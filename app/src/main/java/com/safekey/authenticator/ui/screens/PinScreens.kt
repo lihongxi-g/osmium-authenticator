@@ -205,13 +205,16 @@ fun PinVerifyScreen(
     }
 }
 
-/** Two-step PIN setup: enter twice. */
+/** Two-step PIN setup: enter twice, with an optional validator (e.g. the
+ *  self-destruct PIN must differ from the app PIN). */
 @Composable
 fun PinSetupScreen(
     title: String,
     description: String,
     onDone: (String) -> Unit,
-    onCancel: () -> Unit
+    onCancel: () -> Unit,
+    onValidate: ((String) -> Boolean)? = null,
+    validateError: String? = null
 ) {
     var step by remember { mutableStateOf(0) }
     var firstPin by remember { mutableStateOf("") }
@@ -239,7 +242,13 @@ fun PinSetupScreen(
             error = error,
             onPinEntered = { pin ->
                 if (pin == firstPin) {
-                    onDone(pin)
+                    if (onValidate == null || onValidate(pin)) {
+                        onDone(pin)
+                    } else {
+                        error = validateError ?: mismatchText
+                        step = 0
+                        firstPin = ""
+                    }
                 } else {
                     error = mismatchText
                     step = 0

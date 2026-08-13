@@ -568,6 +568,14 @@ class MainActivity : FragmentActivity() {
                         description = if (screen.mode == "destroy_pin")
                             stringResource(R.string.destroy_pin_desc)
                         else stringResource(R.string.pin_setup_desc),
+                        onValidate = if (screen.mode == "destroy_pin") {
+                            // the destruct PIN must differ from the app PIN —
+                            // otherwise any normal unlock could trigger self-destruct
+                            { pin -> !(vm.hasLocalPin() && vm.verifyLocalPin(pin)) }
+                        } else null,
+                        validateError = if (screen.mode == "destroy_pin")
+                            stringResource(R.string.destroy_pin_same_as_pin)
+                        else null,
                         onDone = { pin ->
                             if (screen.mode == "destroy_pin") {
                                 vm.setSelfDestructPin(pin)

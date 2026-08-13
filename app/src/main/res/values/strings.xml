@@ -177,6 +177,7 @@
     <string name="fail_threshold_desc">Consecutive wrong PINs + failed biometrics before destruction</string>
     <string name="destroy_pin_title">Set destruct PIN</string>
     <string name="destroy_pin_desc">Entering this PIN at a PIN prompt destroys ALL data immediately and irreversibly.</string>
+    <string name="destroy_pin_same_as_pin">The destruct PIN must be different from your app PIN. Try a different one.</string>
     <string name="destroy_pin_setup">Set destruct PIN</string>
     <string name="destroy_pin_manage">Change destruct PIN</string>
     <string name="destroyed_title">All data destroyed</string>

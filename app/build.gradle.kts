@@ -13,8 +13,8 @@ android {
         applicationId = "com.safekey.authenticator"
         minSdk = 26
         targetSdk = 34
-        versionCode = 6
-        versionName = "1.5.0"
+        versionCode = 7
+        versionName = "1.6.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
     }
@@ -81,6 +81,8 @@ dependencies {
     ksp("androidx.room:room-compiler:2.6.1")
 
     implementation("androidx.datastore:datastore-preferences:1.0.0")
+    // Clipboard auto-clear survives process death (Handler alone dies with the app)
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
     // Android 14/15 BiometricPrompt fixes. 1.1.0/1.2.0-alpha05 misbehave on
     // ColorOS 15; 1.4.0-alpha02 requires compileSdk 35 (a real release SDK).
     implementation("androidx.biometric:biometric:1.4.0-alpha02")

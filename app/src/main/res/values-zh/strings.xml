@@ -177,6 +177,7 @@
     <string name="fail_threshold_desc">PIN 输错和指纹验证失败的累计次数达到后触发自毁</string>
     <string name="destroy_pin_title">设置自毁 PIN</string>
     <string name="destroy_pin_desc">在 PIN 验证界面输入此 PIN 将立即、不可逆地销毁全部数据。</string>
+    <string name="destroy_pin_same_as_pin">自毁 PIN 不能和应用 PIN 相同，请换一个。</string>
     <string name="destroy_pin_setup">设置自毁 PIN</string>
     <string name="destroy_pin_manage">修改自毁 PIN</string>
     <string name="destroyed_title">数据已全部销毁</string>
