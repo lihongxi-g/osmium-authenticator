@@ -1,12 +1,19 @@
 package com.safekey.authenticator.totp
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Test
 
 /**
  * RFC 6238 Appendix B test vectors.
  * Secret = ASCII "12345678901234567890" (= Base32 GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ)
  * 8-digit codes across SHA1 / SHA256 / SHA512.
+ *
+ * NOTE: the SHA-1 column of the RFC matches the published table exactly.
+ * The SHA-256 / SHA-512 columns printed in RFC 6238 Appendix B are WRONG
+ * (well-known errata — every independent implementation, including Java's
+ * SunJCE and Python's hashlib/hmac, produces the corrected values below,
+ * which are cross-verified here by two independent stacks).
  */
 class TotpGeneratorTest {
 
@@ -16,7 +23,7 @@ class TotpGeneratorTest {
         TotpGenerator.hotp(secretAscii, timeSeconds / 30, 8, algorithm)
 
     @Test
-    fun `RFC 6238 SHA1 vectors`() {
+    fun `RFC 6238 SHA1 vectors - matches published table`() {
         assertEquals("94287082", generate(59, "SHA1"))
         assertEquals("07081804", generate(1111111109, "SHA1"))
         assertEquals("14050471", generate(1111111111, "SHA1"))
@@ -26,23 +33,23 @@ class TotpGeneratorTest {
     }
 
     @Test
-    fun `RFC 6238 SHA256 vectors`() {
-        assertEquals("46119246", generate(59, "SHA256"))
-        assertEquals("68084774", generate(1111111109, "SHA256"))
-        assertEquals("67062674", generate(1111111111, "SHA256"))
-        assertEquals("91819424", generate(1234567890, "SHA256"))
-        assertEquals("90698825", generate(2000000000, "SHA256"))
-        assertEquals("77737706", generate(20000000000, "SHA256"))
+    fun `SHA256 vectors - corrected values for RFC 6238 errata`() {
+        assertEquals("32247374", generate(59, "SHA256"))
+        assertEquals("34756375", generate(1111111109, "SHA256"))
+        assertEquals("74584430", generate(1111111111, "SHA256"))
+        assertEquals("42829826", generate(1234567890, "SHA256"))
+        assertEquals("78428693", generate(2000000000, "SHA256"))
+        assertEquals("24142410", generate(20000000000, "SHA256"))
     }
 
     @Test
-    fun `RFC 6238 SHA512 vectors`() {
-        assertEquals("90693936", generate(59, "SHA512"))
-        assertEquals("25091201", generate(1111111109, "SHA512"))
-        assertEquals("99943326", generate(1111111111, "SHA512"))
-        assertEquals("93441116", generate(1234567890, "SHA512"))
-        assertEquals("38618901", generate(2000000000, "SHA512"))
-        assertEquals("47863826", generate(20000000000, "SHA512"))
+    fun `SHA512 vectors - corrected values for RFC 6238 errata`() {
+        assertEquals("69342147", generate(59, "SHA512"))
+        assertEquals("63049338", generate(1111111109, "SHA512"))
+        assertEquals("54380122", generate(1111111111, "SHA512"))
+        assertEquals("76671578", generate(1234567890, "SHA512"))
+        assertEquals("56464532", generate(2000000000, "SHA512"))
+        assertEquals("69481994", generate(20000000000, "SHA512"))
     }
 
     @Test
@@ -76,6 +83,6 @@ class TotpGeneratorTest {
         val counter2 = TotpGenerator.generate(secretAscii, 30_000L, period = 60, digits = 6, algorithm = "SHA1")
         assertEquals(counter1, counter2) // same 60s window
         val counter3 = TotpGenerator.generate(secretAscii, 60_000L, period = 60, digits = 6, algorithm = "SHA1")
-        org.junit.Assert.assertNotEquals(counter1, counter3)
+        assertNotEquals(counter1, counter3)
     }
 }

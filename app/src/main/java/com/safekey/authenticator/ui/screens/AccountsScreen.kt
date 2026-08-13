@@ -407,7 +407,6 @@ private fun ReorderableAccountList(
             ) {
                 CodeCard(
                     ui = ui,
-                    onClick = { onOpen(ui.account) },
                     onCopyCode = { onCopyCode(ui) },
                     modifier = Modifier.height(CardHeightPx)
                 )

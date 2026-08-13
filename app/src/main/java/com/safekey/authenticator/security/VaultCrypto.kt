@@ -1,10 +1,10 @@
 package com.safekey.authenticator.security
 
-import android.util.Base64
 import com.safekey.authenticator.model.EncryptedVault
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.security.SecureRandom
+import java.util.Base64
 import javax.crypto.Cipher
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.GCMParameterSpec
@@ -38,9 +38,9 @@ object VaultCrypto {
         val iv = cipher.iv
         val envelope = EncryptedVault(
             iterations = ITERATIONS,
-            salt = Base64.encodeToString(salt, Base64.NO_WRAP),
-            iv = Base64.encodeToString(iv, Base64.NO_WRAP),
-            ciphertext = Base64.encodeToString(ciphertext, Base64.NO_WRAP)
+            salt = Base64.getEncoder().encodeToString(salt),
+            iv = Base64.getEncoder().encodeToString(iv),
+            ciphertext = Base64.getEncoder().encodeToString(ciphertext)
         )
         return json.encodeToString(envelope)
     }
@@ -58,9 +58,9 @@ object VaultCrypto {
         if (envelope.format != "safekey-encrypted") {
             throw IllegalArgumentException("Not a SafeKey encrypted file")
         }
-        val salt = Base64.decode(envelope.salt, Base64.NO_WRAP)
-        val iv = Base64.decode(envelope.iv, Base64.NO_WRAP)
-        val ct = Base64.decode(envelope.ciphertext, Base64.NO_WRAP)
+        val salt = Base64.getDecoder().decode(envelope.salt)
+        val iv = Base64.getDecoder().decode(envelope.iv)
+        val ct = Base64.getDecoder().decode(envelope.ciphertext)
         val key = deriveKey(password, salt, envelope.iterations)
         val cipher = Cipher.getInstance(TRANSFORMATION)
         cipher.init(Cipher.DECRYPT_MODE, key, GCMParameterSpec(128, iv))

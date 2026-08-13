@@ -61,50 +61,50 @@ class OtpUriParserTest {
 
     @Test
     fun `missing secret throws`() {
-        expectThrow("otpauth://totp/A:B") { }
+        expectThrow("otpauth://totp/A:B")
     }
 
     @Test
     fun `invalid base32 secret throws`() {
-        expectThrow("otpauth://totp/A:B?secret=NOT!VALID!") { }
+        expectThrow("otpauth://totp/A:B?secret=NOT!VALID!")
     }
 
     @Test
     fun `too short secret throws`() {
         // "MY" = 1 byte
-        expectThrow("otpauth://totp/A:B?secret=MY") { }
+        expectThrow("otpauth://totp/A:B?secret=MY")
     }
 
     @Test
     fun `unsupported algorithm throws`() {
-        expectThrow("otpauth://totp/A:B?secret=$baseSecret&algorithm=MD5") { }
+        expectThrow("otpauth://totp/A:B?secret=$baseSecret&algorithm=MD5")
     }
 
     @Test
     fun `unsupported digits throws`() {
-        expectThrow("otpauth://totp/A:B?secret=$baseSecret&digits=7") { }
+        expectThrow("otpauth://totp/A:B?secret=$baseSecret&digits=7")
     }
 
     @Test
     fun `invalid period throws`() {
-        expectThrow("otpauth://totp/A:B?secret=$baseSecret&period=0") { }
-        expectThrow("otpauth://totp/A:B?secret=$baseSecret&period=9999") { }
-        expectThrow("otpauth://totp/A:B?secret=$baseSecret&period=abc") { }
+        expectThrow("otpauth://totp/A:B?secret=$baseSecret&period=0")
+        expectThrow("otpauth://totp/A:B?secret=$baseSecret&period=9999")
+        expectThrow("otpauth://totp/A:B?secret=$baseSecret&period=abc")
     }
 
     @Test
     fun `hotp uri is rejected`() {
-        expectThrow("otpauth://hotp/A:B?secret=$baseSecret") { }
+        expectThrow("otpauth://hotp/A:B?secret=$baseSecret")
     }
 
     @Test
     fun `non otpauth uri is rejected`() {
-        expectThrow("https://example.com") { }
-        expectThrow("random text") { }
-        expectThrow("") { }
+        expectThrow("https://example.com")
+        expectThrow("random text")
+        expectThrow("")
     }
 
-    private fun expectThrow(uri: String, body: () -> Unit) {
+    private fun expectThrow(uri: String) {
         var threw = false
         try {
             OtpUriParser.parse(uri)

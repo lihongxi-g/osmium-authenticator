@@ -30,7 +30,6 @@ import com.safekey.authenticator.ui.theme.monospaceFamily
 @Composable
 fun CodeCard(
     ui: AccountUi,
-    onClick: () -> Unit,
     onCopyCode: () -> Unit,
     modifier: Modifier = Modifier
 ) {

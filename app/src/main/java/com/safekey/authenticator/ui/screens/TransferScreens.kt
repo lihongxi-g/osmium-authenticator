@@ -1,6 +1,5 @@
 package com.safekey.authenticator.ui.screens
 
-import android.app.Activity
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -64,7 +63,6 @@ fun ExportScreen(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val activity = context as? Activity
 
     var password by remember { mutableStateOf("") }
     var confirm by remember { mutableStateOf("") }
