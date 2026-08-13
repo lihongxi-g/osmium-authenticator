@@ -1,9 +1,8 @@
-name: Build APK
+name: BioTest APK
 
 on:
   push:
-    branches: [main]
-    paths-ignore:
+    paths:
       - 'biotest/**'
   workflow_dispatch:
 
@@ -18,33 +17,24 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Decode signing keystore
-        env:
-          SAFEKEY_KEYSTORE_B64: ${{ secrets.SAFEKEY_KEYSTORE_B64 }}
-        run: echo "$SAFEKEY_KEYSTORE_B64" | base64 -d > safekey.keystore
-
       - name: Ensure Android SDK components
         env:
           ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
         run: |
           yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null 2>&1 || true
           $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager "platforms;android-35" "build-tools;34.0.0"
-          echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > biotest/local.properties
 
-      - name: Unit tests and debug build
+      - name: Build debug APK
         env:
           ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
-          SAFEKEY_KEYSTORE: ${{ github.workspace }}/safekey.keystore
-          SAFEKEY_STORE_PASS: ${{ secrets.SAFEKEY_STORE_PASS }}
-          SAFEKEY_KEY_ALIAS: ${{ secrets.SAFEKEY_KEY_ALIAS }}
-          SAFEKEY_KEY_PASS: ${{ secrets.SAFEKEY_KEY_PASS }}
         run: |
           chmod +x gradlew
-          ./gradlew testDebugUnitTest assembleDebug --stacktrace
+          ./gradlew -p biotest assembleDebug
 
       - name: Upload APK
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: safekey-debug
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: biotest-debug
+          path: biotest/app/build/outputs/apk/debug/app-debug.apk
