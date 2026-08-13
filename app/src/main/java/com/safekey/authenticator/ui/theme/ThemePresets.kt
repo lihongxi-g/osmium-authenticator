@@ -4,6 +4,7 @@ import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
+import com.safekey.authenticator.R
 
 /**
  * Seven preset theme colors (红橙黄绿青蓝紫), each with its own light/dark

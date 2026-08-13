@@ -216,6 +216,9 @@ fun PinSetupScreen(
     var step by remember { mutableStateOf(0) }
     var firstPin by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
+    // resolved once in composition — lambdas below are not composable contexts
+    val mismatchText = stringResource(R.string.pin_mismatch)
+    val confirmTitle = stringResource(R.string.pin_confirm_title)
 
     if (step == 0) {
         PinPadScreen(
@@ -231,14 +234,14 @@ fun PinSetupScreen(
         )
     } else {
         PinPadScreen(
-            title = stringResource(R.string.pin_confirm_title),
+            title = confirmTitle,
             subtitle = null,
             error = error,
             onPinEntered = { pin ->
                 if (pin == firstPin) {
                     onDone(pin)
                 } else {
-                    error = stringResource(R.string.pin_mismatch)
+                    error = mismatchText
                     step = 0
                     firstPin = ""
                 }
