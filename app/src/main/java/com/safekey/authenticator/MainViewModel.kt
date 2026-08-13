@@ -332,7 +332,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     fun setThemeMode(mode: String) = viewModelScope.launch { settingsRepo.setThemeMode(mode) }
     fun setDynamicColor(enabled: Boolean) = viewModelScope.launch { settingsRepo.setDynamicColor(enabled) }
-    fun setThemeColorIndex(index: Int) = viewModelScope.launch { settingsRepo.setThemeColorIndex(index) }
+    fun setHapticIntensity(percent: Int) = viewModelScope.launch { settingsRepo.setHapticIntensity(percent) }
     fun setBiometricLock(enabled: Boolean) = viewModelScope.launch { settingsRepo.setBiometricLock(enabled) }
     fun setClipboardClearSeconds(seconds: Int) = viewModelScope.launch { settingsRepo.setClipboardClearSeconds(seconds) }
     fun setPinVerifyMode(mode: String) = viewModelScope.launch { settingsRepo.setPinVerifyMode(mode) }

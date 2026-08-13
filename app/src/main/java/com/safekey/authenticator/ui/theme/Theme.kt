@@ -3,22 +3,39 @@ package com.safekey.authenticator.ui.theme
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import com.safekey.authenticator.data.AppSettings
 
+// Fallback palette (no Dynamic Color support, i.e. Android < 12):
+// Material 3 blue primary family on standard white / near-black backgrounds.
+private val FallbackLight = lightColorScheme(
+    primary = Color(0xFF005AC1),
+    onPrimary = Color(0xFFFFFFFF),
+    primaryContainer = Color(0xFFD7E3FF),
+    onPrimaryContainer = Color(0xFF001B3F)
+)
+private val FallbackDark = darkColorScheme(
+    primary = Color(0xFFADC6FF),
+    onPrimary = Color(0xFF002E69),
+    primaryContainer = Color(0xFF004494),
+    onPrimaryContainer = Color(0xFFD7E3FF)
+)
+
 /**
- * App theme: system/light/dark mode + Material You dynamic color (Android 12+)
- * or one of the seven preset colors (红橙黄绿青蓝紫), each with light/dark
- * variants defined in ThemePresets.kt.
+ * Theme strategy (user decision): Dynamic Color from the wallpaper when
+ * available (Android 12+); otherwise a blue-on-white / blue-on-black scheme.
+ * No custom background colors.
  */
 @Composable
 fun SafeKeyTheme(
     themeMode: String,
     dynamicColor: Boolean,
-    themeColorIndex: Int,
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
@@ -32,10 +49,8 @@ fun SafeKeyTheme(
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-        else -> {
-            val preset = themePresets.getOrElse(themeColorIndex) { themePresets[3] }
-            preset.scheme(darkTheme)
-        }
+        darkTheme -> FallbackDark
+        else -> FallbackLight
     }
 
     MaterialTheme(

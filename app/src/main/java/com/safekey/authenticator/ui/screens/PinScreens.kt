@@ -31,6 +31,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.safekey.authenticator.R
+import com.safekey.authenticator.security.Haptics
 import com.safekey.authenticator.ui.components.AppIcons
 
 private const val PIN_LENGTH = 6
@@ -150,11 +151,15 @@ fun PinPadScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PinKey(label: String, icon: Boolean, onClick: () -> Unit) {
+    val context = androidx.compose.ui.platform.LocalContext.current
     Surface(
         modifier = Modifier.size(72.dp),
         shape = CircleShape,
         color = MaterialTheme.colorScheme.surfaceVariant,
-        onClick = onClick
+        onClick = {
+            Haptics.tick(context)
+            onClick()
+        }
     ) {
         Box(contentAlignment = Alignment.Center) {
             if (icon) {

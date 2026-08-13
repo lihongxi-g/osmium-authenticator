@@ -15,7 +15,7 @@ private val Context.dataStore by preferencesDataStore(name = "safekey_settings")
 data class AppSettings(
     val themeMode: String = THEME_SYSTEM,
     val dynamicColor: Boolean = true,
-    val themeColorIndex: Int = 3,
+    val hapticIntensity: Int = 80,
     val biometricLock: Boolean = false,
     val clipboardClearSeconds: Int = 30,
     val pinVerifyMode: String = PIN_VERIFY_OFF,
@@ -47,7 +47,7 @@ class SettingsRepository(private val context: Context) {
     private object Keys {
         val THEME_MODE = stringPreferencesKey("theme_mode")
         val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
-        val THEME_COLOR_INDEX = intPreferencesKey("theme_color_index")
+        val HAPTIC_INTENSITY = intPreferencesKey("haptic_intensity")
         val BIOMETRIC_LOCK = booleanPreferencesKey("biometric_lock")
         val CLIPBOARD_CLEAR = intPreferencesKey("clipboard_clear_seconds")
         val PIN_VERIFY_MODE = stringPreferencesKey("pin_verify_mode")
@@ -64,7 +64,7 @@ class SettingsRepository(private val context: Context) {
         AppSettings(
             themeMode = prefs[Keys.THEME_MODE] ?: AppSettings.THEME_SYSTEM,
             dynamicColor = prefs[Keys.DYNAMIC_COLOR] ?: true,
-            themeColorIndex = prefs[Keys.THEME_COLOR_INDEX] ?: 3,
+            hapticIntensity = prefs[Keys.HAPTIC_INTENSITY] ?: 80,
             biometricLock = prefs[Keys.BIOMETRIC_LOCK] ?: false,
             clipboardClearSeconds = prefs[Keys.CLIPBOARD_CLEAR] ?: 30,
             pinVerifyMode = prefs[Keys.PIN_VERIFY_MODE] ?: AppSettings.PIN_VERIFY_OFF,
@@ -86,8 +86,8 @@ class SettingsRepository(private val context: Context) {
         context.dataStore.edit { it[Keys.DYNAMIC_COLOR] = enabled }
     }
 
-    suspend fun setThemeColorIndex(index: Int) {
-        context.dataStore.edit { it[Keys.THEME_COLOR_INDEX] = index }
+    suspend fun setHapticIntensity(percent: Int) {
+        context.dataStore.edit { it[Keys.HAPTIC_INTENSITY] = percent }
     }
 
     suspend fun setBiometricLock(enabled: Boolean) {

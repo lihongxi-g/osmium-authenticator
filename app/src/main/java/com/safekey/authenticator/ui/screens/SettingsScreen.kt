@@ -13,16 +13,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -47,7 +48,6 @@ import com.safekey.authenticator.ui.components.SectionHeader
 import com.safekey.authenticator.ui.components.SettingRow
 import com.safekey.authenticator.ui.components.SimpleTopBar
 import com.safekey.authenticator.ui.navigation.Screen
-import com.safekey.authenticator.ui.theme.themePresets
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,7 +57,7 @@ fun SettingsScreen(
     onExport: () -> Unit,
     onImport: () -> Unit,
     onOpenPinSetup: () -> Unit,
-    onOpenPinVerify: () -> Unit,
+    onOpenPinVerify: (String) -> Unit,
     onBiometricChanged: ((Boolean) -> Unit)? = null,
     onLanguageChanged: ((String?) -> Unit)? = null
 ) {
@@ -69,13 +69,11 @@ fun SettingsScreen(
 
     var showThemeDialog by remember { mutableStateOf(false) }
     var showClipboardDialog by remember { mutableStateOf(false) }
-    var showColorDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
     var showPinVerifyModeDialog by remember { mutableStateOf(false) }
     var showPinTimeDialog by remember { mutableStateOf(false) }
     var showDestroyModeDialog by remember { mutableStateOf(false) }
     var showThresholdDialog by remember { mutableStateOf(false) }
-    var showClearPinDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = { SimpleTopBar(title = stringResource(R.string.settings_title), onBack = onBack) }
@@ -107,39 +105,28 @@ fun SettingsScreen(
 
             SettingRow(
                 icon = AppIcons.Palette,
-                title = stringResource(R.string.theme_color),
-                description = stringResource(R.string.theme_color_desc),
-                trailing = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier
-                                .size(20.dp)
-                                .clip(CircleShape)
-                                .background(
-                                    themePresets.getOrElse(settings.themeColorIndex) { themePresets[3] }.color
-                                )
-                        )
-                        Text(
-                            text = stringResource(
-                                themePresets.getOrElse(settings.themeColorIndex) { themePresets[3] }.nameResKey
-                            ),
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(start = 8.dp, end = 4.dp)
-                        )
-                    }
-                },
-                onClick = { showColorDialog = true }
-            )
-
-            SettingRow(
-                icon = AppIcons.Palette,
                 title = stringResource(R.string.dynamic_color),
                 description = stringResource(R.string.dynamic_color_desc),
                 trailing = {
                     Switch(
                         checked = settings.dynamicColor,
                         onCheckedChange = { vm.setDynamicColor(it) }
+                    )
+                }
+            )
+
+            SettingRow(
+                icon = AppIcons.Security,
+                title = stringResource(R.string.haptic_intensity),
+                description = stringResource(R.string.haptic_intensity_desc),
+                trailing = {
+                    Slider(
+                        value = settings.hapticIntensity.toFloat(),
+                        onValueChange = { vm.setHapticIntensity(it.toInt()) },
+                        valueRange = 0f..100f,
+                        modifier = Modifier
+                            .padding(start = 8.dp)
+                            .width(140.dp)
                     )
                 }
             )
@@ -208,7 +195,7 @@ fun SettingsScreen(
                 title = if (hasPin) stringResource(R.string.app_pin_manage) else stringResource(R.string.app_pin_setup),
                 description = stringResource(R.string.app_pin_desc),
                 onClick = {
-                    if (hasPin) onOpenPinVerify() else onOpenPinSetup()
+                    if (hasPin) onOpenPinVerify("change_pin") else onOpenPinSetup()
                 }
             )
 
@@ -280,7 +267,11 @@ fun SettingsScreen(
                     else stringResource(R.string.destroy_pin_setup),
                     description = stringResource(R.string.destroy_pin_desc),
                     onClick = {
-                        vm.nav.push(Screen.PinSetup("destroy_pin"))
+                        if (hasPin) {
+                            onOpenPinVerify(if (hasDestroyPin) "change_destroy_pin" else "set_destroy_pin")
+                        } else {
+                            vm.nav.push(Screen.PinSetup("destroy_pin"))
+                        }
                     }
                 )
             }
@@ -307,7 +298,7 @@ fun SettingsScreen(
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier
-                        .clickable { showClearPinDialog = true }
+                        .clickable { onOpenPinVerify("clear_pin") }
                         .padding(horizontal = 16.dp, vertical = 6.dp)
                 )
             }
@@ -392,54 +383,6 @@ fun SettingsScreen(
             },
             confirmButton = {
                 TextButton(onClick = { showThemeDialog = false }) { Text(stringResource(R.string.close)) }
-            }
-        )
-    }
-
-    if (showColorDialog) {
-        AlertDialog(
-            onDismissRequest = { showColorDialog = false },
-            title = { Text(stringResource(R.string.theme_color)) },
-            text = {
-                Column(verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(4.dp)) {
-                    themePresets.forEachIndexed { index, preset ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    vm.setThemeColorIndex(index)
-                                    showColorDialog = false
-                                }
-                                .padding(vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(28.dp)
-                                    .clip(CircleShape)
-                                    .background(preset.color)
-                            )
-                            Text(
-                                text = stringResource(preset.nameResKey),
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .padding(start = 12.dp)
-                            )
-                            if (settings.themeColorIndex == index) {
-                                androidx.compose.material3.Icon(
-                                    imageVector = AppIcons.Check,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                            }
-                        }
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { showColorDialog = false }) { Text(stringResource(R.string.close)) }
             }
         )
     }
@@ -613,23 +556,6 @@ fun SettingsScreen(
             },
             confirmButton = {
                 TextButton(onClick = { showThresholdDialog = false }) { Text(stringResource(R.string.close)) }
-            }
-        )
-    }
-
-    if (showClearPinDialog) {
-        AlertDialog(
-            onDismissRequest = { showClearPinDialog = false },
-            title = { Text(stringResource(R.string.pin_clear_title)) },
-            text = { Text(stringResource(R.string.pin_clear_message)) },
-            confirmButton = {
-                TextButton(onClick = {
-                    vm.clearAppPin()
-                    showClearPinDialog = false
-                }) { Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error) }
-            },
-            dismissButton = {
-                TextButton(onClick = { showClearPinDialog = false }) { Text(stringResource(R.string.cancel)) }
             }
         )
     }
