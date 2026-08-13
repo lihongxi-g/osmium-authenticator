@@ -11,6 +11,7 @@ import com.safekey.authenticator.security.SelfDestructManager
 import com.safekey.authenticator.totp.Base32
 import com.safekey.authenticator.totp.TotpGenerator
 import com.safekey.authenticator.ui.navigation.NavigationState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,6 +19,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.util.Calendar
@@ -45,20 +47,24 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         .stateIn(viewModelScope, SharingStarted.Eagerly, AppSettings())
 
     val accounts: StateFlow<List<Account>> = repo.accounts
+        .flowOn(Dispatchers.Default) // decryption + flow ops off the main thread
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    // UI tick, ~4 Hz — smooth countdown/progress without recomputing codes constantly
+    // UI tick, ~2 Hz — smooth countdown without recomputing codes constantly
     private val _now = MutableStateFlow(System.currentTimeMillis())
     val now: StateFlow<Long> = _now
 
     private val tickJob: Job = viewModelScope.launch {
         while (true) {
             _now.value = System.currentTimeMillis()
-            delay(250)
+            delay(500)
         }
     }
 
-    /** Live codes for every account, recomputed each tick. */
+    /**
+     * Live codes for every account, recomputed each tick.
+     * HMAC runs on Dispatchers.Default — never on the main thread.
+     */
     val accountUiList: StateFlow<List<AccountUi>> =
         combine(accounts, _now) { list, time ->
             list.map { a ->
@@ -75,7 +81,9 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                     periodFraction = TotpGenerator.periodFraction(time, a.period)
                 )
             }
-        }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+        }
+            .flowOn(Dispatchers.Default)
+            .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     // ---- search state ----
     private val _searchQuery = MutableStateFlow("")
@@ -332,7 +340,6 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     fun setThemeMode(mode: String) = viewModelScope.launch { settingsRepo.setThemeMode(mode) }
     fun setDynamicColor(enabled: Boolean) = viewModelScope.launch { settingsRepo.setDynamicColor(enabled) }
-    fun setHapticIntensity(percent: Int) = viewModelScope.launch { settingsRepo.setHapticIntensity(percent) }
     fun setBiometricLock(enabled: Boolean) = viewModelScope.launch { settingsRepo.setBiometricLock(enabled) }
     fun setClipboardClearSeconds(seconds: Int) = viewModelScope.launch { settingsRepo.setClipboardClearSeconds(seconds) }
     fun setPinVerifyMode(mode: String) = viewModelScope.launch { settingsRepo.setPinVerifyMode(mode) }

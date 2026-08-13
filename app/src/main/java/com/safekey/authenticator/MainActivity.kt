@@ -44,7 +44,6 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import com.safekey.authenticator.data.AppSettings
 import com.safekey.authenticator.data.LanguagePrefs
-import com.safekey.authenticator.security.Haptics
 import com.safekey.authenticator.security.IntegrityCheck
 import com.safekey.authenticator.totp.OtpUriParser
 import com.safekey.authenticator.ui.components.SwipeBackContainer
@@ -102,10 +101,6 @@ class MainActivity : FragmentActivity() {
             val destroyed by vm.destroyed.collectAsState()
             val toast by vm.toast.collectAsState()
             val context = LocalContext.current
-
-            LaunchedEffect(settings.hapticIntensity) {
-                Haptics.setIntensity(settings.hapticIntensity)
-            }
 
             SafeKeyTheme(
                 themeMode = settings.themeMode,
@@ -177,7 +172,6 @@ class MainActivity : FragmentActivity() {
                         vm.pinManager.hasDestroyPin()
                     ) {
                         if (vm.onSelfDestructPinEntered(pin)) {
-                            Haptics.heavy(applicationContext)
                             vm.selfDestruct()
                         }
                     }
@@ -217,8 +211,8 @@ class MainActivity : FragmentActivity() {
         LockScreen(
             errorMessage = errorMessage,
             onUnlock = {
-                if (canAuthenticate()) {
-                    errorMessage = null
+                errorMessage = null
+                if (canAuthenticateBiometric()) {
                     launchBiometric(
                         onSuccess = { vm.unlock() },
                         onCancelled = { errorMessage = context.getString(R.string.lock_cancelled) },
@@ -227,6 +221,14 @@ class MainActivity : FragmentActivity() {
                 } else {
                     errorMessage = context.getString(R.string.biometric_unavailable)
                 }
+            },
+            onUsePassword = {
+                errorMessage = null
+                launchCredential(
+                    onSuccess = { vm.unlock() },
+                    onCancelled = { errorMessage = context.getString(R.string.lock_cancelled) },
+                    onError = { msg -> errorMessage = msg }
+                )
             }
         )
 
@@ -234,7 +236,7 @@ class MainActivity : FragmentActivity() {
         // activity is fully resumed — avoids prompt-vs-window races).
         LaunchedEffect(Unit) {
             delay(400)
-            if (canAuthenticate() && vm.locked.value) {
+            if (canAuthenticateBiometric() && vm.locked.value) {
                 launchBiometric(
                     onSuccess = { vm.unlock() },
                     onCancelled = { errorMessage = context.getString(R.string.lock_cancelled) },
@@ -244,7 +246,12 @@ class MainActivity : FragmentActivity() {
         }
     }
 
-    private fun canAuthenticate(): Boolean =
+    private fun canAuthenticateBiometric(): Boolean =
+        BiometricManager.from(this).canAuthenticate(
+            BiometricManager.Authenticators.BIOMETRIC_STRONG
+        ) == BiometricManager.BIOMETRIC_SUCCESS
+
+    private fun canAuthenticateAny(): Boolean =
         BiometricManager.from(this).canAuthenticate(
             BiometricManager.Authenticators.BIOMETRIC_STRONG or
                 BiometricManager.Authenticators.DEVICE_CREDENTIAL
@@ -256,15 +263,39 @@ class MainActivity : FragmentActivity() {
     private var promptInFlight = false
 
     /**
-     * Single BiometricPrompt instance + re-entry guard.
+     * Fingerprint / face prompt (BIOMETRIC_STRONG only).
      *
-     * Android 14+ quirk: a window with FLAG_SECURE blocks the system
-     * biometric prompt (it silently fails). The flag is cleared for the
-     * duration of the prompt — no account data is rendered on the lock
-     * screen, so nothing sensitive is exposed — and restored right after.
-     * Failures surface the real error string instead of a generic toast.
+     * Two Android 14+ rules that older androidx.biometric versions violate
+     * (and why the prompt kept failing on ColorOS 15):
+     * 1. NEVER call setNegativeButtonText when DEVICE_CREDENTIAL is allowed.
+     * 2. Separate prompts per authenticator type — credential fallback gets
+     *    its own prompt (launchCredential below).
      */
     private fun launchBiometric(
+        onSuccess: () -> Unit,
+        onCancelled: () -> Unit,
+        onError: (String) -> Unit
+    ) = launchPrompt(
+        authenticators = BiometricManager.Authenticators.BIOMETRIC_STRONG,
+        onSuccess = onSuccess,
+        onCancelled = onCancelled,
+        onError = onError
+    )
+
+    /** Lock-screen PIN / password / pattern prompt (DEVICE_CREDENTIAL). */
+    private fun launchCredential(
+        onSuccess: () -> Unit,
+        onCancelled: () -> Unit,
+        onError: (String) -> Unit
+    ) = launchPrompt(
+        authenticators = BiometricManager.Authenticators.DEVICE_CREDENTIAL,
+        onSuccess = onSuccess,
+        onCancelled = onCancelled,
+        onError = onError
+    )
+
+    private fun launchPrompt(
+        authenticators: Int,
         onSuccess: () -> Unit,
         onCancelled: () -> Unit,
         onError: (String) -> Unit
@@ -272,6 +303,8 @@ class MainActivity : FragmentActivity() {
         if (promptInFlight) return
         promptInFlight = true
         try {
+            // A window with FLAG_SECURE can block the system prompt on some
+            // Android 14+ builds — clear it for the prompt's lifetime.
             window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
             val callback = object : BiometricPrompt.AuthenticationCallback() {
                 override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
@@ -304,14 +337,11 @@ class MainActivity : FragmentActivity() {
                 callback
             ).also { biometricPrompt = it }
 
+            // No negative button — required when credential fallback exists.
             val info = BiometricPrompt.PromptInfo.Builder()
                 .setTitle(getString(R.string.biometric_prompt_title))
                 .setSubtitle(getString(R.string.biometric_prompt_subtitle))
-                .setAllowedAuthenticators(
-                    BiometricManager.Authenticators.BIOMETRIC_STRONG or
-                        BiometricManager.Authenticators.DEVICE_CREDENTIAL
-                )
-                .setNegativeButtonText(getString(R.string.biometric_negative))
+                .setAllowedAuthenticators(authenticators)
                 .build()
             prompt.authenticate(info)
         } catch (e: Exception) {
@@ -426,7 +456,7 @@ class MainActivity : FragmentActivity() {
                         onDeleted = { vm.nav.popToRoot() },
                         onBack = { vm.nav.pop() },
                         onRequireBiometric = { onSuccess ->
-                            if (canAuthenticate()) {
+                            if (canAuthenticateBiometric()) {
                                 launchBiometric(
                                     onSuccess = onSuccess,
                                     onCancelled = { vm.showToast(context.getString(R.string.lock_cancelled)) },
@@ -454,8 +484,15 @@ class MainActivity : FragmentActivity() {
                         onOpenPinVerify = { next -> vm.nav.push(Screen.PinVerify(next)) },
                         onBiometricChanged = { enable ->
                             if (enable) {
-                                if (canAuthenticate()) {
+                                if (canAuthenticateBiometric()) {
                                     launchBiometric(
+                                        onSuccess = { vm.setBiometricLock(true) },
+                                        onCancelled = { vm.showToast(context.getString(R.string.lock_cancelled)) },
+                                        onError = { msg -> vm.showToast(msg) }
+                                    )
+                                } else if (canAuthenticateAny()) {
+                                    // No fingerprint/face enrolled — verify with the lock-screen PIN instead
+                                    launchCredential(
                                         onSuccess = { vm.setBiometricLock(true) },
                                         onCancelled = { vm.showToast(context.getString(R.string.lock_cancelled)) },
                                         onError = { msg -> vm.showToast(msg) }

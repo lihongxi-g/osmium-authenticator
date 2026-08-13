@@ -49,7 +49,6 @@ import com.safekey.authenticator.MainViewModel
 import com.safekey.authenticator.R
 import com.safekey.authenticator.model.Account
 import com.safekey.authenticator.security.ClipboardHelper
-import com.safekey.authenticator.security.Haptics
 import com.safekey.authenticator.ui.components.AppIcons
 import com.safekey.authenticator.ui.components.CodeCard
 import com.safekey.authenticator.ui.components.IconButtonCompat
@@ -143,7 +142,6 @@ fun AccountsScreen(
                     onCopyCode = { ui ->
                         val seconds = vm.settings.value.clipboardClearSeconds
                         ClipboardHelper.copy(context, ui.code, seconds)
-                        Haptics.tick(context)
                         vm.showToast(context.getString(R.string.code_copied))
                     },
                     onOpen = onOpenDetail,
@@ -323,7 +321,6 @@ private fun ReorderableAccountList(
     var draggingId by remember { mutableStateOf<String?>(null) }
     var dragStartIndex by remember { mutableStateOf(0) }
     var fingerDelta by remember { mutableStateOf(0f) }
-    val hapticContext = androidx.compose.ui.platform.LocalContext.current
 
     val displayItems = remember(items, pendingOrder) {
         val order = pendingOrder
@@ -371,7 +368,6 @@ private fun ReorderableAccountList(
                                 draggingId = ui.account.id
                                 dragStartIndex = index
                                 fingerDelta = 0f
-                                Haptics.medium(hapticContext)
                             },
                             onDrag = { change, amount ->
                                 change.consume()
@@ -385,7 +381,6 @@ private fun ReorderableAccountList(
                                     val moved = order.removeAt(index)
                                     order.add(targetIndex, moved)
                                     pendingOrder = order
-                                    Haptics.tick(hapticContext)
                                 }
                             },
                             onDragEnd = {

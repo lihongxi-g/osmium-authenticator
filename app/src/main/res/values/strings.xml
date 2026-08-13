@@ -123,8 +123,6 @@
     <string name="color_cyan">Cyan</string>
     <string name="color_blue">Blue</string>
     <string name="color_purple">Purple</string>
-    <string name="haptic_intensity">Vibration intensity</string>
-    <string name="haptic_intensity_desc">Haptic feedback strength for taps, drags and keys</string>
     <string name="tampered_title">Error</string>
     <string name="tampered_message">This app has been tampered with and cannot run. Download the official version from GitHub Releases.</string>
     <string name="tampered_exit">Exit</string>

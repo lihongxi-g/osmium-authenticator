@@ -23,7 +23,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -111,22 +110,6 @@ fun SettingsScreen(
                     Switch(
                         checked = settings.dynamicColor,
                         onCheckedChange = { vm.setDynamicColor(it) }
-                    )
-                }
-            )
-
-            SettingRow(
-                icon = AppIcons.Security,
-                title = stringResource(R.string.haptic_intensity),
-                description = stringResource(R.string.haptic_intensity_desc),
-                trailing = {
-                    Slider(
-                        value = settings.hapticIntensity.toFloat(),
-                        onValueChange = { vm.setHapticIntensity(it.toInt()) },
-                        valueRange = 0f..100f,
-                        modifier = Modifier
-                            .padding(start = 8.dp)
-                            .width(140.dp)
                     )
                 }
             )

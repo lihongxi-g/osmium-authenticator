@@ -13,8 +13,8 @@ android {
         applicationId = "com.safekey.authenticator"
         minSdk = 26
         targetSdk = 34
-        versionCode = 3
-        versionName = "1.2.0"
+        versionCode = 4
+        versionName = "1.3.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
     }
@@ -81,9 +81,9 @@ dependencies {
     ksp("androidx.room:room-compiler:2.6.1")
 
     implementation("androidx.datastore:datastore-preferences:1.0.0")
-    // 1.1.0 is the last stable but has known crashes on Android 13+ (esp. with
-    // DEVICE_CREDENTIAL); 1.2.0-alpha05 carries those fixes and is widely used.
-    implementation("androidx.biometric:biometric:1.2.0-alpha05")
+    // 1.4.0-alpha01 carries the Android 14 BiometricPrompt fixes (1.1.0/1.2.0-alpha05
+    // both misbehave on newer ColorOS/Android 15 devices). No compileSdk constraint.
+    implementation("androidx.biometric:biometric:1.4.0-alpha01")
 
     val cameraxVersion = "1.3.1"
     implementation("androidx.camera:camera-core:$cameraxVersion")

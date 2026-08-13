@@ -123,8 +123,6 @@
     <string name="color_cyan">青</string>
     <string name="color_blue">蓝</string>
     <string name="color_purple">紫</string>
-    <string name="haptic_intensity">震动强度</string>
-    <string name="haptic_intensity_desc">点击、拖拽和按键的触觉反馈强度</string>
     <string name="tampered_title">错误</string>
     <string name="tampered_message">应用已被篡改，无法运行。请从 GitHub Releases 下载官方版本。</string>
     <string name="tampered_exit">退出</string>

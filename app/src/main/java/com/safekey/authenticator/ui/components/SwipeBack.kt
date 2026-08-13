@@ -8,8 +8,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.IntOffset
@@ -19,7 +22,8 @@ import kotlin.math.roundToInt
 /**
  * Edge swipe-back with finger-following animation (跟手):
  * - drag starts only from the ~40dp left edge zone so list scrolling is unaffected
- * - the whole screen tracks the finger via Animatable offset
+ * - while dragging, the offset is written straight into snapshot state
+ *   (zero per-frame coroutines — keeps 120Hz scrolling smooth)
  * - release past ~25% width completes the back navigation; otherwise it bounces back
  */
 @Composable
@@ -29,7 +33,11 @@ fun SwipeBackContainer(
     content: @Composable () -> Unit
 ) {
     val scope = rememberCoroutineScope()
-    val dragOffset = remember { Animatable(0f) }
+    var dragPx by remember { mutableStateOf(0f) }
+    var settling by remember { mutableStateOf(false) }
+    val settle = remember { Animatable(0f) }
+
+    val offsetPx = if (settling) settle.value else dragPx
 
     Box(
         modifier = Modifier
@@ -49,27 +57,41 @@ fun SwipeBackContainer(
                         if (edgeActive) {
                             change.consume()
                             total = (total + amount).coerceAtLeast(0f)
-                            scope.launch { dragOffset.snapTo(total) }
+                            dragPx = total // direct state write, no coroutine
                         }
                     },
                     onDragEnd = {
                         if (edgeActive && total > 0f) {
                             edgeActive = false
+                            settling = true
                             if (total > widthPx * 0.25f) {
                                 scope.launch {
-                                    dragOffset.animateTo(widthPx, tween(200, easing = FastOutSlowInEasing))
-                                    dragOffset.snapTo(0f)
+                                    settle.snapTo(total)
+                                    settle.animateTo(widthPx, tween(200, easing = FastOutSlowInEasing))
+                                    dragPx = 0f
+                                    settling = false
                                     onBack()
                                 }
                             } else {
-                                scope.launch { dragOffset.animateTo(0f, tween(200, easing = FastOutSlowInEasing)) }
+                                scope.launch {
+                                    settle.snapTo(total)
+                                    settle.animateTo(0f, tween(200, easing = FastOutSlowInEasing))
+                                    dragPx = 0f
+                                    settling = false
+                                }
                             }
                         }
                     },
                     onDragCancel = {
                         if (edgeActive) {
                             edgeActive = false
-                            scope.launch { dragOffset.animateTo(0f, tween(200, easing = FastOutSlowInEasing)) }
+                            settling = true
+                            scope.launch {
+                                settle.snapTo(total)
+                                settle.animateTo(0f, tween(200, easing = FastOutSlowInEasing))
+                                dragPx = 0f
+                                settling = false
+                            }
                         }
                     }
                 )
@@ -78,7 +100,7 @@ fun SwipeBackContainer(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .offset { IntOffset(dragOffset.value.roundToInt(), 0) }
+                .offset { IntOffset(offsetPx.roundToInt(), 0) }
         ) {
             content()
         }

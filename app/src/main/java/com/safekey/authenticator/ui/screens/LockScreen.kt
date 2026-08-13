@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,6 +27,7 @@ import com.safekey.authenticator.ui.components.AppIcons
 fun LockScreen(
     errorMessage: String?,
     onUnlock: () -> Unit,
+    onUsePassword: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -66,6 +68,12 @@ fun LockScreen(
         Spacer(Modifier.height(28.dp))
         Button(onClick = onUnlock) {
             Text(stringResource(R.string.unlock))
+        }
+        if (onUsePassword != null) {
+            Spacer(Modifier.height(12.dp))
+            TextButton(onClick = onUsePassword) {
+                Text(stringResource(R.string.biometric_negative))
+            }
         }
     }
 }

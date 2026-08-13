@@ -40,7 +40,6 @@ import com.safekey.authenticator.MainViewModel
 import com.safekey.authenticator.R
 import com.safekey.authenticator.model.Account
 import com.safekey.authenticator.security.ClipboardHelper
-import com.safekey.authenticator.security.Haptics
 import com.safekey.authenticator.ui.components.AppIcons
 import com.safekey.authenticator.ui.components.IconButtonCompat
 import com.safekey.authenticator.ui.components.SimpleTopBar
@@ -122,7 +121,6 @@ fun DetailScreen(
                             ClipboardHelper.copy(
                                 context, ui.code, vm.settings.value.clipboardClearSeconds
                             )
-                            Haptics.tick(context)
                             vm.showToast(context.getString(R.string.code_copied))
                         }
                         .padding(vertical = 24.dp),
