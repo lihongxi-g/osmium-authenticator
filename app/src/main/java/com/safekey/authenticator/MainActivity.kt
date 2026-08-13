@@ -46,6 +46,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import com.safekey.authenticator.data.AppSettings
 import com.safekey.authenticator.data.LanguagePrefs
+import com.safekey.authenticator.security.AppLog
 import com.safekey.authenticator.security.IntegrityCheck
 import com.safekey.authenticator.totp.OtpUriParser
 import com.safekey.authenticator.ui.components.SwipeBackContainer
@@ -130,6 +131,7 @@ class MainActivity : FragmentActivity() {
 
     override fun onStart() {
         super.onStart()
+        vm.setBiometricAvailable(canAuthenticateBiometric())
         vm.onAppForeground()
     }
 
@@ -273,8 +275,9 @@ class MainActivity : FragmentActivity() {
 
     // ------------------------------------------------------- biometric core
 
-    private var biometricPrompt: BiometricPrompt? = null
     private var promptInFlight = false
+    private var promptSeq = 0
+    private val promptTimeoutHandler = android.os.Handler(android.os.Looper.getMainLooper())
 
     /**
      * Fingerprint / face prompt (BIOMETRIC_STRONG only).
@@ -323,23 +326,41 @@ class MainActivity : FragmentActivity() {
         onCancelled: () -> Unit,
         onError: (String) -> Unit
     ) {
-        if (promptInFlight) return
+        if (promptInFlight) {
+            AppLog.d("prompt skipped: another prompt in flight")
+            return
+        }
         promptInFlight = true
+        val seq = ++promptSeq
+        // Safety net: if the system prompt hangs without any callback the
+        // guard would block every future attempt — force-reset after 30s.
+        promptTimeoutHandler.postDelayed({
+            if (promptSeq == seq && promptInFlight) {
+                promptInFlight = false
+                restoreSecureFlag()
+                AppLog.d("prompt timeout — guard reset")
+            }
+        }, 30_000)
         try {
             // A window with FLAG_SECURE can block the system prompt on some
             // Android 14+ builds — clear it for the prompt's lifetime.
             window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
+            AppLog.d("launch prompt: authenticators=$authenticators")
             val callback = object : BiometricPrompt.AuthenticationCallback() {
                 override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                    promptSeq++
                     promptInFlight = false
                     restoreSecureFlag()
+                    AppLog.d("prompt SUCCESS type=${result.authenticationType}")
                     vm.onBiometricSucceeded()
                     onSuccess()
                 }
 
                 override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                    promptSeq++
                     promptInFlight = false
                     restoreSecureFlag()
+                    AppLog.d("prompt ERROR $errorCode: $errString")
                     when (errorCode) {
                         BiometricPrompt.ERROR_CANCELED,
                         BiometricPrompt.ERROR_USER_CANCELED,
@@ -351,14 +372,19 @@ class MainActivity : FragmentActivity() {
                 override fun onAuthenticationFailed() {
                     // Counts toward the system lockout and the self-destruct
                     // fail counter; UI stays on the gate.
+                    AppLog.d("prompt FAILED (mismatch)")
                     vm.onBiometricFailed()
                 }
             }
-            val prompt = biometricPrompt ?: BiometricPrompt(
+            // ALWAYS create a fresh prompt instance: BiometricPrompt binds its
+            // callback at construction time, so reusing one instance would
+            // keep calling the FIRST launch's callbacks forever (the
+            // "tap does nothing" bug).
+            val prompt = BiometricPrompt(
                 this,
                 ContextCompat.getMainExecutor(this),
                 callback
-            ).also { biometricPrompt = it }
+            )
 
             val builder = BiometricPrompt.PromptInfo.Builder()
                 .setTitle(getString(R.string.biometric_prompt_title))
@@ -378,8 +404,10 @@ class MainActivity : FragmentActivity() {
             }
             prompt.authenticate(builder.build())
         } catch (e: Exception) {
+            promptSeq++
             promptInFlight = false
             restoreSecureFlag()
+            AppLog.d("prompt EXCEPTION: ${e.javaClass.simpleName}: ${e.message}")
             onError(e.message ?: "Biometric error")
         }
     }
@@ -515,26 +543,6 @@ class MainActivity : FragmentActivity() {
                         onImport = { vm.nav.push(Screen.Import) },
                         onOpenPinSetup = { vm.nav.push(Screen.PinSetup("pin")) },
                         onOpenPinVerify = { next -> vm.nav.push(Screen.PinVerify(next)) },
-                        onBiometricChanged = { enable ->
-                            if (enable) {
-                                if (canAuthenticateBiometric()) {
-                                    launchBiometric(
-                                        onSuccess = { vm.setBiometricLock(true) },
-                                        onCancelled = { vm.showToast(context.getString(R.string.lock_cancelled)) },
-                                        onError = { msg -> vm.showToast(msg) }
-                                    )
-                                } else if (canAuthenticateAny()) {
-                                    // No fingerprint/face enrolled — verify with the lock-screen PIN instead
-                                    launchCredential(
-                                        onSuccess = { vm.setBiometricLock(true) },
-                                        onCancelled = { vm.showToast(context.getString(R.string.lock_cancelled)) },
-                                        onError = { msg -> vm.showToast(msg) }
-                                    )
-                                } else {
-                                    vm.showToast(context.getString(R.string.biometric_unavailable))
-                                }
-                            }
-                        },
                         onLanguageChanged = { lang ->
                             LanguagePrefs.set(this@MainActivity, lang)
                             recreate()

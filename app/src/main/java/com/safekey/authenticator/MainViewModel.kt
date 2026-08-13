@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.safekey.authenticator.data.AppSettings
 import com.safekey.authenticator.model.Account
 import com.safekey.authenticator.model.VaultAccount
+import com.safekey.authenticator.security.AppLog
 import com.safekey.authenticator.security.PinManager
 import com.safekey.authenticator.security.SelfDestructManager
 import com.safekey.authenticator.totp.Base32
@@ -18,12 +19,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.util.Calendar
-import kotlin.random.Random
 
 /** A rendered account: domain data + the live code for the current tick. */
 data class AccountUi(
@@ -90,8 +88,8 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     val searchQuery: StateFlow<String> = _searchQuery
     fun setSearchQuery(q: String) { _searchQuery.value = q }
 
-    // ---- biometric lock state ----
-    private val _locked = MutableStateFlow(false)
+    // ---- gate state (every app open requires verification) ----
+    private val _locked = MutableStateFlow(true)
     val locked: StateFlow<Boolean> = _locked
 
     // ---- PIN gate state (overrides everything) ----
@@ -104,42 +102,56 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     private val _destroyed = MutableStateFlow(false)
     val destroyed: StateFlow<Boolean> = _destroyed
 
-    /** True while the app is in the foreground (drives random-time PIN checks). */
+    /** True while the app is in the foreground. */
     private var appInForeground = false
 
-    private var randomPinJob: Job? = null
+    /** Set by the activity: does this device have a usable fingerprint/face? */
+    private var biometricAvailable = false
 
-    init {
-        viewModelScope.launch {
-            settings.collect { s ->
-                restartRandomPinScheduler(s)
-            }
+    fun setBiometricAvailable(available: Boolean) {
+        biometricAvailable = available
+    }
+
+    /**
+     * Called when the activity comes to the foreground.
+     * Every open requires verification: fingerprint first (or lock-screen
+     * credential via the prompt), app PIN when no biometrics exist.
+     */
+    fun onAppForeground() {
+        appInForeground = true
+        AppLog.d("foreground: biometric=$biometricAvailable pin=${pinManager.hasPin()}")
+        if (_destroyed.value) return
+        _pinError.value = null
+        if (biometricAvailable) {
+            _locked.value = true
+        } else if (pinManager.hasPin()) {
+            _pinRequired.value = true
+        } else {
+            // no fingerprint and no PIN on this device — nothing to verify with
+            _locked.value = false
+            _pinRequired.value = false
         }
     }
 
-    /** Called when the activity comes to the foreground. */
-    fun onAppForeground() {
-        appInForeground = true
-        if (settings.value.biometricLock) _locked.value = true
-        checkDailyPin()
-    }
-
-    /** Called when the activity goes to the background. */
+    /** Called when the activity goes to the background — always re-lock. */
     fun onAppBackground() {
         appInForeground = false
-        if (settings.value.biometricLock) _locked.value = true
+        AppLog.d("background")
+        _locked.value = true
     }
 
     fun unlock() {
+        AppLog.d("unlocked")
         _locked.value = false
-        checkDailyPin()
+        _pinRequired.value = false
     }
 
     // ---------------------------------------------------------------- PIN
 
-    /** Ask for the PIN right now (periodic checks + manual triggers). */
+    /** Ask for the PIN right now (gate without biometrics). */
     fun requirePin() {
         if (pinManager.hasPin() && !_destroyed.value) {
+            AppLog.d("pin gate shown")
             _pinError.value = null
             _pinRequired.value = true
         }
@@ -151,16 +163,16 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
      */
     fun onPinEntered(pin: String): Boolean {
         if (pinManager.verifyPin(pin)) {
+            AppLog.d("pin verified")
             _pinRequired.value = false
             _pinError.value = null
             viewModelScope.launch {
                 settingsRepo.setPinFailCount(0)
-                settingsRepo.setLastPinVerifiedDay(today())
             }
-            restartRandomPinScheduler(settings.value)
             return true
         }
         // wrong PIN — count toward self-destruct threshold
+        AppLog.d("pin WRONG")
         _pinError.value = getApplication<Application>().getString(R.string.pin_wrong)
         viewModelScope.launch {
             val count = settings.value.pinFailCount + 1
@@ -172,6 +184,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     /** Called on biometric authentication failure (fingerprint mismatch). */
     fun onBiometricFailed() {
+        AppLog.d("biometric FAILED (mismatch)")
         viewModelScope.launch {
             val count = settings.value.biometricFailCount + 1
             settingsRepo.setBiometricFailCount(count)
@@ -181,6 +194,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     /** Called on successful biometric authentication — resets the counter. */
     fun onBiometricSucceeded() {
+        AppLog.d("biometric succeeded")
         viewModelScope.launch { settingsRepo.setBiometricFailCount(0) }
     }
 
@@ -201,50 +215,6 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         return remaining.coerceAtLeast(0)
     }
 
-    private fun checkDailyPin() {
-        val s = settings.value
-        if (s.pinVerifyMode != AppSettings.PIN_VERIFY_DAILY) return
-        if (!pinManager.hasPin()) return
-        val cal = Calendar.getInstance()
-        val nowMinutes = cal.get(Calendar.HOUR_OF_DAY) * 60 + cal.get(Calendar.MINUTE)
-        val fixedMinutes = s.pinFixedHour * 60 + s.pinFixedMinute
-        if (nowMinutes >= fixedMinutes && s.lastPinVerifiedDay != today()) {
-            requirePin()
-        }
-    }
-
-    private fun today(): Long {
-        val cal = Calendar.getInstance()
-        cal.set(Calendar.HOUR_OF_DAY, 0)
-        cal.set(Calendar.MINUTE, 0)
-        cal.set(Calendar.SECOND, 0)
-        cal.set(Calendar.MILLISECOND, 0)
-        return cal.timeInMillis
-    }
-
-    /**
-     * Random-time PIN checks: fire at a random point in the next 5–25 minutes,
-     * then wait for the gate to clear before scheduling the next one.
-     */
-    private fun restartRandomPinScheduler(s: AppSettings) {
-        randomPinJob?.cancel()
-        randomPinJob = viewModelScope.launch {
-            while (true) {
-                val delayMs = Random.nextLong(5 * 60_000L, 25 * 60_000L)
-                delay(delayMs)
-                val current = settings.value
-                if (current.pinVerifyMode != AppSettings.PIN_VERIFY_RANDOM) return@launch
-                if (!pinManager.hasPin()) return@launch
-                if (_destroyed.value) return@launch
-                if (appInForeground && !_locked.value && !_pinRequired.value) {
-                    requirePin()
-                }
-                // wait for the gate to clear (verified or cancelled) before re-arming
-                _pinRequired.first { !it }
-            }
-        }
-    }
-
     // -------------------------------------------------------- self destruct
 
     private fun maybeSelfDestructOnFailures(pinFails: Int, biometricFails: Int) {
@@ -262,6 +232,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
      */
     fun selfDestruct() {
         if (_destroyed.value) return
+        AppLog.d("SELF-DESTRUCT triggered")
         viewModelScope.launch {
             try {
                 selfDestruct.destroyMasterKey()
@@ -271,8 +242,10 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                 _pinRequired.value = false
                 _locked.value = false
                 _destroyed.value = true
-            } catch (_: Exception) {
+                AppLog.d("self-destruct complete: key destroyed, data wiped")
+            } catch (e: Exception) {
                 // nothing sensible left to do — surface the state anyway
+                AppLog.d("self-destruct error: ${e.message}")
                 _destroyed.value = true
             }
         }
@@ -340,10 +313,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     fun setThemeMode(mode: String) = viewModelScope.launch { settingsRepo.setThemeMode(mode) }
     fun setDynamicColor(enabled: Boolean) = viewModelScope.launch { settingsRepo.setDynamicColor(enabled) }
-    fun setBiometricLock(enabled: Boolean) = viewModelScope.launch { settingsRepo.setBiometricLock(enabled) }
     fun setClipboardClearSeconds(seconds: Int) = viewModelScope.launch { settingsRepo.setClipboardClearSeconds(seconds) }
-    fun setPinVerifyMode(mode: String) = viewModelScope.launch { settingsRepo.setPinVerifyMode(mode) }
-    fun setPinFixedTime(hour: Int, minute: Int) = viewModelScope.launch { settingsRepo.setPinFixedTime(hour, minute) }
     fun setDestroyMode(mode: String) = viewModelScope.launch { settingsRepo.setDestroyMode(mode) }
     fun setFailThreshold(threshold: Int) = viewModelScope.launch { settingsRepo.setFailThreshold(threshold) }
 
@@ -354,8 +324,8 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     fun clearAppPin() {
         pinManager.clearPin()
+        AppLog.d("app pin cleared")
         viewModelScope.launch {
-            settingsRepo.setPinVerifyMode(AppSettings.PIN_VERIFY_OFF)
             settingsRepo.setPinFailCount(0)
         }
     }

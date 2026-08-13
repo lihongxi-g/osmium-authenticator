@@ -42,6 +42,8 @@ import com.safekey.authenticator.BuildConfig
 import com.safekey.authenticator.MainViewModel
 import com.safekey.authenticator.R
 import com.safekey.authenticator.data.AppSettings
+import com.safekey.authenticator.security.AppLog
+import com.safekey.authenticator.security.ClipboardHelper
 import com.safekey.authenticator.ui.components.AppIcons
 import com.safekey.authenticator.ui.components.SectionHeader
 import com.safekey.authenticator.ui.components.SettingRow
@@ -57,7 +59,6 @@ fun SettingsScreen(
     onImport: () -> Unit,
     onOpenPinSetup: () -> Unit,
     onOpenPinVerify: (String) -> Unit,
-    onBiometricChanged: ((Boolean) -> Unit)? = null,
     onLanguageChanged: ((String?) -> Unit)? = null
 ) {
     val settings by vm.settings.collectAsState()
@@ -69,8 +70,6 @@ fun SettingsScreen(
     var showThemeDialog by remember { mutableStateOf(false) }
     var showClipboardDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
-    var showPinVerifyModeDialog by remember { mutableStateOf(false) }
-    var showPinTimeDialog by remember { mutableStateOf(false) }
     var showDestroyModeDialog by remember { mutableStateOf(false) }
     var showThresholdDialog by remember { mutableStateOf(false) }
 
@@ -135,20 +134,8 @@ fun SettingsScreen(
 
             SettingRow(
                 icon = AppIcons.Security,
-                title = stringResource(R.string.biometric_lock),
-                description = stringResource(R.string.biometric_lock_desc),
-                trailing = {
-                    Switch(
-                        checked = settings.biometricLock,
-                        onCheckedChange = { checked ->
-                            if (checked && onBiometricChanged != null) {
-                                onBiometricChanged(true)
-                            } else if (!checked) {
-                                vm.setBiometricLock(false)
-                            }
-                        }
-                    )
-                }
+                title = stringResource(R.string.gate_always_on),
+                description = stringResource(R.string.gate_always_on_desc)
             )
 
             SettingRow(
@@ -181,45 +168,6 @@ fun SettingsScreen(
                     if (hasPin) onOpenPinVerify("change_pin") else onOpenPinSetup()
                 }
             )
-
-            SettingRow(
-                icon = AppIcons.Timer,
-                title = stringResource(R.string.pin_periodic_verify),
-                description = stringResource(R.string.pin_periodic_desc),
-                trailing = {
-                    Text(
-                        text = when (settings.pinVerifyMode) {
-                            AppSettings.PIN_VERIFY_RANDOM -> stringResource(R.string.pin_mode_random)
-                            AppSettings.PIN_VERIFY_DAILY -> stringResource(R.string.pin_mode_daily)
-                            else -> stringResource(R.string.clipboard_off)
-                        },
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                },
-                onClick = {
-                    if (!hasPin) {
-                        vm.showToast(context.getString(R.string.pin_need_setup_first))
-                    } else {
-                        showPinVerifyModeDialog = true
-                    }
-                }
-            )
-
-            if (settings.pinVerifyMode == AppSettings.PIN_VERIFY_DAILY) {
-                SettingRow(
-                    icon = AppIcons.Timer,
-                    title = stringResource(R.string.pin_daily_time),
-                    trailing = {
-                        Text(
-                            text = String.format("%02d:%02d", settings.pinFixedHour, settings.pinFixedMinute),
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    },
-                    onClick = { showPinTimeDialog = true }
-                )
-            }
 
             // ------------------------------------------------- self-destruct
 
@@ -275,7 +223,7 @@ fun SettingsScreen(
                 )
             }
 
-            if (hasPin && settings.pinVerifyMode == AppSettings.PIN_VERIFY_OFF) {
+            if (hasPin) {
                 Text(
                     text = stringResource(R.string.pin_clear_hint),
                     style = MaterialTheme.typography.labelSmall,
@@ -308,6 +256,18 @@ fun SettingsScreen(
             )
 
             SectionHeader(stringResource(R.string.settings_about))
+
+            SettingRow(
+                icon = AppIcons.Info,
+                title = stringResource(R.string.export_log),
+                description = stringResource(R.string.export_log_desc),
+                onClick = {
+                    val text = AppLog.exportText()
+                    ClipboardHelper.copy(context, text, 60)
+                    AppLog.d("log exported to clipboard (${text.length} chars)")
+                    vm.showToast(context.getString(R.string.export_log_done))
+                }
+            )
 
             SettingRow(
                 icon = AppIcons.Info,
@@ -422,71 +382,6 @@ fun SettingsScreen(
             },
             confirmButton = {
                 TextButton(onClick = { showClipboardDialog = false }) { Text(stringResource(R.string.close)) }
-            }
-        )
-    }
-
-    if (showPinVerifyModeDialog) {
-        AlertDialog(
-            onDismissRequest = { showPinVerifyModeDialog = false },
-            title = { Text(stringResource(R.string.pin_periodic_verify)) },
-            text = {
-                Column {
-                    ThemeOption(stringResource(R.string.clipboard_off), AppSettings.PIN_VERIFY_OFF, settings.pinVerifyMode) {
-                        vm.setPinVerifyMode(it)
-                        showPinVerifyModeDialog = false
-                    }
-                    ThemeOption(stringResource(R.string.pin_mode_random), AppSettings.PIN_VERIFY_RANDOM, settings.pinVerifyMode) {
-                        vm.setPinVerifyMode(it)
-                        showPinVerifyModeDialog = false
-                    }
-                    ThemeOption(stringResource(R.string.pin_mode_daily), AppSettings.PIN_VERIFY_DAILY, settings.pinVerifyMode) {
-                        vm.setPinVerifyMode(it)
-                        showPinVerifyModeDialog = false
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { showPinVerifyModeDialog = false }) { Text(stringResource(R.string.close)) }
-            }
-        )
-    }
-
-    if (showPinTimeDialog) {
-        var hourText by remember { mutableStateOf(settings.pinFixedHour.toString()) }
-        var minuteText by remember { mutableStateOf(settings.pinFixedMinute.toString()) }
-        AlertDialog(
-            onDismissRequest = { showPinTimeDialog = false },
-            title = { Text(stringResource(R.string.pin_daily_time)) },
-            text = {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    OutlinedTextField(
-                        value = hourText,
-                        onValueChange = { hourText = it.filter { c -> c.isDigit() }.take(2) },
-                        label = { Text(stringResource(R.string.pin_time_hour)) },
-                        singleLine = true,
-                        modifier = Modifier.weight(1f)
-                    )
-                    Text(":", style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(horizontal = 8.dp))
-                    OutlinedTextField(
-                        value = minuteText,
-                        onValueChange = { minuteText = it.filter { c -> c.isDigit() }.take(2) },
-                        label = { Text(stringResource(R.string.pin_time_minute)) },
-                        singleLine = true,
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    val h = (hourText.toIntOrNull() ?: 0).coerceIn(0, 23)
-                    val m = (minuteText.toIntOrNull() ?: 0).coerceIn(0, 59)
-                    vm.setPinFixedTime(h, m)
-                    showPinTimeDialog = false
-                }) { Text(stringResource(R.string.confirm)) }
-            },
-            dismissButton = {
-                TextButton(onClick = { showPinTimeDialog = false }) { Text(stringResource(R.string.cancel)) }
             }
         )
     }
