@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.safekey.authenticator"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.safekey.authenticator"
@@ -81,9 +81,9 @@ dependencies {
     ksp("androidx.room:room-compiler:2.6.1")
 
     implementation("androidx.datastore:datastore-preferences:1.0.0")
-    // 1.4.0-alpha01 carries the Android 14 BiometricPrompt fixes (1.1.0/1.2.0-alpha05
-    // both misbehave on newer ColorOS/Android 15 devices). No compileSdk constraint.
-    implementation("androidx.biometric:biometric:1.4.0-alpha01")
+    // Android 14/15 BiometricPrompt fixes. 1.1.0/1.2.0-alpha05 misbehave on
+    // ColorOS 15; 1.4.0-alpha02 requires compileSdk 35 (a real release SDK).
+    implementation("androidx.biometric:biometric:1.4.0-alpha02")
 
     val cameraxVersion = "1.3.1"
     implementation("androidx.camera:camera-core:$cameraxVersion")
