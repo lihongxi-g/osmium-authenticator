@@ -4,7 +4,6 @@ import android.content.ClipboardManager
 import android.os.Bundle
 import android.view.WindowManager
 import android.widget.Toast
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -42,8 +41,9 @@ import com.safekey.authenticator.ui.screens.LockScreen
 import com.safekey.authenticator.ui.screens.ScanScreen
 import com.safekey.authenticator.ui.screens.SettingsScreen
 import com.safekey.authenticator.ui.theme.SafeKeyTheme
+import androidx.fragment.app.FragmentActivity
 
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
 
     private val vm: MainViewModel by viewModels()
 

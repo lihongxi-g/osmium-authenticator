@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -153,7 +152,7 @@ fun SettingsScreen(
             SectionHeader(stringResource(R.string.settings_about))
 
             SettingRow(
-                icon = Icons.Filled.Info,
+                icon = AppIcons.Info,
                 title = stringResource(R.string.version),
                 trailing = {
                     Text(
@@ -231,7 +230,7 @@ fun SettingsScreen(
 }
 
 @Composable
-private fun ThemeOption(label: String, value: Int, selected: Int, onSelect: (Int) -> Unit) {
+private fun <T> ThemeOption(label: String, value: T, selected: T, onSelect: (T) -> Unit) {
     androidx.compose.foundation.layout.Row(
         modifier = Modifier
             .fillMaxWidth()

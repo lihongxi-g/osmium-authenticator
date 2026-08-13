@@ -29,8 +29,8 @@ object ClipboardHelper {
                         val text = clip.getItemAt(0).coerceToText(context.applicationContext).toString()
                         if (text == code) {
                             // Android 13+ shows a system toast on clipboard set;
-                            // clearing with a marker keeps the toast from leaking the code.
-                            cm.setPrimaryClip(ClipData.newPlainText("", CLEARED_MARKER))
+                            // clearing with a placeholder keeps the toast from leaking the code.
+                            cm.setPrimaryClip(ClipData.newPlainText("", ""))
                         }
                     }
                 }

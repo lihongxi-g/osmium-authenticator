@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -72,12 +71,12 @@ fun DetailScreen(
                 actions = {
                     if (account != null) {
                         IconButtonCompat(
-                            icon = Icons.Filled.Edit,
+                            icon = AppIcons.Edit,
                             contentDescription = stringResource(R.string.edit),
                             onClick = { onEdit(account) }
                         )
                         IconButtonCompat(
-                            icon = Icons.Filled.Delete,
+                            icon = AppIcons.Delete,
                             contentDescription = stringResource(R.string.delete),
                             onClick = { showDeleteDialog = true }
                         )
@@ -242,7 +241,7 @@ fun DetailScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Icon(
-                    imageVector = Icons.Filled.Delete,
+                    imageVector = AppIcons.Delete,
                     contentDescription = null,
                     modifier = Modifier.size(18.dp),
                     tint = MaterialTheme.colorScheme.error

@@ -3,7 +3,6 @@ package com.safekey.authenticator.ui.screens
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
-import androidx.compose.foundation.hapticfeedback.HapticFeedbackType
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,7 +18,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
@@ -38,14 +36,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.zIndex
-import androidx.compose.ui.input.pointer.consume
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import com.safekey.authenticator.AccountUi
 import com.safekey.authenticator.MainViewModel
 import com.safekey.authenticator.R
@@ -55,7 +53,6 @@ import com.safekey.authenticator.ui.components.AppIcons
 import com.safekey.authenticator.ui.components.CodeCard
 import com.safekey.authenticator.ui.components.IconButtonCompat
 import com.safekey.authenticator.ui.components.SimpleTopBar
-import com.safekey.authenticator.ui.navigation.Screen
 import kotlin.math.roundToInt
 
 private val ItemSpacingPx = 8.dp
@@ -101,12 +98,12 @@ fun AccountsScreen(
                     title = stringResource(R.string.app_name),
                     actions = {
                         IconButtonCompat(
-                            icon = Icons.Filled.Search,
+                            icon = AppIcons.Search,
                             contentDescription = stringResource(R.string.search_hint),
                             onClick = { searching = true }
                         )
                         IconButtonCompat(
-                            icon = Icons.Filled.Settings,
+                            icon = AppIcons.Settings,
                             contentDescription = stringResource(R.string.settings_title),
                             onClick = onOpenSettings
                         )
@@ -118,10 +115,9 @@ fun AccountsScreen(
             FloatingActionButton(
                 onClick = { showAddSheet = true },
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                contentDescription = stringResource(R.string.add_account)
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
             ) {
-                Icon(Icons.Filled.Add, contentDescription = null)
+                Icon(AppIcons.Add, contentDescription = stringResource(R.string.add_account))
             }
         }
     ) { padding ->
@@ -197,7 +193,7 @@ private fun SearchTopBar(
             shape = RoundedCornerShape(28.dp)
         )
         IconButtonCompat(
-            icon = Icons.Filled.Close,
+            icon = AppIcons.Close,
             contentDescription = stringResource(R.string.close),
             onClick = onClose
         )
@@ -234,7 +230,7 @@ private fun EmptyState(onAdd: () -> Unit, modifier: Modifier = Modifier) {
             onClick = onAdd,
             containerColor = MaterialTheme.colorScheme.primaryContainer,
             contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-            icon = { Icon(Icons.Filled.Add, contentDescription = null) },
+            icon = { Icon(AppIcons.Add, contentDescription = null) },
             text = { Text(stringResource(R.string.empty_action)) }
         )
     }

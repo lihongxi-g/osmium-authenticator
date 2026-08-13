@@ -11,8 +11,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.consume
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.IntOffset
 import kotlinx.coroutines.launch
@@ -81,10 +79,6 @@ fun SwipeBackContainer(
             modifier = Modifier
                 .fillMaxSize()
                 .offset { IntOffset(dragOffset.value.roundToInt(), 0) }
-                .graphicsLayer {
-                    val p = abs(dragOffset.value / (size.width.toFloat().takeIf { it > 0 } ?: 1f))
-                    shadowElevation = 8f * p
-                }
         ) {
             content()
         }

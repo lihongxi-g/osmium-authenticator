@@ -25,6 +25,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.text.KeyboardOptions
@@ -47,6 +48,7 @@ fun AccountFormScreen(
     onBack: () -> Unit
 ) {
     val existing by vm.accounts.collectAsState()
+    val context = LocalContext.current
     val editing = accountId != null
 
     var issuer by remember { mutableStateOf("") }
@@ -188,7 +190,7 @@ fun AccountFormScreen(
                         }
                         onDone()
                     } else {
-                        error = stringResource(errorId)
+                        error = context.getString(errorId)
                     }
                 },
                 modifier = Modifier.fillMaxWidth()
