@@ -1,8 +1,10 @@
 package com.safekey.authenticator
 
+import android.app.KeyguardManager
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.res.Configuration
+import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
 import android.widget.Toast
@@ -247,15 +249,27 @@ class MainActivity : FragmentActivity() {
     }
 
     private fun canAuthenticateBiometric(): Boolean =
-        BiometricManager.from(this).canAuthenticate(
-            BiometricManager.Authenticators.BIOMETRIC_STRONG
-        ) == BiometricManager.BIOMETRIC_SUCCESS
+        if (Build.VERSION.SDK_INT >= 29) {
+            BiometricManager.from(this).canAuthenticate(
+                BiometricManager.Authenticators.BIOMETRIC_STRONG
+            ) == BiometricManager.BIOMETRIC_SUCCESS
+        } else {
+            // androidx fallback path (FingerprintManager) for Android 8/9
+            BiometricManager.from(this).canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS
+        }
 
     private fun canAuthenticateAny(): Boolean =
-        BiometricManager.from(this).canAuthenticate(
-            BiometricManager.Authenticators.BIOMETRIC_STRONG or
-                BiometricManager.Authenticators.DEVICE_CREDENTIAL
-        ) == BiometricManager.BIOMETRIC_SUCCESS
+        if (Build.VERSION.SDK_INT >= 29) {
+            BiometricManager.from(this).canAuthenticate(
+                BiometricManager.Authenticators.BIOMETRIC_STRONG or
+                    BiometricManager.Authenticators.DEVICE_CREDENTIAL
+            ) == BiometricManager.BIOMETRIC_SUCCESS
+        } else {
+            canAuthenticateBiometric() || isDeviceSecure()
+        }
+
+    private fun isDeviceSecure(): Boolean =
+        getSystemService(KeyguardManager::class.java)?.isDeviceSecure == true
 
     // ------------------------------------------------------- biometric core
 
@@ -294,6 +308,15 @@ class MainActivity : FragmentActivity() {
         onError = onError
     )
 
+    /**
+     * Official androidx.biometric rules (PromptInfo.Builder reference):
+     * - setNegativeButtonText is REQUIRED for biometric-only prompts; the
+     *   library throws IllegalArgumentException("Negative text must be set and
+     *   non-empty") otherwise.
+     * - setNegativeButtonText is FORBIDDEN when DEVICE_CREDENTIAL is allowed.
+     * - DEVICE_CREDENTIAL alone is unsupported before API 30 (use
+     *   setDeviceCredentialAllowed there instead).
+     */
     private fun launchPrompt(
         authenticators: Int,
         onSuccess: () -> Unit,
@@ -337,13 +360,23 @@ class MainActivity : FragmentActivity() {
                 callback
             ).also { biometricPrompt = it }
 
-            // No negative button — required when credential fallback exists.
-            val info = BiometricPrompt.PromptInfo.Builder()
+            val builder = BiometricPrompt.PromptInfo.Builder()
                 .setTitle(getString(R.string.biometric_prompt_title))
                 .setSubtitle(getString(R.string.biometric_prompt_subtitle))
-                .setAllowedAuthenticators(authenticators)
-                .build()
-            prompt.authenticate(info)
+            if (authenticators == BiometricManager.Authenticators.DEVICE_CREDENTIAL) {
+                if (Build.VERSION.SDK_INT >= 30) {
+                    builder.setAllowedAuthenticators(authenticators)
+                } else {
+                    // Pre-Android 11 path for lock-screen credential
+                    @Suppress("DEPRECATION")
+                    builder.setDeviceCredentialAllowed(true)
+                }
+            } else {
+                builder.setAllowedAuthenticators(authenticators)
+                // Required for biometric-only prompts per the reference docs.
+                builder.setNegativeButtonText(getString(R.string.cancel))
+            }
+            prompt.authenticate(builder.build())
         } catch (e: Exception) {
             promptInFlight = false
             restoreSecureFlag()
