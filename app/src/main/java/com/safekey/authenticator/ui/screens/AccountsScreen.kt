@@ -347,7 +347,7 @@ private fun ReorderableAccountList(
         verticalArrangement = Arrangement.spacedBy(ItemSpacingPx)
     ) {
         items(displayItems, key = { it.account.id }) { ui ->
-            val index = displayItems.indexOf(ui)
+            val index = displayItems.indexOfFirst { it.account.id == ui.account.id }
             val isDragging = draggingId == ui.account.id
             val offsetY = if (isDragging) {
                 (dragStartIndex - index) * itemHeightPx + fingerDelta
