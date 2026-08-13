@@ -158,7 +158,11 @@ fun ExportScreen(
                         val vaultJson = try {
                             withContext(Dispatchers.IO) {
                                 val repo = (context.applicationContext as com.safekey.authenticator.SafeKeyApp).accountRepository
-                                val vf = repo.exportVault()
+                                val pinHash = vm.pinManager.getPinHashForExport()
+                                val vf = repo.exportVault(
+                                    pinSalt = pinHash?.first ?: "",
+                                    pinHash = pinHash?.second ?: ""
+                                )
                                 val json = Json { encodeDefaults = true }
                                 val plain = json.encodeToString(vf)
                                 VaultCrypto.encrypt(plain, password.toCharArray())
@@ -202,6 +206,8 @@ fun ImportScreen(
     var plan by remember { mutableStateOf<ImportPlan?>(null) }
     var selected by remember { mutableStateOf<Set<Int>?>(null) } // null = all selected
     var working by remember { mutableStateOf(false) }
+    var pinPending by remember { mutableStateOf<VaultFile?>(null) }
+    var pinError by remember { mutableStateOf<String?>(null) }
 
     val openFileLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocument()
@@ -238,10 +244,17 @@ fun ImportScreen(
                         return@launch
                     }
                     val existing = vm.accounts.value
-                    val p = ImportMerger.plan(existing, vault.accounts)
-                    plan = p
-                    selected = null
-                    error = null
+                    // PIN gate: the file itself carries a PIN, or this device has one
+                    if (vault.pinSalt.isNotEmpty() || vm.hasLocalPin()) {
+                        pinPending = vault
+                        pinError = null
+                        plan = null
+                    } else {
+                        val p = ImportMerger.plan(existing, vault.accounts)
+                        plan = p
+                        selected = null
+                        error = null
+                    }
                 } catch (e: Exception) {
                     error = context.getString(R.string.error_import_format)
                     plan = null
@@ -254,10 +267,40 @@ fun ImportScreen(
     Scaffold(
         topBar = { SimpleTopBar(title = stringResource(R.string.import_vault), onBack = onBack) }
     ) { padding ->
-        Column(
+        androidx.compose.foundation.layout.Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
+        ) {
+            val pendingPin = pinPending
+            if (pendingPin != null) {
+                PinVerifyScreen(
+                    title = stringResource(R.string.import_pin_title),
+                    subtitle = stringResource(R.string.import_pin_desc),
+                    error = pinError,
+                    remainingAttempts = null,
+                    onVerify = { pin ->
+                        val ok = if (pendingPin.pinSalt.isNotEmpty()) {
+                            vm.verifyImportPin(pin, pendingPin.pinSalt, pendingPin.pinHash)
+                        } else {
+                            vm.verifyLocalPin(pin)
+                        }
+                        if (ok) {
+                            val p = ImportMerger.plan(vm.accounts.value, pendingPin.accounts)
+                            plan = p
+                            selected = null
+                            pinPending = null
+                            pinError = null
+                        } else {
+                            pinError = context.getString(R.string.pin_wrong)
+                        }
+                    },
+                    onCancel = { pinPending = null }
+                )
+            } else {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -376,6 +419,8 @@ fun ImportScreen(
                 TextButton(onClick = { plan = null; error = null }) {
                     Text(stringResource(R.string.cancel))
                 }
+            }
+        }
             }
         }
     }

@@ -12,11 +12,14 @@ class SafeKeyApp : Application() {
         private set
     lateinit var settingsRepository: SettingsRepository
         private set
+    lateinit var accountDao: com.safekey.authenticator.database.AccountDao
+        private set
 
     override fun onCreate() {
         super.onCreate()
         val db = AppDatabase.get(this)
-        accountRepository = AccountRepository(db.accountDao(), CryptoManager())
+        accountDao = db.accountDao()
+        accountRepository = AccountRepository(accountDao, CryptoManager())
         settingsRepository = SettingsRepository(this)
     }
 }

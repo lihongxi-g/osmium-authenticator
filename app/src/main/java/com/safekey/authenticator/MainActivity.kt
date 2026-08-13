@@ -1,6 +1,8 @@
 package com.safekey.authenticator
 
 import android.content.ClipboardManager
+import android.content.Context
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.WindowManager
 import android.widget.Toast
@@ -17,8 +19,13 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -26,9 +33,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.FragmentActivity
+import com.safekey.authenticator.data.AppSettings
+import com.safekey.authenticator.data.LanguagePrefs
 import com.safekey.authenticator.totp.OtpUriParser
 import com.safekey.authenticator.ui.components.SwipeBackContainer
 import com.safekey.authenticator.ui.navigation.Screen
@@ -38,14 +50,32 @@ import com.safekey.authenticator.ui.screens.DetailScreen
 import com.safekey.authenticator.ui.screens.ExportScreen
 import com.safekey.authenticator.ui.screens.ImportScreen
 import com.safekey.authenticator.ui.screens.LockScreen
+import com.safekey.authenticator.ui.screens.PinSetupScreen
+import com.safekey.authenticator.ui.screens.PinVerifyScreen
 import com.safekey.authenticator.ui.screens.ScanScreen
 import com.safekey.authenticator.ui.screens.SettingsScreen
 import com.safekey.authenticator.ui.theme.SafeKeyTheme
-import androidx.fragment.app.FragmentActivity
+import java.util.Locale
+import kotlinx.coroutines.delay
 
 class MainActivity : FragmentActivity() {
 
     private val vm: MainViewModel by viewModels()
+
+    // ------------------------------------------------------------ lifecycle
+
+    override fun attachBaseContext(newBase: Context) {
+        val lang = LanguagePrefs.get(newBase)
+        if (lang != null) {
+            val locale = Locale.forLanguageTag(lang)
+            Locale.setDefault(locale)
+            val config = Configuration(newBase.resources.configuration)
+            config.setLocales(android.os.LocaleList(locale))
+            super.attachBaseContext(newBase.createConfigurationContext(config))
+        } else {
+            super.attachBaseContext(newBase)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,15 +89,22 @@ class MainActivity : FragmentActivity() {
         setContent {
             val settings by vm.settings.collectAsState()
             val locked by vm.locked.collectAsState()
+            val pinRequired by vm.pinRequired.collectAsState()
+            val destroyed by vm.destroyed.collectAsState()
             val toast by vm.toast.collectAsState()
             val context = LocalContext.current
 
-            SafeKeyTheme(themeMode = settings.themeMode, dynamicColor = settings.dynamicColor) {
+            SafeKeyTheme(
+                themeMode = settings.themeMode,
+                dynamicColor = settings.dynamicColor,
+                themeColorIndex = settings.themeColorIndex
+            ) {
                 Box(Modifier.fillMaxSize()) {
-                    if (locked) {
-                        LockGate()
-                    } else {
-                        MainNavHost()
+                    when {
+                        destroyed -> DestroyedScreen()
+                        pinRequired -> PinGate()
+                        locked -> LockGate()
+                        else -> MainNavHost()
                     }
                 }
             }
@@ -91,6 +128,56 @@ class MainActivity : FragmentActivity() {
         vm.onAppBackground()
     }
 
+    // ------------------------------------------------------------ PIN gate
+
+    @Composable
+    private fun PinGate() {
+        val error by vm.pinError.collectAsState()
+        val attempts = vm.remainingAttempts()
+        val context = LocalContext.current
+
+        PinVerifyScreen(
+            title = stringResource(R.string.pin_verify_title),
+            subtitle = stringResource(R.string.pin_verify_subtitle),
+            error = error,
+            remainingAttempts = attempts,
+            onVerify = { pin ->
+                if (!vm.onPinEntered(pin)) {
+                    // Wrong PIN — if a self-destruct PIN is armed, entering it
+                    // here destroys all data.
+                    if (vm.settings.value.destroyMode == AppSettings.DESTROY_PIN &&
+                        vm.pinManager.hasDestroyPin()
+                    ) {
+                        if (vm.onSelfDestructPinEntered(pin)) {
+                            vm.selfDestruct()
+                        }
+                    }
+                }
+            },
+            onCancel = null // periodic verification cannot be skipped while required
+        )
+    }
+
+    @Composable
+    private fun DestroyedScreen() {
+        Column(
+            modifier = Modifier.fillMaxSize().padding(32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = stringResource(R.string.destroyed_title),
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = stringResource(R.string.destroyed_desc),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+
     // ------------------------------------------------------------ lock gate
 
     @Composable
@@ -101,33 +188,26 @@ class MainActivity : FragmentActivity() {
         LockScreen(
             errorMessage = errorMessage,
             onUnlock = {
-                when (BiometricManager.from(this).canAuthenticate(
-                    BiometricManager.Authenticators.BIOMETRIC_STRONG or
-                        BiometricManager.Authenticators.DEVICE_CREDENTIAL
-                )) {
-                    BiometricManager.BIOMETRIC_SUCCESS -> {
+                when (canAuthenticate()) {
+                    true -> {
                         errorMessage = null
-                        showBiometricPrompt(
+                        launchBiometric(
                             onSuccess = { vm.unlock() },
                             onCancelled = { errorMessage = context.getString(R.string.lock_cancelled) },
                             onError = { errorMessage = context.getString(R.string.lock_failed) }
                         )
                     }
-                    else -> {
-                        errorMessage = context.getString(R.string.biometric_unavailable)
-                    }
+                    false -> errorMessage = context.getString(R.string.biometric_unavailable)
                 }
             }
         )
 
-        // Attempt unlock automatically once when the gate first appears
+        // Attempt unlock automatically once the gate appears (after the
+        // activity is fully resumed — avoids prompt-vs-window races).
         LaunchedEffect(Unit) {
-            if (BiometricManager.from(this@MainActivity).canAuthenticate(
-                    BiometricManager.Authenticators.BIOMETRIC_STRONG or
-                        BiometricManager.Authenticators.DEVICE_CREDENTIAL
-                ) == BiometricManager.BIOMETRIC_SUCCESS
-            ) {
-                showBiometricPrompt(
+            delay(400)
+            if (canAuthenticate() && vm.locked.value) {
+                launchBiometric(
                     onSuccess = { vm.unlock() },
                     onCancelled = { errorMessage = context.getString(R.string.lock_cancelled) },
                     onError = { errorMessage = context.getString(R.string.lock_failed) }
@@ -136,20 +216,40 @@ class MainActivity : FragmentActivity() {
         }
     }
 
-    private fun showBiometricPrompt(
+    private fun canAuthenticate(): Boolean =
+        BiometricManager.from(this).canAuthenticate(
+            BiometricManager.Authenticators.BIOMETRIC_STRONG or
+                BiometricManager.Authenticators.DEVICE_CREDENTIAL
+        ) == BiometricManager.BIOMETRIC_SUCCESS
+
+    // ------------------------------------------------------- biometric core
+
+    private var biometricPrompt: BiometricPrompt? = null
+    private var promptInFlight = false
+
+    /**
+     * Single BiometricPrompt instance + re-entry guard. The 1.1.0 crash loop
+     * (multiple prompts stacking on ColorOS/Android 15) is prevented by
+     * reusing one instance and dropping duplicate requests; all calls are
+     * wrapped so a prompt failure can never take the app down.
+     */
+    private fun launchBiometric(
         onSuccess: () -> Unit,
         onCancelled: () -> Unit,
         onError: () -> Unit
     ) {
-        val prompt = BiometricPrompt(
-            this,
-            ContextCompat.getMainExecutor(this),
-            object : BiometricPrompt.AuthenticationCallback() {
+        if (promptInFlight) return
+        promptInFlight = true
+        try {
+            val callback = object : BiometricPrompt.AuthenticationCallback() {
                 override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                    promptInFlight = false
+                    vm.onBiometricSucceeded()
                     onSuccess()
                 }
 
                 override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                    promptInFlight = false
                     when (errorCode) {
                         BiometricPrompt.ERROR_CANCELED,
                         BiometricPrompt.ERROR_USER_CANCELED,
@@ -159,23 +259,54 @@ class MainActivity : FragmentActivity() {
                 }
 
                 override fun onAuthenticationFailed() {
-                    // Counts toward the system's lockout; UI stays on the gate.
+                    // Counts toward the system lockout and the self-destruct
+                    // fail counter; UI stays on the gate.
+                    vm.onBiometricFailed()
                 }
             }
-        )
-        val info = BiometricPrompt.PromptInfo.Builder()
-            .setTitle(getString(R.string.biometric_prompt_title))
-            .setSubtitle(getString(R.string.biometric_prompt_subtitle))
-            .setAllowedAuthenticators(
-                BiometricManager.Authenticators.BIOMETRIC_STRONG or
-                    BiometricManager.Authenticators.DEVICE_CREDENTIAL
-            )
-            .setNegativeButtonText(getString(R.string.biometric_negative))
-            .build()
-        prompt.authenticate(info)
+            val prompt = biometricPrompt ?: BiometricPrompt(
+                this,
+                ContextCompat.getMainExecutor(this),
+                callback
+            ).also { biometricPrompt = it }
+
+            val info = BiometricPrompt.PromptInfo.Builder()
+                .setTitle(getString(R.string.biometric_prompt_title))
+                .setSubtitle(getString(R.string.biometric_prompt_subtitle))
+                .setAllowedAuthenticators(
+                    BiometricManager.Authenticators.BIOMETRIC_STRONG or
+                        BiometricManager.Authenticators.DEVICE_CREDENTIAL
+                )
+                .setNegativeButtonText(getString(R.string.biometric_negative))
+                .build()
+            prompt.authenticate(info)
+        } catch (e: Exception) {
+            promptInFlight = false
+            onError()
+        }
     }
 
     // ------------------------------------------------------------ nav host
+
+    @Composable
+    private fun CurrentPinVerifyRoute() {
+        var error by remember { mutableStateOf<String?>(null) }
+        PinVerifyScreen(
+            title = stringResource(R.string.pin_verify_title),
+            subtitle = stringResource(R.string.pin_current_hint),
+            error = error,
+            remainingAttempts = null,
+            onVerify = { pin ->
+                if (vm.verifyLocalPin(pin)) {
+                    vm.nav.pop()
+                    vm.nav.push(Screen.PinSetup("pin"))
+                } else {
+                    error = getString(R.string.pin_wrong)
+                }
+            },
+            onCancel = { vm.nav.pop() }
+        )
+    }
 
     @Composable
     private fun MainNavHost() {
@@ -245,12 +376,8 @@ class MainActivity : FragmentActivity() {
                         onDeleted = { vm.nav.popToRoot() },
                         onBack = { vm.nav.pop() },
                         onRequireBiometric = { onSuccess ->
-                            if (BiometricManager.from(this@MainActivity).canAuthenticate(
-                                    BiometricManager.Authenticators.BIOMETRIC_STRONG or
-                                        BiometricManager.Authenticators.DEVICE_CREDENTIAL
-                                ) == BiometricManager.BIOMETRIC_SUCCESS
-                            ) {
-                                showBiometricPrompt(
+                            if (canAuthenticate()) {
+                                launchBiometric(
                                     onSuccess = onSuccess,
                                     onCancelled = { vm.showToast(context.getString(R.string.lock_cancelled)) },
                                     onError = { vm.showToast(context.getString(R.string.lock_failed)) }
@@ -273,24 +400,24 @@ class MainActivity : FragmentActivity() {
                         onBack = { vm.nav.pop() },
                         onExport = { vm.nav.push(Screen.Export) },
                         onImport = { vm.nav.push(Screen.Import) },
+                        onOpenPinSetup = { vm.nav.push(Screen.PinSetup("pin")) },
+                        onOpenPinVerify = { vm.nav.push(Screen.PinVerify) },
                         onBiometricChanged = { enable ->
                             if (enable) {
-                                when (BiometricManager.from(this@MainActivity).canAuthenticate(
-                                    BiometricManager.Authenticators.BIOMETRIC_STRONG or
-                                        BiometricManager.Authenticators.DEVICE_CREDENTIAL
-                                )) {
-                                    BiometricManager.BIOMETRIC_SUCCESS -> {
-                                        showBiometricPrompt(
-                                            onSuccess = { vm.setBiometricLock(true) },
-                                            onCancelled = { vm.showToast(context.getString(R.string.lock_cancelled)) },
-                                            onError = { vm.showToast(context.getString(R.string.lock_failed)) }
-                                        )
-                                    }
-                                    else -> {
-                                        vm.showToast(context.getString(R.string.biometric_unavailable))
-                                    }
+                                if (canAuthenticate()) {
+                                    launchBiometric(
+                                        onSuccess = { vm.setBiometricLock(true) },
+                                        onCancelled = { vm.showToast(context.getString(R.string.lock_cancelled)) },
+                                        onError = { vm.showToast(context.getString(R.string.lock_failed)) }
+                                    )
+                                } else {
+                                    vm.showToast(context.getString(R.string.biometric_unavailable))
                                 }
                             }
+                        },
+                        onLanguageChanged = { lang ->
+                            LanguagePrefs.set(this@MainActivity, lang)
+                            recreate()
                         }
                     )
 
@@ -305,6 +432,27 @@ class MainActivity : FragmentActivity() {
                         onDone = { vm.nav.pop() },
                         onBack = { vm.nav.pop() }
                     )
+
+                    is Screen.PinSetup -> PinSetupScreen(
+                        title = if (screen.mode == "destroy_pin")
+                            stringResource(R.string.destroy_pin_title)
+                        else stringResource(R.string.pin_setup_title),
+                        description = if (screen.mode == "destroy_pin")
+                            stringResource(R.string.destroy_pin_desc)
+                        else stringResource(R.string.pin_setup_desc),
+                        onDone = { pin ->
+                            if (screen.mode == "destroy_pin") {
+                                vm.setSelfDestructPin(pin)
+                            } else {
+                                vm.setAppPin(pin)
+                            }
+                            vm.showToast(context.getString(R.string.pin_saved))
+                            vm.nav.pop()
+                        },
+                        onCancel = { vm.nav.pop() }
+                    )
+
+                    is Screen.PinVerify -> CurrentPinVerifyRoute()
                 }
             }
         }

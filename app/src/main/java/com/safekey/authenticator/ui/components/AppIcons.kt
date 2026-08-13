@@ -93,4 +93,7 @@ object AppIcons {
     val Info: ImageVector by lazy {
         icon("info", "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z")
     }
+    val Check: ImageVector by lazy {
+        icon("check", "M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z")
+    }
 }

@@ -103,7 +103,8 @@ class AccountRepository(
         }
     }
 
-    suspend fun exportVault(): VaultFile {
+    /** Export all accounts; [pinSalt]/[pinHash] bind the app PIN to the file. */
+    suspend fun exportVault(pinSalt: String = "", pinHash: String = ""): VaultFile {
         val all = dao.getAll().map { entity ->
             val domain = entity.toDomain(crypto)
             VaultAccount(
@@ -119,7 +120,9 @@ class AccountRepository(
             version = 1,
             format = "safekey-vault",
             exportedAt = System.currentTimeMillis(),
-            accounts = all
+            accounts = all,
+            pinSalt = pinSalt,
+            pinHash = pinHash
         )
     }
 

@@ -113,4 +113,66 @@
     <string name="biometric_prompt_title">解锁 SafeKey</string>
     <string name="biometric_prompt_subtitle">验证身份</string>
     <string name="biometric_negative">使用密码</string>
+
+    <string name="theme_color">主题颜色</string>
+    <string name="theme_color_desc">关闭动态取色时生效</string>
+    <string name="color_red">红</string>
+    <string name="color_orange">橙</string>
+    <string name="color_yellow">黄</string>
+    <string name="color_green">绿</string>
+    <string name="color_cyan">青</string>
+    <string name="color_blue">蓝</string>
+    <string name="color_purple">紫</string>
+    <string name="language">语言</string>
+    <string name="lang_system">跟随系统</string>
+    <string name="lang_zh">简体中文</string>
+    <string name="lang_en">English</string>
+    <string name="version_click_hint">点击发送邮件给开发者</string>
+    <string name="no_email_app">设备上没有安装邮件应用。</string>
+
+    <string name="settings_pin">PIN</string>
+    <string name="settings_destroy">自毁</string>
+    <string name="app_pin_setup">设置应用 PIN</string>
+    <string name="app_pin_manage">管理应用 PIN</string>
+    <string name="app_pin_desc">加密存储且无法找回。用于解锁备份和定期验证。</string>
+    <string name="pin_setup_title">设置 6 位 PIN</string>
+    <string name="pin_setup_desc">PIN 将加密存储且无法找回。忘记后只能清除应用数据才能恢复。</string>
+    <string name="pin_confirm_title">确认 PIN</string>
+    <string name="pin_mismatch">两次输入的 PIN 不一致，请重试。</string>
+    <string name="pin_saved">PIN 已保存</string>
+    <string name="pin_wrong">PIN 错误</string>
+    <string name="pin_delete">删除一位</string>
+    <string name="pin_verify_title">输入 PIN</string>
+    <string name="pin_verify_subtitle">需要验证后才能继续</string>
+    <string name="pin_current_hint">输入当前 PIN 以修改</string>
+    <string name="pin_attempts_left">剩余尝试次数：%1$d</string>
+    <string name="pin_periodic_verify">定期验证 PIN</string>
+    <string name="pin_periodic_desc">在随机时刻或每天固定时间要求输入 PIN</string>
+    <string name="pin_mode_random">随机时刻</string>
+    <string name="pin_mode_daily">每天固定时间</string>
+    <string name="pin_daily_time">每日验证时间</string>
+    <string name="pin_time_hour">时</string>
+    <string name="pin_time_minute">分</string>
+    <string name="pin_need_setup_first">请先设置应用 PIN。</string>
+    <string name="pin_clear_hint">清除 PIN</string>
+    <string name="pin_clear_title">清除应用 PIN？</string>
+    <string name="pin_clear_message">定期验证和自毁功能将被关闭，备份文件将不再要求此 PIN。</string>
+
+    <string name="destroy_mode">自毁模式</string>
+    <string name="destroy_mode_desc">触发后销毁全部数据</string>
+    <string name="destroy_mode_pin">自毁 PIN</string>
+    <string name="destroy_mode_failures">连续失败次数</string>
+    <string name="destroy_warning">警告：自毁不可逆。所有账户将被随机加密（密钥销毁）并彻底删除，连 SafeKey 自身也无法恢复。</string>
+    <string name="fail_threshold">失败次数阈值</string>
+    <string name="fail_threshold_desc">PIN 输错和指纹验证失败的累计次数达到后触发自毁</string>
+    <string name="destroy_pin_title">设置自毁 PIN</string>
+    <string name="destroy_pin_desc">在 PIN 验证界面输入此 PIN 将立即、不可逆地销毁全部数据。</string>
+    <string name="destroy_pin_setup">设置自毁 PIN</string>
+    <string name="destroy_pin_manage">修改自毁 PIN</string>
+    <string name="destroyed_title">数据已全部销毁</string>
+    <string name="destroyed_desc">账户、PIN 和设置已被不可逆删除，SafeKey 现在为空。</string>
+
+    <string name="import_pin_title">输入备份 PIN</string>
+    <string name="import_pin_desc">此备份已绑定 PIN，输入后才能解密账户。</string>
+    <string name="algorithm_hint">算法会自动从 otpauth:// 链接识别；手动输入的密钥默认使用 SHA1（几乎所有服务都用它）。</string>
 </resources>

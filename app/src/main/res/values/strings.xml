@@ -113,4 +113,66 @@
     <string name="biometric_prompt_title">Unlock SafeKey</string>
     <string name="biometric_prompt_subtitle">Verify it\'s you</string>
     <string name="biometric_negative">Use password</string>
+
+    <string name="theme_color">Theme color</string>
+    <string name="theme_color_desc">Applies when dynamic color is off</string>
+    <string name="color_red">Red</string>
+    <string name="color_orange">Orange</string>
+    <string name="color_yellow">Yellow</string>
+    <string name="color_green">Green</string>
+    <string name="color_cyan">Cyan</string>
+    <string name="color_blue">Blue</string>
+    <string name="color_purple">Purple</string>
+    <string name="language">Language</string>
+    <string name="lang_system">Follow system</string>
+    <string name="lang_zh">简体中文</string>
+    <string name="lang_en">English</string>
+    <string name="version_click_hint">Tap to email the developer</string>
+    <string name="no_email_app">No email app is installed on this device.</string>
+
+    <string name="settings_pin">PIN</string>
+    <string name="settings_destroy">Self-destruct</string>
+    <string name="app_pin_setup">Set app PIN</string>
+    <string name="app_pin_manage">Manage app PIN</string>
+    <string name="app_pin_desc">Encrypted and unrecoverable. Used to unlock backups and periodic checks.</string>
+    <string name="pin_setup_title">Set a 6-digit PIN</string>
+    <string name="pin_setup_desc">This PIN is encrypted and cannot be recovered. If you forget it, your data can only be restored by clearing the app.</string>
+    <string name="pin_confirm_title">Confirm PIN</string>
+    <string name="pin_mismatch">PINs do not match. Try again.</string>
+    <string name="pin_saved">PIN saved</string>
+    <string name="pin_wrong">Wrong PIN</string>
+    <string name="pin_delete">Delete digit</string>
+    <string name="pin_verify_title">Enter PIN</string>
+    <string name="pin_verify_subtitle">Verification required to continue</string>
+    <string name="pin_current_hint">Enter the current PIN to change it</string>
+    <string name="pin_attempts_left">%1$d attempts left</string>
+    <string name="pin_periodic_verify">Periodic PIN check</string>
+    <string name="pin_periodic_desc">Randomly or at a fixed time, the app will ask for your PIN</string>
+    <string name="pin_mode_random">Random time</string>
+    <string name="pin_mode_daily">Fixed time daily</string>
+    <string name="pin_daily_time">Daily check time</string>
+    <string name="pin_time_hour">Hour</string>
+    <string name="pin_time_minute">Minute</string>
+    <string name="pin_need_setup_first">Set an app PIN first.</string>
+    <string name="pin_clear_hint">Clear PIN</string>
+    <string name="pin_clear_title">Clear the app PIN?</string>
+    <string name="pin_clear_message">Periodic PIN checks and self-destruct will be disabled. Backups will no longer require this PIN.</string>
+
+    <string name="destroy_mode">Self-destruct mode</string>
+    <string name="destroy_mode_desc">Destroy all data when triggered</string>
+    <string name="destroy_mode_pin">Destruct PIN</string>
+    <string name="destroy_mode_failures">After repeated failures</string>
+    <string name="destroy_warning">WARNING: destruction is irreversible. All accounts are randomly re-encrypted with a destroyed key and permanently deleted — even SafeKey itself cannot recover them.</string>
+    <string name="fail_threshold">Failure threshold</string>
+    <string name="fail_threshold_desc">Consecutive wrong PINs + failed biometrics before destruction</string>
+    <string name="destroy_pin_title">Set destruct PIN</string>
+    <string name="destroy_pin_desc">Entering this PIN at a PIN prompt destroys ALL data immediately and irreversibly.</string>
+    <string name="destroy_pin_setup">Set destruct PIN</string>
+    <string name="destroy_pin_manage">Change destruct PIN</string>
+    <string name="destroyed_title">All data destroyed</string>
+    <string name="destroyed_desc">Accounts, PINs and settings were irreversibly deleted. SafeKey is now empty.</string>
+
+    <string name="import_pin_title">Enter backup PIN</string>
+    <string name="import_pin_desc">This backup is bound to a PIN. Enter it to decrypt the accounts.</string>
+    <string name="algorithm_hint">Algorithm is detected from the otpauth:// link automatically. Manually entered secrets default to SHA1 (used by almost all services).</string>
 </resources>

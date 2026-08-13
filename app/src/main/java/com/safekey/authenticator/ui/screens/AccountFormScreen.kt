@@ -143,6 +143,11 @@ fun AccountFormScreen(
                 text = stringResource(R.string.algorithm_label),
                 style = MaterialTheme.typography.labelLarge
             )
+            Text(
+                text = stringResource(R.string.algorithm_hint),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Account.SUPPORTED_ALGORITHMS.forEach { algo ->
                     FilterChip(

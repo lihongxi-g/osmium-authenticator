@@ -37,4 +37,7 @@ interface AccountDao {
 
     @Query("SELECT COUNT(*) FROM accounts")
     suspend fun count(): Int
+
+    @Query("DELETE FROM accounts")
+    suspend fun deleteAll()
 }

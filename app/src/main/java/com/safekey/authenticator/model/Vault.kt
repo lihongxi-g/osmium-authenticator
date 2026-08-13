@@ -21,7 +21,10 @@ data class VaultFile(
     val version: Int = 1,
     val format: String = "safekey-vault",
     val exportedAt: Long = 0L,
-    val accounts: List<VaultAccount> = emptyList()
+    val accounts: List<VaultAccount> = emptyList(),
+    /** Present when the exporting device had an app PIN — import then requires it. */
+    val pinSalt: String = "",
+    val pinHash: String = ""
 )
 
 /** Envelope written to disk: encryption metadata + ciphertext. */
