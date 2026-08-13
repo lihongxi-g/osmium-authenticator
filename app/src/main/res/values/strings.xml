@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SafeKey</string>
+    <string name="app_tagline">Offline authenticator</string>
+
+    <string name="accounts_title">Accounts</string>
+    <string name="add_account">Add account</string>
+    <string name="scan_qr">Scan QR code</string>
+    <string name="enter_manually">Enter manually</string>
+    <string name="paste_uri">Paste otpauth:// link</string>
+    <string name="search_hint">Search accounts</string>
+    <string name="empty_title">No accounts yet</string>
+    <string name="empty_desc">Add your first account by scanning the QR code from a website or app.</string>
+    <string name="empty_action">Add account</string>
+    <string name="no_results">No matching accounts</string>
+    <string name="scan_hint">Point the camera at the QR code shown on the website when enabling two-step verification</string>
+    <string name="camera_permission_title">Camera access needed</string>
+    <string name="camera_permission_desc">SafeKey needs the camera to scan authenticator QR codes. The camera is used on-device only.</string>
+    <string name="grant_permission">Grant permission</string>
+
+    <string name="copy_code">Copy code</string>
+    <string name="code_copied">Code copied</string>
+    <string name="clipboard_cleared">Clipboard cleared</string>
+    <string name="seconds_remaining">%1$d s</string>
+
+    <string name="issuer_label">Issuer</string>
+    <string name="account_name_label">Account name</string>
+    <string name="secret_label">Secret (Base32)</string>
+    <string name="algorithm_label">Algorithm</string>
+    <string name="digits_label">Digits</string>
+    <string name="period_label">Period (seconds)</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirm">Confirm</string>
+    <string name="close">Close</string>
+    <string name="delete">Delete</string>
+    <string name="edit">Edit</string>
+    <string name="show_secret">Show secret</string>
+    <string name="hide_secret">Hide secret</string>
+
+    <string name="error_issuer_required">Issuer is required. Enter the service name, e.g. Google.</string>
+    <string name="error_name_required">Account name is required. Enter your email or username.</string>
+    <string name="error_secret_invalid">Secret is not valid Base32. Check for typos — it should only contain A-Z and 2-7.</string>
+    <string name="error_secret_too_short">Secret is too short (less than 10 bytes). It can be brute-forced — check the value.</string>
+    <string name="error_period_invalid">Period must be a whole number between 1 and 600 seconds.</string>
+    <string name="error_digits_invalid">Digits must be 6 or 8.</string>
+    <string name="error_uri_invalid">This is not a valid otpauth:// link. Check that you copied the whole link.</string>
+    <string name="error_uri_not_totp">Only TOTP (time-based) accounts are supported.</string>
+    <string name="error_qr_not_otp">This QR code is not an authenticator code. Scan the QR shown by the website when enabling 2FA.</string>
+
+    <string name="account_detail">Account details</string>
+    <string name="delete_title">Delete account?</string>
+    <string name="delete_message">You will lose access to codes for %1$s. This cannot be undone unless you have a backup.</string>
+    <string name="deleted">Account deleted</string>
+    <string name="account_added">Account added</string>
+    <string name="account_updated">Account updated</string>
+    <string name="totp_params">Algorithm %1$s · %2$d digits · %3$d s period</string>
+    <string name="details_secret_verified">This action requires authentication</string>
+
+    <string name="settings_title">Settings</string>
+    <string name="settings_appearance">Appearance</string>
+    <string name="settings_security">Security</string>
+    <string name="settings_data">Data</string>
+    <string name="settings_about">About</string>
+    <string name="theme_mode">Theme</string>
+    <string name="theme_system">Follow system</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="dynamic_color">Dynamic color (Material You)</string>
+    <string name="dynamic_color_desc">Use colors from your wallpaper. Android 12+ only.</string>
+    <string name="biometric_lock">Biometric lock</string>
+    <string name="biometric_lock_desc">Require fingerprint, face, or device PIN to open the app.</string>
+    <string name="biometric_unavailable">No biometric or screen lock is set up on this device. Set one in system settings first.</string>
+    <string name="clipboard_timeout">Clipboard auto-clear</string>
+    <string name="clipboard_off">Off</string>
+    <string name="clipboard_15s">15 seconds</string>
+    <string name="clipboard_30s">30 seconds</string>
+    <string name="clipboard_60s">60 seconds</string>
+    <string name="export_vault">Export (encrypted)</string>
+    <string name="export_vault_desc">Save all accounts to an encrypted file protected by a password.</string>
+    <string name="import_vault">Import</string>
+    <string name="import_vault_desc">Restore accounts from an encrypted SafeKey export file.</string>
+    <string name="export_password">Set export password</string>
+    <string name="export_password_hint">Password</string>
+    <string name="export_confirm_hint">Confirm password</string>
+    <string name="export_password_desc">This password protects the exported file. Write it down — you will need it to import.</string>
+    <string name="error_password_mismatch">Passwords do not match.</string>
+    <string name="error_password_empty">Password cannot be empty.</string>
+    <string name="error_password_weak">Use at least 8 characters for the export password.</string>
+    <string name="export_done">Export file saved</string>
+    <string name="export_failed">Export failed: %1$s</string>
+    <string name="import_password_title">Enter import password</string>
+    <string name="import_password_desc">Enter the password used when this file was exported.</string>
+    <string name="error_import_wrong_password">Wrong password, or the file is corrupted.</string>
+    <string name="error_import_format">This file is not a SafeKey export.</string>
+    <string name="import_preview_title">Import %1$d account(s)?</string>
+    <string name="import_preview_desc">Review the accounts below. Existing accounts with the same issuer and name will be updated.</string>
+    <string name="import_duplicate_note">%1$d account(s) already exist and will be updated.</string>
+    <string name="import_done">Imported %1$d account(s)</string>
+    <string name="select_all">Select all</string>
+
+    <string name="lock_title">SafeKey is locked</string>
+    <string name="lock_desc">Authenticate to view your codes.</string>
+    <string name="unlock">Unlock</string>
+    <string name="lock_failed">Authentication failed</string>
+    <string name="lock_cancelled">Authentication cancelled</string>
+
+    <string name="version">Version</string>
+    <string name="accounts_count">%1$d account(s)</string>
+    <string name="about_desc">SafeKey is a fully offline, privacy-first TOTP authenticator. All data is encrypted with the Android Keystore and never leaves your device.</string>
+    <string name="sorting_hint">Long-press an account to reorder</string>
+
+    <string name="biometric_prompt_title">Unlock SafeKey</string>
+    <string name="biometric_prompt_subtitle">Verify it\'s you</string>
+    <string name="biometric_negative">Use password</string>
+</resources>

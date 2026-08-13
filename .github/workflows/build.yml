@@ -1,0 +1,48 @@
+name: Build APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Decode signing keystore
+        env:
+          SAFEKEY_KEYSTORE_B64: ${{ secrets.SAFEKEY_KEYSTORE_B64 }}
+        run: echo "$SAFEKEY_KEYSTORE_B64" | base64 -d > safekey.keystore
+
+      - name: Ensure Android SDK components
+        env:
+          ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+        run: |
+          yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null 2>&1 || true
+          $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager "platforms;android-34" "build-tools;34.0.0"
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
+
+      - name: Unit tests and debug build
+        env:
+          ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+          SAFEKEY_KEYSTORE: ${{ github.workspace }}/safekey.keystore
+          SAFEKEY_STORE_PASS: ${{ secrets.SAFEKEY_STORE_PASS }}
+          SAFEKEY_KEY_ALIAS: ${{ secrets.SAFEKEY_KEY_ALIAS }}
+          SAFEKEY_KEY_PASS: ${{ secrets.SAFEKEY_KEY_PASS }}
+        run: |
+          chmod +x gradlew
+          ./gradlew testDebugUnitTest assembleDebug --stacktrace
+
+      - name: Upload APK
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: safekey-debug
+          path: app/build/outputs/apk/debug/app-debug.apk

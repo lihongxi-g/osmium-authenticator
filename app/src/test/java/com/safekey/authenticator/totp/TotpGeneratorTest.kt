@@ -1,0 +1,81 @@
+package com.safekey.authenticator.totp
+
+import org.junit.Assert.assertEquals
+import org.junit.Test
+
+/**
+ * RFC 6238 Appendix B test vectors.
+ * Secret = ASCII "12345678901234567890" (= Base32 GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ)
+ * 8-digit codes across SHA1 / SHA256 / SHA512.
+ */
+class TotpGeneratorTest {
+
+    private val secretAscii = "12345678901234567890".toByteArray(Charsets.US_ASCII)
+
+    private fun generate(timeSeconds: Long, algorithm: String): String =
+        TotpGenerator.hotp(secretAscii, timeSeconds / 30, 8, algorithm)
+
+    @Test
+    fun `RFC 6238 SHA1 vectors`() {
+        assertEquals("94287082", generate(59, "SHA1"))
+        assertEquals("07081804", generate(1111111109, "SHA1"))
+        assertEquals("14050471", generate(1111111111, "SHA1"))
+        assertEquals("89005924", generate(1234567890, "SHA1"))
+        assertEquals("69279037", generate(2000000000, "SHA1"))
+        assertEquals("65353130", generate(20000000000, "SHA1"))
+    }
+
+    @Test
+    fun `RFC 6238 SHA256 vectors`() {
+        assertEquals("46119246", generate(59, "SHA256"))
+        assertEquals("68084774", generate(1111111109, "SHA256"))
+        assertEquals("67062674", generate(1111111111, "SHA256"))
+        assertEquals("91819424", generate(1234567890, "SHA256"))
+        assertEquals("90698825", generate(2000000000, "SHA256"))
+        assertEquals("77737706", generate(20000000000, "SHA256"))
+    }
+
+    @Test
+    fun `RFC 6238 SHA512 vectors`() {
+        assertEquals("90693936", generate(59, "SHA512"))
+        assertEquals("25091201", generate(1111111109, "SHA512"))
+        assertEquals("99943326", generate(1111111111, "SHA512"))
+        assertEquals("93441116", generate(1234567890, "SHA512"))
+        assertEquals("38618901", generate(2000000000, "SHA512"))
+        assertEquals("47863826", generate(20000000000, "SHA512"))
+    }
+
+    @Test
+    fun `6-digit codes are zero padded`() {
+        val base32Secret = Base32.decode("GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ")
+        val code = TotpGenerator.hotp(base32Secret, 59 / 30, 6, "SHA1")
+        assertEquals(6, code.length)
+        assertEquals("287082", code) // 94287082 truncated to 6 digits
+    }
+
+    @Test
+    fun `Base32-encoded secret matches ASCII secret`() {
+        val base32Secret = Base32.decode("GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ")
+        val code = TotpGenerator.hotp(base32Secret, 59 / 30, 8, "SHA1")
+        assertEquals("94287082", code)
+    }
+
+    @Test
+    fun `remaining seconds and fraction`() {
+        // period 30, time 10s in: 20 remaining, fraction ~0.333
+        assertEquals(20, TotpGenerator.remainingSeconds(10_000L, 30))
+        assertEquals(0.333f, TotpGenerator.periodFraction(10_000L, 30), 0.01f)
+        // exactly at boundary: full period remains
+        assertEquals(30, TotpGenerator.remainingSeconds(30_000L, 30))
+        assertEquals(0f, TotpGenerator.periodFraction(30_000L, 30), 0.0001f)
+    }
+
+    @Test
+    fun `custom period is honored`() {
+        val counter1 = TotpGenerator.generate(secretAscii, 0L, period = 60, digits = 6, algorithm = "SHA1")
+        val counter2 = TotpGenerator.generate(secretAscii, 30_000L, period = 60, digits = 6, algorithm = "SHA1")
+        assertEquals(counter1, counter2) // same 60s window
+        val counter3 = TotpGenerator.generate(secretAscii, 60_000L, period = 60, digits = 6, algorithm = "SHA1")
+        org.junit.Assert.assertNotEquals(counter1, counter3)
+    }
+}
