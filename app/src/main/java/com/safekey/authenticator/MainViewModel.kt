@@ -112,16 +112,36 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         biometricAvailable = available
     }
 
+    init {
+        // Re-evaluate the gate whenever settings load/change — e.g. the user
+        // just disabled "verify on open", or the DataStore first read lands
+        // after onStart already locked the app.
+        viewModelScope.launch {
+            settings.collect { s ->
+                if (_destroyed.value) return@collect
+                if (!s.gateOnOpen) {
+                    _locked.value = false
+                    _pinRequired.value = false
+                }
+            }
+        }
+    }
+
     /**
      * Called when the activity comes to the foreground.
-     * Every open requires verification: fingerprint first (or lock-screen
+     * When "verify on open" is enabled: fingerprint first (or lock-screen
      * credential via the prompt), app PIN when no biometrics exist.
      */
     fun onAppForeground() {
         appInForeground = true
-        AppLog.d("foreground: biometric=$biometricAvailable pin=${pinManager.hasPin()}")
+        AppLog.d("foreground: biometric=$biometricAvailable pin=${pinManager.hasPin()} gate=${settings.value.gateOnOpen}")
         if (_destroyed.value) return
         _pinError.value = null
+        if (!settings.value.gateOnOpen) {
+            _locked.value = false
+            _pinRequired.value = false
+            return
+        }
         if (biometricAvailable) {
             _locked.value = true
         } else if (pinManager.hasPin()) {
@@ -133,11 +153,11 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    /** Called when the activity goes to the background — always re-lock. */
+    /** Called when the activity goes to the background. */
     fun onAppBackground() {
         appInForeground = false
         AppLog.d("background")
-        _locked.value = true
+        if (settings.value.gateOnOpen) _locked.value = true
     }
 
     fun unlock() {
@@ -313,7 +333,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     fun setThemeMode(mode: String) = viewModelScope.launch { settingsRepo.setThemeMode(mode) }
     fun setDynamicColor(enabled: Boolean) = viewModelScope.launch { settingsRepo.setDynamicColor(enabled) }
-    fun setClipboardClearSeconds(seconds: Int) = viewModelScope.launch { settingsRepo.setClipboardClearSeconds(seconds) }
+    fun setGateOnOpen(enabled: Boolean) = viewModelScope.launch { settingsRepo.setGateOnOpen(enabled) }
     fun setDestroyMode(mode: String) = viewModelScope.launch { settingsRepo.setDestroyMode(mode) }
     fun setFailThreshold(threshold: Int) = viewModelScope.launch { settingsRepo.setFailThreshold(threshold) }
 

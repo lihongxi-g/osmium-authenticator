@@ -134,8 +134,8 @@
     <string name="version_click_hint">Tap to email the developer</string>
     <string name="no_email_app">No email app is installed on this device.</string>
 
-    <string name="gate_always_on">Verification on every open</string>
-    <string name="gate_always_on_desc">Every time you open the app (including returning from the background) fingerprint or PIN verification is required. No way to disable.</string>
+    <string name="gate_on_open">Verify on open</string>
+    <string name="gate_on_open_desc">Require fingerprint or PIN verification every time the app opens (including returning from the background)</string>
     <string name="export_log">Export log</string>
     <string name="export_log_desc">Copies the latest 100 log lines plus device info to the clipboard</string>
     <string name="export_log_done">Log copied to clipboard</string>

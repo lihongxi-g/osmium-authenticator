@@ -134,8 +134,8 @@
     <string name="version_click_hint">点击发送邮件给开发者</string>
     <string name="no_email_app">设备上没有安装邮件应用。</string>
 
-    <string name="gate_always_on">每次打开需验证</string>
-    <string name="gate_always_on_desc">每次打开应用（包括从后台切回）都需要指纹或 PIN 验证，不可关闭。</string>
+    <string name="gate_on_open">打开时验证</string>
+    <string name="gate_on_open_desc">每次打开应用（包括从后台切回）都要求指纹或 PIN 验证</string>
     <string name="export_log">导出日志</string>
     <string name="export_log_desc">将最新 100 行日志和设备信息复制到剪贴板</string>
     <string name="export_log_done">日志已复制到剪贴板</string>

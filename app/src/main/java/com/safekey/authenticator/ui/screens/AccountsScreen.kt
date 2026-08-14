@@ -36,9 +36,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
@@ -140,8 +138,7 @@ fun AccountsScreen(
                 else -> ReorderableAccountList(
                     items = filtered,
                     onCopyCode = { ui ->
-                        val seconds = vm.settings.value.clipboardClearSeconds
-                        ClipboardHelper.copy(context, ui.code, seconds)
+                        ClipboardHelper.copy(context, ui.code)
                         vm.showToast(context.getString(R.string.code_copied))
                     },
                     onOpen = onOpenDetail,

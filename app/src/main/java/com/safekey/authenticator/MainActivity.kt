@@ -21,6 +21,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,6 +33,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,7 +41,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -109,7 +113,20 @@ class MainActivity : FragmentActivity() {
                 themeMode = settings.themeMode,
                 dynamicColor = settings.dynamicColor
             ) {
-                Box(Modifier.fillMaxSize()) {
+                // The window background follows the app theme (not just the
+                // system dark mode) — otherwise dark theme pages flash white
+                // during transitions and gates show white-on-white text.
+                val view = LocalView.current
+                if (!view.isInEditMode) {
+                    SideEffect {
+                        view.setBackgroundColor(MaterialTheme.colorScheme.background.toArgb())
+                    }
+                }
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background)
+                ) {
                     when {
                         tampered -> TamperedScreen()
                         destroyed -> DestroyedScreen()

@@ -14,7 +14,7 @@ private val Context.dataStore by preferencesDataStore(name = "safekey_settings")
 data class AppSettings(
     val themeMode: String = THEME_SYSTEM,
     val dynamicColor: Boolean = true,
-    val clipboardClearSeconds: Int = 30,
+    val gateOnOpen: Boolean = true,
     val destroyMode: String = DESTROY_OFF,
     val failThreshold: Int = 5,
     val pinFailCount: Int = 0,
@@ -36,7 +36,7 @@ class SettingsRepository(private val context: Context) {
     private object Keys {
         val THEME_MODE = stringPreferencesKey("theme_mode")
         val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
-        val CLIPBOARD_CLEAR = intPreferencesKey("clipboard_clear_seconds")
+        val GATE_ON_OPEN = booleanPreferencesKey("gate_on_open")
         val DESTROY_MODE = stringPreferencesKey("destroy_mode")
         val FAIL_THRESHOLD = intPreferencesKey("fail_threshold")
         val PIN_FAIL_COUNT = intPreferencesKey("pin_fail_count")
@@ -47,7 +47,7 @@ class SettingsRepository(private val context: Context) {
         AppSettings(
             themeMode = prefs[Keys.THEME_MODE] ?: AppSettings.THEME_SYSTEM,
             dynamicColor = prefs[Keys.DYNAMIC_COLOR] ?: true,
-            clipboardClearSeconds = prefs[Keys.CLIPBOARD_CLEAR] ?: 30,
+            gateOnOpen = prefs[Keys.GATE_ON_OPEN] ?: true,
             destroyMode = prefs[Keys.DESTROY_MODE] ?: AppSettings.DESTROY_OFF,
             failThreshold = prefs[Keys.FAIL_THRESHOLD] ?: 5,
             pinFailCount = prefs[Keys.PIN_FAIL_COUNT] ?: 0,
@@ -63,8 +63,8 @@ class SettingsRepository(private val context: Context) {
         context.dataStore.edit { it[Keys.DYNAMIC_COLOR] = enabled }
     }
 
-    suspend fun setClipboardClearSeconds(seconds: Int) {
-        context.dataStore.edit { it[Keys.CLIPBOARD_CLEAR] = seconds }
+    suspend fun setGateOnOpen(enabled: Boolean) {
+        context.dataStore.edit { it[Keys.GATE_ON_OPEN] = enabled }
     }
 
     suspend fun setDestroyMode(mode: String) {

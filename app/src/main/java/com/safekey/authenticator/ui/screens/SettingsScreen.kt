@@ -68,7 +68,6 @@ fun SettingsScreen(
     val hasDestroyPin = vm.pinManager.hasDestroyPin()
 
     var showThemeDialog by remember { mutableStateOf(false) }
-    var showClipboardDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
     var showDestroyModeDialog by remember { mutableStateOf(false) }
     var showThresholdDialog by remember { mutableStateOf(false) }
@@ -114,7 +113,7 @@ fun SettingsScreen(
             )
 
             SettingRow(
-                icon = AppIcons.ContentPaste,
+                icon = AppIcons.Language,
                 title = stringResource(R.string.language),
                 trailing = {
                     Text(
@@ -133,27 +132,15 @@ fun SettingsScreen(
             SectionHeader(stringResource(R.string.settings_security))
 
             SettingRow(
-                icon = AppIcons.Security,
-                title = stringResource(R.string.gate_always_on),
-                description = stringResource(R.string.gate_always_on_desc)
-            )
-
-            SettingRow(
-                icon = AppIcons.Timer,
-                title = stringResource(R.string.clipboard_timeout),
+                icon = AppIcons.Fingerprint,
+                title = stringResource(R.string.gate_on_open),
+                description = stringResource(R.string.gate_on_open_desc),
                 trailing = {
-                    Text(
-                        text = when (settings.clipboardClearSeconds) {
-                            0 -> stringResource(R.string.clipboard_off)
-                            15 -> stringResource(R.string.clipboard_15s)
-                            60 -> stringResource(R.string.clipboard_60s)
-                            else -> stringResource(R.string.clipboard_30s)
-                        },
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    Switch(
+                        checked = settings.gateOnOpen,
+                        onCheckedChange = { vm.setGateOnOpen(it) }
                     )
-                },
-                onClick = { showClipboardDialog = true }
+                }
             )
 
             // -------------------------------------------------------- PIN
@@ -193,7 +180,7 @@ fun SettingsScreen(
 
             if (settings.destroyMode == AppSettings.DESTROY_PIN) {
                 SettingRow(
-                    icon = AppIcons.Keyboard,
+                    icon = AppIcons.VpnKey,
                     title = if (hasDestroyPin) stringResource(R.string.destroy_pin_manage)
                     else stringResource(R.string.destroy_pin_setup),
                     description = stringResource(R.string.destroy_pin_desc),
@@ -209,7 +196,7 @@ fun SettingsScreen(
 
             if (settings.destroyMode == AppSettings.DESTROY_FAIL_COUNT) {
                 SettingRow(
-                    icon = AppIcons.Warning,
+                    icon = AppIcons.Refresh,
                     title = stringResource(R.string.fail_threshold),
                     description = stringResource(R.string.fail_threshold_desc),
                     trailing = {
@@ -258,12 +245,12 @@ fun SettingsScreen(
             SectionHeader(stringResource(R.string.settings_about))
 
             SettingRow(
-                icon = AppIcons.Info,
+                icon = AppIcons.BugReport,
                 title = stringResource(R.string.export_log),
                 description = stringResource(R.string.export_log_desc),
                 onClick = {
                     val text = AppLog.exportText()
-                    ClipboardHelper.copy(context, text, 60)
+                    ClipboardHelper.copy(context, text)
                     AppLog.d("log exported to clipboard (${text.length} chars)")
                     vm.showToast(context.getString(R.string.export_log_done))
                 }
@@ -352,36 +339,6 @@ fun SettingsScreen(
             },
             confirmButton = {
                 TextButton(onClick = { showLanguageDialog = false }) { Text(stringResource(R.string.close)) }
-            }
-        )
-    }
-
-    if (showClipboardDialog) {
-        AlertDialog(
-            onDismissRequest = { showClipboardDialog = false },
-            title = { Text(stringResource(R.string.clipboard_timeout)) },
-            text = {
-                Column {
-                    ThemeOption(stringResource(R.string.clipboard_off), 0, settings.clipboardClearSeconds) {
-                        vm.setClipboardClearSeconds(it)
-                        showClipboardDialog = false
-                    }
-                    ThemeOption(stringResource(R.string.clipboard_15s), 15, settings.clipboardClearSeconds) {
-                        vm.setClipboardClearSeconds(it)
-                        showClipboardDialog = false
-                    }
-                    ThemeOption(stringResource(R.string.clipboard_30s), 30, settings.clipboardClearSeconds) {
-                        vm.setClipboardClearSeconds(it)
-                        showClipboardDialog = false
-                    }
-                    ThemeOption(stringResource(R.string.clipboard_60s), 60, settings.clipboardClearSeconds) {
-                        vm.setClipboardClearSeconds(it)
-                        showClipboardDialog = false
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { showClipboardDialog = false }) { Text(stringResource(R.string.close)) }
             }
         )
     }

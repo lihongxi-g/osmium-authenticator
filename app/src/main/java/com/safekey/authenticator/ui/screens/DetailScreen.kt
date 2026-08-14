@@ -118,9 +118,7 @@ fun DetailScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable {
-                            ClipboardHelper.copy(
-                                context, ui.code, vm.settings.value.clipboardClearSeconds
-                            )
+                            ClipboardHelper.copy(context, ui.code)
                             vm.showToast(context.getString(R.string.code_copied))
                         }
                         .padding(vertical = 24.dp),
@@ -225,7 +223,7 @@ fun DetailScreen(
                             contentDescription = stringResource(R.string.copy_code),
                             onClick = {
                                 ClipboardHelper.copy(
-                                    context, account.secret, vm.settings.value.clipboardClearSeconds
+                                    context, account.secret
                                 )
                                 vm.showToast(context.getString(R.string.code_copied))
                             },
