@@ -90,6 +90,7 @@ fun SettingsScreen(
         when (p.first) {
             "gate" -> vm.setGateOnOpen(p.second)
             "screenshot" -> vm.setAllowScreenshots(p.second)
+            "hideCodes" -> vm.setHideCodes(p.second)
         }
     }
 
@@ -135,6 +136,13 @@ fun SettingsScreen(
             )
 
             SettingRow(
+                icon = AppIcons.SwapVert,
+                title = stringResource(R.string.sort_mode),
+                description = stringResource(R.string.sort_mode_desc),
+                onClick = { vm.nav.push(Screen.SortOrder) }
+            )
+
+            SettingRow(
                 icon = AppIcons.Language,
                 title = stringResource(R.string.language),
                 trailing = {
@@ -177,6 +185,21 @@ fun SettingsScreen(
                         checked = settings.allowScreenshots,
                         onCheckedChange = { target ->
                             pendingToggle = "screenshot" to target
+                            showVerifyDialog = true
+                        }
+                    )
+                }
+            )
+
+            SettingRow(
+                icon = AppIcons.Visibility,
+                title = stringResource(R.string.hide_codes),
+                description = stringResource(R.string.hide_codes_desc),
+                trailing = {
+                    Switch(
+                        checked = settings.hideCodes,
+                        onCheckedChange = { target ->
+                            pendingToggle = "hideCodes" to target
                             showVerifyDialog = true
                         }
                     )

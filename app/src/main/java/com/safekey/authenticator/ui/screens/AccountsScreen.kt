@@ -68,7 +68,8 @@ fun AccountsScreen(
     onOpenDetail: (Account) -> Unit,
     onOpenSettings: () -> Unit
 ) {
-    val uiList by vm.accountUiList.collectAsState()
+    val uiList by vm.sortedAccountUiList.collectAsState()
+    val settings by vm.settings.collectAsState()
     val search by vm.searchQuery.collectAsState()
     var searching by remember { mutableStateOf(false) }
     var showAddSheet by remember { mutableStateOf(false) }
@@ -137,14 +138,15 @@ fun AccountsScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.align(Alignment.Center)
                 )
-                else -> ReorderableAccountList(
+                else -> AccountList(
                     items = filtered,
+                    hideCodes = settings.hideCodes,
                     onCopyCode = { ui ->
                         ClipboardHelper.copy(context, ui.code)
+                        vm.incrementCopyCount(ui.account.id)
                         vm.showToast(context.getString(R.string.code_copied))
                     },
                     onOpen = onOpenDetail,
-                    onReorder = { ids -> vm.reorderAccounts(ids) },
                     contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 96.dp)
                 )
             }
@@ -300,149 +302,33 @@ private fun AddSheetRow(icon: androidx.compose.ui.graphics.vector.ImageVector, t
     }
 }
 
-/**
- * Account list with long-press drag reordering.
- *
- * Drag math: every item has a fixed visual height (card + spacing), so the
- * dragged item's render offset can be computed as
- * (startIndex - currentIndex) * itemHeight + fingerDelta — visually continuous
- * while the underlying list order swaps.
- */
-@OptIn(ExperimentalFoundationApi::class)
+/** Plain (non-draggable) account list — ordering comes from the sort mode
+ *  setting instead of drag gestures. */
 @Composable
-private fun ReorderableAccountList(
+private fun AccountList(
     items: List<AccountUi>,
+    hideCodes: Boolean,
     onCopyCode: (AccountUi) -> Unit,
     onOpen: (Account) -> Unit,
-    onReorder: (List<String>) -> Unit,
     contentPadding: PaddingValues
 ) {
-    var pendingOrder by remember { mutableStateOf<List<String>?>(null) }
-    var draggingId by remember { mutableStateOf<String?>(null) }
-    var dragStartIndex by remember { mutableStateOf(0) }
-    var fingerDelta by remember { mutableStateOf(0f) }
-    // Where on the card the finger pressed down — the card's own offset is
-    // finger travel MINUS this, otherwise the card jumps on touch-down and
-    // the drop slot is miscalculated.
-    var pressOffsetY by remember { mutableStateOf(0f) }
-
-    // Stable across the 500ms code tick: Account objects don't change, so
-    // this list is equals-stable and doesn't trigger re-sorting/reordering
-    // every tick (which caused flicker while dragging).
-    val accounts = remember(items) { items.map { it.account } }
-
-    // Stable ordering key — only changes on real drag operations.
-    val orderedIds = remember(accounts, pendingOrder) {
-        val order = pendingOrder
-        if (order != null) accounts.sortedBy { order.indexOf(it.id) }.map { it.id }
-        else accounts.map { it.id }
-    }
-
-    // Per-tick UI values (codes/seconds refresh) keyed by the stable order.
-    val displayItems = remember(orderedIds, items) {
-        orderedIds.mapNotNull { id -> items.firstOrNull { it.account.id == id } }
-    }
-
-    // Clear pendingOrder once the persisted order matches (DB write completed)
-    LaunchedEffect(orderedIds, pendingOrder) {
-        val order = pendingOrder ?: return@LaunchedEffect
-        if (orderedIds == order) pendingOrder = null
-    }
-
-    val itemHeightPx = with(androidx.compose.ui.platform.LocalDensity.current) {
-        (CardHeightPx + ItemSpacingPx).toPx()
-    }
-
     LazyColumn(
         contentPadding = contentPadding,
         verticalArrangement = Arrangement.spacedBy(ItemSpacingPx)
     ) {
-        items(displayItems, key = { it.account.id }) { ui ->
-            val index = displayItems.indexOfFirst { it.account.id == ui.account.id }
-            // The gesture lambda is created once per item id — always read
-            // the LATEST index through rememberUpdatedState.
-            val currentIndex by rememberUpdatedState(index)
-            val isDragging = draggingId == ui.account.id
-            // While dragging the card follows the finger ONLY — the list
-            // order is untouched until release. No re-sorting mid-drag means
-            // no flicker/jitter at all. The card offset is finger travel
-            // minus the press point, so the card doesn't jump on touch-down.
-            val offsetY = if (isDragging) fingerDelta - pressOffsetY else 0f
-
-            Box(
+        items(items, key = { it.account.id }) { ui ->
+            CodeCard(
+                ui = ui,
+                hideCode = hideCodes,
+                onCopyCode = { onCopyCode(ui) },
                 modifier = Modifier
-                    .then(
-                        if (isDragging) {
-                            Modifier
-                                .zIndex(2f)
-                                .offset { IntOffset(0, offsetY.roundToInt()) }
-                        } else Modifier
-                    )
+                    .height(CardHeightPx)
                     .combinedClickable(
                         onClick = { onOpen(ui.account) },
                         onLongClick = null,
                         onLongClickLabel = null
                     )
-                    .pointerInput(ui.account.id) {
-                        detectDragGesturesAfterLongPress(
-                            onDragStart = { offset ->
-                                draggingId = ui.account.id
-                                dragStartIndex = currentIndex
-                                fingerDelta = 0f
-                                pressOffsetY = offset.y
-                            },
-                            onDrag = { change, amount ->
-                                change.consume()
-                                fingerDelta += amount.y
-                            },
-                            onDragEnd = {
-                                val from = dragStartIndex
-                                // slot crossing = card-top travel over the
-                                // slot height; round() switches at half a slot
-                                val travel = fingerDelta - pressOffsetY
-                                val target = (
-                                    from + (travel / itemHeightPx).roundToInt()
-                                    ).coerceIn(0, displayItems.size - 1)
-                                // apply the reorder in the SAME frame as the
-                                // offset reset: the card renders at its new
-                                // slot with offset 0 — visually continuous.
-                                draggingId = null
-                                fingerDelta = 0f
-                                if (target != from) {
-                                    val order = (pendingOrder
-                                        ?: displayItems.map { it.account.id }).toMutableList()
-                                    val moved = order.removeAt(from)
-                                    order.add(target, moved)
-                                    pendingOrder = order
-                                    onReorder(order)
-                                }
-                            },
-                            onDragCancel = {
-                                draggingId = null
-                                fingerDelta = 0f
-                            }
-                        )
-                    }
-            ) {
-                CodeCard(
-                    ui = ui,
-                    onCopyCode = { onCopyCode(ui) },
-                    modifier = Modifier.height(CardHeightPx)
-                )
-            }
-        }
-        item {
-            if (displayItems.size > 1) {
-                Text(
-                    text = stringResource(R.string.sorting_hint),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp)
-                )
-            }
+            )
         }
     }
 }

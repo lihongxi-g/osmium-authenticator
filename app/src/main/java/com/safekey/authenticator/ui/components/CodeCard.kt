@@ -34,7 +34,8 @@ import com.safekey.authenticator.ui.theme.monospaceFamily
 fun CodeCard(
     ui: AccountUi,
     onCopyCode: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    hideCode: Boolean = false
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -57,7 +58,7 @@ fun CodeCard(
                     modifier = Modifier.weight(1f)
                 )
                 CodeDisplay(
-                    code = ui.code,
+                    code = if (hideCode) "\u2022\u2022\u2022\u2022\u2022\u2022" else ui.code,
                     remainingSeconds = ui.remainingSeconds,
                     expiring = ui.remainingSeconds <= 5,
                     onCopyCode = onCopyCode

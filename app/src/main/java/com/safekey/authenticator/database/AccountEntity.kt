@@ -21,5 +21,6 @@ data class AccountEntity(
     val period: Int,
     val sortOrder: Long,
     val createdAt: Long,
-    val updatedAt: Long
+    val updatedAt: Long,
+    val copyCount: Int = 0
 )

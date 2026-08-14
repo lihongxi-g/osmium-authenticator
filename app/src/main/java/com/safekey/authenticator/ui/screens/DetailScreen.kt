@@ -64,6 +64,7 @@ fun DetailScreen(
     onRequireCredential: ((onSuccess: () -> Unit) -> Unit)? = null
 ) {
     val uiList by vm.accountUiList.collectAsState()
+    val settings by vm.settings.collectAsState()
     val ui = uiList.firstOrNull { it.account.id == accountId }
     val context = LocalContext.current
     var showDeleteDialog by remember { mutableStateOf(false) }
@@ -148,7 +149,7 @@ fun DetailScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = ui.code,
+                            text = if (settings.hideCodes) "\u2022\u2022\u2022\u2022\u2022\u2022" else ui.code,
                             style = MaterialTheme.typography.headlineSmall.copy(
                                 fontFamily = monospaceFamily,
                                 fontSize = 36.sp,
@@ -192,8 +193,15 @@ fun DetailScreen(
                 Spacer(Modifier.height(24.dp))
                 if (!showSecret) {
                     OutlinedButton(
-                        onClick = { pendingAction = "view" },
-                        modifier = Modifier.fillMaxWidth()
+                        onClick = {
+                            if (settings.hideCodes) {
+                                vm.showToast(context.getString(R.string.hide_codes_blocks_secret))
+                            } else {
+                                pendingAction = "view"
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = !settings.hideCodes
                     ) {
                         Icon(
                             imageVector = AppIcons.Visibility,
@@ -249,8 +257,15 @@ fun DetailScreen(
 
                 Spacer(Modifier.height(24.dp))
                 OutlinedButton(
-                    onClick = { pendingAction = "share" },
-                    modifier = Modifier.fillMaxWidth()
+                    onClick = {
+                        if (settings.hideCodes) {
+                            vm.showToast(context.getString(R.string.hide_codes_blocks_secret))
+                        } else {
+                            pendingAction = "share"
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !settings.hideCodes
                 ) {
                     Icon(
                         imageVector = AppIcons.QrCodeScanner,

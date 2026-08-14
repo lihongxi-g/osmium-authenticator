@@ -109,6 +109,19 @@
     <string name="accounts_count">共 %1$d 个账户</string>
     <string name="about_desc">Osmium 是一款完全离线、隐私优先的 TOTP 身份验证器。所有数据使用 Android Keystore 加密，永不离开你的设备。</string>
     <string name="sorting_hint">长按账户可拖动排序</string>
+    <string name="sort_mode">排序方式</string>
+    <string name="sort_mode_desc">账户在列表中的排列方式</string>
+    <string name="sort_random">随机排序</string>
+    <string name="sort_random_desc">每次启动应用洗牌一次</string>
+    <string name="sort_alpha">按字母顺序</string>
+    <string name="sort_alpha_desc">按账户名 A→Z 排序</string>
+    <string name="sort_added">按添加时间</string>
+    <string name="sort_added_desc">先添加的在前</string>
+    <string name="sort_copies">按复制次数</string>
+    <string name="sort_copies_desc">复制最多的在前</string>
+    <string name="hide_codes">隐藏验证码</string>
+    <string name="hide_codes_desc">验证码以圆点显示，复制功能不受影响；显示密钥和分享功能将被禁用。</string>
+    <string name="hide_codes_blocks_secret">隐藏验证码模式下无法显示和分享密钥</string>
 
     <string name="biometric_prompt_title">解锁 Osmium</string>
     <string name="biometric_prompt_subtitle">验证身份</string>

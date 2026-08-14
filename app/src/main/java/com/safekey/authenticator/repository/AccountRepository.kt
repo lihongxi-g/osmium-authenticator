@@ -143,7 +143,8 @@ class AccountRepository(
             period = period,
             sortOrder = sortOrder,
             createdAt = createdAt,
-            updatedAt = updatedAt
+            updatedAt = updatedAt,
+            copyCount = copyCount
         )
     }
 
@@ -161,7 +162,12 @@ class AccountRepository(
             period = period,
             sortOrder = sortOrder,
             createdAt = createdAt,
-            updatedAt = updatedAt
+            updatedAt = updatedAt,
+            copyCount = copyCount
         )
+    }
+
+    suspend fun incrementCopyCount(id: String) {
+        dao.incrementCopyCount(id)
     }
 }

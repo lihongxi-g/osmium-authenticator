@@ -109,6 +109,19 @@
     <string name="accounts_count">%1$d account(s)</string>
     <string name="about_desc">Osmium is a fully offline, privacy-first TOTP authenticator. All data is encrypted with the Android Keystore and never leaves your device.</string>
     <string name="sorting_hint">Long-press an account to reorder</string>
+    <string name="sort_mode">Sort order</string>
+    <string name="sort_mode_desc">How accounts are ordered in the list</string>
+    <string name="sort_random">Random</string>
+    <string name="sort_random_desc">Shuffled once per app launch</string>
+    <string name="sort_alpha">Alphabetical</string>
+    <string name="sort_alpha_desc">A→Z by account name</string>
+    <string name="sort_added">Date added</string>
+    <string name="sort_added_desc">Oldest first</string>
+    <string name="sort_copies">Copy count</string>
+    <string name="sort_copies_desc">Most copied first</string>
+    <string name="hide_codes">Hide codes</string>
+    <string name="hide_codes_desc">Codes show as dots; copy still works. Viewing/sharing secrets is disabled.</string>
+    <string name="hide_codes_blocks_secret">Hidden codes mode: viewing and sharing secrets is disabled</string>
 
     <string name="biometric_prompt_title">Unlock Osmium</string>
     <string name="biometric_prompt_subtitle">Verify it\'s you</string>

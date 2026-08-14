@@ -73,7 +73,8 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                         timeMs = time,
                         period = a.period,
                         digits = a.digits,
-                        algorithm = a.algorithm
+                        algorithm = a.algorithm,
+                        steamAlphabet = if (a.isSteam) TotpGenerator.STEAM_ALPHABET else null
                     ),
                     remainingSeconds = TotpGenerator.remainingSeconds(time, a.period),
                     periodFraction = TotpGenerator.periodFraction(time, a.period)
@@ -83,10 +84,33 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
             .flowOn(Dispatchers.Default)
             .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
+    /** Display order, applying the selected sort mode. */
+    val sortedAccountUiList: StateFlow<List<AccountUi>> =
+        combine(accountUiList, settings) { list, s ->
+            when (s.sortMode) {
+                AppSettings.SORT_ALPHA -> list.sortedBy {
+                    it.account.displayTitle.lowercase()
+                }
+                AppSettings.SORT_COPIES -> list.sortedByDescending { it.account.copyCount }
+                AppSettings.SORT_RANDOM -> {
+                    // shuffled once per launch (stable across ticks)
+                    if (randomOrder.isEmpty()) {
+                        randomOrder = list.map { it.account.id }.shuffled()
+                    }
+                    randomOrder.mapNotNull { id -> list.firstOrNull { it.account.id == id } }
+                }
+                else -> list // SORT_ADDED: repository order (sortOrder = add order)
+            }
+        }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
     // ---- search state ----
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery
     fun setSearchQuery(q: String) { _searchQuery.value = q }
+
+    /** Random-order shuffle, computed once per app launch (see sortMode). */
+    private var randomOrder: List<String> = emptyList()
 
     // ---- gate state (every app open requires verification) ----
     private val _locked = MutableStateFlow(true)
@@ -349,6 +373,9 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     fun setDynamicColor(enabled: Boolean) = viewModelScope.launch { settingsRepo.setDynamicColor(enabled) }
     fun setGateOnOpen(enabled: Boolean) = viewModelScope.launch { settingsRepo.setGateOnOpen(enabled) }
     fun setAllowScreenshots(enabled: Boolean) = viewModelScope.launch { settingsRepo.setAllowScreenshots(enabled) }
+    fun setHideCodes(enabled: Boolean) = viewModelScope.launch { settingsRepo.setHideCodes(enabled) }
+    fun setSortMode(mode: String) = viewModelScope.launch { settingsRepo.setSortMode(mode) }
+    fun incrementCopyCount(id: String) = viewModelScope.launch { repo.incrementCopyCount(id) }
     fun setDestroyMode(mode: String) = viewModelScope.launch { settingsRepo.setDestroyMode(mode) }
     fun setFailThreshold(threshold: Int) = viewModelScope.launch { settingsRepo.setFailThreshold(threshold) }
 

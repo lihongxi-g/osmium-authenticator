@@ -68,6 +68,7 @@ import com.safekey.authenticator.ui.screens.PinVerifyScreen
 import com.safekey.authenticator.ui.screens.ScanScreen
 import com.safekey.authenticator.ui.screens.SettingsScreen
 import com.safekey.authenticator.ui.screens.ShareQrScreen
+import com.safekey.authenticator.ui.screens.SortOrderScreen
 import com.safekey.authenticator.ui.theme.SafeKeyTheme
 import java.util.Locale
 import kotlinx.coroutines.delay
@@ -734,6 +735,11 @@ class MainActivity : FragmentActivity() {
                     )
 
                     is Screen.About -> AboutScreen(
+                        vm = vm,
+                        onBack = { vm.nav.pop() }
+                    )
+
+                    is Screen.SortOrder -> SortOrderScreen(
                         vm = vm,
                         onBack = { vm.nav.pop() }
                     )

@@ -14,10 +14,13 @@ data class Account(
     val period: Int,
     val sortOrder: Long,
     val createdAt: Long,
+    val copyCount: Int = 0,
     val updatedAt: Long
 ) {
     val displayTitle: String get() = issuer.ifBlank { label }
     val displaySubtitle: String get() = label
+    /** Steam Guard accounts use the 26-char Steam alphabet. */
+    val isSteam: Boolean get() = issuer.equals("Steam", ignoreCase = true)
 
     companion object {
         const val ALGO_SHA1 = "SHA1"

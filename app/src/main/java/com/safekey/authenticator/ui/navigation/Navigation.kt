@@ -27,6 +27,7 @@ sealed class Screen {
     /** Share a single account as an otpauth:// QR code. */
     data class ShareQr(val accountId: String) : Screen()
     object About : Screen()
+    object SortOrder : Screen()
 }
 
 /**
