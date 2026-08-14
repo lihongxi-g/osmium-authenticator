@@ -38,6 +38,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.vector.ImageVector
 import com.safekey.authenticator.BuildConfig
 import com.safekey.authenticator.MainViewModel
 import com.safekey.authenticator.R
@@ -60,6 +61,7 @@ fun SettingsScreen(
     onOpenPinSetup: () -> Unit,
     onOpenPinVerify: (String) -> Unit,
     onRequireBiometric: ((onSuccess: () -> Unit) -> Unit)? = null,
+    onRequireCredential: ((onSuccess: () -> Unit) -> Unit)? = null,
     onLanguageChanged: ((String?) -> Unit)? = null
 ) {
     val settings by vm.settings.collectAsState()
@@ -72,7 +74,21 @@ fun SettingsScreen(
     var showLanguageDialog by remember { mutableStateOf(false) }
     var showDestroyModeDialog by remember { mutableStateOf(false) }
     var showThresholdDialog by remember { mutableStateOf(false) }
+    // sensitive toggle awaiting verification: Pair("gate"/"screenshot", target)
+    var pendingToggle by remember { mutableStateOf<Pair<String, Boolean>?>(null) }
+    var pinMode by remember { mutableStateOf(false) }
+    var pinError by remember { mutableStateOf<String?>(null) }
 
+    fun executeToggle() {
+        val p = pendingToggle ?: return
+        pendingToggle = null
+        when (p.first) {
+            "gate" -> vm.setGateOnOpen(p.second)
+            "screenshot" -> vm.setAllowScreenshots(p.second)
+        }
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
     Scaffold(
         topBar = { SimpleTopBar(title = stringResource(R.string.settings_title), onBack = onBack) }
     ) { padding ->
@@ -140,15 +156,21 @@ fun SettingsScreen(
                     Switch(
                         checked = settings.gateOnOpen,
                         onCheckedChange = { target ->
-                            // Enabling/disabling the gate is a sensitive
-                            // action — verify identity first.
-                            if (onRequireBiometric != null) {
-                                onRequireBiometric {
-                                    vm.setGateOnOpen(target)
-                                }
-                            } else {
-                                vm.setGateOnOpen(target)
-                            }
+                            pendingToggle = "gate" to target
+                        }
+                    )
+                }
+            )
+
+            SettingRow(
+                icon = AppIcons.Visibility,
+                title = stringResource(R.string.allow_screenshots),
+                description = stringResource(R.string.allow_screenshots_desc),
+                trailing = {
+                    Switch(
+                        checked = settings.allowScreenshots,
+                        onCheckedChange = { target ->
+                            pendingToggle = "screenshot" to target
                         }
                     )
                 }
@@ -293,6 +315,68 @@ fun SettingsScreen(
         }
     }
 
+    // ---- PIN entry overlay for sensitive toggles ----
+    if (pinMode) {
+        val attempts = vm.remainingAttempts()
+        PinVerifyScreen(
+            title = stringResource(R.string.pin_verify_title),
+            subtitle = stringResource(R.string.pin_verify_subtitle),
+            error = pinError,
+            remainingAttempts = attempts,
+            onVerify = { pin ->
+                if (vm.onPinEntered(pin)) {
+                    pinMode = false
+                    pinError = null
+                    executeToggle()
+                } else {
+                    pinError = context.getString(R.string.pin_wrong)
+                    vm.checkSelfDestructPin(pin)
+                }
+            },
+            onCancel = {
+                pinMode = false
+                pinError = null
+                pendingToggle = null
+            }
+        )
+    }
+
+    // ---- verification method chooser for sensitive toggles ----
+    if (pendingToggle != null && !pinMode) {
+        AlertDialog(
+            onDismissRequest = { pendingToggle = null },
+            title = { Text(stringResource(R.string.verify_title)) },
+            text = {
+                Column {
+                    if (onRequireBiometric != null) {
+                        VerifyOptionRow(AppIcons.Fingerprint, stringResource(R.string.verify_biometric)) {
+                            pendingToggle = null
+                            onRequireBiometric { executeToggle() }
+                        }
+                    }
+                    if (onRequireCredential != null) {
+                        VerifyOptionRow(AppIcons.Security, stringResource(R.string.verify_credential)) {
+                            pendingToggle = null
+                            onRequireCredential { executeToggle() }
+                        }
+                    }
+                    if (hasPin) {
+                        VerifyOptionRow(AppIcons.Keyboard, stringResource(R.string.verify_pin)) {
+                            pinMode = true
+                            pinError = null
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { pendingToggle = null }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+    }
+
     // ------------------------------------------------------------ dialogs
 
     if (showThemeDialog) {
@@ -396,6 +480,31 @@ fun SettingsScreen(
             confirmButton = {
                 TextButton(onClick = { showThresholdDialog = false }) { Text(stringResource(R.string.close)) }
             }
+        )
+    }
+}
+
+
+@Composable
+private fun VerifyOptionRow(icon: ImageVector, label: String, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier = Modifier.size(20.dp),
+            tint = MaterialTheme.colorScheme.onSurface
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(start = 12.dp)
         )
     }
 }

@@ -15,6 +15,7 @@ data class AppSettings(
     val themeMode: String = THEME_SYSTEM,
     val dynamicColor: Boolean = true,
     val gateOnOpen: Boolean = true,
+    val allowScreenshots: Boolean = false,
     val destroyMode: String = DESTROY_OFF,
     val failThreshold: Int = 5,
     val pinFailCount: Int = 0,
@@ -37,6 +38,7 @@ class SettingsRepository(private val context: Context) {
         val THEME_MODE = stringPreferencesKey("theme_mode")
         val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
         val GATE_ON_OPEN = booleanPreferencesKey("gate_on_open")
+        val ALLOW_SCREENSHOTS = booleanPreferencesKey("allow_screenshots")
         val DESTROY_MODE = stringPreferencesKey("destroy_mode")
         val FAIL_THRESHOLD = intPreferencesKey("fail_threshold")
         val PIN_FAIL_COUNT = intPreferencesKey("pin_fail_count")
@@ -48,6 +50,7 @@ class SettingsRepository(private val context: Context) {
             themeMode = prefs[Keys.THEME_MODE] ?: AppSettings.THEME_SYSTEM,
             dynamicColor = prefs[Keys.DYNAMIC_COLOR] ?: true,
             gateOnOpen = prefs[Keys.GATE_ON_OPEN] ?: true,
+            allowScreenshots = prefs[Keys.ALLOW_SCREENSHOTS] ?: false,
             destroyMode = prefs[Keys.DESTROY_MODE] ?: AppSettings.DESTROY_OFF,
             failThreshold = prefs[Keys.FAIL_THRESHOLD] ?: 5,
             pinFailCount = prefs[Keys.PIN_FAIL_COUNT] ?: 0,
@@ -65,6 +68,10 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setGateOnOpen(enabled: Boolean) {
         context.dataStore.edit { it[Keys.GATE_ON_OPEN] = enabled }
+    }
+
+    suspend fun setAllowScreenshots(enabled: Boolean) {
+        context.dataStore.edit { it[Keys.ALLOW_SCREENSHOTS] = enabled }
     }
 
     suspend fun setDestroyMode(mode: String) {

@@ -116,6 +116,19 @@ class MainActivity : FragmentActivity() {
                 themeMode = settings.themeMode,
                 dynamicColor = settings.dynamicColor
             ) {
+                // Screenshot policy follows the user setting (default: blocked).
+                LaunchedEffect(settings.allowScreenshots) {
+                    if (settings.allowScreenshots) {
+                        window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
+                        AppLog.d("screenshots enabled by user")
+                    } else {
+                        window.setFlags(
+                            WindowManager.LayoutParams.FLAG_SECURE,
+                            WindowManager.LayoutParams.FLAG_SECURE
+                        )
+                        AppLog.d("screenshots blocked (default)")
+                    }
+                }
                 // The window background follows the app theme (not just the
                 // system dark mode) — otherwise dark theme pages flash white
                 // during transitions and gates show white-on-white text.
@@ -499,10 +512,14 @@ class MainActivity : FragmentActivity() {
     }
 
     private fun restoreSecureFlag() {
-        window.setFlags(
-            WindowManager.LayoutParams.FLAG_SECURE,
-            WindowManager.LayoutParams.FLAG_SECURE
-        )
+        // respect the user's screenshot preference when restoring after a
+        // biometric prompt (which temporarily clears the flag)
+        if (!vm.settings.value.allowScreenshots) {
+            window.setFlags(
+                WindowManager.LayoutParams.FLAG_SECURE,
+                WindowManager.LayoutParams.FLAG_SECURE
+            )
+        }
     }
 
     // ------------------------------------------------------------ nav host
@@ -655,6 +672,13 @@ class MainActivity : FragmentActivity() {
                                 AppLog.d("gate toggle without biometrics on device")
                                 onSuccess()
                             }
+                        },
+                        onRequireCredential = { onSuccess ->
+                            launchCredential(
+                                onSuccess = onSuccess,
+                                onCancelled = { vm.showToast(context.getString(R.string.lock_cancelled)) },
+                                onError = { msg -> vm.showToast(msg) }
+                            )
                         },
                         onLanguageChanged = { lang ->
                             LanguagePrefs.set(this@MainActivity, lang)

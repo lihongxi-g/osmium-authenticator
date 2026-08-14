@@ -135,6 +135,8 @@
     <string name="no_email_app">设备上没有安装邮件应用。</string>
 
     <string name="gate_on_open">打开时验证</string>
+    <string name="allow_screenshots">允许截屏</string>
+    <string name="allow_screenshots_desc">关闭：阻止截屏和录屏。开启：允许截屏和录屏。修改此设置需要验证身份。</string>
     <string name="gate_on_open_desc">每次打开应用（包括从后台切回）都要求指纹或 PIN 验证</string>
     <string name="export_log">导出日志</string>
     <string name="export_log_desc">将最新 100 行日志和设备信息复制到剪贴板</string>
