@@ -15,7 +15,7 @@
     <string name="no_results">No matching accounts</string>
     <string name="scan_hint">Point the camera at the QR code shown on the website when enabling two-step verification</string>
     <string name="camera_permission_title">Camera access needed</string>
-    <string name="camera_permission_desc">SafeKey needs the camera to scan authenticator QR codes. The camera is used on-device only.</string>
+    <string name="camera_permission_desc">Osmium needs the camera to scan authenticator QR codes. The camera is used on-device only.</string>
     <string name="grant_permission">Grant permission</string>
 
     <string name="copy_code">Copy code</string>
@@ -79,7 +79,7 @@
     <string name="export_vault">Export (encrypted)</string>
     <string name="export_vault_desc">Save all accounts to an encrypted file protected by a password.</string>
     <string name="import_vault">Import</string>
-    <string name="import_vault_desc">Restore accounts from an encrypted SafeKey export file.</string>
+    <string name="import_vault_desc">Restore accounts from an encrypted Osmium export file.</string>
     <string name="export_password">Set export password</string>
     <string name="export_password_hint">Password</string>
     <string name="export_confirm_hint">Confirm password</string>
@@ -92,14 +92,14 @@
     <string name="import_password_title">Enter import password</string>
     <string name="import_password_desc">Enter the password used when this file was exported.</string>
     <string name="error_import_wrong_password">Wrong password, or the file is corrupted.</string>
-    <string name="error_import_format">This file is not a SafeKey export.</string>
+    <string name="error_import_format">This file is not an Osmium export.</string>
     <string name="import_preview_title">Import %1$d account(s)?</string>
     <string name="import_preview_desc">Review the accounts below. Existing accounts with the same issuer and name will be updated.</string>
     <string name="import_duplicate_note">%1$d account(s) already exist and will be updated.</string>
     <string name="import_done">Imported %1$d account(s)</string>
     <string name="select_all">Select all</string>
 
-    <string name="lock_title">SafeKey is locked</string>
+    <string name="lock_title">Osmium is locked</string>
     <string name="lock_desc">Authenticate to view your codes.</string>
     <string name="unlock">Unlock</string>
     <string name="lock_failed">Authentication failed</string>
@@ -107,7 +107,7 @@
 
     <string name="version">Version</string>
     <string name="accounts_count">%1$d account(s)</string>
-    <string name="about_desc">SafeKey is a fully offline, privacy-first TOTP authenticator. All data is encrypted with the Android Keystore and never leaves your device.</string>
+    <string name="about_desc">Osmium is a fully offline, privacy-first TOTP authenticator. All data is encrypted with the Android Keystore and never leaves your device.</string>
     <string name="sorting_hint">Long-press an account to reorder</string>
 
     <string name="biometric_prompt_title">Unlock Osmium</string>
@@ -152,6 +152,11 @@
     <string name="pin_saved">PIN saved</string>
     <string name="pin_wrong">Wrong PIN</string>
     <string name="pin_delete">Delete digit</string>
+    <string name="verify_title">Verify your identity</string>
+    <string name="verify_biometric">Use biometrics</string>
+    <string name="verify_credential">Use system password</string>
+    <string name="verify_pin">Use Osmium PIN</string>
+
     <string name="use_pin">Use Osmium PIN</string>
     <string name="pin_not_set">No Osmium PIN set. Set one in Settings → PIN first.</string>
     <string name="destroy_pin_clear_hint">Clear destruct PIN</string>
@@ -176,7 +181,7 @@
     <string name="destroy_mode_desc">Destroy all data when triggered</string>
     <string name="destroy_mode_pin">Destruct PIN</string>
     <string name="destroy_mode_failures">After repeated failures</string>
-    <string name="destroy_warning">WARNING: destruction is irreversible. All accounts are randomly re-encrypted with a destroyed key and permanently deleted — even SafeKey itself cannot recover them.</string>
+    <string name="destroy_warning">WARNING: destruction is irreversible. All accounts are randomly re-encrypted with a destroyed key and permanently deleted — even Osmium itself cannot recover them.</string>
     <string name="fail_threshold">Failure threshold</string>
     <string name="fail_threshold_desc">Consecutive wrong PINs + failed biometrics before destruction</string>
     <string name="destroy_pin_title">Set destruct PIN</string>
@@ -185,7 +190,7 @@
     <string name="destroy_pin_setup">Set destruct PIN</string>
     <string name="destroy_pin_manage">Change destruct PIN</string>
     <string name="destroyed_title">All data destroyed</string>
-    <string name="destroyed_desc">Accounts, PINs and settings were irreversibly deleted. SafeKey is now empty.</string>
+    <string name="destroyed_desc">Accounts, PINs and settings were irreversibly deleted. Osmium is now empty.</string>
 
     <string name="import_pin_title">Enter backup PIN</string>
     <string name="import_pin_desc">This backup is bound to a PIN. Enter it to decrypt the accounts.</string>

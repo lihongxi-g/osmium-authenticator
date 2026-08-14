@@ -574,17 +574,23 @@ class MainActivity : FragmentActivity() {
                         onEdit = { account -> vm.nav.push(Screen.AccountForm(account.id)) },
                         onDeleted = { vm.nav.popToRoot() },
                         onBack = { vm.nav.pop() },
-                        onRequireBiometric = { onSuccess ->
-                            if (canAuthenticateBiometric()) {
+                        // null when no biometrics on device — the option
+                        // simply doesn't show in the verification dialog
+                        onRequireBiometric = if (canAuthenticateBiometric()) {
+                            { onSuccess ->
                                 launchBiometric(
                                     onSuccess = onSuccess,
                                     onCancelled = { vm.showToast(context.getString(R.string.lock_cancelled)) },
                                     onError = { msg -> vm.showToast(msg) }
                                 )
-                            } else {
-                                // No biometrics on device — degrade gracefully
-                                onSuccess()
                             }
+                        } else null,
+                        onRequireCredential = { onSuccess ->
+                            launchCredential(
+                                onSuccess = onSuccess,
+                                onCancelled = { vm.showToast(context.getString(R.string.lock_cancelled)) },
+                                onError = { msg -> vm.showToast(msg) }
+                            )
                         }
                     )
 

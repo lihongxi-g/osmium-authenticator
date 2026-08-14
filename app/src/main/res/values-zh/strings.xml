@@ -15,7 +15,7 @@
     <string name="no_results">没有匹配的账户</string>
     <string name="scan_hint">将相机对准网站开启两步验证时显示的二维码</string>
     <string name="camera_permission_title">需要相机权限</string>
-    <string name="camera_permission_desc">SafeKey 需要相机来扫描验证器二维码，相机仅在本地使用。</string>
+    <string name="camera_permission_desc">Osmium 需要相机来扫描验证器二维码，相机仅在本地使用。</string>
     <string name="grant_permission">授予权限</string>
 
     <string name="copy_code">复制验证码</string>
@@ -79,7 +79,7 @@
     <string name="export_vault">导出（加密）</string>
     <string name="export_vault_desc">把所有账户保存到用密码加密的文件中。</string>
     <string name="import_vault">导入</string>
-    <string name="import_vault_desc">从 SafeKey 加密导出文件恢复账户。</string>
+    <string name="import_vault_desc">从 Osmium 加密导出文件恢复账户。</string>
     <string name="export_password">设置导出密码</string>
     <string name="export_password_hint">密码</string>
     <string name="export_confirm_hint">确认密码</string>
@@ -92,14 +92,14 @@
     <string name="import_password_title">输入导入密码</string>
     <string name="import_password_desc">输入导出该文件时设置的密码。</string>
     <string name="error_import_wrong_password">密码错误，或文件已损坏。</string>
-    <string name="error_import_format">这不是 SafeKey 导出文件。</string>
+    <string name="error_import_format">这不是 Osmium 导出文件。</string>
     <string name="import_preview_title">导入 %1$d 个账户？</string>
     <string name="import_preview_desc">请核对下方账户。已存在的同名账户将被更新。</string>
     <string name="import_duplicate_note">%1$d 个账户已存在，导入后将更新。</string>
     <string name="import_done">已导入 %1$d 个账户</string>
     <string name="select_all">全选</string>
 
-    <string name="lock_title">SafeKey 已锁定</string>
+    <string name="lock_title">Osmium 已锁定</string>
     <string name="lock_desc">验证身份后查看验证码。</string>
     <string name="unlock">解锁</string>
     <string name="lock_failed">验证失败</string>
@@ -107,7 +107,7 @@
 
     <string name="version">版本</string>
     <string name="accounts_count">共 %1$d 个账户</string>
-    <string name="about_desc">SafeKey 是一款完全离线、隐私优先的 TOTP 身份验证器。所有数据使用 Android Keystore 加密，永不离开你的设备。</string>
+    <string name="about_desc">Osmium 是一款完全离线、隐私优先的 TOTP 身份验证器。所有数据使用 Android Keystore 加密，永不离开你的设备。</string>
     <string name="sorting_hint">长按账户可拖动排序</string>
 
     <string name="biometric_prompt_title">解锁 Osmium</string>
@@ -152,6 +152,11 @@
     <string name="pin_saved">PIN 已保存</string>
     <string name="pin_wrong">PIN 错误</string>
     <string name="pin_delete">删除一位</string>
+    <string name="verify_title">验证身份</string>
+    <string name="verify_biometric">使用生物识别</string>
+    <string name="verify_credential">使用系统密码</string>
+    <string name="verify_pin">使用 Osmium PIN</string>
+
     <string name="use_pin">使用 Osmium PIN</string>
     <string name="pin_not_set">尚未设置应用 PIN，请先在设置 → PIN 中设置。</string>
     <string name="destroy_pin_clear_hint">清除自毁 PIN</string>
@@ -176,7 +181,7 @@
     <string name="destroy_mode_desc">触发后销毁全部数据</string>
     <string name="destroy_mode_pin">自毁 PIN</string>
     <string name="destroy_mode_failures">连续失败次数</string>
-    <string name="destroy_warning">警告：自毁不可逆。所有账户将被随机加密（密钥销毁）并彻底删除，连 SafeKey 自身也无法恢复。</string>
+    <string name="destroy_warning">警告：自毁不可逆。所有账户将被随机加密（密钥销毁）并彻底删除，连 Osmium 自身也无法恢复。</string>
     <string name="fail_threshold">失败次数阈值</string>
     <string name="fail_threshold_desc">PIN 输错和指纹验证失败的累计次数达到后触发自毁</string>
     <string name="destroy_pin_title">设置自毁 PIN</string>
@@ -185,7 +190,7 @@
     <string name="destroy_pin_setup">设置自毁 PIN</string>
     <string name="destroy_pin_manage">修改自毁 PIN</string>
     <string name="destroyed_title">数据已全部销毁</string>
-    <string name="destroyed_desc">账户、PIN 和设置已被不可逆删除，SafeKey 现在为空。</string>
+    <string name="destroyed_desc">账户、PIN 和设置已被不可逆删除，Osmium 现在为空。</string>
 
     <string name="import_pin_title">输入备份 PIN</string>
     <string name="import_pin_desc">此备份已绑定 PIN，输入后才能解密账户。</string>
