@@ -174,7 +174,7 @@ fun ExportScreen(
                         }
                         if (vaultJson != null) {
                             pendingJson = vaultJson
-                            createFileLauncher.launch("safekey-backup.json")
+                            createFileLauncher.launch("osmium-backup.json")
                         } else {
                             exporting = false
                         }
@@ -238,7 +238,7 @@ fun ImportScreen(
                         working = false
                         return@launch
                     }
-                    if (vault.format != "safekey-vault") {
+                    if (vault.format != "osmium-vault" && vault.format != "safekey-vault") {
                         error = context.getString(R.string.error_import_format)
                         working = false
                         return@launch

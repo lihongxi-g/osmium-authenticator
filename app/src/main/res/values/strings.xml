@@ -150,6 +150,7 @@
     <string name="social_github">GitHub</string>
     <string name="social_mail">Email</string>
     <string name="no_browser">No app available to open this link.</string>
+    <string name="email_log_copied">Log added to email body, full log copied to clipboard</string>
     <string name="share_account">Share account</string>
     <string name="share_qr_desc">Account QR code for sharing</string>
     <string name="share_qr_hint">Scan this code with another authenticator app to add this account. Osmium can only share one account at a time.</string>

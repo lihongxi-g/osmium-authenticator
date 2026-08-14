@@ -118,7 +118,7 @@ class AccountRepository(
         }
         return VaultFile(
             version = 1,
-            format = "safekey-vault",
+            format = "osmium-vault",
             exportedAt = System.currentTimeMillis(),
             accounts = all,
             pinSalt = pinSalt,

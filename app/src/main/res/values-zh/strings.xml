@@ -150,6 +150,7 @@
     <string name="social_github">GitHub</string>
     <string name="social_mail">邮件</string>
     <string name="no_browser">没有可打开此链接的应用。</string>
+    <string name="email_log_copied">日志已填入邮件正文，完整日志已复制到剪贴板</string>
     <string name="share_account">分享账户</string>
     <string name="share_qr_desc">用于分享的账户二维码</string>
     <string name="share_qr_hint">用另一台设备上的验证器扫描此码即可添加该账户。Osmium 每次只能分享一个账户。</string>

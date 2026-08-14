@@ -19,7 +19,7 @@ data class VaultAccount(
 @Serializable
 data class VaultFile(
     val version: Int = 1,
-    val format: String = "safekey-vault",
+    val format: String = "osmium-vault",
     val exportedAt: Long = 0L,
     val accounts: List<VaultAccount> = emptyList(),
     /** Present when the exporting device had an app PIN — import then requires it. */
@@ -31,7 +31,7 @@ data class VaultFile(
 @Serializable
 data class EncryptedVault(
     val version: Int = 1,
-    val format: String = "safekey-encrypted",
+    val format: String = "osmium-encrypted",
     val kdf: String = "PBKDF2-HMAC-SHA256",
     val iterations: Int = 0,
     val salt: String = "",

@@ -53,10 +53,11 @@ object VaultCrypto {
         val envelope = try {
             json.decodeFromString<EncryptedVault>(envelopeJson)
         } catch (e: Exception) {
-            throw IllegalArgumentException("Not a SafeKey encrypted file", e)
+            throw IllegalArgumentException("Not an Osmium encrypted file", e)
         }
-        if (envelope.format != "safekey-encrypted") {
-            throw IllegalArgumentException("Not a SafeKey encrypted file")
+        // accept vaults exported by old SafeKey builds too
+        if (envelope.format != "osmium-encrypted" && envelope.format != "safekey-encrypted") {
+            throw IllegalArgumentException("Not an Osmium encrypted file")
         }
         val salt = Base64.getDecoder().decode(envelope.salt)
         val iv = Base64.getDecoder().decode(envelope.iv)

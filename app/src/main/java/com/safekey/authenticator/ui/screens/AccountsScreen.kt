@@ -33,6 +33,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -321,15 +322,27 @@ private fun ReorderableAccountList(
     var dragStartIndex by remember { mutableStateOf(0) }
     var fingerDelta by remember { mutableStateOf(0f) }
 
-    val displayItems = remember(items, pendingOrder) {
+    // Stable across the 500ms code tick: Account objects don't change, so
+    // this list is equals-stable and doesn't trigger re-sorting/reordering
+    // every tick (which caused flicker while dragging).
+    val accounts = remember(items) { items.map { it.account } }
+
+    // Stable ordering key — only changes on real drag operations.
+    val orderedIds = remember(accounts, pendingOrder) {
         val order = pendingOrder
-        if (order != null) items.sortedBy { order.indexOf(it.account.id) } else items
+        if (order != null) accounts.sortedBy { order.indexOf(it.id) }.map { it.id }
+        else accounts.map { it.id }
+    }
+
+    // Per-tick UI values (codes/seconds refresh) keyed by the stable order.
+    val displayItems = remember(orderedIds, items) {
+        orderedIds.mapNotNull { id -> items.firstOrNull { it.account.id == id } }
     }
 
     // Clear pendingOrder once the persisted order matches (DB write completed)
-    LaunchedEffect(items, pendingOrder) {
+    LaunchedEffect(orderedIds, pendingOrder) {
         val order = pendingOrder ?: return@LaunchedEffect
-        if (items.map { it.account.id } == order) pendingOrder = null
+        if (orderedIds == order) pendingOrder = null
     }
 
     val itemHeightPx = with(androidx.compose.ui.platform.LocalDensity.current) {
@@ -342,6 +355,10 @@ private fun ReorderableAccountList(
     ) {
         items(displayItems, key = { it.account.id }) { ui ->
             val index = displayItems.indexOfFirst { it.account.id == ui.account.id }
+            // The gesture lambda is created once per item id — always read
+            // the LATEST index through rememberUpdatedState, otherwise the
+            // drag math uses a stale position and the reorder breaks.
+            val currentIndex by rememberUpdatedState(index)
             val isDragging = draggingId == ui.account.id
             val offsetY = if (isDragging) {
                 (dragStartIndex - index) * itemHeightPx + fingerDelta
@@ -365,7 +382,7 @@ private fun ReorderableAccountList(
                         detectDragGesturesAfterLongPress(
                             onDragStart = { offset ->
                                 draggingId = ui.account.id
-                                dragStartIndex = index
+                                dragStartIndex = currentIndex
                                 fingerDelta = 0f
                             },
                             onDrag = { change, amount ->
@@ -374,10 +391,10 @@ private fun ReorderableAccountList(
                                 val targetIndex = (
                                     (dragStartIndex * itemHeightPx + fingerDelta) / itemHeightPx
                                     ).roundToInt().coerceIn(0, displayItems.size - 1)
-                                if (targetIndex != index) {
+                                if (targetIndex != currentIndex) {
                                     val order = (pendingOrder
                                         ?: displayItems.map { it.account.id }).toMutableList()
-                                    val moved = order.removeAt(index)
+                                    val moved = order.removeAt(currentIndex)
                                     order.add(targetIndex, moved)
                                     pendingOrder = order
                                 }
@@ -386,7 +403,7 @@ private fun ReorderableAccountList(
                                 draggingId = null
                                 fingerDelta = 0f
                                 val finalOrder = pendingOrder
-                                if (finalOrder != null && finalOrder != items.map { it.account.id }) {
+                                if (finalOrder != null && finalOrder != accounts.map { it.id }) {
                                     onReorder(finalOrder)
                                 }
                             },
@@ -394,7 +411,7 @@ private fun ReorderableAccountList(
                                 draggingId = null
                                 fingerDelta = 0f
                                 val finalOrder = pendingOrder
-                                if (finalOrder != null && finalOrder != items.map { it.account.id }) {
+                                if (finalOrder != null && finalOrder != accounts.map { it.id }) {
                                     onReorder(finalOrder)
                                 }
                             }
