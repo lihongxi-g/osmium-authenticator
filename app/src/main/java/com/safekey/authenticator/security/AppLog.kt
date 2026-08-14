@@ -57,7 +57,7 @@ object AppLog {
 
     fun exportText(): String {
         val info = buildString {
-            appendLine("SafeKey log export")
+            appendLine("Osmium log export")
             appendLine("device: ${Build.MANUFACTURER} ${Build.MODEL}")
             appendLine("android: ${Build.VERSION.SDK_INT} (${Build.VERSION.RELEASE})")
             appendLine("fingerprint: ${Build.FINGERPRINT}")

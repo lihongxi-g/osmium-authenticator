@@ -59,6 +59,7 @@ fun SettingsScreen(
     onImport: () -> Unit,
     onOpenPinSetup: () -> Unit,
     onOpenPinVerify: (String) -> Unit,
+    onRequireBiometric: ((onSuccess: () -> Unit) -> Unit)? = null,
     onLanguageChanged: ((String?) -> Unit)? = null
 ) {
     val settings by vm.settings.collectAsState()
@@ -138,7 +139,17 @@ fun SettingsScreen(
                 trailing = {
                     Switch(
                         checked = settings.gateOnOpen,
-                        onCheckedChange = { vm.setGateOnOpen(it) }
+                        onCheckedChange = { target ->
+                            // Enabling/disabling the gate is a sensitive
+                            // action — verify identity first.
+                            if (onRequireBiometric != null) {
+                                onRequireBiometric {
+                                    vm.setGateOnOpen(target)
+                                }
+                            } else {
+                                vm.setGateOnOpen(target)
+                            }
+                        }
                     )
                 }
             )
@@ -192,6 +203,16 @@ fun SettingsScreen(
                         }
                     }
                 )
+                if (hasDestroyPin) {
+                    Text(
+                        text = stringResource(R.string.destroy_pin_clear_hint),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier
+                            .clickable { onOpenPinVerify("clear_destroy_pin") }
+                            .padding(horizontal = 16.dp, vertical = 6.dp)
+                    )
+                }
             }
 
             if (settings.destroyMode == AppSettings.DESTROY_FAIL_COUNT) {
@@ -268,7 +289,7 @@ fun SettingsScreen(
                     )
                 },
                 onClick = {
-                    val subject = Uri.encode("SafeKey v${BuildConfig.VERSION_NAME} Feedback")
+                    val subject = Uri.encode("Osmium v${BuildConfig.VERSION_NAME} Feedback")
                     val intent = Intent(Intent.ACTION_SENDTO).apply {
                         data = Uri.parse("mailto:zhif0776@hotmail.com?subject=$subject")
                     }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">SafeKey</string>
+    <string name="app_name">Osmium</string>
     <string name="app_tagline">离线身份验证器</string>
 
     <string name="accounts_title">账户</string>
@@ -110,7 +110,7 @@
     <string name="about_desc">SafeKey 是一款完全离线、隐私优先的 TOTP 身份验证器。所有数据使用 Android Keystore 加密，永不离开你的设备。</string>
     <string name="sorting_hint">长按账户可拖动排序</string>
 
-    <string name="biometric_prompt_title">解锁 SafeKey</string>
+    <string name="biometric_prompt_title">解锁 Osmium</string>
     <string name="biometric_prompt_subtitle">验证身份</string>
     <string name="biometric_negative">使用密码</string>
 
@@ -152,6 +152,10 @@
     <string name="pin_saved">PIN 已保存</string>
     <string name="pin_wrong">PIN 错误</string>
     <string name="pin_delete">删除一位</string>
+    <string name="use_pin">使用 Osmium PIN</string>
+    <string name="pin_not_set">尚未设置应用 PIN，请先在设置 → PIN 中设置。</string>
+    <string name="destroy_pin_clear_hint">清除自毁 PIN</string>
+    <string name="destroy_pin_cleared">自毁 PIN 已清除</string>
     <string name="pin_verify_title">输入 PIN</string>
     <string name="pin_verify_subtitle">需要验证后才能继续</string>
     <string name="pin_current_hint">输入当前 PIN 以修改</string>

@@ -4,13 +4,34 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <group
-        android:scaleX="2.5"
-        android:scaleY="2.5"
-        android:translateX="24"
-        android:translateY="24">
-        <path
-            android:fillColor="#FFFFFF"
-            android:pathData="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" />
-    </group>
+
+    <!-- Hexagon outline — Osmium's hexagonal close-packed crystal lattice -->
+    <path
+        android:pathData="M54,25.5 L77,38.8 L77,65.2 L54,78.5 L31,65.2 L31,38.8 Z"
+        android:strokeColor="#C9D6EA"
+        android:strokeWidth="2.4"
+        android:strokeLineJoin="round"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000" />
+
+    <!-- Keyhole: circle -->
+    <path
+        android:fillColor="#EAF1FB"
+        android:pathData="M54,43 m-6,0 a6,6 0 1,1 12,0 a6,6 0 1,1 -12,0" />
+
+    <!-- Keyhole: stem -->
+    <path
+        android:fillColor="#EAF1FB"
+        android:pathData="M47.5,45.5 L60.5,45.5 L56,65.5 L52,65.5 Z" />
+
+    <!-- Three ticks — the TOTP clock (30-second window) -->
+    <path
+        android:fillColor="#93A9C9"
+        android:pathData="M48,72.5 m-1.8,0 a1.8,1.8 0 1,1 3.6,0 a1.8,1.8 0 1,1 -3.6,0" />
+    <path
+        android:fillColor="#93A9C9"
+        android:pathData="M54,72.5 m-1.8,0 a1.8,1.8 0 1,1 3.6,0 a1.8,1.8 0 1,1 -3.6,0" />
+    <path
+        android:fillColor="#93A9C9"
+        android:pathData="M60,72.5 m-1.8,0 a1.8,1.8 0 1,1 3.6,0 a1.8,1.8 0 1,1 -3.6,0" />
 </vector>

@@ -353,4 +353,9 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     fun setSelfDestructPin(pin: String) {
         pinManager.setDestroyPin(pin)
     }
+
+    fun clearDestroyPin() {
+        pinManager.clearDestroyPin()
+        AppLog.d("destruct pin cleared")
+    }
 }

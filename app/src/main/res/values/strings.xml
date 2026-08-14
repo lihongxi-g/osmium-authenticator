@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">SafeKey</string>
+    <string name="app_name">Osmium</string>
     <string name="app_tagline">Offline authenticator</string>
 
     <string name="accounts_title">Accounts</string>
@@ -110,7 +110,7 @@
     <string name="about_desc">SafeKey is a fully offline, privacy-first TOTP authenticator. All data is encrypted with the Android Keystore and never leaves your device.</string>
     <string name="sorting_hint">Long-press an account to reorder</string>
 
-    <string name="biometric_prompt_title">Unlock SafeKey</string>
+    <string name="biometric_prompt_title">Unlock Osmium</string>
     <string name="biometric_prompt_subtitle">Verify it\'s you</string>
     <string name="biometric_negative">Use password</string>
 
@@ -152,6 +152,10 @@
     <string name="pin_saved">PIN saved</string>
     <string name="pin_wrong">Wrong PIN</string>
     <string name="pin_delete">Delete digit</string>
+    <string name="use_pin">Use Osmium PIN</string>
+    <string name="pin_not_set">No Osmium PIN set. Set one in Settings → PIN first.</string>
+    <string name="destroy_pin_clear_hint">Clear destruct PIN</string>
+    <string name="destroy_pin_cleared">Destruct PIN cleared</string>
     <string name="pin_verify_title">Enter PIN</string>
     <string name="pin_verify_subtitle">Verification required to continue</string>
     <string name="pin_current_hint">Enter the current PIN to change it</string>

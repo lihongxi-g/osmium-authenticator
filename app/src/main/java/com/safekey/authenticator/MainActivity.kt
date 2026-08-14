@@ -228,42 +228,78 @@ class MainActivity : FragmentActivity() {
     @Composable
     private fun LockGate() {
         var errorMessage by remember { mutableStateOf<String?>(null) }
+        var pinMode by remember { mutableStateOf(false) }
         val context = LocalContext.current
 
-        LockScreen(
-            errorMessage = errorMessage,
-            onUnlock = {
-                errorMessage = null
-                if (canAuthenticateBiometric()) {
+        if (pinMode) {
+            // Osmium PIN entry inside the biometric gate — correct PIN passes,
+            // and the self-destruct PIN (if armed) still triggers destruction.
+            val attempts = vm.remainingAttempts()
+            PinVerifyScreen(
+                title = stringResource(R.string.pin_verify_title),
+                subtitle = stringResource(R.string.pin_verify_subtitle),
+                error = errorMessage,
+                remainingAttempts = attempts,
+                onVerify = { pin ->
+                    if (!vm.onPinEntered(pin)) {
+                        if (vm.settings.value.destroyMode == AppSettings.DESTROY_PIN &&
+                            vm.pinManager.hasDestroyPin()
+                        ) {
+                            if (vm.onSelfDestructPinEntered(pin)) {
+                                vm.selfDestruct()
+                            }
+                        }
+                    }
+                },
+                onCancel = {
+                    pinMode = false
+                    errorMessage = null
+                }
+            )
+        } else {
+            LockScreen(
+                errorMessage = errorMessage,
+                onUnlock = {
+                    errorMessage = null
+                    if (canAuthenticateBiometric()) {
+                        launchBiometric(
+                            onSuccess = { vm.unlock() },
+                            onCancelled = { errorMessage = context.getString(R.string.lock_cancelled) },
+                            onError = { msg -> errorMessage = msg }
+                        )
+                    } else {
+                        errorMessage = context.getString(R.string.biometric_unavailable)
+                    }
+                },
+                onUsePassword = {
+                    errorMessage = null
+                    launchCredential(
+                        onSuccess = { vm.unlock() },
+                        onCancelled = { errorMessage = context.getString(R.string.lock_cancelled) },
+                        onError = { msg -> errorMessage = msg }
+                    )
+                },
+                onUsePin = {
+                    errorMessage = null
+                    if (vm.hasLocalPin()) {
+                        pinMode = true
+                    } else {
+                        errorMessage = context.getString(R.string.pin_not_set)
+                    }
+                }
+            )
+
+            // Attempt unlock automatically once the gate appears (after the
+            // activity is fully resumed — avoids prompt-vs-window races).
+            LaunchedEffect(Unit) {
+                delay(400)
+                if (canAuthenticateBiometric() && vm.locked.value) {
                     launchBiometric(
                         onSuccess = { vm.unlock() },
                         onCancelled = { errorMessage = context.getString(R.string.lock_cancelled) },
                         onError = { msg -> errorMessage = msg }
                     )
-                } else {
-                    errorMessage = context.getString(R.string.biometric_unavailable)
                 }
-            },
-            onUsePassword = {
-                errorMessage = null
-                launchCredential(
-                    onSuccess = { vm.unlock() },
-                    onCancelled = { errorMessage = context.getString(R.string.lock_cancelled) },
-                    onError = { msg -> errorMessage = msg }
-                )
-            }
-        )
-
-        // Attempt unlock automatically once the gate appears (after the
-        // activity is fully resumed — avoids prompt-vs-window races).
-        LaunchedEffect(Unit) {
-            delay(400)
-            if (canAuthenticateBiometric() && vm.locked.value) {
-                launchBiometric(
-                    onSuccess = { vm.unlock() },
-                    onCancelled = { errorMessage = context.getString(R.string.lock_cancelled) },
-                    onError = { msg -> errorMessage = msg }
-                )
             }
         }
     }
@@ -456,6 +492,10 @@ class MainActivity : FragmentActivity() {
                             vm.clearAppPin()
                             vm.showToast(getString(R.string.pin_cleared))
                         }
+                        "clear_destroy_pin" -> {
+                            vm.clearDestroyPin()
+                            vm.showToast(getString(R.string.destroy_pin_cleared))
+                        }
                         "set_destroy_pin", "change_destroy_pin" ->
                             vm.nav.push(Screen.PinSetup("destroy_pin"))
                     }
@@ -561,6 +601,20 @@ class MainActivity : FragmentActivity() {
                         onImport = { vm.nav.push(Screen.Import) },
                         onOpenPinSetup = { vm.nav.push(Screen.PinSetup("pin")) },
                         onOpenPinVerify = { next -> vm.nav.push(Screen.PinVerify(next)) },
+                        onRequireBiometric = { onSuccess ->
+                            // Toggling the gate requires identity verification.
+                            if (canAuthenticateBiometric()) {
+                                launchBiometric(
+                                    onSuccess = onSuccess,
+                                    onCancelled = { vm.showToast(context.getString(R.string.lock_cancelled)) },
+                                    onError = { msg -> vm.showToast(msg) }
+                                )
+                            } else {
+                                // No biometrics enrolled — nothing to verify with
+                                AppLog.d("gate toggle without biometrics on device")
+                                onSuccess()
+                            }
+                        },
                         onLanguageChanged = { lang ->
                             LanguagePrefs.set(this@MainActivity, lang)
                             recreate()

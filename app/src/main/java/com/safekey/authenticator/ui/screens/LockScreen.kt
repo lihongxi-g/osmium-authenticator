@@ -28,6 +28,7 @@ fun LockScreen(
     errorMessage: String?,
     onUnlock: () -> Unit,
     onUsePassword: (() -> Unit)? = null,
+    onUsePin: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -68,6 +69,12 @@ fun LockScreen(
         Spacer(Modifier.height(28.dp))
         Button(onClick = onUnlock) {
             Text(stringResource(R.string.unlock))
+        }
+        if (onUsePin != null) {
+            Spacer(Modifier.height(12.dp))
+            TextButton(onClick = onUsePin) {
+                Text(stringResource(R.string.use_pin))
+            }
         }
         if (onUsePassword != null) {
             Spacer(Modifier.height(12.dp))
