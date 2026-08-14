@@ -77,10 +77,14 @@ fun SettingsScreen(
     var showThresholdDialog by remember { mutableStateOf(false) }
     // sensitive toggle awaiting verification: Pair("gate"/"screenshot", target)
     var pendingToggle by remember { mutableStateOf<Pair<String, Boolean>?>(null) }
+    var showVerifyDialog by remember { mutableStateOf(false) }
     var pinMode by remember { mutableStateOf(false) }
     var pinError by remember { mutableStateOf<String?>(null) }
 
     fun executeToggle() {
+        // pendingToggle survives until verification completes — clearing it
+        // before the verify callback fires loses the target (the "switch
+        // bounces back" bug).
         val p = pendingToggle ?: return
         pendingToggle = null
         when (p.first) {
@@ -158,6 +162,7 @@ fun SettingsScreen(
                         checked = settings.gateOnOpen,
                         onCheckedChange = { target ->
                             pendingToggle = "gate" to target
+                            showVerifyDialog = true
                         }
                     )
                 }
@@ -172,6 +177,7 @@ fun SettingsScreen(
                         checked = settings.allowScreenshots,
                         onCheckedChange = { target ->
                             pendingToggle = "screenshot" to target
+                            showVerifyDialog = true
                         }
                     )
                 }
@@ -343,26 +349,30 @@ fun SettingsScreen(
     }
 
     // ---- verification method chooser for sensitive toggles ----
-    if (pendingToggle != null && !pinMode) {
+    if (showVerifyDialog && pendingToggle != null && !pinMode) {
         AlertDialog(
-            onDismissRequest = { pendingToggle = null },
+            onDismissRequest = {
+                showVerifyDialog = false
+                pendingToggle = null
+            },
             title = { Text(stringResource(R.string.verify_title)) },
             text = {
                 Column {
                     if (onRequireBiometric != null) {
                         VerifyOptionRow(AppIcons.Fingerprint, stringResource(R.string.verify_biometric)) {
-                            pendingToggle = null
+                            showVerifyDialog = false
                             onRequireBiometric { executeToggle() }
                         }
                     }
                     if (onRequireCredential != null) {
                         VerifyOptionRow(AppIcons.Security, stringResource(R.string.verify_credential)) {
-                            pendingToggle = null
+                            showVerifyDialog = false
                             onRequireCredential { executeToggle() }
                         }
                     }
                     if (hasPin) {
                         VerifyOptionRow(AppIcons.Keyboard, stringResource(R.string.verify_pin)) {
+                            showVerifyDialog = false
                             pinMode = true
                             pinError = null
                         }
@@ -370,7 +380,10 @@ fun SettingsScreen(
                 }
             },
             confirmButton = {
-                TextButton(onClick = { pendingToggle = null }) {
+                TextButton(onClick = {
+                    showVerifyDialog = false
+                    pendingToggle = null
+                }) {
                     Text(stringResource(R.string.cancel))
                 }
             }
