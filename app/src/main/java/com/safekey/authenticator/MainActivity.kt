@@ -48,6 +48,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.Lifecycle
 import com.safekey.authenticator.data.AppSettings
 import com.safekey.authenticator.data.LanguagePrefs
 import com.safekey.authenticator.security.AppLog
@@ -157,6 +158,22 @@ class MainActivity : FragmentActivity() {
 
     override fun onStop() {
         super.onStop()
+        // The system biometric prompt dies when the activity stops — on some
+        // OEM builds (ColorOS) it dies WITHOUT any callback, which would
+        // leave promptInFlight stuck forever and block every future prompt
+        // ("can't unlock with fingerprint/password, only PIN" bug).
+        // Release the guard explicitly here.
+        if (promptInFlight) {
+            promptSeq++ // invalidate the 30s watchdog
+            promptInFlight = false
+            try {
+                activePrompt?.cancelAuthentication()
+            } catch (_: Exception) {
+            }
+            activePrompt = null
+            restoreSecureFlag()
+            AppLog.d("onStop: biometric prompt guard released")
+        }
         vm.onAppBackground()
     }
 
@@ -281,11 +298,14 @@ class MainActivity : FragmentActivity() {
                 }
             )
 
-            // Attempt unlock automatically once the gate appears (after the
-            // activity is fully resumed — avoids prompt-vs-window races).
+            // Attempt unlock automatically once the gate appears — only when
+            // the activity is fully RESUMED, otherwise the prompt can die
+            // without a callback on some OEM builds.
             LaunchedEffect(Unit) {
                 delay(400)
-                if (canAuthenticateBiometric() && vm.locked.value) {
+                if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED) &&
+                    canAuthenticateBiometric() && vm.locked.value
+                ) {
                     launchBiometric(
                         onSuccess = { vm.unlock() },
                         onCancelled = { errorMessage = context.getString(R.string.lock_cancelled) },
@@ -323,6 +343,8 @@ class MainActivity : FragmentActivity() {
 
     private var promptInFlight = false
     private var promptSeq = 0
+    private var activePrompt: BiometricPrompt? = null
+    private var promptStartedAt = 0L
     private val promptTimeoutHandler = android.os.Handler(android.os.Looper.getMainLooper())
 
     /**
@@ -373,8 +395,22 @@ class MainActivity : FragmentActivity() {
         onError: (String) -> Unit
     ) {
         if (promptInFlight) {
-            AppLog.d("prompt skipped: another prompt in flight")
-            return
+            // Stale-guard self-heal: if the previous prompt has been hanging
+            // for more than 8 seconds without any callback (OEM prompt death),
+            // force-reset and let this new request through.
+            if (System.currentTimeMillis() - promptStartedAt > 8_000) {
+                AppLog.d("stale prompt detected — forcing reset")
+                promptSeq++
+                promptInFlight = false
+                try {
+                    activePrompt?.cancelAuthentication()
+                } catch (_: Exception) {
+                }
+                activePrompt = null
+            } else {
+                AppLog.d("prompt skipped: another prompt in flight")
+                return
+            }
         }
         promptInFlight = true
         val seq = ++promptSeq
@@ -396,6 +432,7 @@ class MainActivity : FragmentActivity() {
                 override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                     promptSeq++
                     promptInFlight = false
+                    activePrompt = null
                     restoreSecureFlag()
                     AppLog.d("prompt SUCCESS type=${result.authenticationType}")
                     vm.onBiometricSucceeded()
@@ -405,6 +442,7 @@ class MainActivity : FragmentActivity() {
                 override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
                     promptSeq++
                     promptInFlight = false
+                    activePrompt = null
                     restoreSecureFlag()
                     AppLog.d("prompt ERROR $errorCode: $errString")
                     when (errorCode) {
@@ -431,6 +469,8 @@ class MainActivity : FragmentActivity() {
                 ContextCompat.getMainExecutor(this),
                 callback
             )
+            activePrompt = prompt
+            promptStartedAt = System.currentTimeMillis()
 
             val builder = BiometricPrompt.PromptInfo.Builder()
                 .setTitle(getString(R.string.biometric_prompt_title))
