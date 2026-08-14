@@ -1,6 +1,7 @@
 package com.safekey.authenticator.totp
 
 import android.net.Uri
+import com.safekey.authenticator.model.Account
 import java.net.URI
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
