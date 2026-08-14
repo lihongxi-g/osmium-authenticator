@@ -106,4 +106,34 @@ class TotpGeneratorTest {
         val decimal = TotpGenerator.generate(secretAscii, 0L, 30, 6, "SHA1")
         assertNotEquals(decimal, code)
     }
+
+    @Test
+    fun `steam guard reference vectors`() {
+        // Vectors generated with the widely-used npm steam-totp reference
+        // implementation and re-verified with an independent Python port.
+        // secret JBSWY3DPEHPK3PXP @ t=1484000700s
+        assertEquals(
+            "WYRX7",
+            TotpGenerator.generate(
+                secret = Base32.decode("JBSWY3DPEHPK3PXP"),
+                timeMs = 1484000700L * 1000L,
+                period = 30,
+                digits = 5,
+                algorithm = "SHA1",
+                steamAlphabet = TotpGenerator.STEAM_ALPHABET
+            )
+        )
+        // secret H4WO4TRNBEIQD5XNJNWD44CFNY @ t=1484000700s
+        assertEquals(
+            "9GJKM",
+            TotpGenerator.generate(
+                secret = Base32.decode("H4WO4TRNBEIQD5XNJNWD44CFNY"),
+                timeMs = 1484000700L * 1000L,
+                period = 30,
+                digits = 5,
+                algorithm = "SHA1",
+                steamAlphabet = TotpGenerator.STEAM_ALPHABET
+            )
+        )
+    }
 }
