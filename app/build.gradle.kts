@@ -33,7 +33,8 @@ android {
             signingConfig = signingConfigs.getByName("safekey")
         }
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             signingConfig = signingConfigs.getByName("safekey")
         }
