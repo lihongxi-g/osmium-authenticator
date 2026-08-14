@@ -174,7 +174,8 @@ private fun PinKey(label: String, icon: Boolean, onClick: () -> Unit) {
     }
 }
 
-/** Full-screen PIN verification gate. */
+/** Full-screen PIN verification gate — opaque background so it fully covers
+ *  whatever is underneath when used as an overlay. */
 @Composable
 fun PinVerifyScreen(
     title: String,
@@ -184,7 +185,11 @@ fun PinVerifyScreen(
     onVerify: (String) -> Unit,
     onCancel: (() -> Unit)? = null
 ) {
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
         PinPadScreen(
             title = title,
             subtitle = subtitle,
