@@ -73,7 +73,7 @@ fun AboutScreen(
                     .clickable {
                         val intent = Intent(
                             Intent.ACTION_VIEW,
-                            Uri.parse("https://github.com/lihongxi-g/safekey-authenticator/releases")
+                            Uri.parse("https://github.com/lihongxi-g/osmium-authenticator/releases")
                         )
                         try {
                             context.startActivity(intent)
@@ -118,7 +118,7 @@ fun AboutScreen(
                 SocialIcon(AppIcons.XLogo, stringResource(R.string.social_x), "https://x.com/lihongxi_l") { url ->
                     openUrl(context, url, vm)
                 }
-                SocialIcon(AppIcons.GitHub, stringResource(R.string.social_github), "https://github.com/lihongxi-g/safekey-authenticator") { url ->
+                SocialIcon(AppIcons.GitHub, stringResource(R.string.social_github), "https://github.com/lihongxi-g/osmium-authenticator") { url ->
                     openUrl(context, url, vm)
                 }
                 SocialIcon(AppIcons.Mail, stringResource(R.string.social_mail), "mailto:zhif0776@hotmail.com") { url ->

@@ -1,4 +1,4 @@
-# SafeKey
+# Osmium
 
 离线优先、隐私优先的 Android TOTP 身份验证器（Material 3 + Jetpack Compose）。
 
