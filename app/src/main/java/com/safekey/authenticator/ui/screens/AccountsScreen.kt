@@ -321,6 +321,10 @@ private fun ReorderableAccountList(
     var draggingId by remember { mutableStateOf<String?>(null) }
     var dragStartIndex by remember { mutableStateOf(0) }
     var fingerDelta by remember { mutableStateOf(0f) }
+    // Where on the card the finger pressed down — the card's own offset is
+    // finger travel MINUS this, otherwise the card jumps on touch-down and
+    // the drop slot is miscalculated.
+    var pressOffsetY by remember { mutableStateOf(0f) }
 
     // Stable across the 500ms code tick: Account objects don't change, so
     // this list is equals-stable and doesn't trigger re-sorting/reordering
@@ -361,8 +365,9 @@ private fun ReorderableAccountList(
             val isDragging = draggingId == ui.account.id
             // While dragging the card follows the finger ONLY — the list
             // order is untouched until release. No re-sorting mid-drag means
-            // no flicker/jitter at all.
-            val offsetY = if (isDragging) fingerDelta else 0f
+            // no flicker/jitter at all. The card offset is finger travel
+            // minus the press point, so the card doesn't jump on touch-down.
+            val offsetY = if (isDragging) fingerDelta - pressOffsetY else 0f
 
             Box(
                 modifier = Modifier
@@ -384,6 +389,7 @@ private fun ReorderableAccountList(
                                 draggingId = ui.account.id
                                 dragStartIndex = currentIndex
                                 fingerDelta = 0f
+                                pressOffsetY = offset.y
                             },
                             onDrag = { change, amount ->
                                 change.consume()
@@ -391,9 +397,12 @@ private fun ReorderableAccountList(
                             },
                             onDragEnd = {
                                 val from = dragStartIndex
+                                // slot crossing = card-top travel over the
+                                // slot height; round() switches at half a slot
+                                val travel = fingerDelta - pressOffsetY
                                 val target = (
-                                    from + fingerDelta / itemHeightPx
-                                    ).roundToInt().coerceIn(0, displayItems.size - 1)
+                                    from + (travel / itemHeightPx).roundToInt()
+                                    ).coerceIn(0, displayItems.size - 1)
                                 // apply the reorder in the SAME frame as the
                                 // offset reset: the card renders at its new
                                 // slot with offset 0 — visually continuous.
