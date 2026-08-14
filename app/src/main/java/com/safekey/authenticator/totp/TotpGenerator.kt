@@ -57,14 +57,16 @@ object TotpGenerator {
             (hash[offset + 3].toInt() and 0xFF)
 
         if (steamAlphabet != null) {
-            // Steam: 26-ary encoding of the full 4-byte value, 5 chars
+            // Steam: 26-ary encoding of the full 4-byte value, 5 chars,
+            // LSB-first, concatenated directly (no reversal — that's the
+            // canonical SteamGuard algorithm).
             var value = binary
             val sb = StringBuilder(5)
             for (i in 0 until 5) {
                 sb.append(steamAlphabet[value % steamAlphabet.length])
                 value /= steamAlphabet.length
             }
-            return sb.reverse().toString()
+            return sb.toString()
         }
 
         val otp = binary % pow10(digits)

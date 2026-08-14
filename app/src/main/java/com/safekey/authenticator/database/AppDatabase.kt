@@ -8,17 +8,17 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 @Database(entities = [AccountEntity::class], version = 2, exportSchema = false)
-val MIGRATION_1_2 = object : Migration(1, 2) {
-    override fun migrate(db: SupportSQLiteDatabase) {
-        db.execSQL("ALTER TABLE accounts ADD COLUMN copyCount INTEGER NOT NULL DEFAULT 0")
-    }
-}
-
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun accountDao(): AccountDao
 
     companion object {
+        val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE accounts ADD COLUMN copyCount INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
         @Volatile
         private var instance: AppDatabase? = null
 

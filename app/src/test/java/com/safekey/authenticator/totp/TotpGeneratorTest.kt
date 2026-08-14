@@ -85,4 +85,24 @@ class TotpGeneratorTest {
         val counter3 = TotpGenerator.generate(secretAscii, 60_000L, period = 60, digits = 6, algorithm = "SHA1")
         assertNotEquals(counter1, counter3)
     }
+
+    @Test
+    fun `steam guard code shape`() {
+        val code = TotpGenerator.generate(
+            secret = secretAscii,
+            timeMs = 0L,
+            period = 30,
+            digits = 5,
+            algorithm = "SHA1",
+            steamAlphabet = TotpGenerator.STEAM_ALPHABET
+        )
+        // 5 chars, all from the 26-char alphabet, no reversal
+        assertEquals(5, code.length)
+        assertTrue(code.all { it in TotpGenerator.STEAM_ALPHABET })
+        // deterministic across calls in the same window
+        assertEquals(code, TotpGenerator.generate(secretAscii, 10_000L, 30, 5, "SHA1", TotpGenerator.STEAM_ALPHABET))
+        // different from the decimal 6-digit rendering of the same secret
+        val decimal = TotpGenerator.generate(secretAscii, 0L, 30, 6, "SHA1")
+        assertNotEquals(decimal, code)
+    }
 }

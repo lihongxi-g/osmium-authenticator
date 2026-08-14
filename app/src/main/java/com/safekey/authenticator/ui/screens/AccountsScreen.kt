@@ -304,6 +304,7 @@ private fun AddSheetRow(icon: androidx.compose.ui.graphics.vector.ImageVector, t
 
 /** Plain (non-draggable) account list — ordering comes from the sort mode
  *  setting instead of drag gestures. */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun AccountList(
     items: List<AccountUi>,
