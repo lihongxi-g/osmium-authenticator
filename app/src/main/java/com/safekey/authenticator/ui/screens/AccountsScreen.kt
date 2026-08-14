@@ -356,13 +356,13 @@ private fun ReorderableAccountList(
         items(displayItems, key = { it.account.id }) { ui ->
             val index = displayItems.indexOfFirst { it.account.id == ui.account.id }
             // The gesture lambda is created once per item id — always read
-            // the LATEST index through rememberUpdatedState, otherwise the
-            // drag math uses a stale position and the reorder breaks.
+            // the LATEST index through rememberUpdatedState.
             val currentIndex by rememberUpdatedState(index)
             val isDragging = draggingId == ui.account.id
-            val offsetY = if (isDragging) {
-                (dragStartIndex - index) * itemHeightPx + fingerDelta
-            } else 0f
+            // While dragging the card follows the finger ONLY — the list
+            // order is untouched until release. No re-sorting mid-drag means
+            // no flicker/jitter at all.
+            val offsetY = if (isDragging) fingerDelta else 0f
 
             Box(
                 modifier = Modifier
@@ -388,32 +388,29 @@ private fun ReorderableAccountList(
                             onDrag = { change, amount ->
                                 change.consume()
                                 fingerDelta += amount.y
-                                val targetIndex = (
-                                    (dragStartIndex * itemHeightPx + fingerDelta) / itemHeightPx
-                                    ).roundToInt().coerceIn(0, displayItems.size - 1)
-                                if (targetIndex != currentIndex) {
-                                    val order = (pendingOrder
-                                        ?: displayItems.map { it.account.id }).toMutableList()
-                                    val moved = order.removeAt(currentIndex)
-                                    order.add(targetIndex, moved)
-                                    pendingOrder = order
-                                }
                             },
                             onDragEnd = {
+                                val from = dragStartIndex
+                                val target = (
+                                    from + fingerDelta / itemHeightPx
+                                    ).roundToInt().coerceIn(0, displayItems.size - 1)
+                                // apply the reorder in the SAME frame as the
+                                // offset reset: the card renders at its new
+                                // slot with offset 0 — visually continuous.
                                 draggingId = null
                                 fingerDelta = 0f
-                                val finalOrder = pendingOrder
-                                if (finalOrder != null && finalOrder != accounts.map { it.id }) {
-                                    onReorder(finalOrder)
+                                if (target != from) {
+                                    val order = (pendingOrder
+                                        ?: displayItems.map { it.account.id }).toMutableList()
+                                    val moved = order.removeAt(from)
+                                    order.add(target, moved)
+                                    pendingOrder = order
+                                    onReorder(order)
                                 }
                             },
                             onDragCancel = {
                                 draggingId = null
                                 fingerDelta = 0f
-                                val finalOrder = pendingOrder
-                                if (finalOrder != null && finalOrder != accounts.map { it.id }) {
-                                    onReorder(finalOrder)
-                                }
                             }
                         )
                     }
