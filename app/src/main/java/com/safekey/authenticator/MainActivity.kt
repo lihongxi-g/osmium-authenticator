@@ -118,8 +118,9 @@ class MainActivity : FragmentActivity() {
                 // during transitions and gates show white-on-white text.
                 val view = LocalView.current
                 if (!view.isInEditMode) {
+                    val background = MaterialTheme.colorScheme.background
                     SideEffect {
-                        view.setBackgroundColor(MaterialTheme.colorScheme.background.toArgb())
+                        view.setBackgroundColor(background.toArgb())
                     }
                 }
                 Box(
