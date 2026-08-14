@@ -59,6 +59,7 @@ fun DetailScreen(
     onEdit: (Account) -> Unit,
     onDeleted: () -> Unit,
     onBack: () -> Unit,
+    onShare: (Account) -> Unit = {},
     onRequireBiometric: ((onSuccess: () -> Unit) -> Unit)? = null,
     onRequireCredential: ((onSuccess: () -> Unit) -> Unit)? = null
 ) {
@@ -80,6 +81,7 @@ fun DetailScreen(
             "view" -> showSecret = true
             "edit" -> account?.let { onEdit(it) }
             "delete" -> showDeleteDialog = true
+            "share" -> account?.let { onShare(it) }
         }
     }
 
@@ -246,6 +248,22 @@ fun DetailScreen(
                 }
 
                 Spacer(Modifier.height(24.dp))
+                OutlinedButton(
+                    onClick = { pendingAction = "share" },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(
+                        imageVector = AppIcons.QrCodeScanner,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Text(
+                        text = stringResource(R.string.share_account),
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
+                }
+
+                Spacer(Modifier.height(8.dp))
                 OutlinedButton(
                     onClick = { pendingAction = "delete" },
                     modifier = Modifier.fillMaxWidth()

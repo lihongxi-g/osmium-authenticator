@@ -4,14 +4,14 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- Shield, osmium metallic blue-grey (natural osmium color) -->
+    <!-- Shield, osmium metallic blue-grey (deeper tone so it reads on white) -->
     <group
         android:scaleX="2.5"
         android:scaleY="2.5"
         android:translateX="24"
         android:translateY="24">
         <path
-            android:fillColor="#B0C0D0"
+            android:fillColor="#4E6075"
             android:pathData="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" />
     </group>
 </vector>

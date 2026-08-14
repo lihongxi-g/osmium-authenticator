@@ -279,8 +279,8 @@ fun SettingsScreen(
 
             SettingRow(
                 icon = AppIcons.Info,
-                title = stringResource(R.string.version),
-                description = stringResource(R.string.version_click_hint),
+                title = stringResource(R.string.settings_about),
+                description = stringResource(R.string.about_entry_desc),
                 trailing = {
                     Text(
                         text = BuildConfig.VERSION_NAME,
@@ -288,24 +288,7 @@ fun SettingsScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 },
-                onClick = {
-                    val subject = Uri.encode("Osmium v${BuildConfig.VERSION_NAME} Feedback")
-                    val intent = Intent(Intent.ACTION_SENDTO).apply {
-                        data = Uri.parse("mailto:zhif0776@hotmail.com?subject=$subject")
-                    }
-                    try {
-                        context.startActivity(intent)
-                    } catch (e: Exception) {
-                        vm.showToast(context.getString(R.string.no_email_app))
-                    }
-                }
-            )
-
-            Text(
-                text = stringResource(R.string.about_desc),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 32.dp)
+                onClick = { vm.nav.push(Screen.About) }
             )
         }
     }

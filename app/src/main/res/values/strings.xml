@@ -139,6 +139,18 @@
     <string name="export_log">Export log</string>
     <string name="export_log_desc">Copies the latest 100 log lines plus device info to the clipboard</string>
     <string name="export_log_done">Log copied to clipboard</string>
+    <string name="about_entry_desc">Version, updates and contact</string>
+    <string name="about_version">Version %1$s</string>
+    <string name="check_updates">Check for updates (GitHub Releases)</string>
+    <string name="about_follow">Follow Osmium</string>
+    <string name="social_telegram">Telegram</string>
+    <string name="social_x">X</string>
+    <string name="social_github">GitHub</string>
+    <string name="social_mail">Email</string>
+    <string name="no_browser">No app available to open this link.</string>
+    <string name="share_account">Share account</string>
+    <string name="share_qr_desc">Account QR code for sharing</string>
+    <string name="share_qr_hint">Scan this code with another authenticator app to add this account. Osmium can only share one account at a time.</string>
 
     <string name="settings_pin">PIN</string>
     <string name="settings_destroy">Self-destruct</string>

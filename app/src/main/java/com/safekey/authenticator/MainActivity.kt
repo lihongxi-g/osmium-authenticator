@@ -55,6 +55,7 @@ import com.safekey.authenticator.security.IntegrityCheck
 import com.safekey.authenticator.totp.OtpUriParser
 import com.safekey.authenticator.ui.components.SwipeBackContainer
 import com.safekey.authenticator.ui.navigation.Screen
+import com.safekey.authenticator.ui.screens.AboutScreen
 import com.safekey.authenticator.ui.screens.AccountFormScreen
 import com.safekey.authenticator.ui.screens.AccountsScreen
 import com.safekey.authenticator.ui.screens.DetailScreen
@@ -65,6 +66,7 @@ import com.safekey.authenticator.ui.screens.PinSetupScreen
 import com.safekey.authenticator.ui.screens.PinVerifyScreen
 import com.safekey.authenticator.ui.screens.ScanScreen
 import com.safekey.authenticator.ui.screens.SettingsScreen
+import com.safekey.authenticator.ui.screens.ShareQrScreen
 import com.safekey.authenticator.ui.theme.SafeKeyTheme
 import java.util.Locale
 import kotlinx.coroutines.delay
@@ -566,6 +568,7 @@ class MainActivity : FragmentActivity() {
                         onEdit = { account -> vm.nav.push(Screen.AccountForm(account.id)) },
                         onDeleted = { vm.nav.popToRoot() },
                         onBack = { vm.nav.pop() },
+                        onShare = { account -> vm.nav.push(Screen.ShareQr(account.id)) },
                         // null when no biometrics on device — the option
                         // simply doesn't show in the verification dialog
                         onRequireBiometric = if (canAuthenticateBiometric()) {
@@ -659,6 +662,17 @@ class MainActivity : FragmentActivity() {
                     )
 
                     is Screen.PinVerify -> CurrentPinVerifyRoute(screen.next)
+
+                    is Screen.ShareQr -> ShareQrScreen(
+                        vm = vm,
+                        accountId = screen.accountId,
+                        onBack = { vm.nav.pop() }
+                    )
+
+                    is Screen.About -> AboutScreen(
+                        vm = vm,
+                        onBack = { vm.nav.pop() }
+                    )
                 }
             }
         }

@@ -20,11 +20,13 @@ sealed class Screen {
     object Import : Screen()
     /** mode: "pin" = app PIN, "destroy_pin" = self-destruct PIN */
     data class PinSetup(val mode: String) : Screen()
-    /**
-     * Verify the current app PIN before a sensitive action.
+    /** Verify the current app PIN before a sensitive action.
      * next: change_pin | clear_pin | set_destroy_pin | change_destroy_pin
      */
     data class PinVerify(val next: String) : Screen()
+    /** Share a single account as an otpauth:// QR code. */
+    data class ShareQr(val accountId: String) : Screen()
+    object About : Screen()
 }
 
 /**

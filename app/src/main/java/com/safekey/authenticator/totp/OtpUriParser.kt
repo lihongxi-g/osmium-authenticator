@@ -1,5 +1,6 @@
 package com.safekey.authenticator.totp
 
+import android.net.Uri
 import java.net.URI
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
@@ -13,6 +14,17 @@ data class ParsedOtpUri(
     val digits: Int,
     val period: Int
 )
+
+/**
+ * Serializes an account back into a standard otpauth:// URI (for sharing).
+ * Mirrors the exact parameters Osmium parsed on import.
+ */
+fun Account.toOtpUri(): String {
+    val labelPart = if (issuer.isNotBlank()) Uri.encode("$issuer:$label") else Uri.encode(label)
+    val issuerPart = Uri.encode(issuer)
+    return "otpauth://totp/$labelPart?secret=$secret" +
+        "&issuer=$issuerPart&algorithm=$algorithm&digits=$digits&period=$period"
+}
 
 /**
  * Parser for otpauth:// URIs as produced by most TOTP enrollment QR codes.

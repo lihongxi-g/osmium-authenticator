@@ -13,8 +13,8 @@ android {
         applicationId = "com.safekey.authenticator"
         minSdk = 26
         targetSdk = 34
-        versionCode = 11
-        versionName = "1.9.0"
+        versionCode = 12
+        versionName = "1.10.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
     }
@@ -80,6 +80,8 @@ dependencies {
     implementation("androidx.room:room-ktx:2.6.1")
     ksp("androidx.room:room-compiler:2.6.1")
 
+    // QR generation for account sharing (core only, no camera bloat)
+    implementation("com.google.zxing:core:3.5.2")
     implementation("androidx.datastore:datastore-preferences:1.0.0")
     // Android 14/15 BiometricPrompt fixes. 1.1.0/1.2.0-alpha05 misbehave on
     // ColorOS 15; 1.4.0-alpha02 requires compileSdk 35 (a real release SDK).

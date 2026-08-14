@@ -139,6 +139,18 @@
     <string name="export_log">导出日志</string>
     <string name="export_log_desc">将最新 100 行日志和设备信息复制到剪贴板</string>
     <string name="export_log_done">日志已复制到剪贴板</string>
+    <string name="about_entry_desc">版本、更新和联系方式</string>
+    <string name="about_version">版本 %1$s</string>
+    <string name="check_updates">检查更新（GitHub Releases）</string>
+    <string name="about_follow">关注 Osmium</string>
+    <string name="social_telegram">Telegram</string>
+    <string name="social_x">X</string>
+    <string name="social_github">GitHub</string>
+    <string name="social_mail">邮件</string>
+    <string name="no_browser">没有可打开此链接的应用。</string>
+    <string name="share_account">分享账户</string>
+    <string name="share_qr_desc">用于分享的账户二维码</string>
+    <string name="share_qr_hint">用另一台设备上的验证器扫描此码即可添加该账户。Osmium 每次只能分享一个账户。</string>
 
     <string name="settings_pin">PIN</string>
     <string name="settings_destroy">自毁</string>
