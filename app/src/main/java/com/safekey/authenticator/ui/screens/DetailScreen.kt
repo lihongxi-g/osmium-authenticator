@@ -79,6 +79,7 @@ fun DetailScreen(
         when (action) {
             "view" -> showSecret = true
             "edit" -> account?.let { onEdit(it) }
+            "delete" -> showDeleteDialog = true
         }
     }
 
@@ -98,7 +99,7 @@ fun DetailScreen(
                             IconButtonCompat(
                                 icon = AppIcons.Delete,
                                 contentDescription = stringResource(R.string.delete),
-                                onClick = { showDeleteDialog = true }
+                                onClick = { pendingAction = "delete" }
                             )
                         }
                     }
@@ -246,7 +247,7 @@ fun DetailScreen(
 
                 Spacer(Modifier.height(24.dp))
                 OutlinedButton(
-                    onClick = { showDeleteDialog = true },
+                    onClick = { pendingAction = "delete" },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Icon(
@@ -280,13 +281,7 @@ fun DetailScreen(
                         pendingAction = null
                     } else {
                         pinError = context.getString(R.string.pin_wrong)
-                        if (vm.settings.value.destroyMode == AppSettings.DESTROY_PIN &&
-                            vm.pinManager.hasDestroyPin()
-                        ) {
-                            if (vm.onSelfDestructPinEntered(pin)) {
-                                vm.selfDestruct()
-                            }
-                        }
+                        vm.checkSelfDestructPin(pin)
                     }
                 },
                 onCancel = {

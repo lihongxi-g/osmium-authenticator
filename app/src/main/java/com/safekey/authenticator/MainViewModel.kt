@@ -228,6 +228,20 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         return pinManager.verifyDestroyPin(pin)
     }
 
+    /**
+     * ANYWHERE a PIN is entered: if the self-destruct PIN is armed and the
+     * entered PIN matches it, destroy all data. Returns true when destroyed.
+     */
+    fun checkSelfDestructPin(pin: String): Boolean {
+        if (settings.value.destroyMode != AppSettings.DESTROY_PIN) return false
+        if (!pinManager.hasDestroyPin()) return false
+        if (pinManager.verifyDestroyPin(pin)) {
+            selfDestruct()
+            return true
+        }
+        return false
+    }
+
     fun remainingAttempts(): Int? {
         if (settings.value.destroyMode != AppSettings.DESTROY_FAIL_COUNT) return null
         val remaining = settings.value.failThreshold -

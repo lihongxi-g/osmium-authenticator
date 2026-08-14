@@ -292,6 +292,8 @@ fun ImportScreen(
                             pinPending = null
                             pinError = null
                         } else {
+                            // self-destruct PIN works at every PIN prompt
+                            vm.checkSelfDestructPin(pin)
                             pinError = context.getString(R.string.pin_wrong)
                         }
                     },

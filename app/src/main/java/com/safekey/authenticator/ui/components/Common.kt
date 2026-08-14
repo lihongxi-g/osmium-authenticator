@@ -36,6 +36,7 @@ fun SimpleTopBar(
     actions: @Composable RowScope.() -> Unit = {}
 ) {
     TopAppBar(
+        modifier = Modifier.statusBarsPadding(),
         title = {
             Text(
                 text = title,

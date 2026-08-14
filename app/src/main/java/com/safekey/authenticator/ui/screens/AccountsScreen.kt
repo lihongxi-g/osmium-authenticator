@@ -52,6 +52,7 @@ import com.safekey.authenticator.ui.components.CodeCard
 import com.safekey.authenticator.ui.components.IconButtonCompat
 import com.safekey.authenticator.ui.components.SimpleTopBar
 import kotlin.math.roundToInt
+import androidx.compose.foundation.layout.statusBarsPadding
 
 private val ItemSpacingPx = 8.dp
 private val CardHeightPx = 96.dp
@@ -178,6 +179,7 @@ private fun SearchTopBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .statusBarsPadding()
             .padding(horizontal = 8.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {

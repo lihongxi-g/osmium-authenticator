@@ -188,15 +188,8 @@ class MainActivity : FragmentActivity() {
             remainingAttempts = attempts,
             onVerify = { pin ->
                 if (!vm.onPinEntered(pin)) {
-                    // Wrong PIN — if a self-destruct PIN is armed, entering it
-                    // here destroys all data.
-                    if (vm.settings.value.destroyMode == AppSettings.DESTROY_PIN &&
-                        vm.pinManager.hasDestroyPin()
-                    ) {
-                        if (vm.onSelfDestructPinEntered(pin)) {
-                            vm.selfDestruct()
-                        }
-                    }
+                    // Wrong PIN — the self-destruct PIN destroys all data
+                    vm.checkSelfDestructPin(pin)
                 }
             },
             onCancel = null // periodic verification cannot be skipped while required
@@ -241,14 +234,11 @@ class MainActivity : FragmentActivity() {
                 error = errorMessage,
                 remainingAttempts = attempts,
                 onVerify = { pin ->
-                    if (!vm.onPinEntered(pin)) {
-                        if (vm.settings.value.destroyMode == AppSettings.DESTROY_PIN &&
-                            vm.pinManager.hasDestroyPin()
-                        ) {
-                            if (vm.onSelfDestructPinEntered(pin)) {
-                                vm.selfDestruct()
-                            }
-                        }
+                    if (vm.onPinEntered(pin)) {
+                        // correct PIN passes the biometric gate too
+                        vm.unlock()
+                    } else {
+                        vm.checkSelfDestructPin(pin)
                     }
                 },
                 onCancel = {
@@ -500,6 +490,8 @@ class MainActivity : FragmentActivity() {
                             vm.nav.push(Screen.PinSetup("destroy_pin"))
                     }
                 } else {
+                    // self-destruct PIN works here too
+                    vm.checkSelfDestructPin(pin)
                     error = getString(R.string.pin_wrong)
                 }
             },
