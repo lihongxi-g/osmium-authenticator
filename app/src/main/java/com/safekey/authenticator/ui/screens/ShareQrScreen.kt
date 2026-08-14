@@ -85,7 +85,7 @@ fun ShareQrScreen(
                 modifier = Modifier
                     .size(280.dp)
                     .clip(RoundedCornerShape(16.dp))
-                    .background(Color.WHITE)
+                    .background(Color.White)
                     .padding(12.dp)
             )
             Spacer(Modifier.height(16.dp))
