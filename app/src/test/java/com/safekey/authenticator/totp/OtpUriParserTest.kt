@@ -123,4 +123,17 @@ class OtpUriParserTest {
         }
         assertTrue("expected parse failure for: $uri", threw)
     }
+    @Test
+    fun `steam uri with digits 5 accepted`() {
+        val p = OtpUriParser.parse(
+            "otpauth://totp/Steam:test?secret=$baseSecret&issuer=Steam&algorithm=SHA1&digits=5&period=30"
+        )
+        assertEquals(5, p.digits)
+        assertEquals("Steam", p.issuer)
+    }
+
+    @Test
+    fun `digits 5 without steam issuer rejected`() {
+        expectThrow("otpauth://totp/A:B?secret=$baseSecret&digits=5")
+    }
 }

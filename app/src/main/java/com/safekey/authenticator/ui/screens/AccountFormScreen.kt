@@ -183,13 +183,22 @@ fun AccountFormScreen(
                 text = stringResource(R.string.digits_label),
                 style = MaterialTheme.typography.labelLarge
             )
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Account.SUPPORTED_DIGITS.forEach { d ->
-                    FilterChip(
-                        selected = digits == d,
-                        onClick = { digits = d },
-                        label = { Text("$d") }
-                    )
+            if (account?.isSteam == true) {
+                // Steam Guard is always 5 chars — the digits picker doesn't apply
+                Text(
+                    text = "5 (Steam Guard)",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            } else {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Account.SUPPORTED_DIGITS.forEach { d ->
+                        FilterChip(
+                            selected = digits == d,
+                            onClick = { digits = d },
+                            label = { Text("$d") }
+                        )
+                    }
                 }
             }
 

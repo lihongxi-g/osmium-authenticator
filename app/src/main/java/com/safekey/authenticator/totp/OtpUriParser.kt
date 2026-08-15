@@ -82,7 +82,15 @@ object OtpUriParser {
 
         val digits = (query["digits"] ?: "6").let { raw ->
             val d = raw.toIntOrNull() ?: throw IllegalArgumentException("Invalid digits: $raw")
-            if (d != 6 && d != 8) throw IllegalArgumentException("Unsupported digits: $d")
+            // Steam Guard codes are 5 characters — accept digits=5 only when
+            // the account is marked as Steam (query issuer or label prefix).
+            val steamByQuery = query["issuer"]?.equals("Steam", ignoreCase = true) == true
+            val rawLabel = urlDecode(uri.rawPath.removePrefix("/"))
+            val steamByLabel = rawLabel.equals("Steam", ignoreCase = true) ||
+                rawLabel.startsWith("Steam:", ignoreCase = true)
+            if (d != 6 && d != 8 && !(d == 5 && (steamByQuery || steamByLabel))) {
+                throw IllegalArgumentException("Unsupported digits: $d")
+            }
             d
         }
 
