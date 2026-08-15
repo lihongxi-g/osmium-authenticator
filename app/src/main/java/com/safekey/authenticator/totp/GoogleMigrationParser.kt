@@ -149,17 +149,17 @@ object GoogleMigrationParser {
                 }
                 4 -> { // enum algorithm
                     val v = readVarint(bytes, i)
-                    algorithm = v.first
+                    algorithm = v.first.toInt()
                     i = v.second
                 }
                 5 -> { // enum digits
                     val v = readVarint(bytes, i)
-                    digits = v.first
+                    digits = v.first.toInt()
                     i = v.second
                 }
                 6 -> { // enum type
                     val v = readVarint(bytes, i)
-                    type = v.first
+                    type = v.first.toInt()
                     i = v.second
                 }
                 7 -> { // int64 counter
