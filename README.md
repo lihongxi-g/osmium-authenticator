@@ -1,58 +1,62 @@
-# Osmium 🛡️
+# Osmium
 
-Fully offline, privacy-first TOTP authenticator for Android — Material 3 + Jetpack Compose.
+Osmium is a fully offline, privacy-first TOTP authenticator for Android. Every secret is encrypted with a hardware-backed Android Keystore key before it touches disk. The app holds no network permission, creates no account, and sends no telemetry — codes are computed entirely on device.
 
-离线优先、隐私优先的 Android TOTP 身份验证器。
+## Features
 
-<p align="center">
-  <img src="screenshots/main.jpg" width="180" alt="账户列表">
-  <img src="screenshots/detail.jpg" width="180" alt="账户详情">
-  <img src="screenshots/settings-security.jpg" width="180" alt="安全设置">
-  <img src="screenshots/settings-pin.jpg" width="180" alt="PIN 与自毁">
-  <img src="screenshots/about.jpg" width="180" alt="关于">
-</p>
+- **TOTP and HOTP** — SHA-1 / SHA-256 / SHA-512, 6 or 8 digits, periods from 1 to 600 seconds
+- **Google Authenticator migration** — scan the "Transfer accounts" QR code from Google Authenticator and import all accounts in one step
+- **Encrypted backup** — export to a password-protected, PIN-bound encrypted file; restore on any device
+- **Steam Guard** — manual entry with the 26-character Steam alphabet (see warning below)
+- **Hidden codes mode** — codes render as dots; copying still works, editing and sharing are locked until the mode is turned off
+- **Sort modes** — random, alphabetical, add date, copy count
+- **Clock calibration** — manual offset for devices whose clock drifts
+- **Security gate** — optional verification on open (fingerprint / system password / app PIN), self-destruct PIN, screenshots blocked by default
+- **Ten languages** — English, 简体中文, Español, 日本語, 한국어, Deutsch, Русский, Français, हिन्दी
+- **In-app manual** — feature guide and important notes, bilingual
+- **Optional account name and issuer** — blank names are auto-generated from the add date and order (e.g. `20260801`); a blank issuer shows as `Unknown`
 
-## 特性 Features
+## ⚠ Steam Guard — read this first
 
-- **完全离线**：无 INTERNET 权限，密钥物理上无法离开设备
-- **硬件级加密**：账户数据 AES-256-GCM 字段级加密，密钥存 Android Keystore（TEE/StrongBox）；应用 PIN 为 PBKDF2 加盐哈希 + 二次加密落盘
-- **三重门禁**：打开应用（可选）/ 切换敏感设置需 指纹 · 系统密码 · Osmium PIN 任一验证；查看/编辑/删除密钥同样需验证
-- **自毁机制**：自毁 PIN 在所有 PIN 输入处生效；连续验证失败 N 次（3/5/10 可设）同样销毁主密钥与全部数据，不可恢复
-- **反篡改**：启动时校验 APK 签名，被重打包立即拒绝运行
-- **截屏开关**：默认 FLAG_SECURE 禁止截屏录屏，验证身份后可开启
-- **TOTP 完整支持**：SHA1/SHA256/SHA512，6/8 位，自定义 period，RFC 6238 官方向量单元测试
-- **扫码添加**：CameraX + ML Kit 离线识别 otpauth:// 二维码
-- **加密导入/导出**：PBKDF2-HMAC-SHA256 + AES-256-GCM，密码 + PIN 双重保护
-- **单账户分享**：验证身份后生成 otpauth:// 二维码供其他设备扫码
-- **Material 3**：动态取色、深色模式、中英双语
+**When adding a Steam account manually, you must enter `Steam` in the issuer (服务商) field.** Otherwise the account is treated as a regular TOTP entry and the generated codes will be wrong. Steam Guard codes are 5-character alphanumeric strings, not 6-digit numbers.
 
-## 技术栈 Stack
+## Verify your authenticator
 
-Kotlin · Jetpack Compose · Material 3 · MVVM + Repository · Room · DataStore ·
-Android Keystore · CameraX · ML Kit Barcode Scanning · zxing · kotlinx-serialization
+A live test page is available at **https://otp.159310.xyz** — it issues a test secret, you add it to any authenticator, and enter the code back to verify. Supports TOTP, HOTP and Steam Guard. Everything runs in the browser; nothing is uploaded.
 
-minSdk 26 (Android 8.0) / targetSdk 34
+## Download
 
-## 下载 Download
+Pick the APK matching your device:
 
-[GitHub Releases](https://github.com/lihongxi-g/osmium-authenticator/releases) — R8 混淆 + 资源收缩 + 固定签名（侧载安装）
+| File | Architecture | Devices |
+|---|---|---|
+| `app-arm64-v8a-release.apk` | arm64-v8a | Virtually all modern phones (recommended) |
+| `app-armeabi-v7a-release.apk` | armeabi-v7a | Older 32-bit phones |
+| `app-x86_64-release.apk` | x86_64 | Emulators |
 
-## 构建 Build
+Installing the wrong architecture will crash on launch. The signing certificate fingerprint (SHA-256) is `B65BB0131CAA22C45D99EA4E2C3E99B3980EAE0DC5647190F41A2878E6D88412`.
 
-GitHub Actions（push 到 main 自动构建 release 包），或本地：
+## Screenshots
+
+| Main | Details | Security |
+|---|---|---|
+| ![](screenshots/main.jpg) | ![](screenshots/detail.jpg) | ![](screenshots/security.jpg) |
+
+## Security notes
+
+- Field-level AES-256-GCM encryption with a non-exportable Android Keystore key
+- No INTERNET permission in the manifest; no analytics, no crash reporters
+- Backups are encrypted (PBKDF2 + AES-256-GCM) and bound to the app PIN
+- The self-destruct PIN wipes all data irreversibly from any PIN prompt
+
+## Building
 
 ```bash
-./gradlew assembleDebug
+./gradlew assembleRelease
 ```
 
-## 测试 Tests
+Release builds are minified with R8 and split by ABI. Unit tests: `./gradlew testDebugUnitTest`.
 
-RFC 6238 官方向量、Base32、URI 解析、导入导出加密、PIN 哈希等纯 JVM 单元测试随 CI 运行：
+## License
 
-```bash
-./gradlew testDebugUnitTest
-```
-
-## 反馈 Feedback
-
-Telegram [@osmium2fa](https://t.me/osmium2fa) · X [@lihongxi_l](https://x.com/lihongxi_l) · zhif0776@hotmail.com
+MIT
