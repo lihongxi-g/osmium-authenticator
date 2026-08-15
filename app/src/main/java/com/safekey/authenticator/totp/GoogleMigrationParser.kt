@@ -1,6 +1,6 @@
 package com.safekey.authenticator.totp
 
-import android.util.Base64
+import java.util.Base64
 
 /**
  * Parser for Google Authenticator's "Transfer accounts" payload.
@@ -77,11 +77,11 @@ object GoogleMigrationParser {
         // Google QR payloads may use standard or URL-safe base64, padded or not
         val normalized = data.replace('-', '+').replace('_', '/')
         return try {
-            Base64.decode(normalized, Base64.DEFAULT)
+            Base64.getDecoder().decode(normalized)
         } catch (_: Exception) {
             // retry with explicit padding
             val padded = normalized + "=".repeat((4 - normalized.length % 4) % 4)
-            Base64.decode(padded, Base64.DEFAULT)
+            Base64.getDecoder().decode(padded)
         }
     }
 
