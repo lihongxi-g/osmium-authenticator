@@ -50,6 +50,7 @@ fun AccountFormScreen(
     val existing by vm.accounts.collectAsState()
     val context = LocalContext.current
     val editing = accountId != null
+    val editingAccount = existing.firstOrNull { it.id == accountId }
 
     var issuer by remember { mutableStateOf("") }
     var label by remember { mutableStateOf("") }
@@ -183,7 +184,7 @@ fun AccountFormScreen(
                 text = stringResource(R.string.digits_label),
                 style = MaterialTheme.typography.labelLarge
             )
-            if (account?.isSteam == true) {
+            if (editingAccount?.isSteam == true) {
                 // Steam Guard is always 5 chars — the digits picker doesn't apply
                 Text(
                     text = "5 (Steam Guard)",
