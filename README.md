@@ -38,9 +38,17 @@ Installing the wrong architecture will crash on launch. The signing certificate 
 
 ## Screenshots
 
-| Main | Details | Security |
-|---|---|---|
-| ![](screenshots/main.jpg) | ![](screenshots/detail.jpg) | ![](screenshots/security.jpg) |
+| Main | Appearance & security |
+|---|---|
+| ![](screenshots/en-accounts.jpg) | ![](screenshots/en-appearance.jpg) |
+
+| Security & data | Data & about |
+|---|---|
+| ![](screenshots/en-security.jpg) | ![](screenshots/en-data.jpg) |
+
+| About |
+|---|
+| ![](screenshots/en-about.jpg) |
 
 ## Privacy & Terms
 
