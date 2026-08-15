@@ -20,7 +20,7 @@ class AccountRepository(
 
     /** All accounts, decrypted, ordered by sortOrder. */
     val accounts: Flow<List<Account>> =
-        dao.observeAll().map { entities -> entities.map { it.toDomain(crypto) } }
+        dao.observeAll().map { entities -> entities.mapNotNull { it.toDomain(crypto) } }
 
     suspend fun getAll(): List<Account> = dao.getAll().map { it.toDomain(crypto) }
 
@@ -166,26 +166,32 @@ class AccountRepository(
         )
     }
 
-    private fun AccountEntity.toDomain(crypto: CryptoManager): Account {
-        val issuer = crypto.decrypt(CryptoManager.EncryptedField(issuerIv, issuerCiphertext))
-        val label = crypto.decrypt(CryptoManager.EncryptedField(labelIv, labelCiphertext))
-        val secret = crypto.decrypt(CryptoManager.EncryptedField(secretIv, secretCiphertext))
-        return Account(
-            id = id,
-            issuer = issuer,
-            label = label,
-            secret = secret,
-            algorithm = algorithm,
-            digits = digits,
-            period = period,
-            sortOrder = sortOrder,
-            createdAt = createdAt,
-            updatedAt = updatedAt,
-            copyCount = copyCount,
-            type = type,
-            counter = counter,
-            hidden = hidden
-        )
+    private fun AccountEntity.toDomain(crypto: CryptoManager): Account? {
+        return try {
+            val issuer = crypto.decrypt(CryptoManager.EncryptedField(issuerIv, issuerCiphertext))
+            val label = crypto.decrypt(CryptoManager.EncryptedField(labelIv, labelCiphertext))
+            val secret = crypto.decrypt(CryptoManager.EncryptedField(secretIv, secretCiphertext))
+            Account(
+                id = id,
+                issuer = issuer,
+                label = label,
+                secret = secret,
+                algorithm = algorithm,
+                digits = digits,
+                period = period,
+                sortOrder = sortOrder,
+                createdAt = createdAt,
+                updatedAt = updatedAt,
+                copyCount = copyCount,
+                type = type,
+                counter = counter,
+                hidden = hidden
+            )
+        } catch (e: Exception) {
+            // One corrupt row must never take down the whole app on launch
+            com.safekey.authenticator.security.AppLog.d("decrypt failed for account $id: ${e.message}")
+            null
+        }
     }
 
     suspend fun incrementCopyCount(id: String) {

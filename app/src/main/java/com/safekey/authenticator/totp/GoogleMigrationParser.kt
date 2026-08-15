@@ -39,8 +39,8 @@ object GoogleMigrationParser {
         val type: String,
         val counter: Long
     ) {
-        /** MD5-based accounts cannot be reproduced by standard TOTP. */
-        val isUnsupported: Boolean get() = algorithm == "MD5"
+        /** MD5-based or secret-less accounts cannot be reproduced by standard TOTP. */
+        val isUnsupported: Boolean get() = algorithm == "MD5" || secret.isEmpty()
     }
 
     /** True when the raw QR payload is a Google migration URI. */
@@ -197,7 +197,7 @@ object GoogleMigrationParser {
             }
         }
         return MigrationAccount(
-            secret = secret.trim(),
+            secret = normalizedSecret(secret.trim()),
             name = name,
             issuer = issuer,
             algorithm = when (algorithm) {
@@ -211,6 +211,20 @@ object GoogleMigrationParser {
             type = if (type == 1) "hotp" else "totp",
             counter = counter
         )
+    }
+
+    /** Canonicalize the secret like OtpUriParser does (decode → re-encode,
+     *  padding stripped). Invalid secrets return "" and the account is
+     *  marked unsupported so the import preview can skip it safely. */
+    private fun normalizedSecret(raw: String): String {
+        if (raw.isEmpty()) return ""
+        return try {
+            val bytes = Base32.decode(raw)
+            if (bytes.size < 10) return ""
+            Base32.encode(bytes).replace("=", "")
+        } catch (_: Exception) {
+            ""
+        }
     }
 
     /** Reads an unsigned LEB128 varint; returns (value, nextIndex). */

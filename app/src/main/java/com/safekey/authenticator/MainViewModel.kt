@@ -65,11 +65,19 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     val accountUiList: StateFlow<List<AccountUi>> =
         combine(accounts, _now, settings) { list, time, s ->
             val adjusted = time + s.timeOffsetSeconds * 1000L
-            list.map { a ->
+            list.filterNot { it.hidden }.mapNotNull { a ->
+                // Defense in depth: one corrupt secret must never take down
+                // the whole app (invalid Base32 would crash every tick).
+                val secretBytes = try {
+                    Base32.decode(a.secret)
+                } catch (_: Exception) {
+                    null
+                }
+                if (secretBytes == null) return@mapNotNull null
                 AccountUi(
                     account = a,
                     code = TotpGenerator.generate(
-                        secret = Base32.decode(a.secret),
+                        secret = secretBytes,
                         timeMs = adjusted,
                         period = a.period,
                         digits = a.digits,
