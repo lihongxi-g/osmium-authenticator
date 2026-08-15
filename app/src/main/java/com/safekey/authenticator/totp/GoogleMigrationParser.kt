@@ -97,7 +97,7 @@ object GoogleMigrationParser {
                 fieldNumber == 1 && wireType == 2 -> {
                     val len = readVarint(bytes, i)
                     i = len.second
-                    val end = i + len.first
+                    val end = i + len.first.toInt()
                     out.add(parseOtpParameters(bytes, i, end))
                     i = end
                 }
@@ -107,7 +107,7 @@ object GoogleMigrationParser {
                 }
                 wireType == 2 -> {
                     val len = readVarint(bytes, i)
-                    i = len.second + len.first
+                    i = len.second + len.first.toInt()
                 }
                 wireType == 5 -> i += 4 // fixed32, unused here
                 wireType == 1 -> i += 8 // fixed64, unused here
@@ -134,18 +134,18 @@ object GoogleMigrationParser {
             when (fieldNumber) {
                 1 -> { // bytes secret
                     val len = readVarint(bytes, i)
-                    secret = String(bytes, len.second, len.first, Charsets.US_ASCII)
-                    i = len.second + len.first
+                    secret = String(bytes, len.second, len.first.toInt(), Charsets.US_ASCII)
+                    i = len.second + len.first.toInt()
                 }
                 2 -> { // string name
                     val len = readVarint(bytes, i)
-                    name = String(bytes, len.second, len.first, Charsets.UTF_8)
-                    i = len.second + len.first
+                    name = String(bytes, len.second, len.first.toInt(), Charsets.UTF_8)
+                    i = len.second + len.first.toInt()
                 }
                 3 -> { // string issuer
                     val len = readVarint(bytes, i)
-                    issuer = String(bytes, len.second, len.first, Charsets.UTF_8)
-                    i = len.second + len.first
+                    issuer = String(bytes, len.second, len.first.toInt(), Charsets.UTF_8)
+                    i = len.second + len.first.toInt()
                 }
                 4 -> { // enum algorithm
                     val v = readVarint(bytes, i)
@@ -174,7 +174,7 @@ object GoogleMigrationParser {
                         i = v.second
                     } else if (wireType == 2) {
                         val len = readVarint(bytes, i)
-                        i = len.second + len.first
+                        i = len.second + len.first.toInt()
                     } else {
                         i = end
                     }
