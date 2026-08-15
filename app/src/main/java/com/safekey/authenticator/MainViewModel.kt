@@ -58,14 +58,8 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    private val _accountsLoaded = MutableStateFlow(false)
-    val accountsLoaded: StateFlow<Boolean> = _accountsLoaded
-
-    // The onEach hook sits UPSTREAM of stateIn: stateIn's initial emptyList()
-    // never passes through it, so the flag only flips on a REAL Room emission.
     val accounts: StateFlow<List<Account>> = repo.accounts
-        .onEach { _accountsLoaded.value = true }
-        .flowOn(Dispatchers.Default)
+        .flowOn(Dispatchers.Default) // decryption + flow ops off the main thread
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val accountUiList: StateFlow<List<AccountUi>> =
