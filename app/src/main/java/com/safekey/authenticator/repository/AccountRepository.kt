@@ -26,7 +26,16 @@ class AccountRepository(
 
     suspend fun getById(id: String): Account? = dao.getById(id)?.toDomain(crypto)
 
-    suspend fun add(issuer: String, label: String, secret: String, algorithm: String, digits: Int, period: Int): Account {
+    suspend fun add(
+        issuer: String,
+        label: String,
+        secret: String,
+        algorithm: String,
+        digits: Int,
+        period: Int,
+        type: String = Account.TYPE_TOTP,
+        counter: Long = 0
+    ): Account {
         val now = System.currentTimeMillis()
         val order = dao.maxSortOrder() + 1
         val account = Account(
@@ -39,7 +48,9 @@ class AccountRepository(
             period = period,
             sortOrder = order,
             createdAt = now,
-            updatedAt = now
+            updatedAt = now,
+            type = type,
+            counter = counter
         )
         dao.insert(account.toEntity(crypto))
         return account
@@ -85,7 +96,9 @@ class AccountRepository(
                 period = v.period,
                 sortOrder = order,
                 createdAt = now,
-                updatedAt = now
+                updatedAt = now,
+                type = v.type,
+                counter = v.counter
             )
             dao.insert(account.toEntity(crypto))
         }
@@ -113,7 +126,9 @@ class AccountRepository(
                 secret = domain.secret,
                 algorithm = domain.algorithm,
                 digits = domain.digits,
-                period = domain.period
+                period = domain.period,
+                type = domain.type,
+                counter = domain.counter
             )
         }
         return VaultFile(
@@ -144,7 +159,9 @@ class AccountRepository(
             sortOrder = sortOrder,
             createdAt = createdAt,
             updatedAt = updatedAt,
-            copyCount = copyCount
+            copyCount = copyCount,
+            type = type,
+            counter = counter
         )
     }
 
@@ -163,11 +180,17 @@ class AccountRepository(
             sortOrder = sortOrder,
             createdAt = createdAt,
             updatedAt = updatedAt,
-            copyCount = copyCount
+            copyCount = copyCount,
+            type = type,
+            counter = counter
         )
     }
 
     suspend fun incrementCopyCount(id: String) {
         dao.incrementCopyCount(id)
+    }
+
+    suspend fun incrementCounter(id: String) {
+        dao.incrementCounter(id)
     }
 }

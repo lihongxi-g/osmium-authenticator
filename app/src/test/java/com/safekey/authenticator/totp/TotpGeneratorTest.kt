@@ -1,5 +1,6 @@
 package com.safekey.authenticator.totp
 
+import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
@@ -105,6 +106,48 @@ class TotpGeneratorTest {
         // different from the decimal 6-digit rendering of the same secret
         val decimal = TotpGenerator.generate(secretAscii, 0L, 30, 6, "SHA1")
         assertNotEquals(decimal, code)
+    }
+
+    @Test
+    fun `base32 lenient decode`() {
+        val canonical = "JBSWY3DPEHPK3PXP"
+        val noise = listOf(
+            "jbswy3dpehpk3pxp",           // lowercase
+            "JBSW Y3DP EHPK 3PXP",        // spaces
+            "JBSW-Y3DP-EHPK-3PXP",        // dashes
+            "JBSWY3DPEHPK3PXP========",   // extra padding
+            "JBSWY3DPEHPK3PXP".replace("X", "X"), // no-op
+            "jbs_wy3d.pehpk3pxp"          // underscores and dots
+        )
+        val expected = Base32.decode(canonical)
+        noise.forEach { s ->
+            assertArrayEquals("input: $s", expected, Base32.decode(s))
+        }
+    }
+
+    @Test
+    fun `hotp rfc 4226 appendix D vectors`() {
+        // RFC 4226 Appendix D: secret ASCII "12345678901234567890", 6 digits
+        val secret = "12345678901234567890".toByteArray(Charsets.US_ASCII)
+        val expected = mapOf(
+            0L to "755224",
+            1L to "287082",
+            2L to "359152",
+            3L to "969429",
+            4L to "338314",
+            5L to "254676",
+            6L to "287922",
+            7L to "162583",
+            8L to "399871",
+            9L to "520489"
+        )
+        expected.forEach { (counter, code) ->
+            assertEquals(
+                "counter $counter",
+                code,
+                TotpGenerator.hotp(secret, counter, 6, "SHA1")
+            )
+        }
     }
 
     @Test

@@ -57,6 +57,7 @@ fun AccountFormScreen(
     var algorithm by remember { mutableStateOf(Account.ALGO_SHA1) }
     var digits by remember { mutableStateOf(6) }
     var period by remember { mutableStateOf("30") }
+    var type by remember { mutableStateOf(Account.TYPE_TOTP) }
     var error by remember { mutableStateOf<String?>(null) }
     var initialized by remember { mutableStateOf(false) }
 
@@ -71,6 +72,7 @@ fun AccountFormScreen(
                 algorithm = account.algorithm
                 digits = account.digits
                 period = account.period.toString()
+                type = account.type
             }
         } else if (prefillUri != null) {
             issuer = prefillUri.issuer
@@ -79,6 +81,7 @@ fun AccountFormScreen(
             algorithm = prefillUri.algorithm
             digits = prefillUri.digits
             period = prefillUri.period.toString()
+            type = prefillUri.type
         }
         initialized = true
     }
@@ -140,6 +143,24 @@ fun AccountFormScreen(
             }
 
             Text(
+                text = stringResource(R.string.account_type_label),
+                style = MaterialTheme.typography.labelLarge
+            )
+            Row {
+                FilterChip(
+                    selected = type == Account.TYPE_TOTP,
+                    onClick = { type = Account.TYPE_TOTP },
+                    label = { Text(stringResource(R.string.account_type_totp)) },
+                    modifier = Modifier.padding(end = 8.dp)
+                )
+                FilterChip(
+                    selected = type == Account.TYPE_HOTP,
+                    onClick = { type = Account.TYPE_HOTP },
+                    label = { Text(stringResource(R.string.account_type_hotp)) }
+                )
+            }
+
+            Text(
                 text = stringResource(R.string.algorithm_label),
                 style = MaterialTheme.typography.labelLarge
             )
@@ -191,7 +212,7 @@ fun AccountFormScreen(
                         if (editing && accountId != null) {
                             vm.updateAccount(accountId, issuer, label, secret, algorithm, digits, p)
                         } else {
-                            vm.addAccount(issuer, label, secret, algorithm, digits, p)
+                            vm.addAccount(issuer, label, secret, algorithm, digits, p, type, 0L)
                         }
                         onDone()
                     } else {

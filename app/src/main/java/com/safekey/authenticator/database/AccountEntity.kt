@@ -22,5 +22,7 @@ data class AccountEntity(
     val sortOrder: Long,
     val createdAt: Long,
     val updatedAt: Long,
-    val copyCount: Int = 0
+    val copyCount: Int = 0,
+    val type: String = "totp",
+    val counter: Long = 0
 )

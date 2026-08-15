@@ -13,8 +13,8 @@ android {
         applicationId = "com.safekey.authenticator"
         minSdk = 26
         targetSdk = 34
-        versionCode = 21
-        versionName = "2.1.0"
+        versionCode = 22
+        versionName = "2.1.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
     }
@@ -25,6 +25,15 @@ android {
             storePassword = System.getenv("SAFEKEY_STORE_PASS") ?: ""
             keyAlias = System.getenv("SAFEKEY_KEY_ALIAS") ?: "safekey"
             keyPassword = System.getenv("SAFEKEY_KEY_PASS") ?: ""
+        }
+    }
+
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("arm64-v8a", "armeabi-v7a", "x86_64")
+            isUniversalApk = false
         }
     }
 

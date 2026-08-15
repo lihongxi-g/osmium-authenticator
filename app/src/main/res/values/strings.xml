@@ -6,6 +6,10 @@
     <string name="accounts_title">Accounts</string>
     <string name="add_account">Add account</string>
     <string name="scan_qr">Scan QR code</string>
+    <string name="scan_from_gallery">Choose image from gallery</string>
+    <string name="scan_no_qr">No QR code found in the image</string>
+    <string name="scan_no_uri">No otpauth:// link found in the QR code</string>
+    <string name="scan_gallery_failed">Could not read the image</string>
     <string name="enter_manually">Enter manually</string>
     <string name="paste_uri">Paste otpauth:// link</string>
     <string name="search_hint">Search accounts</string>
@@ -109,6 +113,12 @@
     <string name="accounts_count">%1$d account(s)</string>
     <string name="about_desc">Osmium is a fully offline, privacy-first TOTP authenticator. All data is encrypted with the Android Keystore and never leaves your device.</string>
     <string name="sorting_hint">Long-press an account to reorder</string>
+    <string name="account_type_label">Account type</string>
+    <string name="account_type_totp">Time-based (TOTP)</string>
+    <string name="account_type_hotp">Counter (HOTP)</string>
+    <string name="hotp_counter">Counter: %1$d</string>
+    <string name="hotp_next">Next code (counter +1)</string>
+    <string name="hotp_params">HOTP · %1$s · %2$d digits</string>
     <string name="sort_mode">Sort order</string>
     <string name="sort_mode_desc">How accounts are ordered in the list</string>
     <string name="sort_random">Random</string>
@@ -122,6 +132,9 @@
     <string name="hide_codes">Hide codes</string>
     <string name="hide_codes_desc">Codes show as dots; copy still works. Viewing/sharing secrets is disabled.</string>
     <string name="hide_codes_blocks_secret">Hidden codes mode: viewing and sharing secrets is disabled</string>
+    <string name="time_offset">Clock calibration</string>
+    <string name="time_offset_desc">Current offset: %1$+d s (0 = auto)</string>
+    <string name="time_offset_hint">Manually offset the TOTP clock if your device time drifts. Range −600 to +600 seconds. Leave 0 normally.</string>
 
     <string name="biometric_prompt_title">Unlock Osmium</string>
     <string name="biometric_prompt_subtitle">Verify it\'s you</string>

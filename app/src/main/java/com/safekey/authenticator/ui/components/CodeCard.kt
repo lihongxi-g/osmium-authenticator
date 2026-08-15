@@ -64,15 +64,17 @@ fun CodeCard(
                     onCopyCode = onCopyCode
                 )
             }
-            LinearProgressIndicator(
-                progress = (1f - ui.periodFraction).coerceIn(0f, 1f),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
-                color = if (ui.remainingSeconds <= 5) MaterialTheme.colorScheme.error
-                else MaterialTheme.colorScheme.primary,
-                trackColor = MaterialTheme.colorScheme.surfaceVariant
-            )
+            if (!ui.isHotp) {
+                LinearProgressIndicator(
+                    progress = (1f - ui.periodFraction).coerceIn(0f, 1f),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
+                    color = if (ui.remainingSeconds <= 5) MaterialTheme.colorScheme.error
+                    else MaterialTheme.colorScheme.primary,
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+            }
         }
     }
 }
@@ -121,7 +123,7 @@ private fun CodeDisplay(
         )
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = "${remainingSeconds}s",
+                text = if (remainingSeconds > 0) "${remainingSeconds}s" else "HOTP",
                 style = MaterialTheme.typography.labelMedium,
                 color = if (expiring) MaterialTheme.colorScheme.error
                 else MaterialTheme.colorScheme.onSurfaceVariant

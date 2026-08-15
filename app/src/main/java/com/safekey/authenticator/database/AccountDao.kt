@@ -29,6 +29,9 @@ interface AccountDao {
     @Delete
     suspend fun delete(account: AccountEntity)
 
+    @Query("UPDATE accounts SET counter = counter + 1 WHERE id = :id")
+    suspend fun incrementCounter(id: String)
+
     @Query("UPDATE accounts SET copyCount = copyCount + 1 WHERE id = :id")
     suspend fun incrementCopyCount(id: String)
 

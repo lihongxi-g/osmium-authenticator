@@ -19,17 +19,19 @@ object TotpGenerator {
      */
     const val STEAM_ALPHABET = "23456789BCDFGHJKMNPQRTVWXY"
 
-    /** Generate the TOTP code valid at [timeMs] for the given parameters. */
+    /** Generate the TOTP code valid at [timeMs] for the given parameters.
+     *  For HOTP pass [counter] explicitly (time-based window is skipped). */
     fun generate(
         secret: ByteArray,
         timeMs: Long,
         period: Int,
         digits: Int,
         algorithm: String,
-        steamAlphabet: String? = null
+        steamAlphabet: String? = null,
+        counter: Long? = null
     ): String {
-        val counter = Math.floorDiv(timeMs, 1000L) / period
-        return hotp(secret, counter, digits, algorithm, steamAlphabet)
+        val c = counter ?: (Math.floorDiv(timeMs, 1000L) / period)
+        return hotp(secret, c, digits, algorithm, steamAlphabet)
     }
 
     /** RFC 4226 HOTP with a long counter. */

@@ -29,7 +29,9 @@ data class AccountUi(
     val code: String,
     val remainingSeconds: Int,
     val periodFraction: Float
-)
+) {
+    val isHotp: Boolean get() = account.isHotp
+}
 
 class MainViewModel(app: Application) : AndroidViewModel(app) {
 
@@ -64,20 +66,22 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
      * HMAC runs on Dispatchers.Default — never on the main thread.
      */
     val accountUiList: StateFlow<List<AccountUi>> =
-        combine(accounts, _now) { list, time ->
+        combine(accounts, _now, settings) { list, time, s ->
+            val adjusted = time + s.timeOffsetSeconds * 1000L
             list.map { a ->
                 AccountUi(
                     account = a,
                     code = TotpGenerator.generate(
                         secret = Base32.decode(a.secret),
-                        timeMs = time,
+                        timeMs = adjusted,
                         period = a.period,
                         digits = a.digits,
                         algorithm = a.algorithm,
-                        steamAlphabet = if (a.isSteam) TotpGenerator.STEAM_ALPHABET else null
+                        steamAlphabet = if (a.isSteam) TotpGenerator.STEAM_ALPHABET else null,
+                        counter = a.counter
                     ),
-                    remainingSeconds = TotpGenerator.remainingSeconds(time, a.period),
-                    periodFraction = TotpGenerator.periodFraction(time, a.period)
+                    remainingSeconds = if (a.isHotp) 0 else TotpGenerator.remainingSeconds(adjusted, a.period),
+                    periodFraction = if (a.isHotp) 0f else TotpGenerator.periodFraction(adjusted, a.period)
                 )
             }
         }
@@ -326,10 +330,19 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     // ---------------------------------------------------- account actions
 
-    fun addAccount(issuer: String, label: String, secret: String, algorithm: String, digits: Int, period: Int) {
+    fun addAccount(
+        issuer: String,
+        label: String,
+        secret: String,
+        algorithm: String,
+        digits: Int,
+        period: Int,
+        type: String = Account.TYPE_TOTP,
+        counter: Long = 0
+    ) {
         viewModelScope.launch {
             try {
-                repo.add(issuer, label, secret, algorithm, digits, period)
+                repo.add(issuer, label, secret, algorithm, digits, period, type, counter)
                 showToast(getApplication<Application>().getString(R.string.account_added))
             } catch (e: Exception) {
                 showToast(e.message ?: "Error")
@@ -375,7 +388,9 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     fun setAllowScreenshots(enabled: Boolean) = viewModelScope.launch { settingsRepo.setAllowScreenshots(enabled) }
     fun setHideCodes(enabled: Boolean) = viewModelScope.launch { settingsRepo.setHideCodes(enabled) }
     fun setSortMode(mode: String) = viewModelScope.launch { settingsRepo.setSortMode(mode) }
+    fun setTimeOffsetSeconds(offset: Int) = viewModelScope.launch { settingsRepo.setTimeOffsetSeconds(offset) }
     fun incrementCopyCount(id: String) = viewModelScope.launch { repo.incrementCopyCount(id) }
+    fun incrementCounter(id: String) = viewModelScope.launch { repo.incrementCounter(id) }
     fun setDestroyMode(mode: String) = viewModelScope.launch { settingsRepo.setDestroyMode(mode) }
     fun setFailThreshold(threshold: Int) = viewModelScope.launch { settingsRepo.setFailThreshold(threshold) }
 

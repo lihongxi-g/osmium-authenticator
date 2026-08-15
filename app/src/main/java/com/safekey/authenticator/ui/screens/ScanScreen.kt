@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.os.Handler
 import android.os.Looper
 import androidx.activity.compose.rememberLauncherForActivityResult
+import android.graphics.BitmapFactory
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
@@ -70,6 +71,48 @@ fun ScanScreen(
         if (!granted) showPermissionError = true
     }
 
+    // Gallery pick: system SAF picker, no storage permission needed.
+    val galleryLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri ->
+        if (uri != null) {
+            try {
+                val bitmap = context.contentResolver.openInputStream(uri)?.use { input ->
+                    BitmapFactory.decodeStream(input)
+                }
+                if (bitmap != null) {
+                    val image = InputImage.fromBitmap(bitmap, 0)
+                    BarcodeScanning.getClient()
+                        .process(image)
+                        .addOnSuccessListener { barcodes ->
+                            val raw = barcodes.firstOrNull()?.rawValue
+                            if (raw != null) {
+                                val parsed = try {
+                                    OtpUriParser.parse(raw)
+                                } catch (_: Exception) {
+                                    null
+                                }
+                                if (parsed != null) {
+                                    confirm = parsed
+                                } else {
+                                    vm.showToast(context.getString(R.string.scan_no_uri))
+                                }
+                            } else {
+                                vm.showToast(context.getString(R.string.scan_no_qr))
+                            }
+                        }
+                        .addOnFailureListener {
+                            vm.showToast(context.getString(R.string.scan_gallery_failed))
+                        }
+                } else {
+                    vm.showToast(context.getString(R.string.scan_gallery_failed))
+                }
+            } catch (_: Exception) {
+                vm.showToast(context.getString(R.string.scan_gallery_failed))
+            }
+        }
+    }
+
     Scaffold(
         topBar = { SimpleTopBar(title = stringResource(R.string.scan_qr), onBack = onBack) }
     ) { padding ->
@@ -93,6 +136,14 @@ fun ScanScreen(
                             .align(Alignment.CenterHorizontally)
                             .padding(bottom = 16.dp)
                     )
+                    TextButton(
+                        onClick = { galleryLauncher.launch("image/*") },
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                            .padding(bottom = 24.dp)
+                    ) {
+                        Text(stringResource(R.string.scan_from_gallery))
+                    }
                 }
             } else {
                 Column(
@@ -151,7 +202,8 @@ fun ScanScreen(
                 TextButton(onClick = {
                     vm.addAccount(
                         parsed.issuer, parsed.label, parsed.secret,
-                        parsed.algorithm, parsed.digits, parsed.period
+                        parsed.algorithm, parsed.digits, parsed.period,
+                        parsed.type, parsed.counter
                     )
                     confirm = null
                     onSaved()

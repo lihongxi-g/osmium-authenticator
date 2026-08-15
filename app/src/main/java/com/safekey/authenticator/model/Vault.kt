@@ -13,7 +13,9 @@ data class VaultAccount(
     val secret: String = "",
     val algorithm: String = "SHA1",
     val digits: Int = 6,
-    val period: Int = 30
+    val period: Int = 30,
+    val type: String = "totp",
+    val counter: Long = 0
 )
 
 @Serializable

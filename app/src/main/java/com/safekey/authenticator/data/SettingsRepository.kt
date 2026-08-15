@@ -17,6 +17,7 @@ data class AppSettings(
     val gateOnOpen: Boolean = true,
     val allowScreenshots: Boolean = false,
     val hideCodes: Boolean = false,
+    val timeOffsetSeconds: Int = 0,
     val sortMode: String = SORT_ADDED,
     val destroyMode: String = DESTROY_OFF,
     val failThreshold: Int = 5,
@@ -47,6 +48,7 @@ class SettingsRepository(private val context: Context) {
         val ALLOW_SCREENSHOTS = booleanPreferencesKey("allow_screenshots")
         val HIDE_CODES = booleanPreferencesKey("hide_codes")
         val SORT_MODE = stringPreferencesKey("sort_mode")
+        val TIME_OFFSET = intPreferencesKey("time_offset_seconds")
         val DESTROY_MODE = stringPreferencesKey("destroy_mode")
         val FAIL_THRESHOLD = intPreferencesKey("fail_threshold")
         val PIN_FAIL_COUNT = intPreferencesKey("pin_fail_count")
@@ -61,6 +63,7 @@ class SettingsRepository(private val context: Context) {
             allowScreenshots = prefs[Keys.ALLOW_SCREENSHOTS] ?: false,
             hideCodes = prefs[Keys.HIDE_CODES] ?: false,
             sortMode = prefs[Keys.SORT_MODE] ?: AppSettings.SORT_ADDED,
+            timeOffsetSeconds = prefs[Keys.TIME_OFFSET] ?: 0,
             destroyMode = prefs[Keys.DESTROY_MODE] ?: AppSettings.DESTROY_OFF,
             failThreshold = prefs[Keys.FAIL_THRESHOLD] ?: 5,
             pinFailCount = prefs[Keys.PIN_FAIL_COUNT] ?: 0,
@@ -90,6 +93,10 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setSortMode(mode: String) {
         context.dataStore.edit { it[Keys.SORT_MODE] = mode }
+    }
+
+    suspend fun setTimeOffsetSeconds(offset: Int) {
+        context.dataStore.edit { it[Keys.TIME_OFFSET] = offset }
     }
 
     suspend fun setDestroyMode(mode: String) {

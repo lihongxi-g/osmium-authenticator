@@ -46,6 +46,8 @@ object Base32 {
             .replace("\n", "")
             .replace("\r", "")
             .replace("\t", "")
+            .replace("_", "")
+            .replace(".", "")
         if (cleaned.isEmpty()) return ByteArray(0)
 
         val out = ByteArrayOutputStream()

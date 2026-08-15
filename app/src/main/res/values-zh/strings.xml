@@ -6,6 +6,10 @@
     <string name="accounts_title">账户</string>
     <string name="add_account">添加账户</string>
     <string name="scan_qr">扫描二维码</string>
+    <string name="scan_from_gallery">从相册选择图片</string>
+    <string name="scan_no_qr">图片中未找到二维码</string>
+    <string name="scan_no_uri">二维码中未找到 otpauth:// 链接</string>
+    <string name="scan_gallery_failed">无法读取该图片</string>
     <string name="enter_manually">手动输入</string>
     <string name="paste_uri">粘贴 otpauth:// 链接</string>
     <string name="search_hint">搜索账户</string>
@@ -109,6 +113,12 @@
     <string name="accounts_count">共 %1$d 个账户</string>
     <string name="about_desc">Osmium 是一款完全离线、隐私优先的 TOTP 身份验证器。所有数据使用 Android Keystore 加密，永不离开你的设备。</string>
     <string name="sorting_hint">长按账户可拖动排序</string>
+    <string name="account_type_label">账户类型</string>
+    <string name="account_type_totp">时间型（TOTP）</string>
+    <string name="account_type_hotp">计数器（HOTP）</string>
+    <string name="hotp_counter">计数器：%1$d</string>
+    <string name="hotp_next">下一个验证码（计数器 +1）</string>
+    <string name="hotp_params">HOTP · %1$s · %2$d 位</string>
     <string name="sort_mode">排序方式</string>
     <string name="sort_mode_desc">账户在列表中的排列方式</string>
     <string name="sort_random">随机排序</string>
@@ -122,6 +132,9 @@
     <string name="hide_codes">隐藏验证码</string>
     <string name="hide_codes_desc">验证码以圆点显示，复制功能不受影响；显示密钥和分享功能将被禁用。</string>
     <string name="hide_codes_blocks_secret">隐藏验证码模式下无法显示和分享密钥</string>
+    <string name="time_offset">时钟校准</string>
+    <string name="time_offset_desc">当前偏移：%1$+d 秒（0 = 自动）</string>
+    <string name="time_offset_hint">设备时钟不准时手动偏移 TOTP 时钟。范围 −600 到 +600 秒，正常情况下保持 0。</string>
 
     <string name="biometric_prompt_title">解锁 Osmium</string>
     <string name="biometric_prompt_subtitle">验证身份</string>

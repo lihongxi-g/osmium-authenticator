@@ -160,11 +160,27 @@ fun DetailScreen(
                             maxLines = 1
                         )
                         Spacer(Modifier.height(8.dp))
-                        Text(
-                            text = stringResource(R.string.seconds_remaining, ui.remainingSeconds),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        if (ui.isHotp) {
+                            Text(
+                                text = stringResource(R.string.hotp_counter, account.counter),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(Modifier.height(4.dp))
+                            OutlinedButton(
+                                onClick = {
+                                    vm.incrementCounter(account.id)
+                                }
+                            ) {
+                                Text(stringResource(R.string.hotp_next))
+                            }
+                        } else {
+                            Text(
+                                text = stringResource(R.string.seconds_remaining, ui.remainingSeconds),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                         Spacer(Modifier.height(4.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
@@ -185,7 +201,10 @@ fun DetailScreen(
 
                 Spacer(Modifier.height(16.dp))
                 Text(
-                    text = stringResource(R.string.totp_params, account.algorithm, account.digits, account.period),
+                    text = if (account.isHotp)
+                        stringResource(R.string.hotp_params, account.algorithm, account.digits)
+                    else
+                        stringResource(R.string.totp_params, account.algorithm, account.digits, account.period),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.safekey.authenticator.BuildConfig
@@ -75,6 +77,8 @@ fun SettingsScreen(
     var showLanguageDialog by remember { mutableStateOf(false) }
     var showDestroyModeDialog by remember { mutableStateOf(false) }
     var showThresholdDialog by remember { mutableStateOf(false) }
+    var showOffsetDialog by remember { mutableStateOf(false) }
+    var offsetInput by remember { mutableStateOf("") }
     // sensitive toggle awaiting verification: Pair("gate"/"screenshot", target)
     var pendingToggle by remember { mutableStateOf<Pair<String, Boolean>?>(null) }
     var showVerifyDialog by remember { mutableStateOf(false) }
@@ -203,6 +207,19 @@ fun SettingsScreen(
                             showVerifyDialog = true
                         }
                     )
+                }
+            )
+
+            SettingRow(
+                icon = AppIcons.Timer,
+                title = stringResource(R.string.time_offset),
+                description = stringResource(
+                    R.string.time_offset_desc,
+                    settings.timeOffsetSeconds
+                ),
+                onClick = {
+                    offsetInput = settings.timeOffsetSeconds.toString()
+                    showOffsetDialog = true
                 }
             )
 
@@ -496,6 +513,45 @@ fun SettingsScreen(
             },
             confirmButton = {
                 TextButton(onClick = { showDestroyModeDialog = false }) { Text(stringResource(R.string.close)) }
+            }
+        )
+    }
+
+    if (showOffsetDialog) {
+        AlertDialog(
+            onDismissRequest = { showOffsetDialog = false },
+            title = { Text(stringResource(R.string.time_offset)) },
+            text = {
+                Column {
+                    Text(
+                        text = stringResource(R.string.time_offset_hint),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = offsetInput,
+                        onValueChange = { offsetInput = it },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        singleLine = true,
+                        placeholder = { Text("0") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    val v = offsetInput.toIntOrNull()
+                    if (v != null && v in -600..600) {
+                        vm.setTimeOffsetSeconds(v)
+                        showOffsetDialog = false
+                    }
+                }) { Text(stringResource(R.string.save)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showOffsetDialog = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
             }
         )
     }

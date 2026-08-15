@@ -13,7 +13,9 @@ data class ParsedOtpUri(
     val secret: String,
     val algorithm: String,
     val digits: Int,
-    val period: Int
+    val period: Int,
+    val type: String = Account.TYPE_TOTP,
+    val counter: Long = 0
 )
 
 /**
@@ -23,8 +25,9 @@ data class ParsedOtpUri(
 fun Account.toOtpUri(): String {
     val labelPart = if (issuer.isNotBlank()) Uri.encode("$issuer:$label") else Uri.encode(label)
     val issuerPart = Uri.encode(issuer)
-    return "otpauth://totp/$labelPart?secret=$secret" +
-        "&issuer=$issuerPart&algorithm=$algorithm&digits=$digits&period=$period"
+    val base = "otpauth://$type/$labelPart?secret=$secret" +
+        "&issuer=$issuerPart&algorithm=$algorithm&digits=$digits"
+    return if (isHotp) "$base&counter=$counter" else "$base&period=$period"
 }
 
 /**
@@ -49,8 +52,10 @@ object OtpUriParser {
         if (!uri.scheme.equals("otpauth", ignoreCase = true)) {
             throw IllegalArgumentException("Unsupported scheme: ${uri.scheme}")
         }
-        if (!uri.host.equals("totp", ignoreCase = true)) {
-            throw IllegalArgumentException("Only TOTP (time-based) accounts are supported")
+        val type = when {
+            uri.host.equals("totp", ignoreCase = true) -> Account.TYPE_TOTP
+            uri.host.equals("hotp", ignoreCase = true) -> Account.TYPE_HOTP
+            else -> throw IllegalArgumentException("Unsupported type: ${uri.host} (expected totp or hotp)")
         }
 
         val query = parseQuery(uri.rawQuery)
@@ -87,6 +92,15 @@ object OtpUriParser {
             p
         }
 
+        // HOTP: initial counter (RFC 4226, defaults to 0)
+        val counter = if (type == Account.TYPE_HOTP) {
+            (query["counter"] ?: "0").let { raw ->
+                val c = raw.toLongOrNull() ?: throw IllegalArgumentException("Invalid counter: $raw")
+                if (c < 0) throw IllegalArgumentException("Negative counter: $c")
+                c
+            }
+        } else 0L
+
         val labelRaw = urlDecode(uri.rawPath.removePrefix("/"))
         if (labelRaw.isBlank()) {
             throw IllegalArgumentException("Missing account label")
@@ -112,7 +126,9 @@ object OtpUriParser {
             secret = secret,
             algorithm = algorithm,
             digits = digits,
-            period = period
+            period = period,
+            type = type,
+            counter = counter
         )
     }
 
