@@ -1,5 +1,6 @@
 package com.safekey.authenticator.totp
 
+import java.net.URLDecoder
 import java.util.Base64
 
 /**
@@ -52,11 +53,14 @@ object GoogleMigrationParser {
      */
     fun parse(rawUri: String): List<MigrationAccount> {
         val trimmed = rawUri.trim()
-        val dataParam = trimmed.substringAfter("data=", "")
+        val dataRaw = trimmed.substringAfter("data=", "")
             .substringBefore("&").trim()
-        if (dataParam.isEmpty()) {
+        if (dataRaw.isEmpty()) {
             throw IllegalArgumentException("Missing data parameter")
         }
+        // Google may percent-encode the base64 payload inside the QR URI
+        // (%2B %2F %3D). Decode those escapes before base64.
+        val dataParam = percentDecode(dataRaw)
         val bytes = try {
             decodeBase64(dataParam)
         } catch (e: Exception) {
@@ -71,6 +75,17 @@ object GoogleMigrationParser {
             throw IllegalArgumentException("No accounts found in payload")
         }
         return payload
+    }
+
+    private fun percentDecode(s: String): String {
+        if (!s.contains("%")) return s
+        // URLDecoder treats '+' as space (form semantics); protect base64 '+'
+        // by re-escaping it first, then decode the remaining percent escapes.
+        return try {
+            URLDecoder.decode(s.replace("+", "%2B"), Charsets.UTF_8.name())
+        } catch (_: Exception) {
+            s
+        }
     }
 
     private fun decodeBase64(data: String): ByteArray {

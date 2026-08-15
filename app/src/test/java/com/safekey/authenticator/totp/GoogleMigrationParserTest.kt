@@ -71,4 +71,15 @@ class GoogleMigrationParserTest {
         assertEquals(2, accounts.size)
         assertEquals("Google", accounts[0].issuer)
     }
+
+    @Test
+    fun `percent encoded payload accepted`() {
+        // Google QR payloads may percent-encode the base64 body (%3D etc.)
+        val data = "CjIKEEpCU1dZM0RQRUhQSzNQWFASDnVzZXJAZ21haWwuY29tGgZHb29nbGUgASgBMAI4AAoyChpINFdPNFRSTkJFSVFENVhOSk5XRDQ0Q0ZOWRIEb2N0bxoGR2l0SHViIAIoAjABOAUQARgCKAA%3D"
+        val uri = "otpauth-migration://offline?data=$data"
+        val accounts = GoogleMigrationParser.parse(uri)
+        assertEquals(2, accounts.size)
+        assertEquals("Google", accounts[0].issuer)
+        assertEquals("GitHub", accounts[1].issuer)
+    }
 }
