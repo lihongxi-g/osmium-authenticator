@@ -161,7 +161,8 @@ class AccountRepository(
             updatedAt = updatedAt,
             copyCount = copyCount,
             type = type,
-            counter = counter
+            counter = counter,
+            hidden = hidden
         )
     }
 
@@ -182,7 +183,8 @@ class AccountRepository(
             updatedAt = updatedAt,
             copyCount = copyCount,
             type = type,
-            counter = counter
+            counter = counter,
+            hidden = hidden
         )
     }
 

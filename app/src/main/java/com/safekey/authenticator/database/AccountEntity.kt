@@ -24,5 +24,8 @@ data class AccountEntity(
     val updatedAt: Long,
     val copyCount: Int = 0,
     val type: String = "totp",
-    val counter: Long = 0
+    val counter: Long = 0,
+    /** Kept only for schema compatibility with the rolled-back 2.1.3
+     *  (hidden-accounts) database — unused by the UI. */
+    val hidden: Boolean = false
 )

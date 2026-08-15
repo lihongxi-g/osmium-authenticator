@@ -17,7 +17,8 @@ data class Account(
     val copyCount: Int = 0,
     val updatedAt: Long,
     val type: String = TYPE_TOTP,
-    val counter: Long = 0
+    val counter: Long = 0,
+    val hidden: Boolean = false
 ) {
     val displayTitle: String get() = issuer.ifBlank { label }
     val displaySubtitle: String get() = label
