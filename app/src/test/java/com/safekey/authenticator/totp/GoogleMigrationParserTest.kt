@@ -27,7 +27,7 @@ class GoogleMigrationParserTest {
         assertEquals(2, accounts.size)
 
         val google = accounts[0]
-        assertEquals("JBSWY3DPEHPK3PXP", google.secret)
+        assertEquals("JJBFGV2ZGNCFARKIKBFTGUCYKA", google.secret)
         assertEquals("user@gmail.com", google.name)
         assertEquals("Google", google.issuer)
         assertEquals("SHA1", google.algorithm)
@@ -36,7 +36,7 @@ class GoogleMigrationParserTest {
         assertEquals(0L, google.counter)
 
         val github = accounts[1]
-        assertEquals("H4WO4TRNBEIQD5XNJNWD44CFNY", github.secret)
+        assertEquals("JA2FOTZUKRJE4QSFJFIUINKYJZFE4V2EGQ2EGRSOLE", github.secret)
         assertEquals("octo", github.name)
         assertEquals("GitHub", github.issuer)
         assertEquals("SHA256", github.algorithm)
@@ -96,23 +96,24 @@ class GoogleMigrationParserTest {
         assertEquals(1, accounts.size)
         assertEquals("SHA1", accounts[0].algorithm)
         assertFalse(accounts[0].isUnsupported)
+        // raw bytes are canonicalized to Base32 text
+        assertEquals("JJBFGV2ZGNCFARKIKBFTGUCYKA", accounts[0].secret)
     }
 
     @Test
-    fun `base64 secret accepted`() {
-        // Some Google accounts store the secret as base64 (e.g. containing
-        // chars outside the base32 alphabet). Encode a valid 20-byte secret.
-        val bytes = "12345678901234567890".toByteArray(Charsets.US_ASCII)
-        val b64 = java.util.Base64.getEncoder().encodeToString(bytes)
-        val uri = buildOneAccountUri(b64)
+    fun `arbitrary raw secret bytes accepted`() {
+        // The migration secret field is RAW key bytes (Aegis: getSecret()
+        // .toByteArray()) — including bytes outside the printable ASCII
+        // range, which the old text-based parsing could never handle.
+        val bytes = byteArrayOf(0x21, 0x45, 0x67, 0x09, 0x10, 0x32, 0x54, 0x76, 0x78, 0x0A, 0x3B, 0x4D, 0x5E, 0x6F, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66)
+        val uri = buildOneAccountUri(bytes)
         val accounts = GoogleMigrationParser.parse(uri)
         assertEquals(1, accounts.size)
         assertFalse(accounts[0].isUnsupported)
-        // canonicalized to base32 of the same bytes
         assertEquals(Base32.encode(bytes).replace("=", ""), accounts[0].secret)
     }
 
-    private fun buildOneAccountUri(secretB64: String): String {
+    private fun buildOneAccountUri(secretRaw: ByteArray): String {
         // hand-encode: field1(bytes secret), field2(name), field3(issuer), field4(alg=1), field5(digits=1), field6(type=2)
         fun v(n: Long): ByteArray {
             val out = mutableListOf<Byte>()
@@ -126,7 +127,7 @@ class GoogleMigrationParserTest {
         }
         fun f(num: Int, payload: ByteArray): ByteArray = v((num shl 3 or 2).toLong()) + v(payload.size.toLong()) + payload
         fun fv(num: Int, value: Long): ByteArray = v((num shl 3).toLong()) + v(value)
-        var inner = f(1, secretB64.toByteArray()) + f(2, "test".toByteArray()) + f(3, "Google".toByteArray())
+        var inner = f(1, secretRaw) + f(2, "test".toByteArray()) + f(3, "Google".toByteArray())
         inner += fv(4, 1) + fv(5, 1) + fv(6, 2)
         val payload = f(1, inner) + fv(2, 1) + fv(3, 1) + fv(5, 0)
         val data = java.util.Base64.getEncoder().encodeToString(payload)

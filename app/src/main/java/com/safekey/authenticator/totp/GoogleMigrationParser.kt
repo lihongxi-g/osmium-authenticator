@@ -133,7 +133,7 @@ object GoogleMigrationParser {
     }
 
     private fun parseOtpParameters(bytes: ByteArray, start: Int, end: Int): MigrationAccount {
-        var secret = ""
+        var secretBytes: ByteArray = ByteArray(0)
         var name = ""
         var issuer = ""
         var algorithm = 0
@@ -147,9 +147,9 @@ object GoogleMigrationParser {
             val fieldNumber = (tag.first ushr 3).toInt()
             val wireType = (tag.first and 0x07).toInt()
             when (fieldNumber) {
-                1 -> { // bytes secret
+                1 -> { // bytes secret — RAW key bytes, NOT base32/base64 text
                     val len = readVarint(bytes, i)
-                    secret = String(bytes, len.second, len.first.toInt(), Charsets.US_ASCII)
+                    secretBytes = bytes.copyOfRange(len.second, len.second + len.first.toInt())
                     i = len.second + len.first.toInt()
                 }
                 2 -> { // string name
@@ -197,7 +197,7 @@ object GoogleMigrationParser {
             }
         }
         return MigrationAccount(
-            secret = normalizedSecret(secret.trim()),
+            secret = normalizedSecret(secretBytes),
             name = name,
             issuer = issuer,
             algorithm = when (algorithm) {
@@ -214,26 +214,12 @@ object GoogleMigrationParser {
         )
     }
 
-    /** Canonicalize the secret like OtpUriParser does (decode → re-encode,
-     *  padding stripped). Google stores most secrets as Base32 text, but some
-     *  accounts use Base64 — try Base32 first, then Base64. Invalid secrets
-     *  return "" and the account is marked unsupported. */
-    private fun normalizedSecret(raw: String): String {
-        if (raw.isEmpty()) return ""
-        val asB32 = try {
-            val bytes = Base32.decode(raw)
-            if (bytes.size < 10) null else bytes
-        } catch (_: Exception) {
-            null
-        }
-        if (asB32 != null) return Base32.encode(asB32).replace("=", "")
-        val asB64 = try {
-            val bytes = Base64.getDecoder().decode(raw)
-            if (bytes.size < 10) null else bytes
-        } catch (_: Exception) {
-            null
-        }
-        return if (asB64 != null) Base32.encode(asB64).replace("=", "") else ""
+    /** The migration secret field carries RAW key bytes (Aegis handles it
+     *  the same way: getSecret().toByteArray()). Canonicalize to the Base32
+     *  text Osmium stores internally. */
+    private fun normalizedSecret(raw: ByteArray): String {
+        if (raw.size < 10) return ""
+        return Base32.encode(raw).replace("=", "")
     }
 
     /** Reads an unsigned LEB128 varint; returns (value, nextIndex). */
