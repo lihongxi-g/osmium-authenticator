@@ -293,7 +293,7 @@ fun DetailScreen(
                         }
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    enabled = !settings.hideCodes
+                    enabled = !settings.hideCodes && !account.isSteam
                 ) {
                     Icon(
                         imageVector = AppIcons.QrCodeScanner,

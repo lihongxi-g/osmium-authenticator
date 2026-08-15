@@ -354,6 +354,13 @@ fun SettingsScreen(
             )
 
             SettingRow(
+                icon = AppIcons.MenuBook,
+                title = stringResource(R.string.manual_title),
+                description = stringResource(R.string.manual_entry_desc),
+                onClick = { vm.nav.push(Screen.Manual) }
+            )
+
+            SettingRow(
                 icon = AppIcons.Info,
                 title = stringResource(R.string.settings_about),
                 description = stringResource(R.string.about_entry_desc),

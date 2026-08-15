@@ -70,6 +70,7 @@ import com.safekey.authenticator.ui.screens.ScanScreen
 import com.safekey.authenticator.ui.screens.SettingsScreen
 import com.safekey.authenticator.ui.screens.ShareQrScreen
 import com.safekey.authenticator.ui.screens.SortOrderScreen
+import com.safekey.authenticator.ui.screens.ManualScreen
 import com.safekey.authenticator.ui.theme.SafeKeyTheme
 import java.util.Locale
 import kotlinx.coroutines.delay
@@ -606,7 +607,11 @@ class MainActivity : FragmentActivity() {
                             if (parsed != null) {
                                 vm.nav.push(Screen.AccountForm(accountId = null, prefill = parsed))
                             } else {
-                                vm.showToast(context.getString(R.string.error_uri_invalid))
+                                if (clipText.contains("Steam", ignoreCase = true)) {
+                                    vm.showToast(context.getString(R.string.steam_manual_hint))
+                                } else {
+                                    vm.showToast(context.getString(R.string.error_uri_invalid))
+                                }
                             }
                         },
                         onOpenDetail = { account -> vm.nav.push(Screen.Detail(account.id)) },
@@ -737,6 +742,10 @@ class MainActivity : FragmentActivity() {
 
                     is Screen.About -> AboutScreen(
                         vm = vm,
+                        onBack = { vm.nav.pop() }
+                    )
+
+                    is Screen.Manual -> ManualScreen(
                         onBack = { vm.nav.pop() }
                     )
 

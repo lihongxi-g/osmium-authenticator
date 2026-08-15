@@ -135,7 +135,11 @@ fun ScanScreen(
                             if (parsed != null) {
                                 confirm = parsed
                             } else {
-                                vm.showToast(context.getString(R.string.scan_no_uri))
+                                if (raw.contains("Steam", ignoreCase = true)) {
+                                    vm.showToast(context.getString(R.string.steam_manual_hint))
+                                } else {
+                                    vm.showToast(context.getString(R.string.scan_no_uri))
+                                }
                             }
                         },
                         modifier = Modifier.weight(1f)

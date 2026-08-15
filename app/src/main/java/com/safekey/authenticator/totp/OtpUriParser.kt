@@ -128,6 +128,15 @@ object OtpUriParser {
             else -> labelRaw
         }.trim()
 
+        // Steam Guard: QR/link import is intentionally unsupported — Steam
+        // accounts must be added manually (issuer = Steam) so the special
+        // 5-char code format is always explicit.
+        if (issuer.equals("Steam", ignoreCase = true) ||
+            labelRaw.substringBefore(":").equals("Steam", ignoreCase = true)
+        ) {
+            throw IllegalArgumentException("Steam accounts must be added manually")
+        }
+
         return ParsedOtpUri(
             issuer = issuer.trim(),
             label = label,

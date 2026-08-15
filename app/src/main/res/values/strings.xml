@@ -9,6 +9,7 @@
     <string name="scan_from_gallery">Choose image from gallery</string>
     <string name="scan_no_qr">No QR code found in the image</string>
     <string name="scan_no_uri">No otpauth:// link found in the QR code</string>
+    <string name="steam_manual_hint">Steam Guard must be added manually (issuer = Steam)</string>
     <string name="scan_gallery_failed">Could not read the image</string>
     <string name="enter_manually">Enter manually</string>
     <string name="paste_uri">Paste otpauth:// link</string>
@@ -136,6 +137,26 @@
     <string name="migration_totp_badge">TOTP</string>
     <string name="migration_imported">Imported %1$d account(s)</string>
     <string name="loading">Loading…</string>
+    <string name="manual_title">Manual</string>
+    <string name="manual_entry_desc">Feature guide and important notes</string>
+    <string name="manual_add_title">Adding accounts</string>
+    <string name="manual_add_body">Scan an otpauth:// QR code, paste an otpauth:// link, or add manually (name, issuer, secret, algorithm, digits, period).\n\nGoogle Authenticator users can migrate via Settings → Data → Google Authenticator quick import.</string>
+    <string name="manual_codes_title">Verification codes</string>
+    <string name="manual_codes_body">Codes refresh every 30 seconds (or your custom period). Tap a code to copy it. The progress bar shows the remaining time.\n\nThe clock is essential: if codes keep failing, check your device clock and adjust it under Settings → Security → Clock calibration.</string>
+    <string name="manual_sort_title">Sort modes</string>
+    <string name="manual_sort_body">Settings → Appearance → Sort mode: manual (add order), alphabetical, add time, or copy count. Accounts can no longer be reordered by dragging.</string>
+    <string name="manual_hidecodes_title">Hide codes mode</string>
+    <string name="manual_hidecodes_body">With hide-codes enabled, codes show as •••••• everywhere. Copying still works, but viewing the secret, sharing and editing are disabled until you turn the mode off (identity verification required).</string>
+    <string name="manual_steam_title">Steam Guard</string>
+    <string name="manual_steam_body">Steam accounts must be added MANUALLY: issuer = Steam, secret = the Base32 shared secret. The app then generates the 5-character alphanumeric Steam codes automatically.\n\nQR codes and otpauth:// links for Steam are intentionally not imported — Steam Guard has no official TOTP standard, and manual entry keeps the special format explicit.</string>
+    <string name="manual_hotp_title">HOTP (counter-based)</string>
+    <string name="manual_hotp_body">HOTP codes do not refresh by themselves. Tap \u201CNext code\u201D in the account details to advance the counter (+1). The counter persists per account. Use HOTP only when the service explicitly requires it.</string>
+    <string name="manual_security_title">Security</string>
+    <string name="manual_security_body">• Require verification on open: fingerprint / system password / Osmium PIN before showing codes.\n• Self-destruct PIN: entering it at ANY PIN prompt wipes all accounts after a confirmation.\n• Screenshots are blocked by default; you can allow them in Settings, but hidden data stays protected.\n• Osmium is fully offline — no network permission, no accounts, no telemetry.</string>
+    <string name="manual_backup_title">Backup &amp; restore</string>
+    <string name="manual_backup_body">Settings → Data → Export creates an encrypted backup (password + app PIN). Keep the password safe — without it the backup cannot be restored.\n\nHidden accounts are excluded from backups. Google Authenticator migration is read-only import.</string>
+    <string name="manual_notes_title">Important notes</string>
+    <string name="manual_notes_body">• Secrets never leave this device (encrypted with a hardware-backed key).\n• Uninstalling the app or clearing its data DELETES all accounts — export a backup first.\n• Copied codes stay in the clipboard; there is no auto-clear.\n• If your device clock is wrong, codes will be wrong — enable network time sync.</string>
     <string name="sort_mode_desc">How accounts are ordered in the list</string>
     <string name="sort_random">Random</string>
     <string name="sort_random_desc">Shuffled once per app launch</string>

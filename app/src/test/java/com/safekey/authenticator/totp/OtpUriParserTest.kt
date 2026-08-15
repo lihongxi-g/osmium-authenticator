@@ -124,12 +124,10 @@ class OtpUriParserTest {
         assertTrue("expected parse failure for: $uri", threw)
     }
     @Test
-    fun `steam uri with digits 5 accepted`() {
-        val p = OtpUriParser.parse(
-            "otpauth://totp/Steam:test?secret=$baseSecret&issuer=Steam&algorithm=SHA1&digits=5&period=30"
-        )
-        assertEquals(5, p.digits)
-        assertEquals("Steam", p.issuer)
+    fun `steam uri rejected for manual add only`() {
+        // v2.2.0: Steam Guard is manual-add only — QR/link import is refused
+        expectThrow("otpauth://totp/Steam:test?secret=$baseSecret&issuer=Steam&algorithm=SHA1&period=30")
+        expectThrow("otpauth://totp/Steam:test?secret=$baseSecret&issuer=Steam&algorithm=SHA1&digits=5&period=30")
     }
 
     @Test
