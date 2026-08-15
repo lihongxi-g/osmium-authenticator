@@ -20,6 +20,13 @@ class CryptoManager {
 
     private val keyStore: KeyStore = KeyStore.getInstance(ANDROID_KEYSTORE).apply { load(null) }
 
+    /**
+     * Synchronized: concurrent first-time callers would race to generate the
+     * same alias (KeyGenerator.generateKey throws for an existing alias), which
+     * crashed batch imports (N concurrent addAccount coroutines on a fresh
+     * install). Serialize key access — cipher instances stay per-call.
+     */
+    @Synchronized
     private fun getOrCreateKey(): SecretKey {
         val existing = (keyStore.getEntry(KEY_ALIAS, null) as? KeyStore.SecretKeyEntry)?.secretKey
         if (existing != null) return existing

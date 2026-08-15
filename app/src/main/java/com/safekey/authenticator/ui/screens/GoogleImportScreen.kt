@@ -218,25 +218,13 @@ fun GoogleImportScreen(
                 Button(
                     onClick = {
                         val s = selected.orEmpty()
-                        var imported = 0
-                        list.forEachIndexed { index, account ->
-                            if (index in s && !account.isUnsupported &&
+                        val toImport = list.filterIndexed { index, account ->
+                            index in s && !account.isUnsupported &&
                                 accounts.none { it.secret == account.secret }
-                            ) {
-                                vm.addAccount(
-                                    issuer = account.issuer,
-                                    label = account.name,
-                                    secret = account.secret,
-                                    algorithm = account.algorithm,
-                                    digits = account.digits,
-                                    period = 30,
-                                    type = account.type,
-                                    counter = account.counter
-                                )
-                                imported++
-                            }
                         }
-                        vm.showToast(context.getString(R.string.migration_imported, imported))
+                        // sequential batch import (no concurrent Keystore races)
+                        vm.importAccounts(toImport)
+                        vm.showToast(context.getString(R.string.migration_imported, toImport.size))
                         onImported()
                     },
                     enabled = !selected.isNullOrEmpty(),

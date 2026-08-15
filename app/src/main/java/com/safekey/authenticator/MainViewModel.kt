@@ -338,6 +338,30 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     // ---------------------------------------------------- account actions
 
+    /** Sequential batch import for migration flows — avoids racing N
+     *  concurrent addAccount coroutines (Keystore ops serialize cleanly). */
+    fun importAccounts(accounts: List<com.safekey.authenticator.totp.GoogleMigrationParser.MigrationAccount>) {
+        viewModelScope.launch {
+            accounts.forEach { a ->
+                if (a.isUnsupported) return@forEach
+                try {
+                    repo.add(
+                        issuer = a.issuer,
+                        label = a.name,
+                        secret = a.secret,
+                        algorithm = a.algorithm,
+                        digits = a.digits,
+                        period = 30,
+                        type = a.type,
+                        counter = a.counter
+                    )
+                } catch (e: Exception) {
+                    AppLog.d("migration import failed for ${a.name}: ${e.message}")
+                }
+            }
+        }
+    }
+
     fun addAccount(
         issuer: String,
         label: String,
