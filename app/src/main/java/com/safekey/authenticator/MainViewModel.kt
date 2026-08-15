@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -46,10 +47,6 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     val settings: StateFlow<AppSettings> = settingsRepo.settings
         .stateIn(viewModelScope, SharingStarted.Eagerly, AppSettings())
 
-    val accounts: StateFlow<List<Account>> = repo.accounts
-        .flowOn(Dispatchers.Default) // decryption + flow ops off the main thread
-        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
-
     // UI tick, ~2 Hz — smooth countdown without recomputing codes constantly
     private val _now = MutableStateFlow(System.currentTimeMillis())
     val now: StateFlow<Long> = _now
@@ -61,20 +58,15 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    /**
-     * Live codes for every account, recomputed each tick.
-     * HMAC runs on Dispatchers.Default — never on the main thread.
-     */
-    /** True once Room delivered its first query result (even empty) —
-     *  used to distinguish "still decrypting" from "no accounts yet". */
     private val _accountsLoaded = MutableStateFlow(false)
     val accountsLoaded: StateFlow<Boolean> = _accountsLoaded
 
-    init {
-        viewModelScope.launch {
-            accounts.collect { _accountsLoaded.value = true }
-        }
-    }
+    // The onEach hook sits UPSTREAM of stateIn: stateIn's initial emptyList()
+    // never passes through it, so the flag only flips on a REAL Room emission.
+    val accounts: StateFlow<List<Account>> = repo.accounts
+        .onEach { _accountsLoaded.value = true }
+        .flowOn(Dispatchers.Default)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val accountUiList: StateFlow<List<AccountUi>> =
         combine(accounts, _now, settings) { list, time, s ->
