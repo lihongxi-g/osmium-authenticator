@@ -1,5 +1,6 @@
 package com.safekey.authenticator.totp
 
+import com.safekey.authenticator.model.Account
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -93,8 +94,16 @@ class OtpUriParserTest {
     }
 
     @Test
-    fun `hotp uri is rejected`() {
-        expectThrow("otpauth://hotp/A:B?secret=$baseSecret")
+    fun `hotp uri parses with counter`() {
+        val p = OtpUriParser.parse("otpauth://hotp/A:B?secret=$baseSecret&counter=7")
+        assertEquals(Account.TYPE_HOTP, p.type)
+        assertEquals(7L, p.counter)
+        assertEquals("B", p.label)
+        // counter defaults to 0 when omitted
+        val p2 = OtpUriParser.parse("otpauth://hotp/A:B?secret=$baseSecret")
+        assertEquals(0L, p2.counter)
+        // negative counter rejected
+        expectThrow("otpauth://hotp/A:B?secret=$baseSecret&counter=-1")
     }
 
     @Test
