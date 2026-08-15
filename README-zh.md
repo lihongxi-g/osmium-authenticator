@@ -38,9 +38,13 @@ Osmium 是一款完全离线、隐私优先的 Android TOTP 验证器。所有�
 
 ## 截图
 
-| 主界面 | 详情 | 安全 |
-|---|---|---|
-| ![](screenshots/main.jpg) | ![](screenshots/detail.jpg) | ![](screenshots/security.jpg) |
+| 主界面 | 外观与安全 |
+|---|---|
+| ![](screenshots/zh-accounts.jpg) | ![](screenshots/zh-appearance.jpg) |
+
+| 安全与数据 | 数据与关于 |
+|---|---|
+| ![](screenshots/zh-security.jpg) | ![](screenshots/zh-data.jpg) |
 
 ## 隐私与条款
 
