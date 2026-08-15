@@ -22,7 +22,7 @@ class AccountRepository(
     val accounts: Flow<List<Account>> =
         dao.observeAll().map { entities -> entities.mapNotNull { it.toDomain(crypto) } }
 
-    suspend fun getAll(): List<Account> = dao.getAll().map { it.toDomain(crypto) }
+    suspend fun getAll(): List<Account> = dao.getAll().mapNotNull { it.toDomain(crypto) }
 
     suspend fun getById(id: String): Account? = dao.getById(id)?.toDomain(crypto)
 
