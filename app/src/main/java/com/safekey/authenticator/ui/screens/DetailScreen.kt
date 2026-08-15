@@ -94,15 +94,24 @@ fun DetailScreen(
                     onBack = onBack,
                     actions = {
                         if (account != null) {
+                            val locked = settings.hideCodes
                             IconButtonCompat(
                                 icon = AppIcons.Edit,
                                 contentDescription = stringResource(R.string.edit),
-                                onClick = { pendingAction = "edit" }
+                                onClick = {
+                                    if (!locked) pendingAction = "edit"
+                                },
+                                tint = if (locked) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
+                                else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             IconButtonCompat(
                                 icon = AppIcons.Delete,
                                 contentDescription = stringResource(R.string.delete),
-                                onClick = { pendingAction = "delete" }
+                                onClick = {
+                                    if (!locked) pendingAction = "delete"
+                                },
+                                tint = if (locked) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
+                                else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
@@ -300,6 +309,7 @@ fun DetailScreen(
                 Spacer(Modifier.height(8.dp))
                 OutlinedButton(
                     onClick = { pendingAction = "delete" },
+                    enabled = !settings.hideCodes,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Icon(
