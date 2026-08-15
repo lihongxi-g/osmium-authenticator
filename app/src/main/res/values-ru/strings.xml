@@ -193,8 +193,6 @@
     <string name="lang_ru">Русский</string>
     <string name="lang_fr">Français</string>
     <string name="lang_hi">हिन्दी</string>
-    <string name="lang_ms">Bahasa Melayu</string>
-
     <string name="version_click_hint">Нажмите, чтобы написать разработчику</string>
     <string name="no_email_app">На устройстве не установлено почтовое приложение.</string>
     <string name="gate_on_open">Проверка при открытии</string>

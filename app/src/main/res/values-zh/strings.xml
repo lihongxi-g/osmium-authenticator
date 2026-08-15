@@ -203,8 +203,6 @@
     <string name="lang_ru">Русский</string>
     <string name="lang_fr">Français</string>
     <string name="lang_hi">हिन्दी</string>
-    <string name="lang_ms">Bahasa Melayu</string>
-
     <string name="version_click_hint">点击发送邮件给开发者</string>
     <string name="no_email_app">设备上没有安装邮件应用。</string>
 

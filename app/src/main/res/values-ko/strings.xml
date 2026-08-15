@@ -193,8 +193,6 @@
     <string name="lang_ru">Русский</string>
     <string name="lang_fr">Français</string>
     <string name="lang_hi">हिन्दी</string>
-    <string name="lang_ms">Bahasa Melayu</string>
-
     <string name="version_click_hint">탭하여 개발자에게 이메일 보내기</string>
     <string name="no_email_app">이 기기에 이메일 앱이 설치되어 있지 않습니다.</string>
     <string name="gate_on_open">열 때 인증</string>

@@ -161,7 +161,6 @@ fun SettingsScreen(
                             "ru" -> stringResource(R.string.lang_ru)
                             "fr" -> stringResource(R.string.lang_fr)
                             "hi" -> stringResource(R.string.lang_hi)
-                            "ms" -> stringResource(R.string.lang_ms)
                             else -> stringResource(R.string.lang_system)
                         },
                         style = MaterialTheme.typography.labelLarge,
@@ -525,10 +524,6 @@ fun SettingsScreen(
                     }
                     ThemeOption(stringResource(R.string.lang_hi), "hi", com.safekey.authenticator.data.LanguagePrefs.get(context) ?: "system") {
                         onLanguageChanged?.invoke("hi")
-                        showLanguageDialog = false
-                    }
-                    ThemeOption(stringResource(R.string.lang_ms), "ms", com.safekey.authenticator.data.LanguagePrefs.get(context) ?: "system") {
-                        onLanguageChanged?.invoke("ms")
                         showLanguageDialog = false
                     }
                 }

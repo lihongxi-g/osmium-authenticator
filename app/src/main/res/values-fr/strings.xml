@@ -193,8 +193,6 @@
     <string name="lang_ru">Русский</string>
     <string name="lang_fr">Français</string>
     <string name="lang_hi">हिन्दी</string>
-    <string name="lang_ms">Bahasa Melayu</string>
-
     <string name="version_click_hint">Touchez pour écrire au développeur</string>
     <string name="no_email_app">Aucune application de messagerie n’est installée sur cet appareil.</string>
     <string name="gate_on_open">Vérifier à l’ouverture</string>

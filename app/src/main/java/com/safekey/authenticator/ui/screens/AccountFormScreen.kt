@@ -239,8 +239,6 @@ fun AccountFormScreen(
 
 private fun validate(issuer: String, label: String, secret: String, period: String): Int? {
     return when {
-        issuer.isBlank() -> R.string.error_issuer_required
-        label.isBlank() -> R.string.error_name_required
         !Base32.isValid(secret) -> R.string.error_secret_invalid
         else -> {
             val bytes = try { Base32.decode(secret) } catch (_: Exception) { ByteArray(0) }
