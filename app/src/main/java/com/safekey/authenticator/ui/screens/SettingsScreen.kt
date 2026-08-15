@@ -154,6 +154,14 @@ fun SettingsScreen(
                         text = when (com.safekey.authenticator.data.LanguagePrefs.get(context)) {
                             "zh" -> stringResource(R.string.lang_zh)
                             "en" -> stringResource(R.string.lang_en)
+                            "es" -> stringResource(R.string.lang_es)
+                            "ja" -> stringResource(R.string.lang_ja)
+                            "ko" -> stringResource(R.string.lang_ko)
+                            "de" -> stringResource(R.string.lang_de)
+                            "ru" -> stringResource(R.string.lang_ru)
+                            "fr" -> stringResource(R.string.lang_fr)
+                            "hi" -> stringResource(R.string.lang_hi)
+                            "ms" -> stringResource(R.string.lang_ms)
                             else -> stringResource(R.string.lang_system)
                         },
                         style = MaterialTheme.typography.labelLarge,
@@ -489,6 +497,38 @@ fun SettingsScreen(
                     }
                     ThemeOption(stringResource(R.string.lang_en), "en", com.safekey.authenticator.data.LanguagePrefs.get(context) ?: "system") {
                         onLanguageChanged?.invoke("en")
+                        showLanguageDialog = false
+                    }
+                    ThemeOption(stringResource(R.string.lang_es), "es", com.safekey.authenticator.data.LanguagePrefs.get(context) ?: "system") {
+                        onLanguageChanged?.invoke("es")
+                        showLanguageDialog = false
+                    }
+                    ThemeOption(stringResource(R.string.lang_ja), "ja", com.safekey.authenticator.data.LanguagePrefs.get(context) ?: "system") {
+                        onLanguageChanged?.invoke("ja")
+                        showLanguageDialog = false
+                    }
+                    ThemeOption(stringResource(R.string.lang_ko), "ko", com.safekey.authenticator.data.LanguagePrefs.get(context) ?: "system") {
+                        onLanguageChanged?.invoke("ko")
+                        showLanguageDialog = false
+                    }
+                    ThemeOption(stringResource(R.string.lang_de), "de", com.safekey.authenticator.data.LanguagePrefs.get(context) ?: "system") {
+                        onLanguageChanged?.invoke("de")
+                        showLanguageDialog = false
+                    }
+                    ThemeOption(stringResource(R.string.lang_ru), "ru", com.safekey.authenticator.data.LanguagePrefs.get(context) ?: "system") {
+                        onLanguageChanged?.invoke("ru")
+                        showLanguageDialog = false
+                    }
+                    ThemeOption(stringResource(R.string.lang_fr), "fr", com.safekey.authenticator.data.LanguagePrefs.get(context) ?: "system") {
+                        onLanguageChanged?.invoke("fr")
+                        showLanguageDialog = false
+                    }
+                    ThemeOption(stringResource(R.string.lang_hi), "hi", com.safekey.authenticator.data.LanguagePrefs.get(context) ?: "system") {
+                        onLanguageChanged?.invoke("hi")
+                        showLanguageDialog = false
+                    }
+                    ThemeOption(stringResource(R.string.lang_ms), "ms", com.safekey.authenticator.data.LanguagePrefs.get(context) ?: "system") {
+                        onLanguageChanged?.invoke("ms")
                         showLanguageDialog = false
                     }
                 }

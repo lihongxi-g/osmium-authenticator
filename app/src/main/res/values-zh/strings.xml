@@ -145,8 +145,6 @@
     <string name="manual_codes_body">验证码每 30 秒（或你设置的周期）自动刷新，点击验证码即可复制，进度条显示剩余时间。\n\n时钟至关重要：若验证码持续验证失败，先检查手机时间是否准确，可在 设置 → 安全 → 时钟校准 手动补偿。</string>
     <string name="manual_sort_title">排序方式</string>
     <string name="manual_sort_body">设置 → 外观 → 排序方式：手动顺序（添加顺序）、字母、添加时间、复制次数。拖拽排序已由排序方式替代。</string>
-    <string name="manual_hidecodes_title">隐藏验证码</string>
-    <string name="manual_hidecodes_body">开启后所有验证码显示为 ••••••。复制功能仍可用，但查看密钥、分享、编辑、删除都会被禁用，直到关闭该模式（需身份验证）。</string>
     <string name="manual_steam_title">Steam Guard</string>
     <string name="manual_steam_body">Steam 账户需手动添加：发行方填 Steam，密钥填 Base32 共享密钥。应用会自动生成 5 位字母数字组合的 Steam 验证码。\n\nSteam 的二维码和 otpauth:// 链接不支持导入（Steam 无官方 TOTP 标准，手动添加保证特殊格式明确无误）。</string>
     <string name="manual_hotp_title">HOTP（计数器型）</string>
@@ -154,7 +152,11 @@
     <string name="manual_security_title">安全</string>
     <string name="manual_security_body">• 打开时验证：显示验证码前需指纹 / 系统密码 / Osmium PIN 验证。\n• 自毁 PIN：在任何 PIN 输入处输入它会清除所有账户（有确认步骤）。\n• 默认禁止截屏，可在设置中放开，但敏感页面始终受保护。\n• Osmium 完全离线：无网络权限、无账号、无遥测。</string>
     <string name="manual_backup_title">备份与恢复</string>
-    <string name="manual_backup_body">设置 → 数据 → 导出 生成加密备份（密码 + 应用 PIN 双重绑定）。请妥善保管密码，丢失密码将无法恢复备份。\n\n隐藏账户不参与备份。Google 验证器迁移为只读导入。</string>
+    <string name="manual_backup_body">设置 → 数据 → 导出 生成加密备份（密码 + 应用 PIN 双重绑定）。请妥善保管密码，丢失密码将无法恢复备份。Google 验证器迁移为只读导入。</string>
+    <string name="manual_tester_title">测试你的验证器</string>
+    <string name="manual_tester_body">打开 https://otp.159310.xyz 可验证 Osmium（或任意验证器）生成的验证码是否正确：网站发放测试密钥，你把它添加进验证器并回填验证码。支持 TOTP、HOTP、Steam Guard，多种算法、位数和周期——全程在浏览器本地完成，数据不会上传。</string>
+    <string name="manual_naming_title">账户名与服务商</string>
+    <string name="manual_naming_body">账户名和服务商都可留空。\n\n账户名留空时，Osmium 会用添加日期和添加位次自动生成一个名称——例如 2026 年 5 月添加的第一个账户名为 20260501。\n\n服务商留空时统一显示为 "Unknown"。</string>
     <string name="manual_notes_title">重要注意事项</string>
     <string name="manual_notes_body">• 密钥只存在本机（硬件级密钥加密存储）。\n• 卸载应用或清除数据会删除所有账户——请先导出备份。\n• 复制的验证码会留在剪贴板中，无自动清除。\n• 手机时间不准会导致验证码错误——请开启网络自动对时。</string>
     <string name="sort_mode_desc">账户在列表中的排列方式</string>
@@ -194,6 +196,15 @@
     <string name="lang_system">跟随系统</string>
     <string name="lang_zh">简体中文</string>
     <string name="lang_en">English</string>
+    <string name="lang_es">Español</string>
+    <string name="lang_ja">日本語</string>
+    <string name="lang_ko">한국어</string>
+    <string name="lang_de">Deutsch</string>
+    <string name="lang_ru">Русский</string>
+    <string name="lang_fr">Français</string>
+    <string name="lang_hi">हिन्दी</string>
+    <string name="lang_ms">Bahasa Melayu</string>
+
     <string name="version_click_hint">点击发送邮件给开发者</string>
     <string name="no_email_app">设备上没有安装邮件应用。</string>
 

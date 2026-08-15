@@ -13,8 +13,8 @@ android {
         applicationId = "com.safekey.authenticator"
         minSdk = 26
         targetSdk = 34
-        versionCode = 34
-        versionName = "2.2.0"
+        versionCode = 35
+        versionName = "2.2.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
     }

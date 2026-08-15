@@ -41,7 +41,7 @@ class AccountRepository(
         val account = Account(
             id = UUID.randomUUID().toString(),
             issuer = issuer.trim(),
-            label = label.trim(),
+            label = autoName(label.trim(), System.currentTimeMillis()),
             secret = secret.trim().uppercase().replace(" ", ""),
             algorithm = algorithm,
             digits = digits,
@@ -59,7 +59,7 @@ class AccountRepository(
     suspend fun update(account: Account, issuer: String, label: String, secret: String, algorithm: String, digits: Int, period: Int) {
         val updated = account.copy(
             issuer = issuer.trim(),
-            label = label.trim(),
+            label = autoName(label.trim(), account.createdAt),
             secret = secret.trim().uppercase().replace(" ", ""),
             algorithm = algorithm,
             digits = digits,
@@ -195,6 +195,17 @@ class AccountRepository(
             com.safekey.authenticator.security.AppLog.d("decrypt failed for account $id: ${e.message}")
             null
         }
+    }
+
+
+    /** Auto-generated account name: add date (YYYYMM) + add order (2 digits).
+     *  e.g. the first account added in May 2026 becomes "20260501". */
+    private suspend fun autoName(raw: String, timeMs: Long): String {
+        if (raw.isNotBlank()) return raw
+        val cal = java.util.Calendar.getInstance().apply { timeInMillis = timeMs }
+        val ymd = "%04d%02d".format(cal.get(java.util.Calendar.YEAR), cal.get(java.util.Calendar.MONTH) + 1)
+        val order = (dao.count() + 1).toString().padStart(2, '0')
+        return ymd + order
     }
 
     suspend fun incrementCopyCount(id: String) {

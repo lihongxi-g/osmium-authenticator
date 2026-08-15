@@ -145,8 +145,6 @@
     <string name="manual_codes_body">Codes refresh every 30 seconds (or your custom period). Tap a code to copy it. The progress bar shows the remaining time.\n\nThe clock is essential: if codes keep failing, check your device clock and adjust it under Settings → Security → Clock calibration.</string>
     <string name="manual_sort_title">Sort modes</string>
     <string name="manual_sort_body">Settings → Appearance → Sort mode: manual (add order), alphabetical, add time, or copy count. Accounts can no longer be reordered by dragging.</string>
-    <string name="manual_hidecodes_title">Hide codes mode</string>
-    <string name="manual_hidecodes_body">With hide-codes enabled, codes show as •••••• everywhere. Copying still works, but viewing the secret, sharing and editing are disabled until you turn the mode off (identity verification required).</string>
     <string name="manual_steam_title">Steam Guard</string>
     <string name="manual_steam_body">Steam accounts must be added MANUALLY: issuer = Steam, secret = the Base32 shared secret. The app then generates the 5-character alphanumeric Steam codes automatically.\n\nQR codes and otpauth:// links for Steam are intentionally not imported — Steam Guard has no official TOTP standard, and manual entry keeps the special format explicit.</string>
     <string name="manual_hotp_title">HOTP (counter-based)</string>
@@ -154,7 +152,11 @@
     <string name="manual_security_title">Security</string>
     <string name="manual_security_body">• Require verification on open: fingerprint / system password / Osmium PIN before showing codes.\n• Self-destruct PIN: entering it at ANY PIN prompt wipes all accounts after a confirmation.\n• Screenshots are blocked by default; you can allow them in Settings, but hidden data stays protected.\n• Osmium is fully offline — no network permission, no accounts, no telemetry.</string>
     <string name="manual_backup_title">Backup &amp; restore</string>
-    <string name="manual_backup_body">Settings → Data → Export creates an encrypted backup (password + app PIN). Keep the password safe — without it the backup cannot be restored.\n\nHidden accounts are excluded from backups. Google Authenticator migration is read-only import.</string>
+    <string name="manual_backup_body">Settings → Data → Export creates an encrypted backup (password + app PIN). Keep the password safe — without it the backup cannot be restored. Google Authenticator migration is read-only import.</string>
+    <string name="manual_tester_title">Test your authenticator</string>
+    <string name="manual_tester_body">Open https://otp.159310.xyz to verify that Osmium (or any authenticator) generates correct codes: the site issues a test secret, you add it to your app and enter the code back. It supports TOTP, HOTP and Steam Guard with multiple algorithms, digit counts and periods — fully in-browser, nothing is uploaded.</string>
+    <string name="manual_naming_title">Account names &amp; issuers</string>
+    <string name="manual_naming_body">Both the account name and the issuer are optional.\n\nIf you leave the ACCOUNT NAME blank, Osmium generates one automatically from the add date and the add order — e.g. the first account added in May 2026 is named 20260501.\n\nIf you leave the ISSUER blank, it is shown as "Unknown".</string>
     <string name="manual_notes_title">Important notes</string>
     <string name="manual_notes_body">• Secrets never leave this device (encrypted with a hardware-backed key).\n• Uninstalling the app or clearing its data DELETES all accounts — export a backup first.\n• Copied codes stay in the clipboard; there is no auto-clear.\n• If your device clock is wrong, codes will be wrong — enable network time sync.</string>
     <string name="sort_mode_desc">How accounts are ordered in the list</string>
@@ -194,6 +196,15 @@
     <string name="lang_system">Follow system</string>
     <string name="lang_zh">简体中文</string>
     <string name="lang_en">English</string>
+    <string name="lang_es">Español</string>
+    <string name="lang_ja">日本語</string>
+    <string name="lang_ko">한국어</string>
+    <string name="lang_de">Deutsch</string>
+    <string name="lang_ru">Русский</string>
+    <string name="lang_fr">Français</string>
+    <string name="lang_hi">हिन्दी</string>
+    <string name="lang_ms">Bahasa Melayu</string>
+
     <string name="version_click_hint">Tap to email the developer</string>
     <string name="no_email_app">No email app is installed on this device.</string>
 

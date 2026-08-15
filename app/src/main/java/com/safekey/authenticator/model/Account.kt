@@ -20,8 +20,11 @@ data class Account(
     val counter: Long = 0,
     val hidden: Boolean = false
 ) {
-    val displayTitle: String get() = issuer.ifBlank { label }
-    val displaySubtitle: String get() = label
+    /** Service (issuer) is the title; a blank issuer shows "Unknown".
+     *  Account names are auto-generated at add time when left blank, so
+     *  [label] is never empty in practice (falls back to "Unknown" anyway). */
+    val displayTitle: String get() = issuer.ifBlank { "Unknown" }
+    val displaySubtitle: String get() = label.ifBlank { "Unknown" }
     /** Steam Guard accounts use the 26-char Steam alphabet. */
     val isSteam: Boolean get() = issuer.equals("Steam", ignoreCase = true)
     val isHotp: Boolean get() = type == TYPE_HOTP
