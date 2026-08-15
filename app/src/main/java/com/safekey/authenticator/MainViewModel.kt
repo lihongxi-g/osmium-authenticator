@@ -78,7 +78,10 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                         digits = a.digits,
                         algorithm = a.algorithm,
                         steamAlphabet = if (a.isSteam) TotpGenerator.STEAM_ALPHABET else null,
-                        counter = a.counter
+                        // TOTP: null → time-based window. HOTP: explicit counter.
+                        // Passing 0 for TOTP accounts would pin every code to
+                        // counter 0 forever (the "codes never change" bug).
+                        counter = if (a.isHotp) a.counter else null
                     ),
                     remainingSeconds = if (a.isHotp) 0 else TotpGenerator.remainingSeconds(adjusted, a.period),
                     periodFraction = if (a.isHotp) 0f else TotpGenerator.periodFraction(adjusted, a.period)

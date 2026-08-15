@@ -126,6 +126,18 @@ class TotpGeneratorTest {
     }
 
     @Test
+    fun `explicit counter pins the code, null follows the clock`() {
+        // Explicit counter ignores the time window entirely (HOTP semantics)
+        val hotp0 = TotpGenerator.generate(secretAscii, 0L, 30, 6, "SHA1", counter = 0L)
+        val hotp1 = TotpGenerator.generate(secretAscii, 30_000L, 30, 6, "SHA1", counter = 0L)
+        assertEquals(hotp0, hotp1)
+        // Null counter uses the time-based window (TOTP semantics)
+        val totp0 = TotpGenerator.generate(secretAscii, 0L, 30, 6, "SHA1")
+        val totp1 = TotpGenerator.generate(secretAscii, 30_000L, 30, 6, "SHA1")
+        assertNotEquals(totp0, totp1)
+    }
+
+    @Test
     fun `hotp rfc 4226 appendix D vectors`() {
         // RFC 4226 Appendix D: secret ASCII "12345678901234567890", 6 digits
         val secret = "12345678901234567890".toByteArray(Charsets.US_ASCII)
