@@ -73,6 +73,32 @@ class GoogleMigrationParserTest {
     }
 
     @Test
+    fun `algorithm zero defaults to sha1`() {
+        // Many Google accounts omit the algorithm field (enum 0), which
+        // semantically means SHA1 — never MD5.
+        fun v(n: Long): ByteArray {
+            val out = mutableListOf<Byte>()
+            var x = n
+            while (true) {
+                val b = (x and 0x7F).toInt()
+                x = x ushr 7
+                if (x != 0L) out.add((b or 0x80).toByte()) else { out.add(b.toByte()); break }
+            }
+            return out.toByteArray()
+        }
+        fun f(num: Int, payload: ByteArray): ByteArray = v((num shl 3 or 2).toLong()) + v(payload.size.toLong()) + payload
+        fun fv(num: Int, value: Long): ByteArray = v((num shl 3).toLong()) + v(value)
+        var inner = f(1, "JBSWY3DPEHPK3PXP".toByteArray()) + f(2, "alice".toByteArray()) + f(3, "Google".toByteArray())
+        inner += fv(4, 0) + fv(5, 1) + fv(6, 2) // algorithm = 0 (unspecified)
+        val payload = f(1, inner) + fv(2, 1) + fv(3, 1) + fv(5, 0)
+        val data = java.util.Base64.getEncoder().encodeToString(payload)
+        val accounts = GoogleMigrationParser.parse("otpauth-migration://offline?data=$data")
+        assertEquals(1, accounts.size)
+        assertEquals("SHA1", accounts[0].algorithm)
+        assertFalse(accounts[0].isUnsupported)
+    }
+
+    @Test
     fun `base64 secret accepted`() {
         // Some Google accounts store the secret as base64 (e.g. containing
         // chars outside the base32 alphabet). Encode a valid 20-byte secret.

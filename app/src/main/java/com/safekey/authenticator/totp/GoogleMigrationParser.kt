@@ -201,11 +201,12 @@ object GoogleMigrationParser {
             name = name,
             issuer = issuer,
             algorithm = when (algorithm) {
+                0 -> "SHA1" // ALGORITHM_UNSPECIFIED — Google defaults to SHA1
                 1 -> "SHA1"
                 2 -> "SHA256"
                 3 -> "SHA512"
                 4 -> "MD5"
-                else -> "MD5"
+                else -> "MD5" // unknown values are rejected conservatively
             },
             digits = if (digits == 2) 8 else 6,
             type = if (type == 1) "hotp" else "totp",
