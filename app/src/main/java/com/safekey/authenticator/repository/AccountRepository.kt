@@ -116,10 +116,13 @@ class AccountRepository(
         }
     }
 
-    /** Export all accounts; [pinSalt]/[pinHash] bind the app PIN to the file. */
+    /** Export all accounts; [pinSalt]/[pinHash] bind the app PIN to the file.
+     *  Hidden accounts are excluded from backups entirely. */
     suspend fun exportVault(pinSalt: String = "", pinHash: String = ""): VaultFile {
-        val all = dao.getAll().map { entity ->
-            val domain = entity.toDomain(crypto)
+        val all = dao.getAll()
+            .mapNotNull { entity -> entity.toDomain(crypto) }
+            .filter { !it.hidden }
+            .map { domain ->
             VaultAccount(
                 issuer = domain.issuer,
                 label = domain.label,
