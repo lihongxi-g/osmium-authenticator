@@ -70,6 +70,7 @@ fun AccountsScreen(
 ) {
     val uiList by vm.sortedAccountUiList.collectAsState()
     val settings by vm.settings.collectAsState()
+    val accountsLoaded by vm.accountsLoaded.collectAsState()
     val search by vm.searchQuery.collectAsState()
     var searching by remember { mutableStateOf(false) }
     var showAddSheet by remember { mutableStateOf(false) }
@@ -128,6 +129,9 @@ fun AccountsScreen(
                 .padding(padding)
         ) {
             when {
+                !accountsLoaded -> LoadingPlaceholder(
+                    modifier = Modifier.align(Alignment.Center)
+                )
                 uiList.isEmpty() -> EmptyState(
                     onAdd = { showAddSheet = true },
                     modifier = Modifier.align(Alignment.Center)
@@ -331,5 +335,27 @@ private fun AccountList(
                     )
             )
         }
+    }
+}
+
+/** Shown while the vault is being decrypted on first open — distinct from
+ *  the true empty state, and themed (onSurfaceVariant on background) so it
+ *  stays readable in both light and dark mode. */
+@Composable
+private fun LoadingPlaceholder(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        CircularProgressIndicator(
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(36.dp)
+        )
+        Spacer(Modifier.height(16.dp))
+        Text(
+            text = stringResource(R.string.loading),
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }

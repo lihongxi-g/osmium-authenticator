@@ -65,6 +65,17 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
      * Live codes for every account, recomputed each tick.
      * HMAC runs on Dispatchers.Default — never on the main thread.
      */
+    /** True once Room delivered its first query result (even empty) —
+     *  used to distinguish "still decrypting" from "no accounts yet". */
+    private val _accountsLoaded = MutableStateFlow(false)
+    val accountsLoaded: StateFlow<Boolean> = _accountsLoaded
+
+    init {
+        viewModelScope.launch {
+            accounts.collect { _accountsLoaded.value = true }
+        }
+    }
+
     val accountUiList: StateFlow<List<AccountUi>> =
         combine(accounts, _now, settings) { list, time, s ->
             val adjusted = time + s.timeOffsetSeconds * 1000L

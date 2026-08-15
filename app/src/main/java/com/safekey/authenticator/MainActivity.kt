@@ -61,6 +61,7 @@ import com.safekey.authenticator.ui.screens.AccountFormScreen
 import com.safekey.authenticator.ui.screens.AccountsScreen
 import com.safekey.authenticator.ui.screens.DetailScreen
 import com.safekey.authenticator.ui.screens.ExportScreen
+import com.safekey.authenticator.ui.screens.GoogleImportScreen
 import com.safekey.authenticator.ui.screens.ImportScreen
 import com.safekey.authenticator.ui.screens.LockScreen
 import com.safekey.authenticator.ui.screens.PinSetupScreen
@@ -742,6 +743,12 @@ class MainActivity : FragmentActivity() {
                     is Screen.SortOrder -> SortOrderScreen(
                         vm = vm,
                         onBack = { vm.nav.pop() }
+                    )
+
+                    is Screen.GoogleImport -> GoogleImportScreen(
+                        vm = vm,
+                        onBack = { vm.nav.pop() },
+                        onImported = { vm.nav.pop() }
                     )
                 }
             }

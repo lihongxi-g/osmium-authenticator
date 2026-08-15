@@ -43,6 +43,7 @@ import com.safekey.authenticator.MainViewModel
 import com.safekey.authenticator.R
 import com.safekey.authenticator.totp.OtpUriParser
 import com.safekey.authenticator.totp.ParsedOtpUri
+import com.safekey.authenticator.ui.components.QrCameraPreview
 import com.safekey.authenticator.ui.components.SimpleTopBar
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -123,9 +124,20 @@ fun ScanScreen(
         ) {
             if (hasPermission) {
                 Column(modifier = Modifier.fillMaxSize()) {
-                    CameraPreview(
+                    QrCameraPreview(
                         enabled = confirm == null,
-                        onCodeFound = { parsed -> confirm = parsed },
+                        onRawCode = { raw ->
+                            val parsed = try {
+                                OtpUriParser.parse(raw)
+                            } catch (_: Exception) {
+                                null
+                            }
+                            if (parsed != null) {
+                                confirm = parsed
+                            } else {
+                                vm.showToast(context.getString(R.string.scan_no_uri))
+                            }
+                        },
                         modifier = Modifier.weight(1f)
                     )
                     Text(
@@ -231,75 +243,4 @@ fun ScanScreen(
             }
         )
     }
-}
-
-@Composable
-private fun CameraPreview(
-    enabled: Boolean,
-    onCodeFound: (ParsedOtpUri) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
-    val controller = remember {
-        LifecycleCameraController(context).apply {
-            cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-            // REQUIRED: without this the controller never attaches to the
-            // lifecycle and the preview stays black.
-            bindToLifecycle(lifecycleOwner)
-        }
-    }
-    val scanning = remember { AtomicBoolean(true) }
-    val mainHandler = remember { Handler(Looper.getMainLooper()) }
-    val enabledState by rememberUpdatedState(enabled)
-
-    val analyzer = remember {
-        ImageAnalysis.Analyzer { imageProxy ->
-            if (!enabledState || !scanning.get()) {
-                imageProxy.close()
-                return@Analyzer
-            }
-            val mediaImage = imageProxy.image
-            if (mediaImage != null) {
-                val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
-                BarcodeScanning.getClient()
-                    .process(image)
-                    .addOnSuccessListener { barcodes ->
-                        val raw = barcodes.firstOrNull()?.rawValue
-                        if (raw != null) {
-                            val parsed = try {
-                                OtpUriParser.parse(raw)
-                            } catch (_: Exception) {
-                                null
-                            }
-                            if (parsed != null && scanning.get()) {
-                                scanning.set(false)
-                                mainHandler.post { onCodeFound(parsed) }
-                            }
-                        }
-                        imageProxy.close()
-                    }
-                    .addOnFailureListener { imageProxy.close() }
-            } else {
-                imageProxy.close()
-            }
-        }
-    }
-
-    // Re-arm scanning when the confirmation dialog is dismissed
-    if (enabled) scanning.set(true)
-
-    androidx.compose.runtime.DisposableEffect(controller) {
-        controller.setImageAnalysisAnalyzer(ContextCompat.getMainExecutor(context), analyzer)
-        onDispose { controller.clearImageAnalysisAnalyzer() }
-    }
-
-    AndroidView(
-        factory = { ctx ->
-            PreviewView(ctx).apply {
-                this.controller = controller
-            }
-        },
-        modifier = modifier.fillMaxSize()
-    )
 }

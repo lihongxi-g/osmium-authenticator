@@ -28,6 +28,7 @@ sealed class Screen {
     data class ShareQr(val accountId: String) : Screen()
     object About : Screen()
     object SortOrder : Screen()
+    object GoogleImport : Screen()
 }
 
 /**
