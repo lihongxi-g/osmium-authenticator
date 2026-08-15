@@ -42,6 +42,11 @@ Osmium 是一款完全离线、隐私优先的 Android TOTP 验证器。所有�
 |---|---|---|
 | ![](screenshots/main.jpg) | ![](screenshots/detail.jpg) | ![](screenshots/security.jpg) |
 
+## 隐私与条款
+
+- [隐私政策](PRIVACY.md)（[中文版](PRIVACY-zh.md)）
+- [用户协议](TERMS.md)（[中文版](TERMS-zh.md)）
+
 ## 安全说明
 
 - 字段级 AES-256-GCM 加密，密钥不可导出，存于 Android Keystore

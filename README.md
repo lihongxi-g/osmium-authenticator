@@ -42,6 +42,11 @@ Installing the wrong architecture will crash on launch. The signing certificate 
 |---|---|---|
 | ![](screenshots/main.jpg) | ![](screenshots/detail.jpg) | ![](screenshots/security.jpg) |
 
+## Privacy & Terms
+
+- [Privacy Policy](PRIVACY.md) ([中文](PRIVACY-zh.md))
+- [Terms of Use](TERMS.md) ([中文](TERMS-zh.md))
+
 ## Security notes
 
 - Field-level AES-256-GCM encryption with a non-exportable Android Keystore key
