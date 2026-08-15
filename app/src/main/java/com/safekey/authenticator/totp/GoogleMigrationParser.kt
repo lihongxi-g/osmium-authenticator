@@ -214,17 +214,25 @@ object GoogleMigrationParser {
     }
 
     /** Canonicalize the secret like OtpUriParser does (decode → re-encode,
-     *  padding stripped). Invalid secrets return "" and the account is
-     *  marked unsupported so the import preview can skip it safely. */
+     *  padding stripped). Google stores most secrets as Base32 text, but some
+     *  accounts use Base64 — try Base32 first, then Base64. Invalid secrets
+     *  return "" and the account is marked unsupported. */
     private fun normalizedSecret(raw: String): String {
         if (raw.isEmpty()) return ""
-        return try {
+        val asB32 = try {
             val bytes = Base32.decode(raw)
-            if (bytes.size < 10) return ""
-            Base32.encode(bytes).replace("=", "")
+            if (bytes.size < 10) null else bytes
         } catch (_: Exception) {
-            ""
+            null
         }
+        if (asB32 != null) return Base32.encode(asB32).replace("=", "")
+        val asB64 = try {
+            val bytes = Base64.getDecoder().decode(raw)
+            if (bytes.size < 10) null else bytes
+        } catch (_: Exception) {
+            null
+        }
+        return if (asB64 != null) Base32.encode(asB64).replace("=", "") else ""
     }
 
     /** Reads an unsigned LEB128 varint; returns (value, nextIndex). */

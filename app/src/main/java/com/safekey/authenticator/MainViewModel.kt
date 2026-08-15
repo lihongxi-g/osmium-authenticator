@@ -65,29 +65,31 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     val accountUiList: StateFlow<List<AccountUi>> =
         combine(accounts, _now, settings) { list, time, s ->
             val adjusted = time + s.timeOffsetSeconds * 1000L
-            list.filterNot { it.hidden }.mapNotNull { a ->
+            list.filterNot { it.hidden }.map { a ->
                 // Defense in depth: one corrupt secret must never take down
-                // the whole app (invalid Base32 would crash every tick).
+                // the whole app. Bad accounts still render (with an invalid
+                // marker) so the user can find and delete them.
                 val secretBytes = try {
                     Base32.decode(a.secret)
                 } catch (_: Exception) {
                     null
                 }
-                if (secretBytes == null) return@mapNotNull null
                 AccountUi(
                     account = a,
-                    code = TotpGenerator.generate(
-                        secret = secretBytes,
-                        timeMs = adjusted,
-                        period = a.period,
-                        digits = a.digits,
-                        algorithm = a.algorithm,
-                        steamAlphabet = if (a.isSteam) TotpGenerator.STEAM_ALPHABET else null,
-                        // TOTP: null → time-based window. HOTP: explicit counter.
-                        // Passing 0 for TOTP accounts would pin every code to
-                        // counter 0 forever (the "codes never change" bug).
-                        counter = if (a.isHotp) a.counter else null
-                    ),
+                    code = secretBytes?.let { bytes ->
+                        TotpGenerator.generate(
+                            secret = bytes,
+                            timeMs = adjusted,
+                            period = a.period,
+                            digits = a.digits,
+                            algorithm = a.algorithm,
+                            steamAlphabet = if (a.isSteam) TotpGenerator.STEAM_ALPHABET else null,
+                            // TOTP: null → time-based window. HOTP: explicit counter.
+                            // Passing 0 for TOTP accounts would pin every code to
+                            // counter 0 forever (the "codes never change" bug).
+                            counter = if (a.isHotp) a.counter else null
+                        )
+                    } ?: "------",
                     remainingSeconds = if (a.isHotp) 0 else TotpGenerator.remainingSeconds(adjusted, a.period),
                     periodFraction = if (a.isHotp) 0f else TotpGenerator.periodFraction(adjusted, a.period)
                 )

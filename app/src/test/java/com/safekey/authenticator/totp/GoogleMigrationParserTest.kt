@@ -73,6 +73,41 @@ class GoogleMigrationParserTest {
     }
 
     @Test
+    fun `base64 secret accepted`() {
+        // Some Google accounts store the secret as base64 (e.g. containing
+        // chars outside the base32 alphabet). Encode a valid 20-byte secret.
+        val bytes = "12345678901234567890".toByteArray(Charsets.US_ASCII)
+        val b64 = java.util.Base64.getEncoder().encodeToString(bytes)
+        val uri = buildOneAccountUri(b64)
+        val accounts = GoogleMigrationParser.parse(uri)
+        assertEquals(1, accounts.size)
+        assertFalse(accounts[0].isUnsupported)
+        // canonicalized to base32 of the same bytes
+        assertEquals(Base32.encode(bytes).replace("=", ""), accounts[0].secret)
+    }
+
+    private fun buildOneAccountUri(secretB64: String): String {
+        // hand-encode: field1(bytes secret), field2(name), field3(issuer), field4(alg=1), field5(digits=1), field6(type=2)
+        fun v(n: Long): ByteArray {
+            val out = mutableListOf<Byte>()
+            var x = n
+            while (true) {
+                val b = (x and 0x7F).toInt()
+                x = x ushr 7
+                if (x != 0L) out.add((b or 0x80).toByte()) else { out.add(b.toByte()); break }
+            }
+            return out.toByteArray()
+        }
+        fun f(num: Int, payload: ByteArray): ByteArray = v((num shl 3 or 2).toLong()) + v(payload.size.toLong()) + payload
+        fun fv(num: Int, value: Long): ByteArray = v((num shl 3).toLong()) + v(value)
+        var inner = f(1, secretB64.toByteArray()) + f(2, "test".toByteArray()) + f(3, "Google".toByteArray())
+        inner += fv(4, 1) + fv(5, 1) + fv(6, 2)
+        val payload = f(1, inner) + fv(2, 1) + fv(3, 1) + fv(5, 0)
+        val data = java.util.Base64.getEncoder().encodeToString(payload)
+        return "otpauth-migration://offline?data=$data"
+    }
+
+    @Test
     fun `percent encoded payload accepted`() {
         // Google QR payloads may percent-encode the base64 body (%3D etc.)
         val data = "CjIKEEpCU1dZM0RQRUhQSzNQWFASDnVzZXJAZ21haWwuY29tGgZHb29nbGUgASgBMAI4AAoyChpINFdPNFRSTkJFSVFENVhOSk5XRDQ0Q0ZOWRIEb2N0bxoGR2l0SHViIAIoAjABOAUQARgCKAA%3D"
