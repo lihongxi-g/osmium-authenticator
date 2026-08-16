@@ -436,6 +436,12 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     fun incrementCounter(id: String) = viewModelScope.launch { repo.incrementCounter(id) }
     fun setDestroyMode(mode: String) = viewModelScope.launch { settingsRepo.setDestroyMode(mode) }
     fun setFailThreshold(threshold: Int) = viewModelScope.launch { settingsRepo.setFailThreshold(threshold) }
+    fun setAutoCheckUpdates(enabled: Boolean) = viewModelScope.launch { settingsRepo.setAutoCheckUpdates(enabled) }
+    fun setAutoBackupEnabled(enabled: Boolean) = viewModelScope.launch { settingsRepo.setAutoBackupEnabled(enabled) }
+    fun setAutoBackupTarget(target: String) = viewModelScope.launch { settingsRepo.setAutoBackupTarget(target) }
+    fun setAutoBackupIntervalDays(days: Int) = viewModelScope.launch { settingsRepo.setAutoBackupIntervalDays(days) }
+    fun setAutoBackupTime(hour: Int, minute: Int) = viewModelScope.launch { settingsRepo.setAutoBackupTime(hour, minute) }
+    fun setAutoBackupPassword(password: String) = viewModelScope.launch { settingsRepo.setAutoBackupPassword(password) }
 
     fun setAppPin(pin: String) {
         pinManager.setPin(pin)

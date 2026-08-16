@@ -9,6 +9,12 @@
          local network) and to nothing else. No telemetry, no cloud. -->
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!-- Auto-backup to the public Download/Osmium folder on Android 8/9 only.
+         Android 10+ writes via MediaStore and needs no permission. -->
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
+
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />

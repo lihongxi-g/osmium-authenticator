@@ -4,10 +4,12 @@ import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.safekey.authenticator.security.CryptoManager
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 private val Context.dataStore by preferencesDataStore(name = "safekey_settings")
@@ -23,7 +25,16 @@ data class AppSettings(
     val destroyMode: String = DESTROY_OFF,
     val failThreshold: Int = 5,
     val pinFailCount: Int = 0,
-    val biometricFailCount: Int = 0
+    val biometricFailCount: Int = 0,
+    val autoBackupEnabled: Boolean = false,
+    val autoBackupTarget: String = AUTO_BACKUP_TARGET_WEBDAV,
+    val autoBackupIntervalDays: Int = 1,
+    val autoBackupHour: Int = 3,
+    val autoBackupMinute: Int = 0,
+    val autoBackupPasswordSet: Boolean = false,
+    val autoBackupLastTime: Long = 0L,
+    val autoBackupLastError: String = "",
+    val autoCheckUpdates: Boolean = true
 ) {
     companion object {
         const val THEME_SYSTEM = "system"
@@ -37,6 +48,9 @@ data class AppSettings(
         const val DESTROY_OFF = "off"
         const val DESTROY_PIN = "destroy_pin"
         const val DESTROY_FAIL_COUNT = "fail_count"
+
+        const val AUTO_BACKUP_TARGET_WEBDAV = "webdav"
+        const val AUTO_BACKUP_TARGET_LOCAL = "local"
     }
 }
 
@@ -61,6 +75,17 @@ class SettingsRepository(
         val WEBDAV_USER = stringPreferencesKey("webdav_user")
         val WEBDAV_PASS_IV = stringPreferencesKey("webdav_pass_iv")
         val WEBDAV_PASS_CT = stringPreferencesKey("webdav_pass_ct")
+        val AUTO_BACKUP_ENABLED = booleanPreferencesKey("auto_backup_enabled")
+        val AUTO_BACKUP_TARGET = stringPreferencesKey("auto_backup_target")
+        val AUTO_BACKUP_INTERVAL = intPreferencesKey("auto_backup_interval_days")
+        val AUTO_BACKUP_HOUR = intPreferencesKey("auto_backup_hour")
+        val AUTO_BACKUP_MINUTE = intPreferencesKey("auto_backup_minute")
+        val AUTO_BACKUP_PASS_IV = stringPreferencesKey("auto_backup_pass_iv")
+        val AUTO_BACKUP_PASS_CT = stringPreferencesKey("auto_backup_pass_ct")
+        val AUTO_BACKUP_LAST_TIME = longPreferencesKey("auto_backup_last_time")
+        val AUTO_BACKUP_LAST_ERROR = stringPreferencesKey("auto_backup_last_error")
+        val AUTO_CHECK_UPDATES = booleanPreferencesKey("auto_check_updates")
+        val UPDATE_LAST_CHECK = longPreferencesKey("update_last_check")
     }
 
     val settings: Flow<AppSettings> = context.dataStore.data.map { prefs ->
@@ -75,7 +100,16 @@ class SettingsRepository(
             destroyMode = prefs[Keys.DESTROY_MODE] ?: AppSettings.DESTROY_OFF,
             failThreshold = prefs[Keys.FAIL_THRESHOLD] ?: 5,
             pinFailCount = prefs[Keys.PIN_FAIL_COUNT] ?: 0,
-            biometricFailCount = prefs[Keys.BIOMETRIC_FAIL_COUNT] ?: 0
+            biometricFailCount = prefs[Keys.BIOMETRIC_FAIL_COUNT] ?: 0,
+            autoBackupEnabled = prefs[Keys.AUTO_BACKUP_ENABLED] ?: false,
+            autoBackupTarget = prefs[Keys.AUTO_BACKUP_TARGET] ?: AppSettings.AUTO_BACKUP_TARGET_WEBDAV,
+            autoBackupIntervalDays = prefs[Keys.AUTO_BACKUP_INTERVAL] ?: 1,
+            autoBackupHour = prefs[Keys.AUTO_BACKUP_HOUR] ?: 3,
+            autoBackupMinute = prefs[Keys.AUTO_BACKUP_MINUTE] ?: 0,
+            autoBackupPasswordSet = prefs[Keys.AUTO_BACKUP_PASS_IV] != null,
+            autoBackupLastTime = prefs[Keys.AUTO_BACKUP_LAST_TIME] ?: 0L,
+            autoBackupLastError = prefs[Keys.AUTO_BACKUP_LAST_ERROR] ?: "",
+            autoCheckUpdates = prefs[Keys.AUTO_CHECK_UPDATES] ?: true
         )
     }
 
@@ -121,6 +155,81 @@ class SettingsRepository(
 
     suspend fun setBiometricFailCount(count: Int) {
         context.dataStore.edit { it[Keys.BIOMETRIC_FAIL_COUNT] = count }
+    }
+
+    // ------------------------------------------------------- auto backup
+
+    suspend fun setAutoBackupEnabled(enabled: Boolean) {
+        context.dataStore.edit { it[Keys.AUTO_BACKUP_ENABLED] = enabled }
+    }
+
+    suspend fun setAutoBackupTarget(target: String) {
+        context.dataStore.edit { it[Keys.AUTO_BACKUP_TARGET] = target }
+    }
+
+    suspend fun setAutoBackupIntervalDays(days: Int) {
+        context.dataStore.edit { it[Keys.AUTO_BACKUP_INTERVAL] = days.coerceIn(1, 365) }
+    }
+
+    suspend fun setAutoBackupTime(hour: Int, minute: Int) {
+        context.dataStore.edit {
+            it[Keys.AUTO_BACKUP_HOUR] = hour.coerceIn(0, 23)
+            it[Keys.AUTO_BACKUP_MINUTE] = minute.coerceIn(0, 59)
+        }
+    }
+
+    /**
+     * Store the export password used by unattended scheduled backups,
+     * encrypted with the Android Keystore key — same storage as the WebDAV
+     * server password. Without this the scheduled worker has no password
+     * to encrypt the backup file with.
+     */
+    suspend fun setAutoBackupPassword(password: String) {
+        context.dataStore.edit { prefs ->
+            if (password.isEmpty()) {
+                prefs.remove(Keys.AUTO_BACKUP_PASS_IV)
+                prefs.remove(Keys.AUTO_BACKUP_PASS_CT)
+            } else {
+                val field = crypto.encrypt(password)
+                prefs[Keys.AUTO_BACKUP_PASS_IV] = field.iv
+                prefs[Keys.AUTO_BACKUP_PASS_CT] = field.ciphertext
+            }
+        }
+    }
+
+    /** Decrypt the stored auto-backup password; null when none is set. */
+    suspend fun getAutoBackupPassword(): String? {
+        val prefs = context.dataStore.data.first()
+        val iv = prefs[Keys.AUTO_BACKUP_PASS_IV] ?: return null
+        val ct = prefs[Keys.AUTO_BACKUP_PASS_CT] ?: return null
+        return try {
+            crypto.decrypt(CryptoManager.EncryptedField(iv, ct))
+        } catch (e: Exception) {
+            // Corrupt password record — fall back to null rather than crash
+            null
+        }
+    }
+
+    /** Result of the last auto-backup run: empty error = success. */
+    suspend fun setAutoBackupResult(error: String, time: Long) {
+        context.dataStore.edit {
+            it[Keys.AUTO_BACKUP_LAST_TIME] = time
+            it[Keys.AUTO_BACKUP_LAST_ERROR] = error
+        }
+    }
+
+    // ------------------------------------------------------ update checks
+
+    suspend fun setAutoCheckUpdates(enabled: Boolean) {
+        context.dataStore.edit { it[Keys.AUTO_CHECK_UPDATES] = enabled }
+    }
+
+    suspend fun getUpdateLastCheck(): Long {
+        return context.dataStore.data.first()[Keys.UPDATE_LAST_CHECK] ?: 0L
+    }
+
+    suspend fun setUpdateLastCheck(timeMillis: Long) {
+        context.dataStore.edit { it[Keys.UPDATE_LAST_CHECK] = timeMillis }
     }
 
     // ------------------------------------------------------ WebDAV backup

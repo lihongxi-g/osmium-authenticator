@@ -62,6 +62,7 @@ fun SettingsScreen(
     onExport: () -> Unit,
     onImport: () -> Unit,
     onWebDav: () -> Unit,
+    onAutoBackup: () -> Unit,
     onOpenPinSetup: () -> Unit,
     onOpenPinVerify: (String) -> Unit,
     onRequireBiometric: ((onSuccess: () -> Unit) -> Unit)? = null,
@@ -367,6 +368,16 @@ fun SettingsScreen(
             )
 
             SettingRow(
+                icon = AppIcons.Timer,
+                title = stringResource(R.string.auto_backup_title),
+                description = stringResource(R.string.auto_backup_desc),
+                onClick = {
+                    pendingNav = { onAutoBackup() }
+                    showVerifyDialog = true
+                }
+            )
+
+            SettingRow(
                 icon = AppIcons.SwapVert,
                 title = stringResource(R.string.accounts_count, accounts.size)
             )
@@ -404,6 +415,18 @@ fun SettingsScreen(
                     )
                 },
                 onClick = { vm.nav.push(Screen.About) }
+            )
+
+            SettingRow(
+                icon = AppIcons.Refresh,
+                title = stringResource(R.string.update_check_label),
+                description = stringResource(R.string.update_check_desc),
+                trailing = {
+                    Switch(
+                        checked = settings.autoCheckUpdates,
+                        onCheckedChange = { vm.setAutoCheckUpdates(it) }
+                    )
+                }
             )
         }
     }

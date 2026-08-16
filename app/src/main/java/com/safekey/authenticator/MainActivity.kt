@@ -3,7 +3,9 @@ package com.safekey.authenticator
 import android.app.KeyguardManager
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.content.res.Configuration
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
@@ -49,6 +51,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import com.safekey.authenticator.backup.AutoBackupScheduler
 import com.safekey.authenticator.data.AppSettings
 import com.safekey.authenticator.data.LanguagePrefs
 import com.safekey.authenticator.security.AppLog
@@ -59,6 +63,7 @@ import com.safekey.authenticator.ui.navigation.Screen
 import com.safekey.authenticator.ui.screens.AboutScreen
 import com.safekey.authenticator.ui.screens.AccountFormScreen
 import com.safekey.authenticator.ui.screens.AccountsScreen
+import com.safekey.authenticator.ui.screens.AutoBackupScreen
 import com.safekey.authenticator.ui.screens.DetailScreen
 import com.safekey.authenticator.ui.screens.ExportScreen
 import com.safekey.authenticator.ui.screens.GoogleImportScreen
@@ -73,13 +78,21 @@ import com.safekey.authenticator.ui.screens.SortOrderScreen
 import com.safekey.authenticator.ui.screens.ManualScreen
 import com.safekey.authenticator.ui.screens.WebDavScreen
 import com.safekey.authenticator.ui.theme.SafeKeyTheme
+import com.safekey.authenticator.update.UpdateChecker
 import java.util.Locale
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : FragmentActivity() {
 
     private val vm: MainViewModel by viewModels()
     private var tampered = false
+
+    // Update-check state: silent once-per-day GitHub query, one dialog.
+    private var pendingUpdateTag by mutableStateOf<String?>(null)
+    private var updateCheckInFlight = false
 
     // ------------------------------------------------------------ lifecycle
 
@@ -155,6 +168,13 @@ class MainActivity : FragmentActivity() {
                         locked -> LockGate()
                         else -> MainNavHost()
                     }
+                    // Update notification only over the unlocked main UI.
+                    val updateTag = pendingUpdateTag
+                    if (updateTag != null && !locked && !pinRequired &&
+                        !destroyed && !tampered
+                    ) {
+                        UpdateDialog(tag = updateTag)
+                    }
                 }
             }
 
@@ -171,6 +191,13 @@ class MainActivity : FragmentActivity() {
         super.onStart()
         vm.setBiometricAvailable(canAuthenticateBiometric())
         vm.onAppForeground()
+
+        // Keep the auto-backup schedule alive across reboots and settings
+        // drift. KEEP never disturbs a pending run.
+        if (!vm.destroyed.value && vm.settings.value.autoBackupEnabled) {
+            AutoBackupScheduler.ensureScheduled(this, vm.settings.value)
+        }
+        maybeCheckForUpdate()
     }
 
     override fun onStop() {
@@ -526,6 +553,78 @@ class MainActivity : FragmentActivity() {
         }
     }
 
+    // --------------------------------------------------------- update check
+
+    /**
+     * Silent once-per-day check against the GitHub releases API, run in the
+     * background when the app comes to the foreground. Only when the user
+     * has auto-update checks enabled. Failures stay silent; a found update
+     * sets [pendingUpdateTag], which the Compose tree shows as a dialog over
+     * the unlocked main UI.
+     */
+    private fun maybeCheckForUpdate() {
+        val settings = vm.settings.value
+        if (!settings.autoCheckUpdates || updateCheckInFlight || tampered ||
+            vm.destroyed.value
+        ) return
+        updateCheckInFlight = true
+        val settingsRepo = (application as SafeKeyApp).settingsRepository
+        lifecycleScope.launch {
+            try {
+                val now = System.currentTimeMillis()
+                val lastCheck = settingsRepo.getUpdateLastCheck()
+                if (now - lastCheck < 24 * 3600_000L) return@launch
+                // Mark the day as checked even if the request fails, so a
+                // flaky network cannot trigger a request storm.
+                settingsRepo.setUpdateLastCheck(now)
+                val tag = withContext(Dispatchers.IO) { UpdateChecker.checkForUpdate() }
+                if (tag != null) pendingUpdateTag = tag
+            } finally {
+                updateCheckInFlight = false
+            }
+        }
+    }
+
+    @Composable
+    private fun UpdateDialog(tag: String) {
+        val context = LocalContext.current
+        AlertDialog(
+            onDismissRequest = { pendingUpdateTag = null },
+            title = { Text(stringResource(R.string.update_available_title)) },
+            text = {
+                Text(
+                    stringResource(
+                        R.string.update_available_body, tag, BuildConfig.VERSION_NAME
+                    )
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        pendingUpdateTag = null
+                        try {
+                            startActivity(
+                                Intent(
+                                    Intent.ACTION_VIEW,
+                                    Uri.parse(
+                                        "https://github.com/lihongxi-g/osmium-authenticator/releases"
+                                    )
+                                )
+                            )
+                        } catch (_: Exception) {
+                            vm.showToast(context.getString(R.string.update_later))
+                        }
+                    }
+                ) { Text(stringResource(R.string.update_go_github)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { pendingUpdateTag = null }) {
+                    Text(stringResource(R.string.update_later))
+                }
+            }
+        )
+    }
+
     // ------------------------------------------------------------ nav host
 
     @Composable
@@ -666,6 +765,7 @@ class MainActivity : FragmentActivity() {
                         onExport = { vm.nav.push(Screen.Export) },
                         onImport = { vm.nav.push(Screen.Import) },
                         onWebDav = { vm.nav.push(Screen.WebDav) },
+                        onAutoBackup = { vm.nav.push(Screen.AutoBackup) },
                         onOpenPinSetup = { vm.nav.push(Screen.PinSetup("pin")) },
                         onOpenPinVerify = { next -> vm.nav.push(Screen.PinVerify(next)) },
                         onRequireBiometric = { onSuccess ->
@@ -708,6 +808,11 @@ class MainActivity : FragmentActivity() {
                     )
 
                     is Screen.WebDav -> WebDavScreen(
+                        vm = vm,
+                        onBack = { vm.nav.pop() }
+                    )
+
+                    is Screen.AutoBackup -> AutoBackupScreen(
                         vm = vm,
                         onBack = { vm.nav.pop() }
                     )

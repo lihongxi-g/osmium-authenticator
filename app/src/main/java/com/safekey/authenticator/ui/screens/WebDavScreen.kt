@@ -79,6 +79,7 @@ fun WebDavScreen(
 
     // dialogs / flows
     var showBackupDialog by remember { mutableStateOf(false) }
+    var showHttpWarning by remember { mutableStateOf(false) }
     var showRestorePassword by remember { mutableStateOf(false) }
     var showPicker by remember { mutableStateOf(false) }
     var pickerFiles by remember { mutableStateOf<List<WebDavFile>>(emptyList()) }
@@ -116,6 +117,16 @@ fun WebDavScreen(
 
     fun saveConfig() {
         if (url.isBlank()) return
+        // Plaintext HTTP is useful for trusted LAN servers, but the user
+        // must explicitly acknowledge the risk before we store the address.
+        if (url.trim().startsWith("http://", ignoreCase = true)) {
+            showHttpWarning = true
+            return
+        }
+        doSaveConfig()
+    }
+
+    fun doSaveConfig() {
         vm.saveWebDavConfig(currentConfig())
         vm.showToast(context.getString(R.string.webdav_saved))
     }
@@ -284,6 +295,29 @@ fun WebDavScreen(
                 )
             }
         }
+    }
+
+    // ------------------------------------------------ plaintext HTTP warning
+
+    if (showHttpWarning) {
+        AlertDialog(
+            onDismissRequest = { showHttpWarning = false },
+            title = { Text(stringResource(R.string.webdav_http_warning_title)) },
+            text = { Text(stringResource(R.string.webdav_http_warning_body)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showHttpWarning = false
+                        doSaveConfig()
+                    }
+                ) { Text(stringResource(R.string.webdav_http_confirm)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showHttpWarning = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
     }
 
     // ---------------------------------------------------- backup password

@@ -13,8 +13,8 @@ android {
         applicationId = "com.safekey.authenticator"
         minSdk = 26
         targetSdk = 34
-        versionCode = 37
-        versionName = "2.3.1"
+        versionCode = 38
+        versionName = "2.3.2"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
     }
@@ -93,6 +93,10 @@ dependencies {
     // QR generation for account sharing (core only, no camera bloat)
     implementation("com.google.zxing:core:3.5.2")
     implementation("androidx.datastore:datastore-preferences:1.0.0")
+
+    // Scheduled auto-backup (WebDAV / local storage). Google first-party;
+    // handles Doze, process death and reboot without custom alarm plumbing.
+    implementation("androidx.work:work-runtime-ktx:2.9.1")
     // Android 14/15 BiometricPrompt fixes. 1.1.0/1.2.0-alpha05 misbehave on
     // ColorOS 15; 1.4.0-alpha02 requires compileSdk 35 (a real release SDK).
     implementation("androidx.biometric:biometric:1.4.0-alpha02")
