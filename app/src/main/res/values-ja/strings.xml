@@ -142,7 +142,7 @@
     <string name="manual_hotp_title">HOTP（カウンタベース）</string>
     <string name="manual_hotp_body">HOTPコードは自動更新されません。アカウント詳細の「次のコード」をタップするとカウンタが+1されます。カウンタはアカウントごとに保存されます。HOTPはサービスが明示的に要求する場合のみ使用してください。</string>
     <string name="manual_security_title">セキュリティ</string>
-    <string name="manual_security_body">• 起動時の確認：コードを表示する前に指紋 / システムパスワード / Osmium PIN で確認します。\n• 自爆 PIN：どの PIN 画面で入力しても、確認後にすべてのアカウントが消去されます。\n• スクリーンショットはデフォルトで禁止。設定で許可できますが、非表示データは常に保護されます。\n• Osmium が接続するのは、あなた自身が設定した WebDAV バックアップサーバーだけです。アカウントなし、テレメトリなし、クラウドなし。</string>
+    <string name="manual_security_body">• 起動時の確認：コードを表示する前に指紋 / システムパスワード / Osmium PIN で確認します。\n• 自爆 PIN：どの PIN 画面で入力しても、確認後にすべてのアカウントが消去されます。\n• スクリーンショットはデフォルトで禁止。設定で許可できますが、非表示データは常に保護されます。\n• Osmiumが接続するのは、あなた自身が設定したWebDAVバックアップサーバーと、更新確認のためのGitHub Releases API（自動確認が有効な場合、1日1回）のみです。アカウントなし、テレメトリなし、クラウドなし。</string>
     <string name="manual_backup_title">バックアップと復元</string>
     <string name="manual_backup_body">設定 → データ → エクスポート で暗号化バックアップ（パスワード + アプリPIN）を作成できます。パスワードは大切に保管してください。ないと復元できません。Google Authenticatorからの移行は読み取り専用のインポートです。</string>
     <string name="manual_tester_title">認証アプリのテスト</string>
@@ -150,7 +150,7 @@
     <string name="manual_naming_title">アカウント名と発行元</string>
     <string name="manual_naming_body">アカウント名と発行元はどちらも省略できます。\n\nアカウント名を空にすると、Osmiumが追加日と追加順から自動で名前を生成します — 例：2026年5月に追加した最初のアカウントは 20260501 となります。\n\n発行元を空にすると「Unknown」と表示されます。</string>
     <string name="manual_notes_title">重要な注意事項</string>
-    <string name="manual_notes_body">• 秘密鍵はハードウェア保護の鍵で暗号化され、あなた自身のパスワード暗号化バックアップの中でのみ端末の外に出ます。\n• アプリのアンインストールやデータ消去で全アカウントが削除されます。先にバックアップを書き出してください。\n• コピーしたコードはクリップボードに残ります。自動クリアはありません。\n• 端末の時計がずれているとコードもずれます。ネットワーク時刻同期を有効にしてください。</string>
+    <string name="manual_notes_body">• 秘密鍵はエクスポート不可のAndroid Keystore鍵で暗号化され、あなた自身のパスワード暗号化バックアップの中でのみ端末の外に出ます。\n• アプリのアンインストールやデータ消去で全アカウントが削除されます。先にバックアップを書き出してください。\n• コピーしたコードはクリップボードに残ります。自動クリアはありません。\n• 端末の時計がずれているとコードもずれます。ネットワーク時刻同期を有効にしてください。</string>
     <string name="sort_mode_desc">リストでのアカウントの並び順</string>
     <string name="sort_random">ランダム</string>
     <string name="sort_random_desc">起動ごとにシャッフル</string>
@@ -298,8 +298,8 @@
     <string name="manual_webdav_body">設定 → データ → WebDAV バックアップで、同じ暗号化書き出しファイルをローカルネットワーク上の WebDAV サーバー（NAS、PC、WebDAV サーバーアプリを動かす別のスマホ）にアップロードできます。サーバーアドレス（ホスト名またはローカル IP）、ユーザー名、パスワードを入力してください。\n\n復元ではサーバーに保存されたバックアップの一覧を表示し、どれか一つを選んで復元します。バックアップの管理では同じ一覧を表示し、サーバー上の古いバックアップを削除できます。サーバーが受け取るのはパスワードで暗号化されたデータだけです。アプリが接続するのは、あなたが設定したサーバーアドレス以外には何もありません。\n\nサーバーアドレスが頻繁に変わる場合は、ルーターで NAS に固定 IP を割り当てるか、ホスト名を使ってください。</string>
     <string name="about_terms_title">利用規約</string>
     <string name="about_privacy_title">プライバシーポリシー</string>
-    <string name="terms_body">Osmium をインストールまたは使用することで、以下の規約に同意したことになります。\n\nOsmium は MIT ライセンスで公開された無料のオープンソースソフトウェアです。\n\n本ソフトウェアは“現状のまま”提供され、いかなる保証もありません。法律で認められる最大限の範囲で、開発者はソフトウェアの使用に起因するいかなる損害についても責任を負いません。\n\nあなたの責任：\n• 秘密鍵とバックアップ用パスワードを大切に保管してください。暗号鍵は開発者を含め誰にも復元できません。PIN を忘れたり、バックアップ用パスワードを失った場合、リセットはできません。\n• バックアップは自分で保管してください。アプリをアンインストールするかデータを消去すると、すべてのアカウントが永久に削除されます。\n• 自爆 PIN は設計上、取り消せません。\n• 端末の時計を正確に保ってください。時間ベースのコードは時計に依存します。\n\nOsmium は自身の二要素認証に使用できます。アクセス権のないシステムやデータへのアクセスには使用しないでください。\n\nOsmium が接続するのは、あなた自身が設定した WebDAV バックアップサーバー（通常はローカルネットワーク内）だけです。それ以外には一切接続しません。</string>
-    <string name="privacy_body">Osmium は一切のデータを収集しません。アカウントシステム、登録、分析、広告 SDK、クラッシュレポートはありません。\n\n保存：秘密鍵・アカウント名・サービス名はこの端末にのみ保存され、Android Keystore の書き出し不能な鍵で AES-256-GCM 暗号化されます。バックアップファイルはパスワードで暗号化されます（PBKDF2 + AES-256-GCM）。\n\nネットワーク：INTERNET 権限は WebDAV バックアップ機能のためだけに使用されます。アプリが接続するのは、あなたが設定したサーバーアドレス（通常はローカルネットワーク内の NAS や PC）だけであり、バックアップまたは復元を実行するときだけです。バックアップは端末を離れる前にパスワードで暗号化されます。\n\nカメラ：QR コードのスキャンのみに使用され、端末上で処理されます。映像が保存・送信されることはありません。\n\n生体認証：Android システムが独占的に処理します。アプリが指紋や顔データを見たり保存したりすることはありません。\n\n何も保持していないため、共有するものもありません。アプリをアンインストールすると、ローカルに保存されたデータはすべて削除されます。\n\nこれらの保証に影響する将来の変更は、リリースノートで告知されます。\n\n連絡先：zhif0776@hotmail.com · https://t.me/osmium2fa</string>
+    <string name="terms_body">Osmium をインストールまたは使用することで、以下の規約に同意したことになります。\n\nOsmium は MIT ライセンスで公開された無料のオープンソースソフトウェアです。\n\n本ソフトウェアは“現状のまま”提供され、いかなる保証もありません。法律で認められる最大限の範囲で、開発者はソフトウェアの使用に起因するいかなる損害についても責任を負いません。\n\nあなたの責任：\n• 秘密鍵とバックアップ用パスワードを大切に保管してください。暗号鍵は開発者を含め誰にも復元できません。PIN を忘れたり、バックアップ用パスワードを失った場合、リセットはできません。\n• バックアップは自分で保管してください。アプリをアンインストールするかデータを消去すると、すべてのアカウントが永久に削除されます。\n• 自爆 PIN は設計上、取り消せません。\n• 端末の時計を正確に保ってください。時間ベースのコードは時計に依存します。\n\nOsmium は自身の二要素認証に使用できます。アクセス権のないシステムやデータへのアクセスには使用しないでください。\n\nOsmiumが接続するのは、あなた自身が設定したWebDAVバックアップサーバー（通常はローカルネットワーク上）と、自動更新確認が有効な場合に1日1回接続するGitHub Releases APIのみです。それ以外には一切接続しません。</string>
+    <string name="privacy_body">Osmiumはデータを一切収集しません。アカウントシステム、登録、解析、広告SDK、クラッシュレポートはありません。\n\n保存：秘密鍵、アカウント名、発行者はこの端末にのみ保存され、Android Keystoreのエクスポート不可キーによるAES-256-GCMで暗号化されます。バックアップファイルはあなたのパスワードで暗号化されます（PBKDF2 + AES-256-GCM）。\n\nネットワーク：INTERNET権限は2つの機能のみに使われます。(1) WebDAVバックアップ：アプリはあなたが設定したサーバーアドレス——通常はローカルネットワーク上のNASやPC——にのみ、バックアップまたは復元の実行時のみ接続します。(2) 更新確認：自動確認が有効な場合、アプリは1日1回、GitHub Releases APIに最新の公開バージョンを問い合わせます。バックアップは端末を離れる前にパスワードで暗号化されます。\n\n自動バックアップ：スケジュールされたバックアップは無人で実行されます。設定したエクスポート用パスワードはAndroid Keystoreキーで暗号化して保存され、バックアップファイルの暗号化にのみ使用されます。ローカルバックアップは公開フォルダ「ダウンロード/Osmium」に書き込まれ、最新5件を残して古いものは削除されます。\n\nカメラ：QRコードのスキャンにのみ使用され、端末上で処理されます。映像が保存・送信されることはありません。\n\n生体認証：完全にAndroidシステムが処理します。アプリが指紋や顔のデータを見たり保存したりすることはありません。\n\n私たちは何も保持していないため、何も共有しません。アプリをアンインストールすると、ローカルに保存されたデータはすべて削除されます。\n\nこれらの保証に影響する将来の変更は、リリースノートに明記されます。\n\n連絡先：zhif0776@hotmail.com · https://t.me/osmium2fa</string>
 
     <string name="webdav_manage">バックアップの管理</string>
     <string name="webdav_delete">削除</string>
@@ -307,4 +307,45 @@
     <string name="webdav_delete_confirm_msg">サーバーから %1$s を削除しますか？この操作は取り消せません。</string>
     <string name="webdav_deleting">削除中…</string>
     <string name="webdav_deleted">バックアップを削除しました</string>
+
+    <string name="auto_backup_title">自動バックアップ</string>
+    <string name="auto_backup_desc">スケジュールに従ってWebDAVまたはローカルに自動バックアップ</string>
+    <string name="auto_backup_target_label">バックアップ先</string>
+    <string name="auto_backup_target_webdav">WebDAVサーバー</string>
+    <string name="auto_backup_target_local">端末のローカルストレージ</string>
+    <string name="auto_backup_interval_label">バックアップ頻度</string>
+    <string name="auto_backup_interval_day">毎日</string>
+    <string name="auto_backup_interval_every_days">%1$d日ごと</string>
+    <string name="auto_backup_time_label">バックアップ時刻</string>
+    <string name="auto_backup_password_label">バックアップ用パスワード</string>
+    <string name="auto_backup_password_set">設定済み（タップで変更）</string>
+    <string name="auto_backup_password_missing">未設定</string>
+    <string name="auto_backup_password_desc">自動バックアップには保存されたパスワードが必要です。Android Keystoreキーで暗号化され、端末の外に出ることはありません。</string>
+    <string name="auto_backup_next_run">次回バックアップ：%1$s</string>
+    <string name="auto_backup_last_success">前回バックアップ：%1$s（成功）</string>
+    <string name="auto_backup_last_failed">前回バックアップ：%1$s（失敗：%2$s）</string>
+    <string name="auto_backup_never_run">まだバックアップはありません</string>
+    <string name="auto_backup_tz_label">(GMT+8)</string>
+    <string name="auto_backup_run_now">今すぐバックアップ</string>
+    <string name="auto_backup_started">バックアップを開始しました</string>
+    <string name="auto_backup_local_dir_desc">保存先：ダウンロード/Osmium</string>
+    <string name="auto_backup_local_permission_desc">このAndroidバージョンでは保存先への書き込みに権限が必要です——タップして許可</string>
+    <string name="auto_backup_webdav_missing">WebDAVサーバーが未設定です。先に設定してください</string>
+    <string name="auto_backup_need_password">先にバックアップ用パスワードを設定してください</string>
+    <string name="auto_backup_password_saved">パスワードを保存しました</string>
+    <string name="auto_backup_time_picker_title">時刻を選択</string>
+    <string name="auto_backup_interval_picker_title">頻度を選択</string>
+    <string name="update_check_label">更新を自動確認</string>
+    <string name="update_check_desc">アプリ起動時にGitHubの新バージョンを静かに確認（1日1回）</string>
+    <string name="update_available_title">新しいバージョンがあります</string>
+    <string name="update_available_body">バージョン%1$sが公開されています（現在：%2$s）。GitHubで確認しますか？</string>
+    <string name="update_go_github">GitHubを開く</string>
+    <string name="update_later">後で</string>
+    <string name="webdav_http_warning_title">平文接続の警告</string>
+    <string name="webdav_http_warning_body">このhttp://アドレスは平文でデータを送信するため、ネットワーク上の他者に読み取られる恐れがあります。信頼できるローカルネットワークでのみ使用してください。それでも保存しますか？</string>
+    <string name="webdav_http_confirm">それでも保存</string>
+    <string name="manual_auto_backup_title">自動バックアップ</string>
+    <string name="manual_auto_backup_body">設定 → データ → 自動バックアップはスケジュールに従って無人でバックアップします。保存先（WebDAVサーバーまたは端末ローカル）、間隔（日数）、時刻を選べます。次回の実行時刻はGMT+8表記で表示されます。\n\nバックアップは手動バックアップと同じパスワード暗号化エクスポート形式です。パスワードはAndroid Keystoreキーで暗号化して保存され、バックアップファイルの暗号化にのみ使われます。ローカルバックアップは公開フォルダ「ダウンロード/Osmium」に書き込まれ、最新5件を残して古いものは削除されます。\n\n前回の実行結果は自動バックアップ画面に表示されます。失敗（サーバーに接続できない等）は記録され1回再試行され、次の予定時刻に再び試みます。</string>
+    <string name="manual_updates_title">更新確認</string>
+    <string name="manual_updates_body">自動確認が有効な場合（設定 → このアプリについて → 更新を自動確認）、Osmiumはアプリ起動時に1日1回、静かにGitHub Releases APIへ最新バージョンを問い合わせます。新しいバージョンがあると、GitHub Releasesページを開くかどうかを尋ねるダイアログを表示します——アプリが自動でダウンロードやインストールをすることはありません。\n\nアカウントデータや端末情報は送信されず、最新の公開バージョン情報のみを取得します。ネットワークエラー時は何も表示しません。</string>
 </resources>

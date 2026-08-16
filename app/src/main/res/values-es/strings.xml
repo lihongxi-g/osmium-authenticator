@@ -142,7 +142,7 @@
     <string name="manual_hotp_title">HOTP (basado en contador)</string>
     <string name="manual_hotp_body">Los códigos HOTP no se actualizan solos. Toca «Código siguiente» en los detalles de la cuenta para avanzar el contador (+1). El contador se guarda por cuenta. Usa HOTP solo cuando el servicio lo exija explícitamente.</string>
     <string name="manual_security_title">Seguridad</string>
-    <string name="manual_security_body">• Verificación al abrir: huella / contraseña del sistema / PIN de Osmium antes de mostrar los códigos.\n• PIN de autodestrucción: al introducirlo en CUALQUIER pantalla de PIN borra todas las cuentas tras confirmar.\n• Las capturas están bloqueadas por defecto; puedes permitirlas en Ajustes, pero los datos ocultos siguen protegidos.\n• Osmium solo se conecta al servidor WebDAV que configures tú: sin cuentas, sin telemetría, sin nube.</string>
+    <string name="manual_security_body">• Verificación al abrir: huella / contraseña del sistema / PIN de Osmium antes de mostrar los códigos.\n• PIN de autodestrucción: al introducirlo en CUALQUIER pantalla de PIN borra todas las cuentas tras confirmar.\n• Las capturas están bloqueadas por defecto; puedes permitirlas en Ajustes, pero los datos ocultos siguen protegidos.\n• Osmium solo se conecta con el servidor WebDAV de copias que configures y, una vez al día, con la API de versiones de GitHub para buscar actualizaciones (si está activada). Sin cuentas, sin telemetría, sin nube.</string>
     <string name="manual_backup_title">Copia de seguridad y restauración</string>
     <string name="manual_backup_body">Ajustes → Datos → Exportar crea una copia cifrada (contraseña + PIN de la aplicación). Guarda bien la contraseña: sin ella no se puede restaurar. La migración de Google Authenticator es solo de importación.</string>
     <string name="manual_tester_title">Prueba tu autenticador</string>
@@ -150,7 +150,7 @@
     <string name="manual_naming_title">Nombres de cuenta y emisores</string>
     <string name="manual_naming_body">Tanto el nombre de la cuenta como el emisor son opcionales.\n\nSi dejas el NOMBRE DE CUENTA en blanco, Osmium genera uno automáticamente con la fecha de añadido y el orden — p. ej., la primera cuenta añadida en mayo de 2026 se llama 20260501.\n\nSi dejas el EMISOR en blanco, se muestra como "Unknown".</string>
     <string name="manual_notes_title">Notas importantes</string>
-    <string name="manual_notes_body">• Los secretos se cifran con una clave respaldada por hardware; solo salen del dispositivo dentro de tus propias copias cifradas.\n• Desinstalar la app o borrar sus datos ELIMINA todas las cuentas: exporta una copia antes.\n• Los códigos copiados quedan en el portapapeles; no se borran solos.\n• Si el reloj del dispositivo está mal, los códigos fallarán: activa la sincronización horaria por red.</string>
+    <string name="manual_notes_body">• Los secretos se cifran con una clave no exportable de Android Keystore; solo salen del dispositivo dentro de tus propias copias cifradas.\n• Desinstalar la app o borrar sus datos ELIMINA todas las cuentas: exporta una copia antes.\n• Los códigos copiados quedan en el portapapeles; no se borran solos.\n• Si el reloj del dispositivo está mal, los códigos fallarán: activa la sincronización horaria por red.</string>
     <string name="sort_mode_desc">Cómo se ordenan las cuentas en la lista</string>
     <string name="sort_random">Aleatorio</string>
     <string name="sort_random_desc">Barajadas una vez por inicio</string>
@@ -298,8 +298,8 @@
     <string name="manual_webdav_body">Ajustes → Datos → Copia de seguridad WebDAV sube el mismo archivo cifrado a un servidor WebDAV de tu red local: un NAS, un PC u otro móvil con una app de servidor WebDAV. Introduce la dirección del servidor (nombre de host o IP local), el usuario y la contraseña.\n\nRestaurar muestra las copias guardadas en el servidor y te deja elegir una. Gestionar copias muestra las mismas copias y puede eliminar las antiguas del servidor. El servidor solo recibe datos cifrados con contraseña; la app nunca se conecta a nada que no sea la dirección que configures.\n\nSi la dirección del servidor cambia a menudo, asigna una IP fija al NAS en el router o usa su nombre de host.</string>
     <string name="about_terms_title">Términos de uso</string>
     <string name="about_privacy_title">Política de privacidad</string>
-    <string name="terms_body">Al instalar o usar Osmium aceptas los siguientes términos.\n\nOsmium es software libre y de código abierto bajo la licencia MIT.\n\nEl software se ofrece “tal cual”, sin garantía de ningún tipo. En la máxima medida permitida por la ley, el desarrollador no se hace responsable de los daños derivados del uso del software.\n\nTus responsabilidades:\n• Protege tus secretos y contraseñas de copia. Las claves de cifrado no las puede recuperar nadie: un PIN olvidado o una contraseña perdida no se pueden restablecer.\n• Guarda copias de seguridad. Desinstalar la app o borrar sus datos elimina todas las cuentas para siempre.\n• El PIN de autodestrucción es irreversible, por diseño.\n• Mantén el reloj del dispositivo exacto: los códigos dependen de él.\n\nPuedes usar Osmium para tu propia autenticación de dos factores. No lo uses para acceder a sistemas o datos a los que no estés autorizado.\n\nOsmium solo se conecta al servidor WebDAV de copia de seguridad que configures tú (normalmente en tu red local). Nunca se conecta a nada más.</string>
-    <string name="privacy_body">Osmium no recopila ningún dato. No hay sistema de cuentas, registro, analíticas, SDK de publicidad ni informe de fallos.\n\nAlmacenamiento: tus secretos, nombres de cuenta y proveedores se guardan solo en este dispositivo, cifrados con AES-256-GCM mediante una clave no exportable del Android Keystore. Las copias se cifran con tu contraseña (PBKDF2 + AES-256-GCM).\n\nRed: el permiso INTERNET se usa únicamente para la copia de seguridad WebDAV. La app solo se conecta a la dirección que configures — normalmente un NAS o PC de tu red local — y solo al hacer copias o restaurar. Las copias van cifradas antes de salir del dispositivo.\n\nCámara: solo para escanear códigos QR, procesados en el dispositivo; las imágenes nunca se guardan ni transmiten.\n\nBiometría: gestionada exclusivamente por Android; la app nunca ve ni guarda huellas ni datos faciales.\n\nNo compartimos nada porque no guardamos nada. Desinstalar la app borra todos los datos locales.\n\nCualquier cambio que afecte a estas garantías se indicará en las notas de la versión.\n\nContacto: zhif0776@hotmail.com · https://t.me/osmium2fa</string>
+    <string name="terms_body">Al instalar o usar Osmium aceptas los siguientes términos.\n\nOsmium es software libre y de código abierto bajo la licencia MIT.\n\nEl software se ofrece “tal cual”, sin garantía de ningún tipo. En la máxima medida permitida por la ley, el desarrollador no se hace responsable de los daños derivados del uso del software.\n\nTus responsabilidades:\n• Protege tus secretos y contraseñas de copia. Las claves de cifrado no las puede recuperar nadie: un PIN olvidado o una contraseña perdida no se pueden restablecer.\n• Guarda copias de seguridad. Desinstalar la app o borrar sus datos elimina todas las cuentas para siempre.\n• El PIN de autodestrucción es irreversible, por diseño.\n• Mantén el reloj del dispositivo exacto: los códigos dependen de él.\n\nPuedes usar Osmium para tu propia autenticación de dos factores. No lo uses para acceder a sistemas o datos a los que no estés autorizado.\n\nOsmium solo se conecta al servidor WebDAV de copias que configures (normalmente en tu red local) y, una vez al día, a la API de versiones de GitHub para buscar actualizaciones si la comprobación automática está activada. Nunca se conecta a nada más.</string>
+    <string name="privacy_body">Osmium no recoge ningún dato. No hay sistema de cuentas, registro, analíticas, SDK de publicidad ni informes de fallos.\n\nAlmacenamiento: tus secretos, nombres de cuenta y emisores se guardan solo en este dispositivo, cifrados con AES-256-GCM mediante una clave no exportable del Android Keystore. Los archivos de copia se cifran con tu contraseña (PBKDF2 + AES-256-GCM).\n\nRed: el permiso INTERNET se usa solo para dos funciones. (1) Copia WebDAV: la app solo se conecta a la dirección del servidor que configures — normalmente un NAS o PC en tu red local — y solo al copiar o restaurar. (2) Comprobación de actualizaciones: si está activada, la app pregunta a la API de versiones de GitHub por la última versión pública una vez al día. Las copias se cifran con contraseña antes de salir del dispositivo.\n\nCopia automática: las copias programadas se ejecutan sin intervención. La contraseña de exportación se guarda cifrada con la clave de Android Keystore y solo sirve para cifrar los archivos de copia. Las copias locales van a la carpeta pública Download/Osmium; se conservan las 5 más recientes y se borran las antiguas.\n\nCámara: solo para escanear códigos QR, procesados en el dispositivo; las imágenes nunca se guardan ni transmiten.\n\nBiometría: gestionada exclusivamente por el sistema Android; la app nunca ve ni guarda datos de huella o rostro.\n\nNo compartimos nada, porque no tenemos nada. Desinstalar la app elimina todos los datos locales.\n\nCualquier cambio futuro que afecte a estas garantías se indicará en las notas de la versión.\n\nContacto: zhif0776@hotmail.com · https://t.me/osmium2fa</string>
 
     <string name="webdav_manage">Gestionar copias</string>
     <string name="webdav_delete">Eliminar</string>
@@ -307,4 +307,45 @@
     <string name="webdav_delete_confirm_msg">¿Eliminar %1$s del servidor? Esta acción no se puede deshacer.</string>
     <string name="webdav_deleting">Eliminando…</string>
     <string name="webdav_deleted">Copia eliminada</string>
+
+    <string name="auto_backup_title">Copia de seguridad automática</string>
+    <string name="auto_backup_desc">Copia programada a WebDAV o almacenamiento local</string>
+    <string name="auto_backup_target_label">Ubicación de la copia</string>
+    <string name="auto_backup_target_webdav">Servidor WebDAV</string>
+    <string name="auto_backup_target_local">Almacenamiento del teléfono</string>
+    <string name="auto_backup_interval_label">Frecuencia</string>
+    <string name="auto_backup_interval_day">Cada día</string>
+    <string name="auto_backup_interval_every_days">Cada %1$d días</string>
+    <string name="auto_backup_time_label">Hora de la copia</string>
+    <string name="auto_backup_password_label">Contraseña de copia</string>
+    <string name="auto_backup_password_set">Configurada (pulsa para cambiar)</string>
+    <string name="auto_backup_password_missing">No configurada</string>
+    <string name="auto_backup_password_desc">Las copias automáticas necesitan una contraseña guardada. Se cifra con la clave de Android Keystore y nunca sale del dispositivo.</string>
+    <string name="auto_backup_next_run">Próxima copia: %1$s</string>
+    <string name="auto_backup_last_success">Última copia: %1$s (correcta)</string>
+    <string name="auto_backup_last_failed">Última copia: %1$s (falló: %2$s)</string>
+    <string name="auto_backup_never_run">Aún no hay copias</string>
+    <string name="auto_backup_tz_label">(GMT+8)</string>
+    <string name="auto_backup_run_now">Copiar ahora</string>
+    <string name="auto_backup_started">Copia iniciada</string>
+    <string name="auto_backup_local_dir_desc">Archivos guardados en: Download/Osmium</string>
+    <string name="auto_backup_local_permission_desc">Esta versión de Android necesita permiso de almacenamiento — pulsa para conceder</string>
+    <string name="auto_backup_webdav_missing">No hay servidor WebDAV configurado — configúralo primero</string>
+    <string name="auto_backup_need_password">Primero configura una contraseña</string>
+    <string name="auto_backup_password_saved">Contraseña guardada</string>
+    <string name="auto_backup_time_picker_title">Elige una hora</string>
+    <string name="auto_backup_interval_picker_title">Elige una frecuencia</string>
+    <string name="update_check_label">Comprobar actualizaciones</string>
+    <string name="update_check_desc">Comprueba GitHub en silencio al abrir la app (una vez al día)</string>
+    <string name="update_available_title">Nueva versión disponible</string>
+    <string name="update_available_body">La versión %1$s está disponible (instalada: %2$s). ¿Abrir GitHub?</string>
+    <string name="update_go_github">Abrir GitHub</string>
+    <string name="update_later">Más tarde</string>
+    <string name="webdav_http_warning_title">Aviso de conexión sin cifrar</string>
+    <string name="webdav_http_warning_body">Esta dirección http:// transmite datos sin cifrar: cualquiera en la red puede leerlos. Úsala solo en una red local de confianza. ¿Guardar de todos modos?</string>
+    <string name="webdav_http_confirm">Guardar de todos modos</string>
+    <string name="manual_auto_backup_title">Copia automática</string>
+    <string name="manual_auto_backup_body">Ajustes → Datos → Copia automática ejecuta copias sin intervención según un plan: elige destino (servidor WebDAV o almacenamiento del teléfono), intervalo en días y hora. La próxima ejecución se muestra con etiqueta GMT+8.\n\nLas copias usan el mismo formato de exportación cifrado con contraseña que las manuales. La contraseña se guarda cifrada con la clave de Android Keystore y solo sirve para cifrar los archivos. Las copias locales van a la carpeta pública Download/Osmium; se conservan las 5 más recientes y se borran las antiguas.\n\nEl resultado del último intento se muestra en la pantalla de copia automática. Un fallo (p. ej. servidor inaccesible) se registra y se reintenta una vez; el siguiente intento programado volverá a probar.</string>
+    <string name="manual_updates_title">Comprobación de actualizaciones</string>
+    <string name="manual_updates_body">Si la comprobación automática está activada (Ajustes → Acerca de → Comprobar actualizaciones), Osmium consulta en silencio la API de versiones de GitHub una vez al día al abrir la app. Si hay una versión nueva, un diálogo ofrece abrir la página de versiones de GitHub — nunca descarga ni instala nada por su cuenta.\n\nNo se envían datos de cuentas ni del dispositivo; solo se pide la última versión pública. Si falla la red, la comprobación permanece en silencio.</string>
 </resources>

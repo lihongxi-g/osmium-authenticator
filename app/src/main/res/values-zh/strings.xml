@@ -150,7 +150,7 @@
     <string name="manual_hotp_title">HOTP（计数器型）</string>
     <string name="manual_hotp_body">HOTP 验证码不会自动刷新，在账户详情页点击「下一个验证码」使计数器 +1。计数器随账户持久保存。仅当服务明确要求时使用 HOTP。</string>
     <string name="manual_security_title">安全</string>
-    <string name="manual_security_body">• 打开时验证：显示验证码前需通过指纹 / 系统密码 / Osmium PIN。\n• 自毁 PIN：在任何 PIN 界面输入它，确认后即清除所有账户。\n• 默认禁止截屏；可在设置中允许，但隐藏数据始终受保护。\n• Osmium 只连接你自己配置的 WebDAV 备份服务器——无账户、无遥测、无云。</string>
+    <string name="manual_security_body">• 打开时验证：显示验证码前需通过指纹 / 系统密码 / Osmium PIN。\n• 自毁 PIN：在任何 PIN 界面输入它，确认后即清除所有账户。\n• 默认禁止截屏；可在设置中允许，但隐藏数据始终受保护。\n• Osmium 只连接你自行配置的 WebDAV 备份服务器，以及用于更新检查的 GitHub Releases API（启用自动检查时每天最多一次）——无账号、无遥测、无云。</string>
     <string name="manual_backup_title">备份与恢复</string>
     <string name="manual_backup_body">设置 → 数据 → 导出 生成加密备份（密码 + 应用 PIN 双重绑定）。请妥善保管密码，丢失密码将无法恢复备份。Google 验证器迁移为只读导入。</string>
     <string name="manual_tester_title">测试你的验证器</string>
@@ -158,7 +158,7 @@
     <string name="manual_naming_title">账户名与服务商</string>
     <string name="manual_naming_body">账户名和服务商都可留空。\n\n账户名留空时，Osmium 会用添加日期和添加位次自动生成一个名称——例如 2026 年 5 月添加的第一个账户名为 20260501。\n\n服务商留空时统一显示为 "Unknown"。</string>
     <string name="manual_notes_title">重要注意事项</string>
-    <string name="manual_notes_body">• 密钥使用硬件级密钥加密；只有在你自己的密码加密备份中才会离开设备。\n• 卸载应用或清除数据会删除所有账户——请先导出备份。\n• 复制的验证码会留在剪贴板，不会自动清除。\n• 如果设备时钟不准，验证码就会出错——请开启网络时间同步。</string>
+    <string name="manual_notes_body">• 密钥使用不可导出的 Android Keystore 密钥加密；只有在你自己的密码加密备份中才会离开设备。\n• 卸载应用或清除数据会删除所有账户——请先导出备份。\n• 复制的验证码会留在剪贴板，不会自动清除。\n• 如果设备时钟不准，验证码就会出错——请开启网络时间同步。</string>
     <string name="sort_mode_desc">账户在列表中的排列方式</string>
     <string name="sort_random">随机排序</string>
     <string name="sort_random_desc">每次启动应用洗牌一次</string>
@@ -313,8 +313,8 @@
     <string name="manual_webdav_body">设置 → 数据 → WebDAV 备份会将同一份加密导出文件上传到局域网内的 WebDAV 服务器——NAS、电脑，或运行 WebDAV 服务器应用的另一部手机。填写服务器地址（主机名或局域网 IP）、用户名和密码。\n\n恢复功能会列出服务器上存储的备份，供你选择其一恢复。管理备份同样列出备份，并可删除服务器上的旧备份。服务器只会收到密码加密的数据；应用除了你配置的服务器地址外，不会连接任何其他地址。\n\n如果服务器地址经常变化，可以在路由器中为 NAS 设置固定 IP，或改用其主机名。</string>
     <string name="about_terms_title">用户协议</string>
     <string name="about_privacy_title">隐私政策</string>
-    <string name="terms_body">安装或使用 Osmium 即表示你同意以下条款。\n\nOsmium 是基于 MIT 许可发布的免费开源软件。\n\n本软件按“原样”提供，不作任何形式的担保。在法律允许的最大范围内，开发者不对因使用本软件而产生的任何损失负责。\n\n你的责任：\n• 妥善保管密钥和备份密码。加密密钥无法被开发者或任何人找回——忘记 PIN 或丢失备份密码无法重置。\n• 自行保存备份。卸载应用或清除其数据将永久删除所有账户。\n• 自毁 PIN 的设计就是不可逆的。\n• 保持设备时间准确——基于时间的验证码依赖它。\n\n你可以将 Osmium 用于自己的双因素认证。不得用它访问你没有权限访问的系统或数据。\n\nOsmium 只连接你自己配置的 WebDAV 备份服务器（通常在局域网内），不会连接任何其他地址。</string>
-    <string name="privacy_body">Osmium 不收集任何数据。没有账户系统、没有注册、没有分析统计、没有广告 SDK、没有崩溃上报。\n\n存储：你的密钥、账户名和服务商仅存储在本设备上，使用 Android Keystore 中不可导出的密钥进行 AES-256-GCM 加密。备份文件使用你的密码加密（PBKDF2 + AES-256-GCM）。\n\n网络：INTERNET 权限仅用于 WebDAV 备份功能。应用只连接你配置的服务器地址——通常是局域网内的 NAS 或电脑——且仅在你执行备份或恢复时连接。备份在离开设备前已用密码加密。\n\n相机：仅用于扫描二维码，全部在设备本地处理；画面不会被存储或传输。\n\n生物识别：完全由 Android 系统处理；应用不会看到或存储任何指纹或人脸数据。\n\n我们不共享任何数据，因为我们不持有任何数据。卸载应用会删除所有本地存储的数据。\n\n任何影响上述保证的未来变更都会在发布说明中声明。\n\n联系：zhif0776@hotmail.com · https://t.me/osmium2fa</string>
+    <string name="terms_body">安装或使用 Osmium 即表示你同意以下条款。\n\nOsmium 是基于 MIT 许可发布的免费开源软件。\n\n本软件按“原样”提供，不作任何形式的担保。在法律允许的最大范围内，开发者不对因使用本软件而产生的任何损失负责。\n\n你的责任：\n• 妥善保管密钥和备份密码。加密密钥无法被开发者或任何人找回——忘记 PIN 或丢失备份密码无法重置。\n• 自行保存备份。卸载应用或清除其数据将永久删除所有账户。\n• 自毁 PIN 的设计就是不可逆的。\n• 保持设备时间准确——基于时间的验证码依赖它。\n\n你可以将 Osmium 用于自己的双因素认证。不得用它访问你没有权限访问的系统或数据。\n\nOsmium 仅连接你自行配置的 WebDAV 备份服务器（通常在局域网内），并在自动检查更新开启时每天最多连接一次 GitHub Releases API 检查更新。除此之外不会连接任何其他地址。</string>
+    <string name="privacy_body">Osmium 不收集任何数据。没有账号体系、注册、统计分析、广告 SDK 或崩溃上报。\n\n存储：你的密钥、账户名与服务商仅存于本机，使用 Android Keystore 中不可导出的密钥进行 AES-256-GCM 加密。备份文件使用你的密码加密（PBKDF2 + AES-256-GCM）。\n\n网络：INTERNET 权限仅用于两个功能。(1) WebDAV 备份：应用只连接你自行配置的服务器地址——通常是局域网内的 NAS 或电脑——且仅在你执行备份或恢复时连接。(2) 更新检查：开启自动检查后，应用每天最多一次向 GitHub Releases API 查询最新公开版本。备份文件在离开设备前已用密码加密。\n\n自动备份：定时备份无人值守运行。你设置的备份密码用 Android Keystore 密钥加密存储，仅用于加密备份文件。本地备份写入公共的 下载/Osmium 目录，保留最新 5 份并清理更旧的备份。\n\n相机：仅用于扫描二维码，全部在本机处理；画面不会被存储或传输。\n\n生物识别：完全由 Android 系统处理；应用不会看到或存储指纹、人脸数据。\n\n我们不共享任何数据，因为我们不持有任何数据。卸载应用会删除全部本地数据。\n\n任何影响上述保证的变更都会在发布说明中声明。\n\n联系方式：zhif0776@hotmail.com · https://t.me/osmium2fa</string>
 
     <string name="webdav_manage">管理备份</string>
     <string name="webdav_delete">删除</string>
@@ -322,4 +322,45 @@
     <string name="webdav_delete_confirm_msg">从服务器删除 %1$s？此操作不可撤销。</string>
     <string name="webdav_deleting">删除中…</string>
     <string name="webdav_deleted">备份已删除</string>
+
+    <string name="auto_backup_title">自动备份</string>
+    <string name="auto_backup_desc">按计划自动备份到 WebDAV 服务器或手机本地存储</string>
+    <string name="auto_backup_target_label">备份位置</string>
+    <string name="auto_backup_target_webdav">WebDAV 服务器</string>
+    <string name="auto_backup_target_local">手机本地存储</string>
+    <string name="auto_backup_interval_label">备份频率</string>
+    <string name="auto_backup_interval_day">每天</string>
+    <string name="auto_backup_interval_every_days">每 %1$d 天</string>
+    <string name="auto_backup_time_label">备份时间</string>
+    <string name="auto_backup_password_label">备份密码</string>
+    <string name="auto_backup_password_set">已设置（点按修改）</string>
+    <string name="auto_backup_password_missing">未设置</string>
+    <string name="auto_backup_password_desc">自动备份需无人值守加密，此密码用 Android Keystore 密钥加密后仅存于本机。</string>
+    <string name="auto_backup_next_run">下次备份：%1$s</string>
+    <string name="auto_backup_last_success">上次备份：%1$s（成功）</string>
+    <string name="auto_backup_last_failed">上次备份：%1$s（失败：%2$s）</string>
+    <string name="auto_backup_never_run">尚未执行过备份</string>
+    <string name="auto_backup_tz_label">（GMT+8）</string>
+    <string name="auto_backup_run_now">立即备份</string>
+    <string name="auto_backup_started">备份已开始</string>
+    <string name="auto_backup_local_dir_desc">备份文件保存在：下载/Osmium 目录</string>
+    <string name="auto_backup_local_permission_desc">此 Android 版本需存储权限才能写入此目录，点按授权</string>
+    <string name="auto_backup_webdav_missing">尚未配置 WebDAV 服务器，请先完成配置</string>
+    <string name="auto_backup_need_password">请先设置备份密码</string>
+    <string name="auto_backup_password_saved">备份密码已保存</string>
+    <string name="auto_backup_time_picker_title">选择备份时间</string>
+    <string name="auto_backup_interval_picker_title">选择备份频率</string>
+    <string name="update_check_label">自动检查更新</string>
+    <string name="update_check_desc">每次打开应用时静默检查 GitHub 上的新版本（每天最多一次）</string>
+    <string name="update_available_title">发现新版本</string>
+    <string name="update_available_body">新版本 %1$s 已发布（当前版本 %2$s）。前往 GitHub 查看？</string>
+    <string name="update_go_github">前往 GitHub</string>
+    <string name="update_later">稍后</string>
+    <string name="webdav_http_warning_title">明文连接警告</string>
+    <string name="webdav_http_warning_body">该地址使用 http:// 明文传输，网络上的其他人可能截获内容。仅在可信局域网内使用。确认保存？</string>
+    <string name="webdav_http_confirm">仍然保存</string>
+    <string name="manual_auto_backup_title">自动备份</string>
+    <string name="manual_auto_backup_body">设置 → 数据 → 自动备份会按计划无人值守地备份：选择目标（WebDAV 服务器或手机本地存储）、间隔天数与每日时间。下次执行时间以 GMT+8 标注显示。\n\n备份文件与手动备份使用同一密码加密导出格式。备份密码用 Android Keystore 密钥加密存储，仅用于加密备份文件。本地备份写入公共的 下载/Osmium 目录；自动保留最新 5 份并清理更旧的备份。\n\n自动备份界面会显示上次执行结果。失败（如服务器不可达）会记录并重试一次，下一个计划时间点会再次尝试。</string>
+    <string name="manual_updates_title">更新检查</string>
+    <string name="manual_updates_body">开启自动检查更新后（设置 → 关于 → 自动检查更新），Osmium 会在每次打开应用时静默向 GitHub Releases API 查询最新版本（每天最多一次）。发现新版本时弹窗询问是否前往 GitHub Releases 页面——应用本身不会下载或安装任何内容。\n\n查询不会发送任何账户数据或设备信息，仅请求最新的公开版本信息。网络失败时保持静默。</string>
 </resources>
