@@ -32,6 +32,7 @@ data class AppSettings(
     val autoBackupHour: Int = 3,
     val autoBackupMinute: Int = 0,
     val autoBackupPasswordSet: Boolean = false,
+    val autoBackupKeepCount: Int = 5,
     val autoBackupLastTime: Long = 0L,
     val autoBackupLastError: String = "",
     val autoCheckUpdates: Boolean = true
@@ -51,6 +52,10 @@ data class AppSettings(
 
         const val AUTO_BACKUP_TARGET_WEBDAV = "webdav"
         const val AUTO_BACKUP_TARGET_LOCAL = "local"
+
+        /** How many auto-backups to keep per target; older ones are pruned. */
+        const val AUTO_BACKUP_KEEP_DEFAULT = 5
+        const val AUTO_BACKUP_KEEP_MAX = 10
     }
 }
 
@@ -82,6 +87,7 @@ class SettingsRepository(
         val AUTO_BACKUP_MINUTE = intPreferencesKey("auto_backup_minute")
         val AUTO_BACKUP_PASS_IV = stringPreferencesKey("auto_backup_pass_iv")
         val AUTO_BACKUP_PASS_CT = stringPreferencesKey("auto_backup_pass_ct")
+        val AUTO_BACKUP_KEEP = intPreferencesKey("auto_backup_keep_count")
         val AUTO_BACKUP_LAST_TIME = longPreferencesKey("auto_backup_last_time")
         val AUTO_BACKUP_LAST_ERROR = stringPreferencesKey("auto_backup_last_error")
         val AUTO_CHECK_UPDATES = booleanPreferencesKey("auto_check_updates")
@@ -107,6 +113,7 @@ class SettingsRepository(
             autoBackupHour = prefs[Keys.AUTO_BACKUP_HOUR] ?: 3,
             autoBackupMinute = prefs[Keys.AUTO_BACKUP_MINUTE] ?: 0,
             autoBackupPasswordSet = prefs[Keys.AUTO_BACKUP_PASS_IV] != null,
+            autoBackupKeepCount = prefs[Keys.AUTO_BACKUP_KEEP] ?: AppSettings.AUTO_BACKUP_KEEP_DEFAULT,
             autoBackupLastTime = prefs[Keys.AUTO_BACKUP_LAST_TIME] ?: 0L,
             autoBackupLastError = prefs[Keys.AUTO_BACKUP_LAST_ERROR] ?: "",
             autoCheckUpdates = prefs[Keys.AUTO_CHECK_UPDATES] ?: true
@@ -215,6 +222,12 @@ class SettingsRepository(
         context.dataStore.edit {
             it[Keys.AUTO_BACKUP_LAST_TIME] = time
             it[Keys.AUTO_BACKUP_LAST_ERROR] = error
+        }
+    }
+
+    suspend fun setAutoBackupKeepCount(count: Int) {
+        context.dataStore.edit {
+            it[Keys.AUTO_BACKUP_KEEP] = count.coerceIn(1, AppSettings.AUTO_BACKUP_KEEP_MAX)
         }
     }
 

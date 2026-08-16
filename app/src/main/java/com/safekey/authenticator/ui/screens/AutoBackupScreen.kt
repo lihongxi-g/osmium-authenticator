@@ -72,6 +72,7 @@ fun AutoBackupScreen(
     var showTargetDialog by remember { mutableStateOf(false) }
     var showIntervalDialog by remember { mutableStateOf(false) }
     var showTimeDialog by remember { mutableStateOf(false) }
+    var showKeepDialog by remember { mutableStateOf(false) }
     var showPasswordDialog by remember { mutableStateOf(false) }
     var pendingEnableAfterPassword by remember { mutableStateOf(false) }
 
@@ -262,6 +263,20 @@ fun AutoBackupScreen(
                     onClick = { showPasswordDialog = true }
                 )
 
+                SettingRow(
+                    icon = AppIcons.FileUpload,
+                    title = stringResource(R.string.auto_backup_keep_label),
+                    description = stringResource(R.string.auto_backup_keep_desc),
+                    trailing = {
+                        Text(
+                            text = settings.autoBackupKeepCount.toString(),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    },
+                    onClick = { showKeepDialog = true }
+                )
+
                 // ---- status block
 
                 nextRun?.let { millis ->
@@ -400,6 +415,31 @@ fun AutoBackupScreen(
             },
             confirmButton = {
                 TextButton(onClick = { showIntervalDialog = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+
+    if (showKeepDialog) {
+        AlertDialog(
+            onDismissRequest = { showKeepDialog = false },
+            title = { Text(stringResource(R.string.auto_backup_keep_picker_title)) },
+            text = {
+                Column {
+                    (1..AppSettings.AUTO_BACKUP_KEEP_MAX).forEach { count ->
+                        TextButton(
+                            onClick = {
+                                showKeepDialog = false
+                                vm.setAutoBackupKeepCount(count)
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) { Text(count.toString()) }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showKeepDialog = false }) {
                     Text(stringResource(R.string.cancel))
                 }
             }

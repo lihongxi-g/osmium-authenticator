@@ -24,7 +24,7 @@ If auto-check for updates is enabled (Settings → About → Auto-check for upda
 
 ## Automatic backup
 
-If you enable automatic backup (Settings → Data → Auto backup), the app runs scheduled backups **unattended**: choose WebDAV or the phone's Download/Osmium folder, an interval in days and a time of day. The export password you set is stored on your device, encrypted with the Android Keystore key, and is used only to encrypt backup files. Local backups are written to the public Download/Osmium folder; the 5 newest are kept and older ones are pruned automatically.
+If you enable automatic backup (Settings → Data → Auto backup), the app runs scheduled backups **unattended**: choose WebDAV or the phone's Download/Osmium folder, an interval in days and a time of day. The export password you set is stored on your device, encrypted with the Android Keystore key, and is used only to encrypt backup files. Local backups are written to the public Download/Osmium folder; a configurable number are kept (default 5, max 10) and older ones are pruned automatically.
 
 ## Data stored on your device
 

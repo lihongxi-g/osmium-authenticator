@@ -36,7 +36,6 @@ class AutoBackupWorker(
 ) : CoroutineWorker(appContext, params) {
 
     companion object {
-        private const val KEEP_BACKUPS = 5
         private const val FILE_PREFIX = "osmium-auto-"
     }
 
@@ -84,7 +83,7 @@ class AutoBackupWorker(
         when (settings.autoBackupTarget) {
             AppSettings.AUTO_BACKUP_TARGET_LOCAL -> {
                 writeLocalBackup(applicationContext, fileName, payload)
-                pruneLocalBackups(applicationContext)
+                pruneLocalBackups(applicationContext, settings.autoBackupKeepCount)
             }
             else -> {
                 val config = app.settingsRepository.webDavConfig.first()
@@ -95,17 +94,25 @@ class AutoBackupWorker(
                     return
                 }
                 WebDavClient.upload(config, fileName, payload)
-                pruneWebDavBackups(config)
+                pruneWebDavBackups(config, settings.autoBackupKeepCount)
             }
         }
         app.settingsRepository.setAutoBackupResult("", System.currentTimeMillis())
     }
 
-    private fun pruneWebDavBackups(config: com.safekey.authenticator.data.WebDavServerConfig) {
+    /**
+     * Prune auto-backups beyond [keep]. [WebDavClient.listBackups] returns
+     * files sorted by name (timestamped names → chronological) — trust that
+     * order instead of re-sorting by lastModified, which some servers leave
+     * unset (0), scrambling the order and deleting the wrong files.
+     */
+    private fun pruneWebDavBackups(
+        config: com.safekey.authenticator.data.WebDavServerConfig,
+        keep: Int
+    ) {
         val old = WebDavClient.listBackups(config)
             .filter { it.name.startsWith(FILE_PREFIX) }
-            .sortedByDescending { it.lastModified }
-            .drop(KEEP_BACKUPS)
+            .drop(keep)
         old.forEach { WebDavClient.delete(config, it.href) }
     }
 
@@ -144,7 +151,7 @@ class AutoBackupWorker(
         }
     }
 
-    private fun pruneLocalBackups(context: Context) {
+    private fun pruneLocalBackups(context: Context, keep: Int) {
         if (Build.VERSION.SDK_INT >= 29) {
             val resolver = context.contentResolver
             val projection = arrayOf(
@@ -157,13 +164,15 @@ class AutoBackupWorker(
                 Environment.DIRECTORY_DOWNLOADS + "/Osmium/",
                 "$FILE_PREFIX%"
             )
-            val sortOrder = "${MediaStore.Downloads.DATE_MODIFIED} DESC"
+            // Timestamped file names sort chronologically — deterministic
+            // even if DATE_MODIFIED were missing on some provider rows.
+            val sortOrder = "${MediaStore.Downloads.DISPLAY_NAME} DESC"
             resolver.query(
                 MediaStore.Downloads.EXTERNAL_CONTENT_URI, projection, selection, args, sortOrder
             )?.use { cursor ->
                 var index = 0
                 while (cursor.moveToNext()) {
-                    if (index >= KEEP_BACKUPS) {
+                    if (index >= keep) {
                         val id = cursor.getLong(0)
                         resolver.delete(
                             ContentUris.withAppendedId(
@@ -181,8 +190,8 @@ class AutoBackupWorker(
             )
             if (!dir.isDirectory) return
             dir.listFiles { f -> f.name.startsWith(FILE_PREFIX) }
-                ?.sortedByDescending { it.lastModified() }
-                ?.drop(KEEP_BACKUPS)
+                ?.sortedByDescending { it.name }
+                ?.drop(keep)
                 ?.forEach { it.delete() }
         }
     }

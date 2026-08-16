@@ -115,10 +115,12 @@ fun WebDavScreen(
         return ok
     }
 
-    fun doSaveConfig() {
+    fun doSaveConfig(skipHttpWarning: Boolean = false) {
         // Plaintext HTTP is useful for trusted LAN servers, but the user
         // must explicitly acknowledge the risk before we store the address.
-        if (url.trim().startsWith("http://", ignoreCase = true)) {
+        if (!skipHttpWarning &&
+            url.trim().startsWith("http://", ignoreCase = true)
+        ) {
             showHttpWarning = true
             return
         }
@@ -308,7 +310,7 @@ fun WebDavScreen(
                 TextButton(
                     onClick = {
                         showHttpWarning = false
-                        doSaveConfig()
+                        doSaveConfig(skipHttpWarning = true)
                     }
                 ) { Text(stringResource(R.string.webdav_http_confirm)) }
             },

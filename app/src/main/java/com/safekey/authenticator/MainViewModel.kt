@@ -442,6 +442,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     fun setAutoBackupIntervalDays(days: Int) = viewModelScope.launch { settingsRepo.setAutoBackupIntervalDays(days) }
     fun setAutoBackupTime(hour: Int, minute: Int) = viewModelScope.launch { settingsRepo.setAutoBackupTime(hour, minute) }
     fun setAutoBackupPassword(password: String) = viewModelScope.launch { settingsRepo.setAutoBackupPassword(password) }
+    fun setAutoBackupKeepCount(count: Int) = viewModelScope.launch { settingsRepo.setAutoBackupKeepCount(count) }
 
     fun setAppPin(pin: String) {
         pinManager.setPin(pin)
