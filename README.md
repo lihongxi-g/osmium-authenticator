@@ -1,19 +1,21 @@
 # Osmium
 
-Osmium is a fully offline, privacy-first TOTP authenticator for Android. Every secret is encrypted with a hardware-backed Android Keystore key before it touches disk. The app holds no network permission, creates no account, and sends no telemetry — codes are computed entirely on device.
+Osmium is a privacy-first TOTP authenticator for Android. Every secret is encrypted with a hardware-backed Android Keystore key before it touches disk. The app creates no account and sends no telemetry — codes are computed entirely on device. The INTERNET permission exists solely for the optional WebDAV backup feature: the app connects exclusively to the server address you configure yourself (typically a NAS on your local network) and to nothing else.
 
 ## Features
 
 - **TOTP and HOTP** — SHA-1 / SHA-256 / SHA-512, 6 or 8 digits, periods from 1 to 600 seconds
 - **Google Authenticator migration** — scan the "Transfer accounts" QR code from Google Authenticator and import all accounts in one step
 - **Encrypted backup** — export to a password-protected, PIN-bound encrypted file; restore on any device
+- **WebDAV backup** — upload the same encrypted export to a WebDAV server on your local network (NAS, PC, another phone) and restore from it; the server only ever stores ciphertext
 - **Steam Guard** — manual entry with the 26-character Steam alphabet (see warning below)
 - **Hidden codes mode** — codes render as dots; copying still works, editing and sharing are locked until the mode is turned off
 - **Sort modes** — random, alphabetical, add date, copy count
 - **Clock calibration** — manual offset for devices whose clock drifts
 - **Security gate** — optional verification on open (fingerprint / system password / app PIN), self-destruct PIN, screenshots blocked by default
-- **Ten languages** — English, 简体中文, Español, 日本語, 한국어, Deutsch, Русский, Français, हिन्दी
-- **In-app manual** — feature guide and important notes, bilingual
+- **Nine languages** — English, 简体中文, Español, 日本語, 한국어, Deutsch, Русский, Français, हिन्दी
+- **In-app manual** — feature guide and important notes
+- **Terms & privacy in-app** — Settings → About shows the Terms of Use and Privacy Policy
 - **Optional account name and issuer** — blank names are auto-generated from the add date and order (e.g. `20260801`); a blank issuer shows as `Unknown`
 
 ## ⚠ Steam Guard — read this first
@@ -55,11 +57,14 @@ Installing the wrong architecture will crash on launch. The signing certificate 
 - [Privacy Policy](PRIVACY.md) ([中文](PRIVACY-zh.md))
 - [Terms of Use](TERMS.md) ([中文](TERMS-zh.md))
 
+Both are also available in the app: Settings → About.
+
 ## Security notes
 
 - Field-level AES-256-GCM encryption with a non-exportable Android Keystore key
-- No INTERNET permission in the manifest; no analytics, no crash reporters
-- Backups are encrypted (PBKDF2 + AES-256-GCM) and bound to the app PIN
+- INTERNET permission used only for the user-configured WebDAV backup server; the app never connects to anything else — no analytics, no crash reporters, no cloud
+- Backups are encrypted (PBKDF2 + AES-256-GCM) before they leave the device and are bound to the app PIN
+- HTTPS uses standard certificate validation — self-signed certificates are rejected by design (no TrustAllManager in a password app)
 - The self-destruct PIN wipes all data irreversibly from any PIN prompt
 
 ## Building

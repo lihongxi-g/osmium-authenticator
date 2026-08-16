@@ -1,6 +1,6 @@
 # Osmium Privacy Policy
 
-*Effective date: August 15, 2026*
+*Effective date: August 16, 2026*
 
 Osmium is designed to be fully offline. This policy describes, in plain terms, what the application does and does not do with your data.
 
@@ -8,9 +8,15 @@ Osmium is designed to be fully offline. This policy describes, in plain terms, w
 
 **We do not collect any data.** Specifically:
 
-- The application holds **no INTERNET permission** in its manifest. It cannot transmit anything over a network, even if it wanted to.
+- The INTERNET permission exists **only for the WebDAV backup feature** (see below). The application never connects to anything except the server address you configure yourself.
 - There is **no account system, no registration, no analytics, no advertising SDK, and no crash reporter**.
 - We operate **no server** for the application. There is nothing to upload to and nothing to sync with.
+
+## Network: WebDAV backup
+
+If you enable WebDAV backup (Settings → Data → WebDAV backup), the app connects **exclusively** to the server address you enter — typically a NAS, a PC, or another device on your local network. It connects only when you run a backup, list backups, or restore one.
+
+Backups are encrypted with your export password (PBKDF2 + AES-256-GCM) **before they leave the device**; the server only ever stores ciphertext. The server address and login are stored on your device, with the password encrypted by the Android Keystore.
 
 ## Data stored on your device
 
@@ -22,6 +28,7 @@ Osmium is designed to be fully offline. This policy describes, in plain terms, w
 
 - **Camera** — used solely to scan QR codes during account import. Frames are processed in real time on the device (ML Kit, bundled offline mode) and are never stored or transmitted.
 - **Biometrics / device credential** — handled exclusively by the Android system. The application never sees or stores fingerprint or face data.
+- **Internet** — used solely for the WebDAV backup feature described above. There is no other network activity in the application.
 
 ## Data sharing
 

@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.safekey.authenticator.security.CryptoManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -39,7 +40,10 @@ data class AppSettings(
     }
 }
 
-class SettingsRepository(private val context: Context) {
+class SettingsRepository(
+    private val context: Context,
+    private val crypto: CryptoManager
+) {
 
     private object Keys {
         val THEME_MODE = stringPreferencesKey("theme_mode")
@@ -53,6 +57,10 @@ class SettingsRepository(private val context: Context) {
         val FAIL_THRESHOLD = intPreferencesKey("fail_threshold")
         val PIN_FAIL_COUNT = intPreferencesKey("pin_fail_count")
         val BIOMETRIC_FAIL_COUNT = intPreferencesKey("biometric_fail_count")
+        val WEBDAV_URL = stringPreferencesKey("webdav_url")
+        val WEBDAV_USER = stringPreferencesKey("webdav_user")
+        val WEBDAV_PASS_IV = stringPreferencesKey("webdav_pass_iv")
+        val WEBDAV_PASS_CT = stringPreferencesKey("webdav_pass_ct")
     }
 
     val settings: Flow<AppSettings> = context.dataStore.data.map { prefs ->
@@ -113,6 +121,50 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setBiometricFailCount(count: Int) {
         context.dataStore.edit { it[Keys.BIOMETRIC_FAIL_COUNT] = count }
+    }
+
+    // ------------------------------------------------------ WebDAV backup
+
+    /** The saved WebDAV server, with the password decrypted on read; null when
+     *  no server is configured yet. */
+    val webDavConfig: Flow<WebDavServerConfig?> = context.dataStore.data.map { prefs ->
+        val url = prefs[Keys.WEBDAV_URL]?.takeIf { it.isNotBlank() } ?: return@map null
+        val user = prefs[Keys.WEBDAV_USER] ?: ""
+        val iv = prefs[Keys.WEBDAV_PASS_IV]
+        val ct = prefs[Keys.WEBDAV_PASS_CT]
+        val password = if (iv != null && ct != null) {
+            try {
+                crypto.decrypt(CryptoManager.EncryptedField(iv, ct))
+            } catch (e: Exception) {
+                // Corrupt password record — fall back to blank rather than crash
+                ""
+            }
+        } else ""
+        WebDavServerConfig(baseUrl = url, username = user, password = password)
+    }
+
+    /** Persist the server config; the password is encrypted with the
+     *  Android Keystore key before it touches disk. */
+    suspend fun setWebDavConfig(config: WebDavServerConfig?) {
+        context.dataStore.edit { prefs ->
+            if (config == null || config.baseUrl.isBlank()) {
+                prefs.remove(Keys.WEBDAV_URL)
+                prefs.remove(Keys.WEBDAV_USER)
+                prefs.remove(Keys.WEBDAV_PASS_IV)
+                prefs.remove(Keys.WEBDAV_PASS_CT)
+            } else {
+                prefs[Keys.WEBDAV_URL] = config.baseUrl.trim()
+                prefs[Keys.WEBDAV_USER] = config.username
+                if (config.password.isEmpty()) {
+                    prefs.remove(Keys.WEBDAV_PASS_IV)
+                    prefs.remove(Keys.WEBDAV_PASS_CT)
+                } else {
+                    val field = crypto.encrypt(config.password)
+                    prefs[Keys.WEBDAV_PASS_IV] = field.iv
+                    prefs[Keys.WEBDAV_PASS_CT] = field.ciphertext
+                }
+            }
+        }
     }
 
     suspend fun wipeSettings() {

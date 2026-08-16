@@ -71,6 +71,7 @@ import com.safekey.authenticator.ui.screens.SettingsScreen
 import com.safekey.authenticator.ui.screens.ShareQrScreen
 import com.safekey.authenticator.ui.screens.SortOrderScreen
 import com.safekey.authenticator.ui.screens.ManualScreen
+import com.safekey.authenticator.ui.screens.WebDavScreen
 import com.safekey.authenticator.ui.theme.SafeKeyTheme
 import java.util.Locale
 import kotlinx.coroutines.delay
@@ -664,6 +665,7 @@ class MainActivity : FragmentActivity() {
                         onBack = { vm.nav.pop() },
                         onExport = { vm.nav.push(Screen.Export) },
                         onImport = { vm.nav.push(Screen.Import) },
+                        onWebDav = { vm.nav.push(Screen.WebDav) },
                         onOpenPinSetup = { vm.nav.push(Screen.PinSetup("pin")) },
                         onOpenPinVerify = { next -> vm.nav.push(Screen.PinVerify(next)) },
                         onRequireBiometric = { onSuccess ->
@@ -702,6 +704,11 @@ class MainActivity : FragmentActivity() {
                     is Screen.Import -> ImportScreen(
                         vm = vm,
                         onDone = { vm.nav.pop() },
+                        onBack = { vm.nav.pop() }
+                    )
+
+                    is Screen.WebDav -> WebDavScreen(
+                        vm = vm,
                         onBack = { vm.nav.pop() }
                     )
 

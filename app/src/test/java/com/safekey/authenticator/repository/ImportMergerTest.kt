@@ -72,4 +72,38 @@ class ImportMergerTest {
         assertEquals(3, plan.total)
         assertEquals(1, plan.duplicatesCount)
     }
+
+    // ---- HOTP counter safety (restoring an old backup must never rewind) ----
+
+    @Test
+    fun `hotp restore keeps the higher local counter`() {
+        val existing = listOf(
+            account("1", "HOTP Service", "x").copy(type = Account.TYPE_HOTP, counter = 42)
+        )
+        val plan = ImportMerger.plan(
+            existing,
+            listOf(vault("HOTP Service", "x").copy(type = Account.TYPE_HOTP, counter = 10))
+        )
+        assertEquals(1, plan.toUpdate.size)
+        assertEquals(42L, plan.toUpdate[0].second.counter)
+    }
+
+    @Test
+    fun `hotp restore takes the backup counter when it is higher`() {
+        val existing = listOf(
+            account("1", "HOTP Service", "x").copy(type = Account.TYPE_HOTP, counter = 5)
+        )
+        val plan = ImportMerger.plan(
+            existing,
+            listOf(vault("HOTP Service", "x").copy(type = Account.TYPE_HOTP, counter = 10))
+        )
+        assertEquals(10L, plan.toUpdate[0].second.counter)
+    }
+
+    @Test
+    fun `totp counter field is left untouched by the merge`() {
+        val existing = listOf(account("1", "Google", "a@gmail.com").copy(counter = 7))
+        val plan = ImportMerger.plan(existing, listOf(vault("Google", "a@gmail.com")))
+        assertEquals(0L, plan.toUpdate[0].second.counter)
+    }
 }

@@ -28,7 +28,7 @@ object ImportMerger {
             val first = items.first()
             val match = existing.firstOrNull { keyOf(it.issuer, it.label) == key }
             if (match != null) {
-                toUpdate.add(match to first)
+                toUpdate.add(match to first.withSafeHotpCounter(match.counter))
                 duplicates += 1
             } else {
                 toAdd.add(first)
@@ -36,6 +36,14 @@ object ImportMerger {
         }
         return ImportPlan(toAdd, toUpdate, duplicates)
     }
+
+    /**
+     * Restoring an older backup must never rewind an HOTP counter: the server
+     * rejects codes below the counter it already accepted. Keep whichever
+     * counter is higher. (TOTP counters are unused and left untouched.)
+     */
+    private fun VaultAccount.withSafeHotpCounter(localCounter: Long): VaultAccount =
+        if (type == Account.TYPE_HOTP) copy(counter = maxOf(counter, localCounter)) else this
 
     private fun keyOf(issuer: String, label: String): String =
         "${issuer.trim().lowercase()}|${label.trim().lowercase()}"

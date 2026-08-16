@@ -18,6 +18,8 @@ sealed class Screen {
     object Settings : Screen()
     object Export : Screen()
     object Import : Screen()
+    /** WebDAV backup to a user-configured server on the local network. */
+    object WebDav : Screen()
     /** mode: "pin" = app PIN, "destroy_pin" = self-destruct PIN */
     data class PinSetup(val mode: String) : Screen()
     /** Verify the current app PIN before a sensitive action.

@@ -23,8 +23,9 @@ class SafeKeyApp : Application() {
         AppLog.d("app start v${BuildConfig.VERSION_NAME}")
         val db = AppDatabase.get(this)
         accountDao = db.accountDao()
-        accountRepository = AccountRepository(accountDao, CryptoManager())
-        settingsRepository = SettingsRepository(this)
+        val crypto = CryptoManager()
+        accountRepository = AccountRepository(accountDao, crypto)
+        settingsRepository = SettingsRepository(this, crypto)
     }
 
     private fun installCrashHandler() {

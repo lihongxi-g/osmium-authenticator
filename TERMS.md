@@ -1,6 +1,6 @@
 # Osmium Terms of Use
 
-*Effective date: August 15, 2026*
+*Effective date: August 16, 2026*
 
 By installing or using Osmium, you agree to the following terms.
 
@@ -25,7 +25,7 @@ You may use Osmium for your own two-factor authentication needs. You may not use
 
 ## Third-party services
 
-Osmium connects to no third-party services. The optional Google Authenticator migration feature parses export codes you provide locally on the device; no data is sent to Google or anyone else.
+Osmium connects to no third-party services. The optional WebDAV backup feature connects only to the server address you configure yourself (typically on your local network); backups are encrypted with your password before upload. The optional Google Authenticator migration feature parses export codes you provide locally on the device; no data is sent to Google or anyone else.
 
 ## Contact
 

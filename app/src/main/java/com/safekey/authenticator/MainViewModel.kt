@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.safekey.authenticator.data.AppSettings
+import com.safekey.authenticator.data.WebDavServerConfig
 import com.safekey.authenticator.model.Account
 import com.safekey.authenticator.model.VaultAccount
 import com.safekey.authenticator.security.AppLog
@@ -46,6 +47,14 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     val settings: StateFlow<AppSettings> = settingsRepo.settings
         .stateIn(viewModelScope, SharingStarted.Eagerly, AppSettings())
+
+    /** Saved WebDAV backup server (null until the user configures one). */
+    val webDavConfig: StateFlow<WebDavServerConfig?> = settingsRepo.webDavConfig
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    fun saveWebDavConfig(config: WebDavServerConfig?) {
+        viewModelScope.launch { settingsRepo.setWebDavConfig(config) }
+    }
 
     // UI tick, ~2 Hz — smooth countdown without recomputing codes constantly
     private val _now = MutableStateFlow(System.currentTimeMillis())

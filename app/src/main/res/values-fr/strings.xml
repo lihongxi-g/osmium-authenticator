@@ -104,7 +104,7 @@
     <string name="lock_cancelled">Authentification annulée</string>
     <string name="version">Version</string>
     <string name="accounts_count">%1$d compte(s)</string>
-    <string name="about_desc">Osmium est un authentificateur TOTP entièrement hors ligne, axé sur la confidentialité. Toutes les données sont chiffrées avec le Android Keystore et ne quittent jamais votre appareil.</string>
+    <string name="about_desc">Osmium est un authentificateur TOTP axé sur la confidentialité. Toutes les données sont chiffrées avec le Android Keystore. L\'app ne se connecte jamais ailleurs qu\'au serveur de sauvegarde WebDAV que vous configurez vous-même.</string>
     <string name="sorting_hint">Maintenez un compte pour réorganiser</string>
     <string name="account_type_label">Type de compte</string>
     <string name="account_type_totp">Basé sur le temps (TOTP)</string>
@@ -142,7 +142,7 @@
     <string name="manual_hotp_title">HOTP (basé sur compteur)</string>
     <string name="manual_hotp_body">Les codes HOTP ne se rafraîchissent pas seuls. Touchez « Code suivant » dans les détails du compte pour avancer le compteur (+1). Le compteur est conservé par compte. N’utilisez HOTP que si le service l’exige explicitement.</string>
     <string name="manual_security_title">Sécurité</string>
-    <string name="manual_security_body">• Vérification à l’ouverture : empreinte / mot de passe système / PIN Osmium avant d’afficher les codes.\n• PIN d’autodestruction : sa saisie dans N’IMPORTE QUEL champ PIN efface tous les comptes après confirmation.\n• Les captures d’écran sont bloquées par défaut ; vous pouvez les autoriser dans les paramètres.\n• Osmium est entièrement hors ligne — aucune permission réseau, aucun compte, aucune télémétrie.</string>
+    <string name="manual_security_body">• Vérification à l\'ouverture : empreinte / mot de passe système / code PIN Osmium avant d\'afficher les codes.\n• Code PIN d\'autodestruction : le saisir sur N\'IMPORTE QUEL écran de code PIN efface tous les comptes après confirmation.\n• Les captures d\'écran sont bloquées par défaut ; vous pouvez les autoriser dans les réglages, mais les données masquées restent protégées.\n• Osmium ne se connecte qu\'au serveur WebDAV que vous configurez vous-même : pas de comptes, pas de télémétrie, pas de cloud.</string>
     <string name="manual_backup_title">Sauvegarde et restauration</string>
     <string name="manual_backup_body">Paramètres → Données → Exporter crée une sauvegarde chiffrée (mot de passe + PIN de l’application). Conservez le mot de passe précieusement — sans lui, impossible de restaurer. La migration Google Authenticator est un import en lecture seule.</string>
     <string name="manual_tester_title">Tester votre authentificateur</string>
@@ -150,7 +150,7 @@
     <string name="manual_naming_title">Noms de compte et émetteurs</string>
     <string name="manual_naming_body">Le nom du compte et l’émetteur sont tous deux facultatifs.\n\nSi vous laissez le NOM DU COMPTE vide, Osmium en génère un automatiquement à partir de la date d’ajout et de l’ordre d’ajout — par ex., le premier compte ajouté en mai 2026 s’appelle 20260501.\n\nSi vous laissez l’ÉMETTEUR vide, il s’affiche comme « Unknown ».</string>
     <string name="manual_notes_title">Notes importantes</string>
-    <string name="manual_notes_body">• Les secrets ne quittent jamais cet appareil (chiffrés avec une clé adossée au matériel).\n• Désinstaller l’application ou effacer ses données SUPPRIME tous les comptes — exportez d’abord une sauvegarde.\n• Les codes copiés restent dans le presse-papiers ; il n’y a pas de nettoyage automatique.\n• Si l’horloge de l’appareil est fausse, les codes seront faux — activez la synchronisation de l’heure par le réseau.</string>
+    <string name="manual_notes_body">• Les secrets sont chiffrés avec une clé adossée au matériel ; ils ne quittent l\'appareil que dans vos propres sauvegardes chiffrées.\n• Désinstaller l\'app ou effacer ses données SUPPRIME tous les comptes — exportez d\'abord une sauvegarde.\n• Les codes copiés restent dans le presse-papiers ; il n\'y a pas d\'effacement automatique.\n• Si l\'horloge de l\'appareil est fausse, les codes seront faux — activez la synchronisation réseau de l\'heure.</string>
     <string name="sort_mode_desc">Comment les comptes sont ordonnés dans la liste</string>
     <string name="sort_random">Aléatoire</string>
     <string name="sort_random_desc">Mélangés à chaque lancement</string>
@@ -267,4 +267,37 @@
     <string name="import_pin_title">Saisir le PIN de sauvegarde</string>
     <string name="import_pin_desc">Cette sauvegarde est liée à un PIN. Saisissez-le pour déchiffrer les comptes.</string>
     <string name="algorithm_hint">L’algorithme est détecté automatiquement depuis le lien otpauth://. Les secrets saisis manuellement utilisent SHA1 par défaut (utilisé par presque tous les services).</string>
+
+    <string name="webdav_title">Sauvegarde WebDAV</string>
+    <string name="webdav_desc">Sauvegarde vers un serveur WebDAV sur votre réseau local (NAS, PC, téléphone)</string>
+    <string name="webdav_intro">Sauvegardez vers n\'importe quel serveur WebDAV de votre réseau local : un NAS, un PC ou un autre téléphone. Les sauvegardes sont chiffrées avec votre mot de passe d\'export avant l\'envoi ; le serveur ne stocke que du texte chiffré.</string>
+    <string name="webdav_url_label">Adresse du serveur</string>
+    <string name="webdav_url_hint">http://192.168.1.5:5005 ou https://nas.local</string>
+    <string name="webdav_username_label">Nom d\'utilisateur (facultatif)</string>
+    <string name="webdav_password_label">Mot de passe</string>
+    <string name="webdav_save">Enregistrer</string>
+    <string name="webdav_saved">Paramètres du serveur enregistrés</string>
+    <string name="webdav_test">Tester la connexion</string>
+    <string name="webdav_testing">Test en cours…</string>
+    <string name="webdav_test_ok">Connecté avec succès</string>
+    <string name="webdav_backup_now">Sauvegarder maintenant</string>
+    <string name="webdav_uploading">Envoi en cours…</string>
+    <string name="webdav_backup_done">Sauvegarde envoyée</string>
+    <string name="webdav_backup_failed">Échec de la sauvegarde : %1$s</string>
+    <string name="webdav_restore">Restaurer…</string>
+    <string name="webdav_listing">Liste des sauvegardes…</string>
+    <string name="webdav_no_backups">Aucune sauvegarde trouvée sur le serveur.</string>
+    <string name="webdav_pick_file">Choisir une sauvegarde</string>
+    <string name="webdav_downloading">Téléchargement…</string>
+    <string name="webdav_backup_password_title">Définir un mot de passe de sauvegarde</string>
+    <string name="webdav_backup_password_desc">Ce mot de passe protège le fichier envoyé. Notez-le : vous en aurez besoin pour restaurer.</string>
+    <string name="webdav_restore_password_desc">Saisissez le mot de passe utilisé lors de la création de cette sauvegarde.</string>
+    <string name="webdav_error_url">Saisissez l\'adresse du serveur, ex. http://192.168.1.5:5005</string>
+    <string name="webdav_warning">N\'utilisez que des serveurs de confiance. Le fichier de sauvegarde est chiffré, mais gardez précieusement le mot de passe d\'export : quiconque peut atteindre le fichier ET connaît le mot de passe peut le restaurer.</string>
+    <string name="manual_webdav_title">Sauvegarde WebDAV</string>
+    <string name="manual_webdav_body">Réglages → Données → Sauvegarde WebDAV envoie le même fichier d\'export chiffré vers un serveur WebDAV de votre réseau local : un NAS, un PC ou un autre téléphone exécutant une app serveur WebDAV. Saisissez l\'adresse du serveur (nom d\'hôte ou IP locale), le nom d\'utilisateur et le mot de passe.\n\nRestaurer liste les sauvegardes stockées sur le serveur et vous laisse en choisir une. Le serveur ne reçoit que des données chiffrées par mot de passe ; l\'app ne se connecte jamais ailleurs qu\'à l\'adresse que vous avez configurée.\n\nSi l\'adresse du serveur change souvent, attribuez une IP fixe au NAS dans le routeur, ou utilisez son nom d\'hôte.</string>
+    <string name="about_terms_title">Conditions d\'utilisation</string>
+    <string name="about_privacy_title">Politique de confidentialité</string>
+    <string name="terms_body">En installant ou en utilisant Osmium, vous acceptez les conditions suivantes.\n\nOsmium est un logiciel libre et open source publié sous licence MIT.\n\nLe logiciel est fourni « tel quel », sans garantie d\'aucune sorte. Dans les limites permises par la loi, le développeur n\'est pas responsable des dommages résultant de l\'utilisation du logiciel.\n\nVos responsabilités :\n• Protégez vos secrets et mots de passe de sauvegarde. Les clés de chiffrement ne peuvent être récupérées par personne : un code PIN oublié ou un mot de passe de sauvegarde perdu ne peut pas être réinitialisé.\n• Conservez des sauvegardes. Désinstaller l\'app ou effacer ses données supprime définitivement tous les comptes.\n• Le code PIN d\'autodestruction est irréversible, par conception.\n• Gardez l\'horloge de l\'appareil exacte : les codes dépendent d\'elle.\n\nVous pouvez utiliser Osmium pour votre propre authentification à deux facteurs. Ne l\'utilisez pas pour accéder à des systèmes ou données auxquels vous n\'êtes pas autorisé.\n\nOsmium ne se connecte qu\'au serveur de sauvegarde WebDAV que vous configurez vous-même (généralement sur votre réseau local). Jamais à autre chose.</string>
+    <string name="privacy_body">Osmium ne collecte aucune donnée. Pas de système de compte, d\'inscription, d\'analyse, de SDK publicitaire ni de rapport de plantage.\n\nStockage : vos secrets, noms de compte et émetteurs sont stockés uniquement sur cet appareil, chiffrés en AES-256-GCM avec une clé non exportable du Android Keystore. Les sauvegardes sont chiffrées avec votre mot de passe (PBKDF2 + AES-256-GCM).\n\nRéseau : la permission INTERNET sert uniquement à la sauvegarde WebDAV. L\'app ne se connecte qu\'à l\'adresse que vous configurez — généralement un NAS ou un PC de votre réseau local — et uniquement lors d\'une sauvegarde ou restauration. Les sauvegardes sont chiffrées avant de quitter l\'appareil.\n\nCaméra : uniquement pour scanner les QR codes, traités sur l\'appareil ; les images ne sont jamais stockées ni transmises.\n\nBiométrie : gérée exclusivement par le système Android ; l\'app ne voit ni ne stocke jamais de données d\'empreinte ou de visage.\n\nNous ne partageons rien, car nous ne détenons rien. Désinstaller l\'app supprime toutes les données locales.\n\nTout changement futur affectant ces garanties sera mentionné dans les notes de version.\n\nContact : zhif0776@hotmail.com · https://t.me/osmium2fa</string>
 </resources>

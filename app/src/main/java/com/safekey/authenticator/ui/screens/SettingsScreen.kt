@@ -61,6 +61,7 @@ fun SettingsScreen(
     onBack: () -> Unit,
     onExport: () -> Unit,
     onImport: () -> Unit,
+    onWebDav: () -> Unit,
     onOpenPinSetup: () -> Unit,
     onOpenPinVerify: (String) -> Unit,
     onRequireBiometric: ((onSuccess: () -> Unit) -> Unit)? = null,
@@ -339,6 +340,13 @@ fun SettingsScreen(
                 title = stringResource(R.string.import_vault),
                 description = stringResource(R.string.import_vault_desc),
                 onClick = onImport
+            )
+
+            SettingRow(
+                icon = AppIcons.Dns,
+                title = stringResource(R.string.webdav_title),
+                description = stringResource(R.string.webdav_desc),
+                onClick = onWebDav
             )
 
             SettingRow(

@@ -11,10 +11,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -24,7 +22,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,19 +36,15 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.safekey.authenticator.MainViewModel
 import com.safekey.authenticator.R
-import com.safekey.authenticator.model.Account
-import com.safekey.authenticator.model.VaultAccount
 import com.safekey.authenticator.model.VaultFile
 import com.safekey.authenticator.repository.ImportMerger
 import com.safekey.authenticator.repository.ImportPlan
-import com.safekey.authenticator.security.VaultCrypto
+import com.safekey.authenticator.security.VaultFormatException
+import com.safekey.authenticator.security.VaultIO
 import com.safekey.authenticator.ui.components.SimpleTopBar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 
 // ---------------------------------------------------------------- Export
 
@@ -163,9 +157,7 @@ fun ExportScreen(
                                     pinSalt = pinHash?.first ?: "",
                                     pinHash = pinHash?.second ?: ""
                                 )
-                                val json = Json { encodeDefaults = true }
-                                val plain = json.encodeToString(vf)
-                                VaultCrypto.encrypt(plain, password.toCharArray())
+                                VaultIO.encrypt(vf, password.toCharArray())
                             }
                         } catch (e: Exception) {
                             error = context.getString(R.string.export_failed, e.message ?: "Error")
@@ -203,11 +195,8 @@ fun ImportScreen(
 
     var password by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
-    var plan by remember { mutableStateOf<ImportPlan?>(null) }
-    var selected by remember { mutableStateOf<Set<Int>?>(null) } // null = all selected
     var working by remember { mutableStateOf(false) }
-    var pinPending by remember { mutableStateOf<VaultFile?>(null) }
-    var pinError by remember { mutableStateOf<String?>(null) }
+    var vault by remember { mutableStateOf<VaultFile?>(null) }
 
     val openFileLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocument()
@@ -220,44 +209,23 @@ fun ImportScreen(
                         context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
                             ?: throw IllegalStateException("Cannot read file")
                     }
-                    // Stage 1: decrypt — failures here mean wrong password / corrupt file
-                    val vaultJson = try {
+                    // Stage 1+2: decrypt and parse (shared with the WebDAV restore path)
+                    val parsed = try {
                         withContext(Dispatchers.Default) {
-                            VaultCrypto.decrypt(String(payload, Charsets.UTF_8), password.toCharArray())
+                            VaultIO.decrypt(payload, password.toCharArray())
                         }
-                    } catch (e: Exception) {
-                        error = context.getString(R.string.error_import_wrong_password)
+                    } catch (e: VaultFormatException) {
+                        error = context.getString(
+                            if (e.wrongPassword) R.string.error_import_wrong_password
+                            else R.string.error_import_format
+                        )
                         working = false
                         return@launch
                     }
-                    // Stage 2: parse — failures here mean not a SafeKey vault
-                    val vault: VaultFile = try {
-                        Json { ignoreUnknownKeys = true }.decodeFromString(vaultJson)
-                    } catch (e: Exception) {
-                        error = context.getString(R.string.error_import_format)
-                        working = false
-                        return@launch
-                    }
-                    if (vault.format != "osmium-vault" && vault.format != "safekey-vault") {
-                        error = context.getString(R.string.error_import_format)
-                        working = false
-                        return@launch
-                    }
-                    val existing = vm.accounts.value
-                    // PIN gate: the file itself carries a PIN, or this device has one
-                    if (vault.pinSalt.isNotEmpty() || vm.hasLocalPin()) {
-                        pinPending = vault
-                        pinError = null
-                        plan = null
-                    } else {
-                        val p = ImportMerger.plan(existing, vault.accounts)
-                        plan = p
-                        selected = null
-                        error = null
-                    }
+                    vault = parsed
+                    error = null
                 } catch (e: Exception) {
                     error = context.getString(R.string.error_import_format)
-                    plan = null
                 }
                 working = false
             }
@@ -267,48 +235,16 @@ fun ImportScreen(
     Scaffold(
         topBar = { SimpleTopBar(title = stringResource(R.string.import_vault), onBack = onBack) }
     ) { padding ->
-        androidx.compose.foundation.layout.Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-        ) {
-            val pendingPin = pinPending
-            if (pendingPin != null) {
-                PinVerifyScreen(
-                    title = stringResource(R.string.import_pin_title),
-                    subtitle = stringResource(R.string.import_pin_desc),
-                    error = pinError,
-                    remainingAttempts = null,
-                    onVerify = { pin ->
-                        val ok = if (pendingPin.pinSalt.isNotEmpty()) {
-                            vm.verifyImportPin(pin, pendingPin.pinSalt, pendingPin.pinHash)
-                        } else {
-                            vm.verifyLocalPin(pin)
-                        }
-                        if (ok) {
-                            val p = ImportMerger.plan(vm.accounts.value, pendingPin.accounts)
-                            plan = p
-                            selected = null
-                            pinPending = null
-                            pinError = null
-                        } else {
-                            // self-destruct PIN works at every PIN prompt
-                            vm.checkSelfDestructPin(pin)
-                            pinError = context.getString(R.string.pin_wrong)
-                        }
-                    },
-                    onCancel = { pinPending = null }
-                )
-            } else {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            val currentPlan = plan
-            if (currentPlan == null) {
+        val currentVault = vault
+        if (currentVault == null) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .verticalScroll(rememberScrollState())
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
                 Text(
                     text = stringResource(R.string.import_password_desc),
                     style = MaterialTheme.typography.bodyMedium,
@@ -343,6 +279,99 @@ fun ImportScreen(
                 ) {
                     Text(stringResource(R.string.import_vault))
                 }
+            }
+        } else {
+            androidx.compose.foundation.layout.Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+            ) {
+                VaultImportFlow(
+                    vm = vm,
+                    vault = currentVault,
+                    onDone = onDone,
+                    onBackToPassword = { vault = null; error = null }
+                )
+            }
+        }
+    }
+}
+
+// --------------------------------------- shared import flow (file + WebDAV)
+
+/**
+ * Shared post-decryption import flow: PIN gate (when the file carries one or
+ * this device has one), merge preview with per-account checkboxes, and the
+ * final apply. Used by both the file import screen and WebDAV restore.
+ */
+@Composable
+fun VaultImportFlow(
+    vm: MainViewModel,
+    vault: VaultFile,
+    onDone: () -> Unit,
+    onBackToPassword: () -> Unit
+) {
+    val context = LocalContext.current
+
+    var plan by remember { mutableStateOf<ImportPlan?>(null) }
+    var selected by remember { mutableStateOf<Set<Int>?>(null) } // null = all selected
+    var working by remember { mutableStateOf(false) }
+    var pinPending by remember { mutableStateOf<VaultFile?>(null) }
+    var pinError by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(vault) {
+        // PIN gate: the file itself carries a PIN, or this device has one
+        if (vault.pinSalt.isNotEmpty() || vm.hasLocalPin()) {
+            pinPending = vault
+            pinError = null
+            plan = null
+        } else {
+            plan = ImportMerger.plan(vm.accounts.value, vault.accounts)
+            selected = null
+        }
+    }
+
+    val pendingPin = pinPending
+    if (pendingPin != null) {
+        PinVerifyScreen(
+            title = stringResource(R.string.import_pin_title),
+            subtitle = stringResource(R.string.import_pin_desc),
+            error = pinError,
+            remainingAttempts = null,
+            onVerify = { pin ->
+                val ok = if (pendingPin.pinSalt.isNotEmpty()) {
+                    vm.verifyImportPin(pin, pendingPin.pinSalt, pendingPin.pinHash)
+                } else {
+                    vm.verifyLocalPin(pin)
+                }
+                if (ok) {
+                    plan = ImportMerger.plan(vm.accounts.value, pendingPin.accounts)
+                    selected = null
+                    pinPending = null
+                    pinError = null
+                } else {
+                    // self-destruct PIN works at every PIN prompt
+                    vm.checkSelfDestructPin(pin)
+                    pinError = context.getString(R.string.pin_wrong)
+                }
+            },
+            onCancel = {
+                pinPending = null
+                onBackToPassword()
+            }
+        )
+    } else {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            val currentPlan = plan
+            if (currentPlan == null) {
+                // nothing to show yet (LaunchedEffect has not run)
+                Spacer(Modifier.height(4.dp))
             } else {
                 // Preview & confirm
                 Text(
@@ -418,11 +447,9 @@ fun ImportScreen(
                 ) {
                     Text(stringResource(R.string.confirm))
                 }
-                TextButton(onClick = { plan = null; error = null }) {
+                TextButton(onClick = { onBackToPassword() }) {
                     Text(stringResource(R.string.cancel))
                 }
-            }
-        }
             }
         }
     }

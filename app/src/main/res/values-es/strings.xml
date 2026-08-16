@@ -104,7 +104,7 @@
     <string name="lock_cancelled">Autenticación cancelada</string>
     <string name="version">Versión</string>
     <string name="accounts_count">%1$d cuenta(s)</string>
-    <string name="about_desc">Osmium es un autenticador TOTP totalmente sin conexión y centrado en la privacidad. Todos los datos se cifran con el Android Keystore y nunca salen de tu dispositivo.</string>
+    <string name="about_desc">Osmium es un autenticador TOTP centrado en la privacidad. Todos los datos se cifran con el Android Keystore. La app nunca se conecta a nada que no sea el servidor de copias WebDAV que configures tú.</string>
     <string name="sorting_hint">Mantén pulsada una cuenta para reordenar</string>
     <string name="account_type_label">Tipo de cuenta</string>
     <string name="account_type_totp">Basado en tiempo (TOTP)</string>
@@ -142,7 +142,7 @@
     <string name="manual_hotp_title">HOTP (basado en contador)</string>
     <string name="manual_hotp_body">Los códigos HOTP no se actualizan solos. Toca «Código siguiente» en los detalles de la cuenta para avanzar el contador (+1). El contador se guarda por cuenta. Usa HOTP solo cuando el servicio lo exija explícitamente.</string>
     <string name="manual_security_title">Seguridad</string>
-    <string name="manual_security_body">• Exigir verificación al abrir: huella / contraseña del sistema / PIN de Osmium antes de mostrar los códigos.\n• PIN de autodestrucción: introducirlo en CUALQUIER campo de PIN borra todas las cuentas tras una confirmación.\n• Las capturas están bloqueadas por defecto; puedes permitirlas en Ajustes.\n• Osmium es totalmente sin conexión: sin permisos de red, sin cuentas, sin telemetría.</string>
+    <string name="manual_security_body">• Verificación al abrir: huella / contraseña del sistema / PIN de Osmium antes de mostrar los códigos.\n• PIN de autodestrucción: al introducirlo en CUALQUIER pantalla de PIN borra todas las cuentas tras confirmar.\n• Las capturas están bloqueadas por defecto; puedes permitirlas en Ajustes, pero los datos ocultos siguen protegidos.\n• Osmium solo se conecta al servidor WebDAV que configures tú: sin cuentas, sin telemetría, sin nube.</string>
     <string name="manual_backup_title">Copia de seguridad y restauración</string>
     <string name="manual_backup_body">Ajustes → Datos → Exportar crea una copia cifrada (contraseña + PIN de la aplicación). Guarda bien la contraseña: sin ella no se puede restaurar. La migración de Google Authenticator es solo de importación.</string>
     <string name="manual_tester_title">Prueba tu autenticador</string>
@@ -150,7 +150,7 @@
     <string name="manual_naming_title">Nombres de cuenta y emisores</string>
     <string name="manual_naming_body">Tanto el nombre de la cuenta como el emisor son opcionales.\n\nSi dejas el NOMBRE DE CUENTA en blanco, Osmium genera uno automáticamente con la fecha de añadido y el orden — p. ej., la primera cuenta añadida en mayo de 2026 se llama 20260501.\n\nSi dejas el EMISOR en blanco, se muestra como "Unknown".</string>
     <string name="manual_notes_title">Notas importantes</string>
-    <string name="manual_notes_body">• Los secretos nunca salen de este dispositivo (cifrados con una clave respaldada por hardware).\n• Desinstalar la aplicación o borrar sus datos ELIMINA todas las cuentas: exporta antes una copia.\n• Los códigos copiados permanecen en el portapapeles; no hay limpieza automática.\n• Si el reloj del dispositivo está mal, los códigos serán incorrectos: activa la sincronización horaria por red.</string>
+    <string name="manual_notes_body">• Los secretos se cifran con una clave respaldada por hardware; solo salen del dispositivo dentro de tus propias copias cifradas.\n• Desinstalar la app o borrar sus datos ELIMINA todas las cuentas: exporta una copia antes.\n• Los códigos copiados quedan en el portapapeles; no se borran solos.\n• Si el reloj del dispositivo está mal, los códigos fallarán: activa la sincronización horaria por red.</string>
     <string name="sort_mode_desc">Cómo se ordenan las cuentas en la lista</string>
     <string name="sort_random">Aleatorio</string>
     <string name="sort_random_desc">Barajadas una vez por inicio</string>
@@ -267,4 +267,37 @@
     <string name="import_pin_title">Introduce el PIN de la copia</string>
     <string name="import_pin_desc">Esta copia está vinculada a un PIN. Introdúcelo para descifrar las cuentas.</string>
     <string name="algorithm_hint">El algoritmo se detecta automáticamente desde el enlace otpauth://. Los secretos introducidos manualmente usan SHA1 por defecto (el que usan casi todos los servicios).</string>
+
+    <string name="webdav_title">Copia de seguridad WebDAV</string>
+    <string name="webdav_desc">Copia de seguridad a un servidor WebDAV en tu red local (NAS, PC, móvil)</string>
+    <string name="webdav_intro">Haz una copia de seguridad en cualquier servidor WebDAV de tu red local: un NAS, un PC u otro móvil. Las copias se cifran con tu contraseña de exportación antes de subirse; el servidor solo almacena texto cifrado.</string>
+    <string name="webdav_url_label">Dirección del servidor</string>
+    <string name="webdav_url_hint">http://192.168.1.5:5005 o https://nas.local</string>
+    <string name="webdav_username_label">Usuario (opcional)</string>
+    <string name="webdav_password_label">Contraseña</string>
+    <string name="webdav_save">Guardar</string>
+    <string name="webdav_saved">Configuración del servidor guardada</string>
+    <string name="webdav_test">Probar conexión</string>
+    <string name="webdav_testing">Probando…</string>
+    <string name="webdav_test_ok">Conectado correctamente</string>
+    <string name="webdav_backup_now">Hacer copia ahora</string>
+    <string name="webdav_uploading">Subiendo…</string>
+    <string name="webdav_backup_done">Copia subida</string>
+    <string name="webdav_backup_failed">Falló la copia: %1$s</string>
+    <string name="webdav_restore">Restaurar…</string>
+    <string name="webdav_listing">Listando copias…</string>
+    <string name="webdav_no_backups">No se encontraron copias en el servidor.</string>
+    <string name="webdav_pick_file">Selecciona una copia</string>
+    <string name="webdav_downloading">Descargando…</string>
+    <string name="webdav_backup_password_title">Establece una contraseña de copia</string>
+    <string name="webdav_backup_password_desc">Esta contraseña protege el archivo subido. Apúntala: la necesitarás para restaurar.</string>
+    <string name="webdav_restore_password_desc">Introduce la contraseña con la que se creó esta copia.</string>
+    <string name="webdav_error_url">Introduce la dirección del servidor, p. ej. http://192.168.1.5:5005</string>
+    <string name="webdav_warning">Usa solo servidores de confianza. El archivo de copia va cifrado, pero guarda bien la contraseña de exportación: quien pueda acceder al archivo y conozca la contraseña podrá restaurarlo.</string>
+    <string name="manual_webdav_title">Copia de seguridad WebDAV</string>
+    <string name="manual_webdav_body">Ajustes → Datos → Copia de seguridad WebDAV sube el mismo archivo cifrado a un servidor WebDAV de tu red local: un NAS, un PC u otro móvil con una app de servidor WebDAV. Introduce la dirección del servidor (nombre de host o IP local), el usuario y la contraseña.\n\nRestaurar muestra las copias guardadas en el servidor y te deja elegir una. El servidor solo recibe datos cifrados con contraseña; la app nunca se conecta a nada que no sea la dirección que configures.\n\nSi la dirección del servidor cambia a menudo, asigna una IP fija al NAS en el router o usa su nombre de host.</string>
+    <string name="about_terms_title">Términos de uso</string>
+    <string name="about_privacy_title">Política de privacidad</string>
+    <string name="terms_body">Al instalar o usar Osmium aceptas los siguientes términos.\n\nOsmium es software libre y de código abierto bajo la licencia MIT.\n\nEl software se ofrece “tal cual”, sin garantía de ningún tipo. En la máxima medida permitida por la ley, el desarrollador no se hace responsable de los daños derivados del uso del software.\n\nTus responsabilidades:\n• Protege tus secretos y contraseñas de copia. Las claves de cifrado no las puede recuperar nadie: un PIN olvidado o una contraseña perdida no se pueden restablecer.\n• Guarda copias de seguridad. Desinstalar la app o borrar sus datos elimina todas las cuentas para siempre.\n• El PIN de autodestrucción es irreversible, por diseño.\n• Mantén el reloj del dispositivo exacto: los códigos dependen de él.\n\nPuedes usar Osmium para tu propia autenticación de dos factores. No lo uses para acceder a sistemas o datos a los que no estés autorizado.\n\nOsmium solo se conecta al servidor WebDAV de copia de seguridad que configures tú (normalmente en tu red local). Nunca se conecta a nada más.</string>
+    <string name="privacy_body">Osmium no recopila ningún dato. No hay sistema de cuentas, registro, analíticas, SDK de publicidad ni informe de fallos.\n\nAlmacenamiento: tus secretos, nombres de cuenta y proveedores se guardan solo en este dispositivo, cifrados con AES-256-GCM mediante una clave no exportable del Android Keystore. Las copias se cifran con tu contraseña (PBKDF2 + AES-256-GCM).\n\nRed: el permiso INTERNET se usa únicamente para la copia de seguridad WebDAV. La app solo se conecta a la dirección que configures — normalmente un NAS o PC de tu red local — y solo al hacer copias o restaurar. Las copias van cifradas antes de salir del dispositivo.\n\nCámara: solo para escanear códigos QR, procesados en el dispositivo; las imágenes nunca se guardan ni transmiten.\n\nBiometría: gestionada exclusivamente por Android; la app nunca ve ni guarda huellas ni datos faciales.\n\nNo compartimos nada porque no guardamos nada. Desinstalar la app borra todos los datos locales.\n\nCualquier cambio que afecte a estas garantías se indicará en las notas de la versión.\n\nContacto: zhif0776@hotmail.com · https://t.me/osmium2fa</string>
 </resources>

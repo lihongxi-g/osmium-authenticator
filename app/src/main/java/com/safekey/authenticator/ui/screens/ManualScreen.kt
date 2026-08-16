@@ -45,6 +45,7 @@ fun ManualScreen(onBack: () -> Unit) {
             ManualSection(R.string.manual_security_title, R.string.manual_security_body)
             ManualSection(R.string.manual_tester_title, R.string.manual_tester_body)
             ManualSection(R.string.manual_backup_title, R.string.manual_backup_body)
+            ManualSection(R.string.manual_webdav_title, R.string.manual_webdav_body)
             ManualSection(R.string.manual_notes_title, R.string.manual_notes_body)
             Spacer(Modifier.height(24.dp))
         }

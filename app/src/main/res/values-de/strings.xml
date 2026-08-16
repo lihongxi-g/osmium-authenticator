@@ -104,7 +104,7 @@
     <string name="lock_cancelled">Authentifizierung abgebrochen</string>
     <string name="version">Version</string>
     <string name="accounts_count">%1$d Konto/Konten</string>
-    <string name="about_desc">Osmium ist ein vollständig offline arbeitender, datenschutzorientierter TOTP-Authenticator. Alle Daten werden mit dem Android Keystore verschlüsselt und verlassen dein Gerät nie.</string>
+    <string name="about_desc">Osmium ist ein datenschutzorientierter TOTP-Authenticator. Alle Daten sind mit dem Android Keystore verschlüsselt. Die App verbindet sich mit nichts anderem als dem WebDAV-Backup-Server, den du selbst konfigurierst.</string>
     <string name="sorting_hint">Zum Umsortieren lange drücken</string>
     <string name="account_type_label">Kontotyp</string>
     <string name="account_type_totp">Zeitbasiert (TOTP)</string>
@@ -142,7 +142,7 @@
     <string name="manual_hotp_title">HOTP (zählerbasiert)</string>
     <string name="manual_hotp_body">HOTP-Codes aktualisieren sich nicht von selbst. Tippe in den Kontodetails auf „Nächster Code“, um den Zähler zu erhöhen (+1). Der Zähler wird pro Konto gespeichert. Verwende HOTP nur, wenn der Dienst es ausdrücklich verlangt.</string>
     <string name="manual_security_title">Sicherheit</string>
-    <string name="manual_security_body">• Verifizierung beim Öffnen: Fingerabdruck / Systempasswort / Osmium-PIN vor dem Anzeigen der Codes.\n• Selbstzerstörungs-PIN: Die Eingabe an JEDER PIN-Stelle löscht nach Bestätigung alle Konten.\n• Screenshots sind standardmäßig blockiert; du kannst sie in den Einstellungen erlauben.\n• Osmium ist vollständig offline — keine Netzwerkberechtigung, keine Konten, keine Telemetrie.</string>
+    <string name="manual_security_body">• Prüfung beim Öffnen: Fingerabdruck / Systempasswort / Osmium-PIN, bevor Codes angezeigt werden.\n• Selbstzerstörungs-PIN: Eingabe an JEDEM PIN-Fenster löscht nach Bestätigung alle Konten.\n• Screenshots sind standardmäßig blockiert; du kannst sie in den Einstellungen erlauben, versteckte Daten bleiben aber geschützt.\n• Osmium verbindet sich nur mit dem WebDAV-Server, den du selbst konfigurierst – keine Konten, keine Telemetrie, keine Cloud.</string>
     <string name="manual_backup_title">Sicherung &amp; Wiederherstellung</string>
     <string name="manual_backup_body">Einstellungen → Daten → Exportieren erstellt eine verschlüsselte Sicherung (Passwort + App-PIN). Bewahre das Passwort sicher auf — ohne es lässt sich die Sicherung nicht wiederherstellen. Die Google-Authenticator-Migration ist ein reiner Import.</string>
     <string name="manual_tester_title">Authenticator testen</string>
@@ -150,7 +150,7 @@
     <string name="manual_naming_title">Kontonamen &amp; Aussteller</string>
     <string name="manual_naming_body">Kontoname und Aussteller sind beide optional.\n\nLässt du den KONTONAMEN leer, erzeugt Osmium automatisch einen aus Hinzufügedatum und Hinzufüge-Reihenfolge — z. B. heißt das erste im Mai 2026 hinzugefügte Konto 20260501.\n\nLässt du den AUSSTELLER leer, wird „Unknown“ angezeigt.</string>
     <string name="manual_notes_title">Wichtige Hinweise</string>
-    <string name="manual_notes_body">• Geheimnisse verlassen dieses Gerät nie (verschlüsselt mit einem hardwaregestützten Schlüssel).\n• Deinstallieren oder Daten löschen LÖSCHT alle Konten — exportiere zuerst eine Sicherung.\n• Kopierte Codes bleiben in der Zwischenablage; es gibt keine automatische Leerung.\n• Ist die Geräteuhr falsch, sind auch die Codes falsch — aktiviere die Netzwerkzeit-Synchronisierung.</string>
+    <string name="manual_notes_body">• Geheimnisse sind mit einem hardwaregestützten Schlüssel verschlüsselt; sie verlassen das Gerät nur in deinen eigenen passwortgeschützten Backups.\n• Deinstallieren oder Daten löschen LÖSCHT alle Konten – exportiere vorher ein Backup.\n• Kopierte Codes bleiben in der Zwischenablage; es gibt kein automatisches Löschen.\n• Wenn die Geräteuhr falsch geht, sind die Codes falsch – aktiviere die Netzwerkzeit-Synchronisierung.</string>
     <string name="sort_mode_desc">Wie Konten in der Liste sortiert werden</string>
     <string name="sort_random">Zufällig</string>
     <string name="sort_random_desc">Einmal pro App-Start gemischt</string>
@@ -267,4 +267,37 @@
     <string name="import_pin_title">Sicherungs-PIN eingeben</string>
     <string name="import_pin_desc">Diese Sicherung ist an einen PIN gebunden. Gib ihn ein, um die Konten zu entschlüsseln.</string>
     <string name="algorithm_hint">Der Algorithmus wird automatisch aus dem otpauth://-Link erkannt. Manuell eingegebene Geheimnisse verwenden standardmäßig SHA1 (von fast allen Diensten genutzt).</string>
+
+    <string name="webdav_title">WebDAV-Backup</string>
+    <string name="webdav_desc">Backup auf einen WebDAV-Server im lokalen Netzwerk (NAS, PC, Handy)</string>
+    <string name="webdav_intro">Backup auf einen beliebigen WebDAV-Server im lokalen Netzwerk – ein NAS, ein PC oder ein anderes Handy. Die Backups werden vor dem Upload mit deinem Export-Passwort verschlüsselt; der Server speichert ausschließlich verschlüsselte Daten.</string>
+    <string name="webdav_url_label">Serveradresse</string>
+    <string name="webdav_url_hint">http://192.168.1.5:5005 oder https://nas.local</string>
+    <string name="webdav_username_label">Benutzername (optional)</string>
+    <string name="webdav_password_label">Passwort</string>
+    <string name="webdav_save">Speichern</string>
+    <string name="webdav_saved">Servereinstellungen gespeichert</string>
+    <string name="webdav_test">Verbindung testen</string>
+    <string name="webdav_testing">Teste…</string>
+    <string name="webdav_test_ok">Erfolgreich verbunden</string>
+    <string name="webdav_backup_now">Jetzt sichern</string>
+    <string name="webdav_uploading">Lade hoch…</string>
+    <string name="webdav_backup_done">Backup hochgeladen</string>
+    <string name="webdav_backup_failed">Backup fehlgeschlagen: %1$s</string>
+    <string name="webdav_restore">Wiederherstellen…</string>
+    <string name="webdav_listing">Liste Backups auf…</string>
+    <string name="webdav_no_backups">Keine Backups auf dem Server gefunden.</string>
+    <string name="webdav_pick_file">Backup auswählen</string>
+    <string name="webdav_downloading">Lade herunter…</string>
+    <string name="webdav_backup_password_title">Backup-Passwort festlegen</string>
+    <string name="webdav_backup_password_desc">Dieses Passwort schützt die hochgeladene Datei. Notiere es dir – du brauchst es zum Wiederherstellen.</string>
+    <string name="webdav_restore_password_desc">Gib das Passwort ein, mit dem dieses Backup erstellt wurde.</string>
+    <string name="webdav_error_url">Gib die Serveradresse ein, z. B. http://192.168.1.5:5005</string>
+    <string name="webdav_warning">Verwende nur Server, denen du vertraust. Die Backup-Datei selbst ist verschlüsselt, aber bewahre das Export-Passwort sicher auf – wer die Datei erreichen UND das Passwort kennt, kann sie wiederherstellen.</string>
+    <string name="manual_webdav_title">WebDAV-Backup</string>
+    <string name="manual_webdav_body">Einstellungen → Daten → WebDAV-Backup lädt dieselbe verschlüsselte Export-Datei auf einen WebDAV-Server im lokalen Netzwerk hoch – ein NAS, einen PC oder ein anderes Handy mit einer WebDAV-Server-App. Gib die Serveradresse (Hostname oder lokale IP), Benutzername und Passwort ein.\n\n„Wiederherstellen“ listet die auf dem Server gespeicherten Backups auf und lässt dich eines auswählen. Der Server erhält ausschließlich passwortverschlüsselte Daten; die App verbindet sich mit nichts anderem als der von dir konfigurierten Adresse.\n\nWenn sich die Serveradresse oft ändert, weise dem NAS im Router eine feste IP zu oder verwende seinen Hostnamen.</string>
+    <string name="about_terms_title">Nutzungsbedingungen</string>
+    <string name="about_privacy_title">Datenschutzerklärung</string>
+    <string name="terms_body">Durch die Installation oder Nutzung von Osmium stimmst du den folgenden Bedingungen zu.\n\nOsmium ist freie Open-Source-Software unter der MIT-Lizenz.\n\nDie Software wird „wie besehen“ und ohne jegliche Gewährleistung bereitgestellt. Im gesetzlich zulässigen Umfang haftet der Entwickler nicht für Schäden, die aus der Nutzung der Software entstehen.\n\nDeine Verantwortung:\n• Schütze deine Geheimnisse und Backup-Passwörter. Verschlüsselungsschlüssel können von niemandem wiederhergestellt werden – eine vergessene PIN oder ein verlorenes Backup-Passwort lässt sich nicht zurücksetzen.\n• Bewahre Backups auf. Das Deinstallieren der App oder das Löschen ihrer Daten entfernt alle Konten dauerhaft.\n• Die Selbstzerstörungs-PIN ist absichtlich unumkehrbar.\n• Halte die Geräteuhr genau – zeitbasierte Codes hängen davon ab.\n\nDu darfst Osmium für deine eigene Zwei-Faktor-Authentifizierung nutzen. Nutze es nicht für den Zugriff auf Systeme oder Daten, zu denen du nicht berechtigt bist.\n\nOsmium verbindet sich nur mit dem WebDAV-Backup-Server, den du selbst konfigurierst (normalerweise im lokalen Netzwerk). Mit nichts anderem.</string>
+    <string name="privacy_body">Osmium sammelt keine Daten. Es gibt kein Kontosystem, keine Registrierung, keine Analyse, kein Werbe-SDK und keinen Crash-Reporter.\n\nSpeicherung: Deine Geheimnisse, Kontonamen und Diensteanbieter werden nur auf diesem Gerät gespeichert, verschlüsselt mit AES-256-GCM über einen nicht exportierbaren Schlüssel im Android Keystore. Backup-Dateien werden mit deinem Passwort verschlüsselt (PBKDF2 + AES-256-GCM).\n\nNetzwerk: Die INTERNET-Berechtigung dient ausschließlich der WebDAV-Backup-Funktion. Die App verbindet sich nur mit der von dir konfigurierten Adresse – normalerweise einem NAS oder PC im lokalen Netzwerk – und nur beim Backup oder Wiederherstellen. Backups werden verschlüsselt, bevor sie das Gerät verlassen.\n\nKamera: Nur zum Scannen von QR-Codes, Verarbeitung auf dem Gerät; Bilder werden nie gespeichert oder übertragen.\n\nBiometrie: Ausschließlich vom Android-System verarbeitet; die App sieht oder speichert niemals Fingerabdruck- oder Gesichtsdaten.\n\nWir teilen nichts, weil wir nichts besitzen. Das Deinstallieren der App löscht alle lokal gespeicherten Daten.\n\nÄnderungen, die diese Garantien betreffen, werden in den Release-Notes genannt.\n\nKontakt: zhif0776@hotmail.com · https://t.me/osmium2fa</string>
 </resources>

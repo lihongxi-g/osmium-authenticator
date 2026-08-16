@@ -104,7 +104,7 @@
     <string name="lock_cancelled">認証がキャンセルされました</string>
     <string name="version">バージョン</string>
     <string name="accounts_count">%1$d件のアカウント</string>
-    <string name="about_desc">Osmiumは完全オフラインでプライバシー最優先のTOTP認証アプリです。すべてのデータはAndroid Keystoreで暗号化され、端末の外に出ることはありません。</string>
+    <string name="about_desc">Osmium はプライバシー重視の TOTP 認証アプリです。すべてのデータは Android Keystore で暗号化されます。アプリが接続するのは、あなた自身が設定した WebDAV バックアップサーバー以外には何もありません。</string>
     <string name="sorting_hint">長押しで並べ替え</string>
     <string name="account_type_label">アカウントタイプ</string>
     <string name="account_type_totp">時間ベース（TOTP）</string>
@@ -142,7 +142,7 @@
     <string name="manual_hotp_title">HOTP（カウンタベース）</string>
     <string name="manual_hotp_body">HOTPコードは自動更新されません。アカウント詳細の「次のコード」をタップするとカウンタが+1されます。カウンタはアカウントごとに保存されます。HOTPはサービスが明示的に要求する場合のみ使用してください。</string>
     <string name="manual_security_title">セキュリティ</string>
-    <string name="manual_security_body">• 開くときに認証：コード表示前に指紋 / システムパスワード / Osmium PIN を要求。\n• 自爆PIN：どのPIN入力欄でも入力すると、確認後にすべてのアカウントが消去されます。\n• スクリーンショットはデフォルトでブロック。設定で許可できます。\n• Osmiumは完全オフライン：ネットワーク権限なし、アカウントなし、テレメトリなし。</string>
+    <string name="manual_security_body">• 起動時の確認：コードを表示する前に指紋 / システムパスワード / Osmium PIN で確認します。\n• 自爆 PIN：どの PIN 画面で入力しても、確認後にすべてのアカウントが消去されます。\n• スクリーンショットはデフォルトで禁止。設定で許可できますが、非表示データは常に保護されます。\n• Osmium が接続するのは、あなた自身が設定した WebDAV バックアップサーバーだけです。アカウントなし、テレメトリなし、クラウドなし。</string>
     <string name="manual_backup_title">バックアップと復元</string>
     <string name="manual_backup_body">設定 → データ → エクスポート で暗号化バックアップ（パスワード + アプリPIN）を作成できます。パスワードは大切に保管してください。ないと復元できません。Google Authenticatorからの移行は読み取り専用のインポートです。</string>
     <string name="manual_tester_title">認証アプリのテスト</string>
@@ -150,7 +150,7 @@
     <string name="manual_naming_title">アカウント名と発行元</string>
     <string name="manual_naming_body">アカウント名と発行元はどちらも省略できます。\n\nアカウント名を空にすると、Osmiumが追加日と追加順から自動で名前を生成します — 例：2026年5月に追加した最初のアカウントは 20260501 となります。\n\n発行元を空にすると「Unknown」と表示されます。</string>
     <string name="manual_notes_title">重要な注意事項</string>
-    <string name="manual_notes_body">• 秘密鍵はこの端末から出ません（ハードウェア連携キーで暗号化）。\n• アプリのアンインストールやデータ消去で全アカウントが削除されます — 先にバックアップをエクスポートしてください。\n• コピーしたコードはクリップボードに残ります。自動消去はありません。\n• 端末の時計がずれているとコードも間違えます — ネットワーク時刻同期を有効にしてください。</string>
+    <string name="manual_notes_body">• 秘密鍵はハードウェア保護の鍵で暗号化され、あなた自身のパスワード暗号化バックアップの中でのみ端末の外に出ます。\n• アプリのアンインストールやデータ消去で全アカウントが削除されます。先にバックアップを書き出してください。\n• コピーしたコードはクリップボードに残ります。自動クリアはありません。\n• 端末の時計がずれているとコードもずれます。ネットワーク時刻同期を有効にしてください。</string>
     <string name="sort_mode_desc">リストでのアカウントの並び順</string>
     <string name="sort_random">ランダム</string>
     <string name="sort_random_desc">起動ごとにシャッフル</string>
@@ -267,4 +267,37 @@
     <string name="import_pin_title">バックアップPINを入力</string>
     <string name="import_pin_desc">このバックアップはPINに紐付けられています。入力してアカウントを復号してください。</string>
     <string name="algorithm_hint">アルゴリズムはotpauth://リンクから自動検出されます。手動入力の秘密鍵はデフォルトでSHA1を使用します（ほぼすべてのサービスが採用）。</string>
+
+    <string name="webdav_title">WebDAV バックアップ</string>
+    <string name="webdav_desc">ローカルネットワーク上の WebDAV サーバーにバックアップ（NAS・PC・スマホ）</string>
+    <string name="webdav_intro">ローカルネットワーク上の任意の WebDAV サーバー（NAS、PC、別のスマホ）にバックアップできます。バックアップはアップロード前に書き出し用パスワードで暗号化され、サーバーには暗号文しか保存されません。</string>
+    <string name="webdav_url_label">サーバーアドレス</string>
+    <string name="webdav_url_hint">http://192.168.1.5:5005 または https://nas.local</string>
+    <string name="webdav_username_label">ユーザー名（任意）</string>
+    <string name="webdav_password_label">パスワード</string>
+    <string name="webdav_save">保存</string>
+    <string name="webdav_saved">サーバー設定を保存しました</string>
+    <string name="webdav_test">接続テスト</string>
+    <string name="webdav_testing">テスト中…</string>
+    <string name="webdav_test_ok">接続に成功しました</string>
+    <string name="webdav_backup_now">今すぐバックアップ</string>
+    <string name="webdav_uploading">アップロード中…</string>
+    <string name="webdav_backup_done">バックアップをアップロードしました</string>
+    <string name="webdav_backup_failed">バックアップに失敗しました：%1$s</string>
+    <string name="webdav_restore">復元…</string>
+    <string name="webdav_listing">バックアップ一覧を取得中…</string>
+    <string name="webdav_no_backups">サーバーにバックアップが見つかりません。</string>
+    <string name="webdav_pick_file">バックアップを選択</string>
+    <string name="webdav_downloading">ダウンロード中…</string>
+    <string name="webdav_backup_password_title">バックアップ用パスワードを設定</string>
+    <string name="webdav_backup_password_desc">このパスワードがアップロードしたファイルを保護します。復元時に必要になるので必ず控えてください。</string>
+    <string name="webdav_restore_password_desc">このバックアップを作成したときのパスワードを入力してください。</string>
+    <string name="webdav_error_url">サーバーアドレスを入力してください（例：http://192.168.1.5:5005）</string>
+    <string name="webdav_warning">信頼できるサーバーのみ使用してください。バックアップファイル自体は暗号化されていますが、書き出し用パスワードは大切に保管してください。ファイルにアクセスでき、かつパスワードを知っている人なら復元できてしまいます。</string>
+    <string name="manual_webdav_title">WebDAV バックアップ</string>
+    <string name="manual_webdav_body">設定 → データ → WebDAV バックアップで、同じ暗号化書き出しファイルをローカルネットワーク上の WebDAV サーバー（NAS、PC、WebDAV サーバーアプリを動かす別のスマホ）にアップロードできます。サーバーアドレス（ホスト名またはローカル IP）、ユーザー名、パスワードを入力してください。\n\n復元ではサーバーに保存されたバックアップの一覧を表示し、どれか一つを選んで復元します。サーバーが受け取るのはパスワードで暗号化されたデータだけです。アプリが接続するのは、あなたが設定したサーバーアドレス以外には何もありません。\n\nサーバーアドレスが頻繁に変わる場合は、ルーターで NAS に固定 IP を割り当てるか、ホスト名を使ってください。</string>
+    <string name="about_terms_title">利用規約</string>
+    <string name="about_privacy_title">プライバシーポリシー</string>
+    <string name="terms_body">Osmium をインストールまたは使用することで、以下の規約に同意したことになります。\n\nOsmium は MIT ライセンスで公開された無料のオープンソースソフトウェアです。\n\n本ソフトウェアは“現状のまま”提供され、いかなる保証もありません。法律で認められる最大限の範囲で、開発者はソフトウェアの使用に起因するいかなる損害についても責任を負いません。\n\nあなたの責任：\n• 秘密鍵とバックアップ用パスワードを大切に保管してください。暗号鍵は開発者を含め誰にも復元できません。PIN を忘れたり、バックアップ用パスワードを失った場合、リセットはできません。\n• バックアップは自分で保管してください。アプリをアンインストールするかデータを消去すると、すべてのアカウントが永久に削除されます。\n• 自爆 PIN は設計上、取り消せません。\n• 端末の時計を正確に保ってください。時間ベースのコードは時計に依存します。\n\nOsmium は自身の二要素認証に使用できます。アクセス権のないシステムやデータへのアクセスには使用しないでください。\n\nOsmium が接続するのは、あなた自身が設定した WebDAV バックアップサーバー（通常はローカルネットワーク内）だけです。それ以外には一切接続しません。</string>
+    <string name="privacy_body">Osmium は一切のデータを収集しません。アカウントシステム、登録、分析、広告 SDK、クラッシュレポートはありません。\n\n保存：秘密鍵・アカウント名・サービス名はこの端末にのみ保存され、Android Keystore の書き出し不能な鍵で AES-256-GCM 暗号化されます。バックアップファイルはパスワードで暗号化されます（PBKDF2 + AES-256-GCM）。\n\nネットワーク：INTERNET 権限は WebDAV バックアップ機能のためだけに使用されます。アプリが接続するのは、あなたが設定したサーバーアドレス（通常はローカルネットワーク内の NAS や PC）だけであり、バックアップまたは復元を実行するときだけです。バックアップは端末を離れる前にパスワードで暗号化されます。\n\nカメラ：QR コードのスキャンのみに使用され、端末上で処理されます。映像が保存・送信されることはありません。\n\n生体認証：Android システムが独占的に処理します。アプリが指紋や顔データを見たり保存したりすることはありません。\n\n何も保持していないため、共有するものもありません。アプリをアンインストールすると、ローカルに保存されたデータはすべて削除されます。\n\nこれらの保証に影響する将来の変更は、リリースノートで告知されます。\n\n連絡先：zhif0776@hotmail.com · https://t.me/osmium2fa</string>
 </resources>

@@ -104,7 +104,7 @@
     <string name="lock_cancelled">인증이 취소되었습니다</string>
     <string name="version">버전</string>
     <string name="accounts_count">계정 %1$d개</string>
-    <string name="about_desc">Osmium은 완전 오프라인, 프라이버시 우선 TOTP 인증기입니다. 모든 데이터는 Android Keystore로 암호화되며 기기를 벗어나지 않습니다.</string>
+    <string name="about_desc">Osmium은 개인정보 보호를 최우선으로 하는 TOTP 인증 앱입니다. 모든 데이터는 Android Keystore로 암호화됩니다. 앱은 사용자가 직접 설정한 WebDAV 백업 서버 외에는 아무것도 연결하지 않습니다.</string>
     <string name="sorting_hint">길게 눌러 순서 변경</string>
     <string name="account_type_label">계정 유형</string>
     <string name="account_type_totp">시간 기반 (TOTP)</string>
@@ -142,7 +142,7 @@
     <string name="manual_hotp_title">HOTP (카운터 기반)</string>
     <string name="manual_hotp_body">HOTP 코드는 자동으로 갱신되지 않습니다. 계정 상세의「다음 코드」를 탭하면 카운터가 +1됩니다. 카운터는 계정별로 저장됩니다. HOTP는 서비스가 명시적으로 요구할 때만 사용하세요.</string>
     <string name="manual_security_title">보안</string>
-    <string name="manual_security_body">• 열 때 인증: 코드 표시 전 지문 / 시스템 비밀번호 / Osmium PIN 요구.\n• 자폭 PIN: 어느 PIN 입력란에든 입력하면 확인 후 모든 계정이 삭제됩니다.\n• 스크린샷은 기본 차단. 설정에서 허용할 수 있습니다.\n• Osmium은 완전 오프라인: 네트워크 권한 없음, 계정 없음, 텔레메트리 없음.</string>
+    <string name="manual_security_body">• 열 때 확인: 코드를 보여주기 전에 지문 / 시스템 비밀번호 / Osmium PIN으로 확인합니다.\n• 자폭 PIN: 어떤 PIN 화면에서든 입력하면 확인 후 모든 계정이 삭제됩니다.\n• 스크린샷은 기본적으로 차단됩니다. 설정에서 허용할 수 있지만 숨긴 데이터는 항상 보호됩니다.\n• Osmium은 사용자가 직접 설정한 WebDAV 백업 서버에만 연결합니다. 계정 없음, 원격 측정 없음, 클라우드 없음.</string>
     <string name="manual_backup_title">백업 및 복원</string>
     <string name="manual_backup_body">설정 → 데이터 → 내보내기로 암호화 백업(비밀번호 + 앱 PIN)을 만듭니다. 비밀번호를 안전하게 보관하세요. 없으면 복원할 수 없습니다. Google Authenticator 마이그레이션은 읽기 전용 가져오기입니다.</string>
     <string name="manual_tester_title">인증기 테스트</string>
@@ -150,7 +150,7 @@
     <string name="manual_naming_title">계정 이름과 발급자</string>
     <string name="manual_naming_body">계정 이름과 발급자는 모두 비워둘 수 있습니다.\n\n계정 이름을 비우면 Osmium이 추가 날짜와 추가 순서로 이름을 자동 생성합니다 — 예: 2026년 5월에 추가한 첫 계정은 20260501입니다.\n\n발급자를 비우면 "Unknown"으로 표시됩니다.</string>
     <string name="manual_notes_title">중요 사항</string>
-    <string name="manual_notes_body">• 비밀키는 이 기기를 벗어나지 않습니다(하드웨어 연동 키로 암호화).\n• 앱 제거 또는 데이터 삭제 시 모든 계정이 삭제됩니다 — 먼저 백업을 내보내세요.\n• 복사한 코드는 클립보드에 남습니다. 자동 삭제 기능은 없습니다.\n• 기기 시계가 틀리면 코드도 틀립니다 — 네트워크 시간 동기화를 켜세요.</string>
+    <string name="manual_notes_body">• 비밀 키는 하드웨어 기반 키로 암호화되며, 사용자 본인의 비밀번호 암호화 백업 안에서만 기기를 떠납니다.\n• 앱을 삭제하거나 데이터를 지우면 모든 계정이 삭제됩니다. 먼저 백업을 내보내세요.\n• 복사한 코드는 클립보드에 남아 있으며 자동 삭제되지 않습니다.\n• 기기 시계가 틀리면 코드도 틀립니다. 네트워크 시간 동기화를 켜세요.</string>
     <string name="sort_mode_desc">목록에서 계정을 정렬하는 방식</string>
     <string name="sort_random">무작위</string>
     <string name="sort_random_desc">앱 실행마다 섞음</string>
@@ -267,4 +267,37 @@
     <string name="import_pin_title">백업 PIN 입력</string>
     <string name="import_pin_desc">이 백업은 PIN에 연결되어 있습니다. 입력하면 계정이 복호화됩니다.</string>
     <string name="algorithm_hint">알고리즘은 otpauth:// 링크에서 자동 감지됩니다. 수동 입력 비밀키는 기본적으로 SHA1을 사용합니다(거의 모든 서비스가 사용).</string>
+
+    <string name="webdav_title">WebDAV 백업</string>
+    <string name="webdav_desc">로컬 네트워크의 WebDAV 서버에 백업 (NAS, PC, 휴대폰)</string>
+    <string name="webdav_intro">로컬 네트워크의 어떤 WebDAV 서버(NAS, PC, 다른 휴대폰)에도 백업할 수 있습니다. 백업은 업로드 전에 내보내기 비밀번호로 암호화되며, 서버에는 암호문만 저장됩니다.</string>
+    <string name="webdav_url_label">서버 주소</string>
+    <string name="webdav_url_hint">http://192.168.1.5:5005 또는 https://nas.local</string>
+    <string name="webdav_username_label">사용자 이름 (선택)</string>
+    <string name="webdav_password_label">비밀번호</string>
+    <string name="webdav_save">저장</string>
+    <string name="webdav_saved">서버 설정이 저장되었습니다</string>
+    <string name="webdav_test">연결 테스트</string>
+    <string name="webdav_testing">테스트 중…</string>
+    <string name="webdav_test_ok">연결 성공</string>
+    <string name="webdav_backup_now">지금 백업</string>
+    <string name="webdav_uploading">업로드 중…</string>
+    <string name="webdav_backup_done">백업이 업로드되었습니다</string>
+    <string name="webdav_backup_failed">백업 실패: %1$s</string>
+    <string name="webdav_restore">복원…</string>
+    <string name="webdav_listing">백업 목록 불러오는 중…</string>
+    <string name="webdav_no_backups">서버에서 백업을 찾지 못했습니다.</string>
+    <string name="webdav_pick_file">백업 선택</string>
+    <string name="webdav_downloading">다운로드 중…</string>
+    <string name="webdav_backup_password_title">백업 비밀번호 설정</string>
+    <string name="webdav_backup_password_desc">이 비밀번호가 업로드된 파일을 보호합니다. 복원할 때 필요하므로 반드시 기록해 두세요.</string>
+    <string name="webdav_restore_password_desc">이 백업을 만들 때 설정한 비밀번호를 입력하세요.</string>
+    <string name="webdav_error_url">서버 주소를 입력하세요 (예: http://192.168.1.5:5005)</string>
+    <string name="webdav_warning">신뢰하는 서버만 사용하세요. 백업 파일 자체는 암호화되어 있지만, 내보내기 비밀번호는 안전하게 보관하세요. 파일에 접근할 수 있고 비밀번호를 아는 사람이라면 누구든 복원할 수 있습니다.</string>
+    <string name="manual_webdav_title">WebDAV 백업</string>
+    <string name="manual_webdav_body">설정 → 데이터 → WebDAV 백업은 동일한 암호화 내보내기 파일을 로컬 네트워크의 WebDAV 서버(NAS, PC, WebDAV 서버 앱을 실행하는 다른 휴대폰)에 업로드합니다. 서버 주소(호스트 이름 또는 로컬 IP), 사용자 이름, 비밀번호를 입력하세요.\n\n복원은 서버에 저장된 백업 목록을 보여주고 그중 하나를 선택해 복원합니다. 서버가 받는 것은 비밀번호로 암호화된 데이터뿐입니다. 앱은 사용자가 설정한 서버 주소 외에는 아무것도 연결하지 않습니다.\n\n서버 주소가 자주 바뀐다면 라우터에서 NAS에 고정 IP를 할당하거나 호스트 이름을 사용하세요.</string>
+    <string name="about_terms_title">이용 약관</string>
+    <string name="about_privacy_title">개인정보 처리방침</string>
+    <string name="terms_body">Osmium을 설치하거나 사용하면 다음 약관에 동의하는 것입니다.\n\nOsmium은 MIT 라이선스로 배포되는 무료 오픈소스 소프트웨어입니다.\n\n소프트웨어는 “있는 그대로” 제공되며 어떠한 보증도 없습니다. 법이 허용하는 최대 범위에서 개발자는 소프트웨어 사용으로 인한 어떠한 손해에도 책임지지 않습니다.\n\n사용자의 책임:\n• 비밀 키와 백업 비밀번호를 안전하게 보관하세요. 암호화 키는 개발자를 포함해 누구도 복구할 수 없습니다. PIN을 잊거나 백업 비밀번호를 잃으면 재설정할 수 없습니다.\n• 백업을 직접 보관하세요. 앱을 삭제하거나 데이터를 지우면 모든 계정이 영구 삭제됩니다.\n• 자폭 PIN은 설계상 되돌릴 수 없습니다.\n• 기기 시계를 정확하게 유지하세요. 시간 기반 코드는 시계에 의존합니다.\n\nOsmium은 본인의 이중 인증 용도로 사용할 수 있습니다. 접근 권한이 없는 시스템이나 데이터에 접근하는 데 사용하지 마세요.\n\nOsmium은 사용자가 직접 설정한 WebDAV 백업 서버(보통 로컬 네트워크)에만 연결하며, 그 외에는 아무것도 연결하지 않습니다.</string>
+    <string name="privacy_body">Osmium은 어떤 데이터도 수집하지 않습니다. 계정 시스템, 가입, 분석, 광고 SDK, 크래시 리포터가 없습니다.\n\n저장: 비밀 키, 계정 이름, 서비스 제공자는 이 기기에만 저장되며 Android Keystore의 내보낼 수 없는 키로 AES-256-GCM 암호화됩니다. 백업 파일은 비밀번호로 암호화됩니다 (PBKDF2 + AES-256-GCM).\n\n네트워크: INTERNET 권한은 WebDAV 백업 기능에만 사용됩니다. 앱은 사용자가 설정한 서버 주소(보통 로컬 네트워크의 NAS나 PC)에만, 그리고 백업 또는 복원을 실행할 때만 연결합니다. 백업은 기기를 떠나기 전에 비밀번호로 암호화됩니다.\n\n카메라: QR 코드 스캔에만 사용되며 기기 내에서 처리됩니다. 화면이 저장되거나 전송되지 않습니다.\n\n생체 인식: Android 시스템이 전적으로 처리합니다. 앱은 지문이나 얼굴 데이터를 보거나 저장하지 않습니다.\n\n우리는 아무것도 보유하지 않으므로 공유할 것도 없습니다. 앱을 삭제하면 로컬에 저장된 모든 데이터가 삭제됩니다.\n\n이러한 보장에 영향을 주는 향후 변경 사항은 릴리스 노트에 명시됩니다.\n\n문의: zhif0776@hotmail.com · https://t.me/osmium2fa</string>
 </resources>
