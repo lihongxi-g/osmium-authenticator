@@ -2,41 +2,45 @@
 
 *Effective date: August 16, 2026*
 
-Osmium is designed to be fully offline. This policy describes, in plain terms, what the application does and does not do with your data.
+Osmium is a privacy-first TOTP authenticator designed to run fully offline. This policy describes, in plain terms, what the application does and does not do with your data.
 
 ## Data we collect
 
 **We do not collect any data.** Specifically:
 
-- The INTERNET permission exists **only for the WebDAV backup feature and the optional update check** (see below). The application never connects to anything except the server address you configure yourself and the GitHub releases API for update checks.
 - There is **no account system, no registration, no analytics, no advertising SDK, and no crash reporter**.
 - We operate **no server** for the application. There is nothing to upload to and nothing to sync with.
+- The INTERNET permission exists only for two optional features, both described below: WebDAV backup and update checks.
+
+## Storage on your device
+
+- Your authenticator secrets, account names and issuers are stored **only on your device**, encrypted with AES-256-GCM using a non-exportable key in the Android Keystore.
+- Backup files you export are encrypted with your password (PBKDF2 + AES-256-GCM) and stored wherever you choose to save them. We have no access to them.
+- The optional app PIN and self-destruct PIN are stored as salted hashes and encrypted values; they cannot be recovered by anyone, including us.
+- The WebDAV server address and login are stored on your device, with the password encrypted by the Android Keystore.
 
 ## Network: WebDAV backup
 
-If you enable WebDAV backup (Settings → Data → WebDAV backup), the app connects **exclusively** to the server address you enter — typically a NAS, a PC, or another device on your local network. It connects only when you run a backup, list backups, or restore one.
-
-Backups are encrypted with your export password (PBKDF2 + AES-256-GCM) **before they leave the device**; the server only ever stores ciphertext. The server address and login are stored on your device, with the password encrypted by the Android Keystore.
+If you enable WebDAV backup (Settings → Data → WebDAV backup), the app connects **exclusively** to the server address you enter — typically a NAS, a PC, or another device on your local network — and only when you run a backup, list backups, or restore one. Backups are encrypted with your export password **before they leave the device**; the server only ever stores ciphertext. Plaintext `http://` addresses require an explicit on-screen confirmation before they are saved.
 
 ## Network: update checks
 
-If auto-check for updates is enabled (Settings → About → Auto-check for updates; on by default), the app asks the GitHub releases API (`api.github.com`) for the latest public version **once per day** when it opens. No account data or device information is sent — the request only asks for the newest public release. The check fails silently when offline, and it never downloads or installs anything.
+If auto-check for updates is enabled (Settings → About → Auto-check for updates; on by default), the app asks the GitHub releases API (`api.github.com`) for the latest public version **once per day** when it opens. No account data or device information is sent. The check fails silently when offline and never downloads or installs anything.
 
 ## Automatic backup
 
-If you enable automatic backup (Settings → Data → Auto backup), the app runs scheduled backups **unattended**: choose WebDAV or the phone's Download/Osmium folder, an interval in days and a time of day. The export password you set is stored on your device, encrypted with the Android Keystore key, and is used only to encrypt backup files. Local backups are written to the public Download/Osmium folder; a configurable number are kept (default 5, max 10) and older ones are pruned automatically.
+If you enable automatic backup (Settings → Data → Auto backup), the app runs scheduled backups **unattended** via the Android system scheduler: choose WebDAV or the phone's Download/Osmium folder, an interval in days, a time of day, and how many backups to keep (1–10, default 5; older ones are pruned automatically). The export password you set is stored on your device, encrypted with the Android Keystore key, and used only to encrypt backup files. Local backups are written to the public Download/Osmium folder.
 
-## Data stored on your device
+## Background execution
 
-- Your authenticator secrets, account names and issuers are stored **only on your device**, encrypted with AES-256-GCM using a non-exportable key in the Android Keystore.
-- Backup files you export are encrypted (PBKDF2 + AES-256-GCM) and are stored wherever you choose to save them. We have no access to them.
-- The optional app PIN and self-destruct PIN are stored as salted hashes and encrypted values; we cannot recover them and neither can anyone else.
+Automatic backups run through the Android system scheduler. The app wakes briefly to run a backup and keeps **no persistent background service**; beyond that short job it does not consume battery in the background. On some devices, aggressive battery optimizations may defer or block scheduled backups — see the README for a recommendation.
 
 ## Permissions
 
 - **Camera** — used solely to scan QR codes during account import. Frames are processed in real time on the device (ML Kit, bundled offline mode) and are never stored or transmitted.
 - **Biometrics / device credential** — handled exclusively by the Android system. The application never sees or stores fingerprint or face data.
-- **Internet** — used solely for the WebDAV backup feature and the update check described above. There is no other network activity in the application.
+- **Internet** — used solely for the WebDAV backup feature and the update check described above.
+- **Storage (Android 8/9 only)** — `WRITE_EXTERNAL_STORAGE` is requested only on Android 8 and 9, solely to write automatic backups to the public Download/Osmium folder. Android 10 and later need no such permission.
 
 ## Data sharing
 
@@ -46,7 +50,7 @@ We share nothing, because we hold nothing. No third party receives data from the
 
 - Uninstalling the application deletes all locally stored data.
 - The self-destruct PIN, when configured and entered, irreversibly destroys all accounts and settings.
-- Backups are deleted when you delete the exported files.
+- Backups are deleted when you delete the exported files; automatic backups are additionally pruned by the retention setting.
 
 ## Changes to this policy
 

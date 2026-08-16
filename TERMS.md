@@ -14,8 +14,8 @@ The software is provided without warranty of any kind, express or implied. To th
 
 ## Your responsibilities
 
-- **You are responsible for safeguarding your secrets and backup passwords.** Osmium encrypts data with keys that cannot be recovered by the developer or anyone else. A forgotten PIN or lost backup password cannot be reset.
-- **You are responsible for keeping backups.** Uninstalling the application or clearing its data permanently deletes all accounts. The developer cannot recover them.
+- **You are responsible for safeguarding your secrets and backup passwords.** Osmium encrypts data with keys that cannot be recovered by the developer or anyone else. A forgotten PIN or lost backup password cannot be reset. The automatic-backup password is stored on your device (encrypted with the Android Keystore) and is likewise unrecoverable if the app's data is erased.
+- **You are responsible for keeping backups.** Uninstalling the application or clearing its data permanently deletes all accounts; the developer cannot recover them. Automatic backups run unattended via the Android system scheduler and depend on the device's power state and background-activity settings — see the README for a recommendation; the app does not keep any persistent background service and does not drain the battery beyond the short backup job.
 - **The self-destruct PIN is irreversible.** Entering it at a PIN prompt destroys all data permanently, by design.
 - **You are responsible for keeping your device clock accurate.** Time-based codes depend on the device clock; the application offers a calibration option but cannot fix an incorrect clock on its own.
 
@@ -25,7 +25,12 @@ You may use Osmium for your own two-factor authentication needs. You may not use
 
 ## Third-party services
 
-Osmium connects to no third-party services. The optional WebDAV backup feature connects only to the server address you configure yourself (typically on your local network); backups are encrypted with your password before upload. The optional Google Authenticator migration feature parses export codes you provide locally on the device; no data is sent to Google or anyone else.
+Osmium runs no account system and connects to no third-party services except:
+
+- the WebDAV server **you configure yourself** (optional backup feature; backups are encrypted with your password before upload), and
+- the GitHub releases API (`api.github.com`) once per day for the optional update check, which sends no account or device data.
+
+The optional Google Authenticator migration feature parses export codes you provide locally on the device; no data is sent to Google or anyone else.
 
 ## Contact
 
