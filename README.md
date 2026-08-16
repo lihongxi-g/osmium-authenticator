@@ -1,6 +1,6 @@
 # Osmium
 
-Osmium is a privacy-first TOTP authenticator for Android. Every secret is encrypted with a hardware-backed Android Keystore key before it touches disk. The app creates no account and sends no telemetry — codes are computed entirely on device. The INTERNET permission exists solely for the optional WebDAV backup feature: the app connects exclusively to the server address you configure yourself (typically a NAS on your local network) and to nothing else.
+Osmium is a privacy-first TOTP authenticator for Android. Every secret is encrypted with a non-exportable Android Keystore key before it touches disk. The app creates no account and sends no telemetry — codes are computed entirely on device. The INTERNET permission exists solely for the optional WebDAV backup feature: the app connects exclusively to the server address you configure yourself (typically a NAS on your local network) and to nothing else.
 
 ## Features
 
@@ -11,6 +11,7 @@ Osmium is a privacy-first TOTP authenticator for Android. Every secret is encryp
 - **Steam Guard** — manual entry with the 26-character Steam alphabet (see warning below)
 - **Hidden codes mode** — codes render as dots; copying still works, editing and sharing are locked until the mode is turned off
 - **Sort modes** — random, alphabetical, add date, copy count
+- **Search** — find any account instantly by name or issuer
 - **Clock calibration** — manual offset for devices whose clock drifts
 - **Security gate** — optional verification on open (fingerprint / system password / app PIN), self-destruct PIN, screenshots blocked by default
 - **Nine languages** — English, 简体中文, Español, 日本語, 한국어, Deutsch, Русский, Français, हिन्दी
