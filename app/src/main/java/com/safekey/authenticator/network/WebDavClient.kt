@@ -71,14 +71,14 @@ object WebDavClient {
      *  human-readable reason on any failure. */
     fun testConnection(config: WebDavServerConfig) {
         execute("PROPFIND", url(base(config)), config, requestBody = PROPFIND_BODY,
-            extraHeaders = mapOf("Depth" to "0"), allowStatus = 200..399)
+            extraHeaders = mapOf("Depth" to "0"), allowStatus = 200..299)
     }
 
     /** List password-encrypted backup files under <base>/osmium/, newest first. */
     fun listBackups(config: WebDavServerConfig): List<WebDavFile> {
         val dirUrl = url(dir(config))
         val body = execute("PROPFIND", dirUrl, config, requestBody = PROPFIND_BODY,
-            extraHeaders = mapOf("Depth" to "1"), allowStatus = 200..399)
+            extraHeaders = mapOf("Depth" to "1"), allowStatus = 200..299)
         if (body.size > MAX_LIST_BYTES) {
             throw WebDavException("Server response too large")
         }

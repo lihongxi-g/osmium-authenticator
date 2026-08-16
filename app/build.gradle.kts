@@ -116,3 +116,10 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 }
+
+// The WebDAV client sets PROPFIND/MKCOL via reflection on the JDK
+// HttpURLConnection 'method' field (fine on Android, no module system).
+// On the JVM test host the java.net package is not opened — allow it there.
+tasks.withType<Test>().configureEach {
+    jvmArgs("--add-opens", "java.base/java.net=ALL-UNNAMED")
+}
