@@ -55,6 +55,10 @@ Osmium 是一款隐私优先的 Android TOTP 验证器。所有密钥在落盘�
 
 应用内 设置 → 关于 亦可查看。
 
+## WebDAV 备份教程
+
+各平台（NAS、Linux、Android、macOS、Windows、iOS、鸿蒙）搭建 WebDAV 服务器的分步教程：[WEBDAV-GUIDE-zh.md](WEBDAV-GUIDE-zh.md)（[English](WEBDAV-GUIDE.md)）
+
 ## 安全说明
 
 - 字段级 AES-256-GCM 加密，密钥不可导出，存于 Android Keystore

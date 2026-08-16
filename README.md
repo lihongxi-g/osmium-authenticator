@@ -59,6 +59,10 @@ Installing the wrong architecture will crash on launch. The signing certificate 
 
 Both are also available in the app: Settings → About.
 
+## WebDAV backup guide
+
+Step-by-step server setup for every platform (NAS, Linux, Android, macOS, Windows, iOS, HarmonyOS): [WEBDAV-GUIDE.md](WEBDAV-GUIDE.md) ([中文](WEBDAV-GUIDE-zh.md))
+
 ## Security notes
 
 - Field-level AES-256-GCM encryption with a non-exportable Android Keystore key
