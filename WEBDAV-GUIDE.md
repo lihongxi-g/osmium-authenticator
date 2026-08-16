@@ -210,11 +210,14 @@ iOS has no built-in WebDAV server. A few third-party WebDAV server apps exist on
 
 ## Using Osmium (all platforms)
 
+Note: opening the WebDAV backup screen requires verification (fingerprint / system credential / Osmium PIN).
+
 1. Settings → Data → **WebDAV backup**
 2. **Server address**: `http://IP:port`; hostnames work too (e.g. `http://nas.local:5005`). If the server is published under a subpath (e.g. `/webdav`), include the full path
 3. **Username / Password**: server account; leave blank for anonymous servers
 4. Tap "**Test connection**" to verify, then "**Save**" to remember the config (the password is stored encrypted on the device)
 5. "**Back up now**" → set a backup password (8+ characters) → upload. This password is unrelated to the server password — **if you forget it, no backup can ever be restored**
 6. "**Restore…**" → enter the backup password → pick a backup from the list → tick accounts → confirm import
+7. "**Manage backups**" lists the backups on the server; tap the trash icon to delete one (confirmed, cannot be undone)
 
 **Tip**: reserve a static lease (fixed IP) for the server in your router, or use its hostname, to avoid backups failing after IP changes.

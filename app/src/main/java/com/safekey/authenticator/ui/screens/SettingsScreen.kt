@@ -82,6 +82,8 @@ fun SettingsScreen(
     var offsetInput by remember { mutableStateOf("") }
     // sensitive toggle awaiting verification: Pair("gate"/"screenshot", target)
     var pendingToggle by remember { mutableStateOf<Pair<String, Boolean>?>(null) }
+    // navigation awaiting verification (e.g. entering the WebDAV screen)
+    var pendingNav by remember { mutableStateOf<(() -> Unit)?>(null) }
     var showVerifyDialog by remember { mutableStateOf(false) }
     var pinMode by remember { mutableStateOf(false) }
     var pinError by remember { mutableStateOf<String?>(null) }
@@ -97,6 +99,17 @@ fun SettingsScreen(
             "screenshot" -> vm.setAllowScreenshots(p.second)
             "hideCodes" -> vm.setHideCodes(p.second)
         }
+    }
+
+    /** Run whatever verification-protected action is pending (toggle or nav). */
+    fun executePending() {
+        val nav = pendingNav
+        if (nav != null) {
+            pendingNav = null
+            nav()
+            return
+        }
+        executeToggle()
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -346,7 +359,11 @@ fun SettingsScreen(
                 icon = AppIcons.Dns,
                 title = stringResource(R.string.webdav_title),
                 description = stringResource(R.string.webdav_desc),
-                onClick = onWebDav
+                onClick = {
+                    // Entering the WebDAV screen requires identity verification
+                    pendingNav = { onWebDav() }
+                    showVerifyDialog = true
+                }
             )
 
             SettingRow(
@@ -403,7 +420,7 @@ fun SettingsScreen(
                 if (vm.onPinEntered(pin)) {
                     pinMode = false
                     pinError = null
-                    executeToggle()
+                    executePending()
                 } else {
                     pinError = context.getString(R.string.pin_wrong)
                     vm.checkSelfDestructPin(pin)
@@ -413,16 +430,18 @@ fun SettingsScreen(
                 pinMode = false
                 pinError = null
                 pendingToggle = null
+                pendingNav = null
             }
         )
     }
 
     // ---- verification method chooser for sensitive toggles ----
-    if (showVerifyDialog && pendingToggle != null && !pinMode) {
+    if (showVerifyDialog && (pendingToggle != null || pendingNav != null) && !pinMode) {
         AlertDialog(
             onDismissRequest = {
                 showVerifyDialog = false
                 pendingToggle = null
+                pendingNav = null
             },
             title = { Text(stringResource(R.string.verify_title)) },
             text = {
@@ -430,13 +449,13 @@ fun SettingsScreen(
                     if (onRequireBiometric != null) {
                         VerifyOptionRow(AppIcons.Fingerprint, stringResource(R.string.verify_biometric)) {
                             showVerifyDialog = false
-                            onRequireBiometric { executeToggle() }
+                            onRequireBiometric { executePending() }
                         }
                     }
                     if (onRequireCredential != null) {
                         VerifyOptionRow(AppIcons.Security, stringResource(R.string.verify_credential)) {
                             showVerifyDialog = false
-                            onRequireCredential { executeToggle() }
+                            onRequireCredential { executePending() }
                         }
                     }
                     if (hasPin) {
@@ -452,6 +471,7 @@ fun SettingsScreen(
                 TextButton(onClick = {
                     showVerifyDialog = false
                     pendingToggle = null
+                    pendingNav = null
                 }) {
                     Text(stringResource(R.string.cancel))
                 }

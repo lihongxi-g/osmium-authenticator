@@ -13,6 +13,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -41,6 +43,7 @@ import com.safekey.authenticator.network.WebDavException
 import com.safekey.authenticator.network.WebDavFile
 import com.safekey.authenticator.security.VaultFormatException
 import com.safekey.authenticator.security.VaultIO
+import com.safekey.authenticator.ui.components.AppIcons
 import com.safekey.authenticator.ui.components.SimpleTopBar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -81,6 +84,10 @@ fun WebDavScreen(
     var restoreVault by remember { mutableStateOf<VaultFile?>(null) }
     // Export password held across the two restore dialogs (password → picker).
     var pendingRestorePassword by remember { mutableStateOf("") }
+    // backup management (list + delete)
+    var showManage by remember { mutableStateOf(false) }
+    var manageFiles by remember { mutableStateOf<List<WebDavFile>>(emptyList()) }
+    var deleteTarget by remember { mutableStateOf<WebDavFile?>(null) }
 
     // Seed the form from the saved config once (and only once, so the user's
     // edits are never overwritten by a re-emission of the flow).
@@ -247,6 +254,20 @@ fun WebDavScreen(
                 ) {
                     Text(stringResource(R.string.webdav_restore))
                 }
+                OutlinedButton(
+                    onClick = {
+                        if (validateUrl()) {
+                            showManage = true
+                            runBusy(context.getString(R.string.webdav_listing)) {
+                                manageFiles = WebDavClient.listBackups(currentConfig())
+                            }
+                        }
+                    },
+                    enabled = busyLabel == null,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(stringResource(R.string.webdav_manage))
+                }
                 busyLabel?.let { label ->
                     Text(
                         text = label,
@@ -352,6 +373,81 @@ fun WebDavScreen(
             },
             confirmButton = {
                 TextButton(onClick = { showPicker = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+
+    // ------------------------------------------------------ manage & delete
+
+    if (showManage) {
+        AlertDialog(
+            onDismissRequest = { showManage = false },
+            title = { Text(stringResource(R.string.webdav_manage)) },
+            text = {
+                Column(
+                    modifier = Modifier.verticalScroll(rememberScrollState())
+                ) {
+                    if (manageFiles.isEmpty()) {
+                        Text(
+                            text = stringResource(R.string.webdav_no_backups),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    } else {
+                        manageFiles.forEach { file ->
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "${file.name}  ·  ${formatBackupDate(file.lastModified)}",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    modifier = Modifier.weight(1f)
+                                )
+                                IconButton(onClick = { deleteTarget = file }) {
+                                    Icon(
+                                        imageVector = AppIcons.Delete,
+                                        contentDescription = stringResource(R.string.webdav_delete),
+                                        tint = MaterialTheme.colorScheme.error
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showManage = false }) {
+                    Text(stringResource(R.string.close))
+                }
+            }
+        )
+    }
+
+    val target = deleteTarget
+    if (target != null) {
+        AlertDialog(
+            onDismissRequest = { deleteTarget = null },
+            title = { Text(stringResource(R.string.webdav_delete_confirm_title)) },
+            text = { Text(stringResource(R.string.webdav_delete_confirm_msg, target.name)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        deleteTarget = null
+                        runBusy(context.getString(R.string.webdav_deleting)) {
+                            WebDavClient.delete(currentConfig(), target.href)
+                            manageFiles = WebDavClient.listBackups(currentConfig())
+                            withContext(Dispatchers.Main) {
+                                vm.showToast(context.getString(R.string.webdav_deleted))
+                            }
+                        }
+                    }
+                ) { Text(stringResource(R.string.webdav_delete)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { deleteTarget = null }) {
                     Text(stringResource(R.string.cancel))
                 }
             }

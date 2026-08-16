@@ -110,6 +110,12 @@ object WebDavClient {
         return bytes
     }
 
+    /** Delete one backup file from the server (204/200 expected). */
+    fun delete(config: WebDavServerConfig, href: String) {
+        val absolute = absoluteHref(base(config), href)
+        execute("DELETE", url(absolute), config, allowStatus = 200..299)
+    }
+
     // ------------------------------------------------------------ plumbing
 
     private fun base(config: WebDavServerConfig): String =

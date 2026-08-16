@@ -112,6 +112,27 @@ class WebDavClientTest {
     }
 
     @Test
+    fun `delete removes the backup from the server`() {
+        WebDavClient.upload(config(), "osmium-backup-20260816-090000.json", byteArrayOf(1))
+        WebDavClient.upload(config(), "osmium-backup-20260817-090000.json", byteArrayOf(2))
+
+        val files = WebDavClient.listBackups(config())
+        assertEquals(2, files.size)
+
+        WebDavClient.delete(config(), files[0].href)
+
+        val remaining = WebDavClient.listBackups(config())
+        assertEquals(1, remaining.size)
+        assertEquals("osmium-backup-20260816-090000.json", remaining[0].name)
+    }
+
+    @Test
+    fun `deleting a non-existent backup does not throw for 204 servers`() {
+        // servers answer 204 for DELETE of a missing file too; treat as success
+        WebDavClient.delete(config(), "/osmium/ghost.json")
+    }
+
+    @Test
     fun `invalid address without scheme throws friendly error`() {
         val bad = config().copy(baseUrl = "192.168.1.5:5005")
         val e = assertThrows(WebDavException::class.java) { WebDavClient.listBackups(bad) }
@@ -199,6 +220,10 @@ private class MockDavServer(private val user: String, private val pass: String) 
                 if (bytes == null) writeStatus(output, 404)
                 else writeBytes(output, 200, bytes)
             }
+            "DELETE" -> {
+                stored.remove(path)
+                writeStatus(output, 204)
+            }
             "PROPFIND" -> writeBytes(output, 207, multistatus().toByteArray(Charsets.UTF_8))
             else -> writeStatus(output, 405)
         }
@@ -244,6 +269,7 @@ private class MockDavServer(private val user: String, private val pass: String) 
         val reason = when (code) {
             200 -> "OK"
             201 -> "Created"
+            204 -> "No Content"
             401 -> "Unauthorized"
             404 -> "Not Found"
             405 -> "Method Not Allowed"

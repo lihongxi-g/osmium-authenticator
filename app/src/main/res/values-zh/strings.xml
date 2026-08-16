@@ -310,9 +310,16 @@
     <string name="webdav_error_url">请输入服务器地址，例如 http://192.168.1.5:5005</string>
     <string name="webdav_warning">只使用你信任的服务器。备份文件本身已加密，但请妥善保管导出密码——任何能拿到文件且知道密码的人都能恢复它。</string>
     <string name="manual_webdav_title">WebDAV 备份</string>
-    <string name="manual_webdav_body">设置 → 数据 → WebDAV 备份会将同一份加密导出文件上传到局域网内的 WebDAV 服务器——NAS、电脑，或运行 WebDAV 服务器应用的另一部手机。填写服务器地址（主机名或局域网 IP）、用户名和密码。\n\n恢复功能会列出服务器上存储的备份，供你选择其一恢复。服务器只会收到密码加密的数据；应用除了你配置的服务器地址外，不会连接任何其他地址。\n\n如果服务器地址经常变化，可以在路由器中为 NAS 设置固定 IP，或改用其主机名。</string>
+    <string name="manual_webdav_body">设置 → 数据 → WebDAV 备份会将同一份加密导出文件上传到局域网内的 WebDAV 服务器——NAS、电脑，或运行 WebDAV 服务器应用的另一部手机。填写服务器地址（主机名或局域网 IP）、用户名和密码。\n\n恢复功能会列出服务器上存储的备份，供你选择其一恢复。管理备份同样列出备份，并可删除服务器上的旧备份。服务器只会收到密码加密的数据；应用除了你配置的服务器地址外，不会连接任何其他地址。\n\n如果服务器地址经常变化，可以在路由器中为 NAS 设置固定 IP，或改用其主机名。</string>
     <string name="about_terms_title">用户协议</string>
     <string name="about_privacy_title">隐私政策</string>
     <string name="terms_body">安装或使用 Osmium 即表示你同意以下条款。\n\nOsmium 是基于 MIT 许可发布的免费开源软件。\n\n本软件按“原样”提供，不作任何形式的担保。在法律允许的最大范围内，开发者不对因使用本软件而产生的任何损失负责。\n\n你的责任：\n• 妥善保管密钥和备份密码。加密密钥无法被开发者或任何人找回——忘记 PIN 或丢失备份密码无法重置。\n• 自行保存备份。卸载应用或清除其数据将永久删除所有账户。\n• 自毁 PIN 的设计就是不可逆的。\n• 保持设备时间准确——基于时间的验证码依赖它。\n\n你可以将 Osmium 用于自己的双因素认证。不得用它访问你没有权限访问的系统或数据。\n\nOsmium 只连接你自己配置的 WebDAV 备份服务器（通常在局域网内），不会连接任何其他地址。</string>
     <string name="privacy_body">Osmium 不收集任何数据。没有账户系统、没有注册、没有分析统计、没有广告 SDK、没有崩溃上报。\n\n存储：你的密钥、账户名和服务商仅存储在本设备上，使用 Android Keystore 中不可导出的密钥进行 AES-256-GCM 加密。备份文件使用你的密码加密（PBKDF2 + AES-256-GCM）。\n\n网络：INTERNET 权限仅用于 WebDAV 备份功能。应用只连接你配置的服务器地址——通常是局域网内的 NAS 或电脑——且仅在你执行备份或恢复时连接。备份在离开设备前已用密码加密。\n\n相机：仅用于扫描二维码，全部在设备本地处理；画面不会被存储或传输。\n\n生物识别：完全由 Android 系统处理；应用不会看到或存储任何指纹或人脸数据。\n\n我们不共享任何数据，因为我们不持有任何数据。卸载应用会删除所有本地存储的数据。\n\n任何影响上述保证的未来变更都会在发布说明中声明。\n\n联系：zhif0776@hotmail.com · https://t.me/osmium2fa</string>
+
+    <string name="webdav_manage">管理备份</string>
+    <string name="webdav_delete">删除</string>
+    <string name="webdav_delete_confirm_title">删除备份？</string>
+    <string name="webdav_delete_confirm_msg">从服务器删除 %1$s？此操作不可撤销。</string>
+    <string name="webdav_deleting">删除中…</string>
+    <string name="webdav_deleted">备份已删除</string>
 </resources>
