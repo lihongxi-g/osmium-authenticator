@@ -8,7 +8,7 @@
 
 - 账户名与服务商（issuer）允许留空：账户名留空时按添加日期与位次自动命名（如 20260801）；服务商留空时显示 Unknown
 - 内置使用手册（设置 → 使用手册）：功能说明、测试指南与注意事项，中英双语
-- 在线测试站：https://otp.159310.xyz ——发放测试密钥并校验验证码，支持 TOTP / HOTP / Steam Guard
+- 在线测试站：https://otp.osmium.im ——发放测试密钥并校验验证码，支持 TOTP / HOTP / Steam Guard
 - 7 种新语言：Español、日本語、한국어、Deutsch、Русский、Français、हिन्दी
 - Steam Guard：支持 5 位字母数字验证码（26 字符字母表），仅支持手动添加（发行方填 Steam）
 - HOTP 计数器验证码：支持 RFC 4226，计数器持久化、手动递增

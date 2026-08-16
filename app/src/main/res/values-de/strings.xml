@@ -146,7 +146,7 @@
     <string name="manual_backup_title">Sicherung &amp; Wiederherstellung</string>
     <string name="manual_backup_body">Einstellungen → Daten → Exportieren erstellt eine verschlüsselte Sicherung (Passwort + App-PIN). Bewahre das Passwort sicher auf — ohne es lässt sich die Sicherung nicht wiederherstellen. Die Google-Authenticator-Migration ist ein reiner Import.</string>
     <string name="manual_tester_title">Authenticator testen</string>
-    <string name="manual_tester_body">Öffne https://otp.159310.xyz, um zu prüfen, ob Osmium (oder jeder Authenticator) korrekte Codes erzeugt: Die Seite stellt ein Test-Geheimnis aus, du fügst es deiner App hinzu und gibst den Code zurück. Unterstützt TOTP, HOTP und Steam Guard mit verschiedenen Algorithmen, Stellenzahlen und Zeiträumen — komplett im Browser, nichts wird hochgeladen.</string>
+    <string name="manual_tester_body">Öffne https://otp.osmium.im, um zu prüfen, ob Osmium (oder jeder Authenticator) korrekte Codes erzeugt: Die Seite stellt ein Test-Geheimnis aus, du fügst es deiner App hinzu und gibst den Code zurück. Unterstützt TOTP, HOTP und Steam Guard mit verschiedenen Algorithmen, Stellenzahlen und Zeiträumen — komplett im Browser, nichts wird hochgeladen.</string>
     <string name="manual_naming_title">Kontonamen &amp; Aussteller</string>
     <string name="manual_naming_body">Kontoname und Aussteller sind beide optional.\n\nLässt du den KONTONAMEN leer, erzeugt Osmium automatisch einen aus Hinzufügedatum und Hinzufüge-Reihenfolge — z. B. heißt das erste im Mai 2026 hinzugefügte Konto 20260501.\n\nLässt du den AUSSTELLER leer, wird „Unknown“ angezeigt.</string>
     <string name="manual_notes_title">Wichtige Hinweise</string>

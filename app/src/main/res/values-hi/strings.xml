@@ -146,7 +146,7 @@
     <string name="manual_backup_title">बैकअप और पुनर्स्थापन</string>
     <string name="manual_backup_body">सेटिंग्स → डेटा → निर्यात एन्क्रिप्टेड बैकअप (पासवर्ड + ऐप PIN) बनाता है। पासवर्ड संभालकर रखें — इसके बिना बहाली असंभव। Google Authenticator माइग्रेशन केवल-पठन आयात है।</string>
     <string name="manual_tester_title">प्रमाणक का परीक्षण</string>
-    <string name="manual_tester_body">https://otp.159310.xyz खोलकर जाँचें कि Osmium (या कोई प्रमाणक) सही कोड बनाता है: साइट परीक्षण गुप्त कुंजी जारी करती है, आप उसे ऐप में जोड़कर कोड वापस दर्ज करते हैं। TOTP, HOTP और Steam Guard कई एल्गोरिदम, अंक और अवधियों के साथ — सब ब्राउज़र में, कुछ अपलोड नहीं होता।</string>
+    <string name="manual_tester_body">https://otp.osmium.im खोलकर जाँचें कि Osmium (या कोई प्रमाणक) सही कोड बनाता है: साइट परीक्षण गुप्त कुंजी जारी करती है, आप उसे ऐप में जोड़कर कोड वापस दर्ज करते हैं। TOTP, HOTP और Steam Guard कई एल्गोरिदम, अंक और अवधियों के साथ — सब ब्राउज़र में, कुछ अपलोड नहीं होता।</string>
     <string name="manual_naming_title">खाता नाम और जारीकर्ता</string>
     <string name="manual_naming_body">खाते का नाम और जारीकर्ता दोनों वैकल्पिक हैं।\n\nखाते का नाम खाली छोड़ने पर Osmium जोड़ने की तारीख़ और क्रम से स्वतः नाम बनाता है — जैसे मई 2026 में जोड़ा गया पहला खाता 20260501 होगा।\n\nजारीकर्ता खाली छोड़ने पर "Unknown" दिखेगा।</string>
     <string name="manual_notes_title">महत्वपूर्ण नोट्स</string>

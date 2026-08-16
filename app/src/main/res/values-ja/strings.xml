@@ -146,7 +146,7 @@
     <string name="manual_backup_title">バックアップと復元</string>
     <string name="manual_backup_body">設定 → データ → エクスポート で暗号化バックアップ（パスワード + アプリPIN）を作成できます。パスワードは大切に保管してください。ないと復元できません。Google Authenticatorからの移行は読み取り専用のインポートです。</string>
     <string name="manual_tester_title">認証アプリのテスト</string>
-    <string name="manual_tester_body">https://otp.159310.xyz を開くと、Osmium（または任意の認証アプリ）が正しいコードを生成するか確認できます：サイトがテスト用秘密鍵を発行し、アプリに追加してコードを入力します。TOTP・HOTP・Steam Guardに対応し、複数のアルゴリズム・桁数・周期を選択可能 — すべてブラウザ内で完結し、何もアップロードされません。</string>
+    <string name="manual_tester_body">https://otp.osmium.im を開くと、Osmium（または任意の認証アプリ）が正しいコードを生成するか確認できます：サイトがテスト用秘密鍵を発行し、アプリに追加してコードを入力します。TOTP・HOTP・Steam Guardに対応し、複数のアルゴリズム・桁数・周期を選択可能 — すべてブラウザ内で完結し、何もアップロードされません。</string>
     <string name="manual_naming_title">アカウント名と発行元</string>
     <string name="manual_naming_body">アカウント名と発行元はどちらも省略できます。\n\nアカウント名を空にすると、Osmiumが追加日と追加順から自動で名前を生成します — 例：2026年5月に追加した最初のアカウントは 20260501 となります。\n\n発行元を空にすると「Unknown」と表示されます。</string>
     <string name="manual_notes_title">重要な注意事項</string>

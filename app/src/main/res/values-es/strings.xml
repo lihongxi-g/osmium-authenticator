@@ -146,7 +146,7 @@
     <string name="manual_backup_title">Copia de seguridad y restauración</string>
     <string name="manual_backup_body">Ajustes → Datos → Exportar crea una copia cifrada (contraseña + PIN de la aplicación). Guarda bien la contraseña: sin ella no se puede restaurar. La migración de Google Authenticator es solo de importación.</string>
     <string name="manual_tester_title">Prueba tu autenticador</string>
-    <string name="manual_tester_body">Abre https://otp.159310.xyz para comprobar que Osmium (o cualquier autenticador) genera códigos correctos: el sitio emite un secreto de prueba, lo añades a tu aplicación e introduces el código de vuelta. Admite TOTP, HOTP y Steam Guard con varios algoritmos, dígitos y periodos — todo en el navegador, nada se sube.</string>
+    <string name="manual_tester_body">Abre https://otp.osmium.im para comprobar que Osmium (o cualquier autenticador) genera códigos correctos: el sitio emite un secreto de prueba, lo añades a tu aplicación e introduces el código de vuelta. Admite TOTP, HOTP y Steam Guard con varios algoritmos, dígitos y periodos — todo en el navegador, nada se sube.</string>
     <string name="manual_naming_title">Nombres de cuenta y emisores</string>
     <string name="manual_naming_body">Tanto el nombre de la cuenta como el emisor son opcionales.\n\nSi dejas el NOMBRE DE CUENTA en blanco, Osmium genera uno automáticamente con la fecha de añadido y el orden — p. ej., la primera cuenta añadida en mayo de 2026 se llama 20260501.\n\nSi dejas el EMISOR en blanco, se muestra como "Unknown".</string>
     <string name="manual_notes_title">Notas importantes</string>

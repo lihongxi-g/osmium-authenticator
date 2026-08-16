@@ -154,7 +154,7 @@
     <string name="manual_backup_title">备份与恢复</string>
     <string name="manual_backup_body">设置 → 数据 → 导出 生成加密备份（密码 + 应用 PIN 双重绑定）。请妥善保管密码，丢失密码将无法恢复备份。Google 验证器迁移为只读导入。</string>
     <string name="manual_tester_title">测试你的验证器</string>
-    <string name="manual_tester_body">打开 https://otp.159310.xyz 可验证 Osmium（或任意验证器）生成的验证码是否正确：网站发放测试密钥，你把它添加进验证器并回填验证码。支持 TOTP、HOTP、Steam Guard，多种算法、位数和周期——全程在浏览器本地完成，数据不会上传。</string>
+    <string name="manual_tester_body">打开 https://otp.osmium.im 可验证 Osmium（或任意验证器）生成的验证码是否正确：网站发放测试密钥，你把它添加进验证器并回填验证码。支持 TOTP、HOTP、Steam Guard，多种算法、位数和周期——全程在浏览器本地完成，数据不会上传。</string>
     <string name="manual_naming_title">账户名与服务商</string>
     <string name="manual_naming_body">账户名和服务商都可留空。\n\n账户名留空时，Osmium 会用添加日期和添加位次自动生成一个名称——例如 2026 年 5 月添加的第一个账户名为 20260501。\n\n服务商留空时统一显示为 "Unknown"。</string>
     <string name="manual_notes_title">重要注意事项</string>

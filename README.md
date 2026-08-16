@@ -22,7 +22,7 @@ Osmium is a fully offline, privacy-first TOTP authenticator for Android. Every s
 
 ## Verify your authenticator
 
-A live test page is available at **https://otp.159310.xyz** — it issues a test secret, you add it to any authenticator, and enter the code back to verify. Supports TOTP, HOTP and Steam Guard. Everything runs in the browser; nothing is uploaded.
+A live test page is available at **https://otp.osmium.im** — it issues a test secret, you add it to any authenticator, and enter the code back to verify. Supports TOTP, HOTP and Steam Guard. Everything runs in the browser; nothing is uploaded.
 
 ## Download
 

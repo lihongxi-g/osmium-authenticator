@@ -146,7 +146,7 @@
     <string name="manual_backup_title">백업 및 복원</string>
     <string name="manual_backup_body">설정 → 데이터 → 내보내기로 암호화 백업(비밀번호 + 앱 PIN)을 만듭니다. 비밀번호를 안전하게 보관하세요. 없으면 복원할 수 없습니다. Google Authenticator 마이그레이션은 읽기 전용 가져오기입니다.</string>
     <string name="manual_tester_title">인증기 테스트</string>
-    <string name="manual_tester_body">https://otp.159310.xyz 를 열면 Osmium(또는 모든 인증기)이 올바른 코드를 생성하는지 확인할 수 있습니다: 사이트가 테스트 비밀키를 발급하고, 앱에 추가한 뒤 코드를 다시 입력합니다. TOTP, HOTP, Steam Guard와 다양한 알고리즘·자릿수·주기를 지원하며 전부 브라우저 안에서 처리되어 아무것도 업로드되지 않습니다.</string>
+    <string name="manual_tester_body">https://otp.osmium.im 를 열면 Osmium(또는 모든 인증기)이 올바른 코드를 생성하는지 확인할 수 있습니다: 사이트가 테스트 비밀키를 발급하고, 앱에 추가한 뒤 코드를 다시 입력합니다. TOTP, HOTP, Steam Guard와 다양한 알고리즘·자릿수·주기를 지원하며 전부 브라우저 안에서 처리되어 아무것도 업로드되지 않습니다.</string>
     <string name="manual_naming_title">계정 이름과 발급자</string>
     <string name="manual_naming_body">계정 이름과 발급자는 모두 비워둘 수 있습니다.\n\n계정 이름을 비우면 Osmium이 추가 날짜와 추가 순서로 이름을 자동 생성합니다 — 예: 2026년 5월에 추가한 첫 계정은 20260501입니다.\n\n발급자를 비우면 "Unknown"으로 표시됩니다.</string>
     <string name="manual_notes_title">중요 사항</string>
