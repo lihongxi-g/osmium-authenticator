@@ -38,22 +38,6 @@ Osmium 是一款隐私优先的 Android TOTP 验证器。所有密钥在落盘�
 
 安装与设备架构不符的包会导致启动闪退。签名证书 SHA-256 指纹：`B65BB0131CAA22C45D99EA4E2C3E99B3980EAE0DC5647190F41A2878E6D88412`。
 
-## 截图
-
-> 图片经自建图床直链加载（GitHub 图片代理在大陆网络下可能无法显示）。
-
-| WebDAV 备份配置 | 连接测试 |
-|---|---|
-| ![](https://159310.xyz/img/osmium-webdav-config-6hvyu.jpg) | ![](https://159310.xyz/img/osmium-webdav-toast-fnap6.jpg) |
-
-| 备份上传完成 | 选择备份 |
-|---|---|
-| ![](https://159310.xyz/img/osmium-webdav-upload-p636y.jpg) | ![](https://159310.xyz/img/osmium-webdav-picker-r260d.jpg) |
-
-| 导入预览 |
-|---|
-| ![](https://159310.xyz/img/osmium-webdav-import-wpm28.jpg) |
-
 ## 隐私与条款
 
 - [隐私政策](PRIVACY.md)（[中文版](PRIVACY-zh.md)）

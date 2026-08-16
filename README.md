@@ -38,20 +38,6 @@ Pick the APK matching your device:
 
 Installing the wrong architecture will crash on launch. The signing certificate fingerprint (SHA-256) is `B65BB0131CAA22C45D99EA4E2C3E99B3980EAE0DC5647190F41A2878E6D88412`.
 
-## Screenshots
-
-| Main | Appearance & security |
-|---|---|
-| ![](screenshots/en-accounts.jpg) | ![](screenshots/en-appearance.jpg) |
-
-| Security & data | Data & about |
-|---|---|
-| ![](screenshots/en-security.jpg) | ![](screenshots/en-data.jpg) |
-
-| About |
-|---|
-| ![](screenshots/en-about.jpg) |
-
 ## Privacy & Terms
 
 - [Privacy Policy](PRIVACY.md) ([中文](PRIVACY-zh.md))
