@@ -6,8 +6,7 @@ How to set up a WebDAV server for Osmium v2.3.0's local-network backup and resto
 
 | Platform | Status |
 |---|---|
-| NAS (Synology / QNAP / ZSpace / TrueNAS) | ✅ Built-in WebDAV service |
-| NAS (UGREEN UGOS) | ❓ Unknown — try it yourself (no official docs found) |
+| NAS (Synology / QNAP / ZSpace / UGREEN UGOS Pro / TrueNAS) | ✅ Built-in WebDAV service |
 | Linux server / PC | ✅ Several options (Docker / rclone / Python / Apache) |
 | Android phone | ✅ As a temporary server (Termux / MiXplorer) |
 | macOS | ✅ No native server; use rclone / Docker |
@@ -49,17 +48,24 @@ Official docs: docs.qnap.com, "Enabling WebDAV".
 3. Recommended: create a **least-privilege dedicated account** for Osmium on the WebDAV page
 4. In Osmium: `http://<ZSpace-IP>:5005`
 
-### UGREEN (UGOS)
+### UGREEN (UGOS Pro)
 
-No official documentation on WebDAV support was found. **Unknown — try it yourself**: look for "File Service / Network Service / WebDAV" in system settings. If your model supports Docker (some UGOS Pro models do), use the Linux → Docker option below.
+UGOS Pro has a built-in WebDAV service (confirmed by official tutorials):
+
+1. Open **Control Panel** → **File Service** → **WebDAV**
+2. Tick "**Enable WebDAV service**" → click "**Apply**"
+3. Configure the port and account permissions as needed
+4. In Osmium: `http://<UGREEN-NAS-IP>:<port>`
+
+Official docs: UGREEN tutorial "How to Access UGREEN NAS Files via WebDAV" (ugnas.com/tutorial-detail/id-223.html; also ai.ugreen.com).
 
 ### TrueNAS (CORE / SCALE)
 
-1. Sharing → **Add WebDAV Share**, pick a dataset and set permissions
-2. Enable the WebDAV service under Services
-3. In Osmium: `http://<TrueNAS-IP>:<port>`
+- **SCALE**: Shares → WebDAV launch widget → **Add**
+- **CORE**: Sharing → **WebDAV Shares** → **ADD**, pick a dataset
+- In Osmium: `http://<TrueNAS-IP>:<port>`
 
-Official docs: truenas.com/docs, "WebDAV Share".
+Official docs: truenas.com/docs, "Configuring WebDAV Shares" (SCALE) / "WebDav Share Creation" (CORE).
 
 ### Other Docker-capable NAS
 
@@ -206,7 +212,7 @@ iOS has no built-in WebDAV server. A few third-party WebDAV server apps exist on
 ## HarmonyOS 5.0+ (NEXT)
 
 - Osmium is an Android app; HarmonyOS NEXT does not run Android apps natively. To run Osmium on a HarmonyOS device, try Huawei's official Android compatibility tool (e.g. 卓易通 / OutFold) — compatibility is unverified
-- WebDAV server options: **unknown — try it yourself**. Search the app gallery for WebDAV server apps, or use the Docker option above on Docker-capable devices
+- WebDAV server options: **unknown — try it yourself**. A search found no ready-made WebDAV server app in the HarmonyOS NEXT app gallery; search the gallery yourself for "WebDAV server", or use the Docker option above on Docker-capable devices
 
 ## Using Osmium (all platforms)
 

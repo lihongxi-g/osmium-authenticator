@@ -6,8 +6,7 @@
 
 | 平台 | 支持情况 |
 |---|---|
-| NAS（群晖 / 威联通 / 极空间 / TrueNAS） | ✅ 内置 WebDAV 服务 |
-| NAS（绿联 UGOS） | ❓ 未知，需自行尝试（未见官方文档） |
+| NAS（群晖 / 威联通 / 极空间 / 绿联 UGOS Pro / TrueNAS） | ✅ 内置 WebDAV 服务 |
 | Linux 服务器 / 电脑 | ✅ 多种方案（Docker / rclone / Python / Apache） |
 | Android 手机 | ✅ 可作临时服务器（Termux / MiXplorer） |
 | macOS | ✅ 无原生服务器，可用 rclone / Docker |
@@ -49,17 +48,24 @@ Osmium 的 WebDAV 客户端使用四个 HTTP 请求：`PROPFIND`（测试连接�
 3. 建议在 WebDAV 服务页**新增一个最小权限的独立账号**给 Osmium 使用
 4. Osmium 中填写 `http://极空间IP:5005`
 
-### 绿联（UGREEN UGOS）
+### 绿联（UGREEN UGOS Pro）
 
-未见官方文档说明 WebDAV 支持情况。**未知，需自行尝试**：可在系统设置中查找「文件服务 / 网络服务 / WebDAV」相关选项；若你的机型支持 Docker（部分 UGOS Pro 型号支持），可直接使用下方 Linux → Docker 方案。
+UGOS Pro 系统内置 WebDAV 服务（官方教程确认）：
+
+1. 打开 **控制面板** → **文件服务** → **WebDAV**
+2. 勾选「**启用 WebDAV 服务**」→ 点击「**应用**」保存
+3. 按需设置端口与账号权限
+4. Osmium 中填写 `http://绿联NAS的IP:端口`
+
+官方文档：绿联官网教程「如何使用 WebDAV 访问绿联 NAS 上的文件」（ugnas.com/tutorial-detail/id-223.html）。
 
 ### TrueNAS（CORE / SCALE）
 
-1. 共享（Sharing）→ **添加 WebDAV 共享**，选择数据集并设置用户权限
-2. 服务（Services）中启用 WebDAV 服务
-3. Osmium 中填写 `http://TrueNAS的IP:端口`
+- **SCALE**：共享（Shares）→ WebDAV 小组件 → **添加**（Add）
+- **CORE**：共享（Sharing）→ **WebDAV 共享** → **添加**（ADD），选择数据集
+- 启用后 Osmium 中填写 `http://TrueNAS的IP:端口`
 
-官方文档：truenas.com/docs「WebDAV Share」。
+官方文档：truenas.com/docs「Configuring WebDAV Shares」（SCALE）/「WebDav Share Creation」（CORE）。
 
 ### 其他支持 Docker 的 NAS
 
@@ -206,7 +212,7 @@ iOS 没有内置 WebDAV 服务器；App Store 存在少量第三方 WebDAV 服�
 ## HarmonyOS 5.0+（NEXT）
 
 - Osmium 是 Android 应用，HarmonyOS NEXT 不原生兼容 Android 应用；如需在鸿蒙设备运行 Osmium，请尝试华为官方 Android 兼容工具（如卓易通），兼容性未经验证
-- WebDAV 服务器方案：**未知，需自行尝试**。可在应用市场搜索 WebDAV 服务器类应用，或在支持 Docker 的设备上使用上方 Docker 方案
+- WebDAV 服务器方案：**未知，需自行尝试**。经检索未发现鸿蒙 NEXT 应用市场中有现成的 WebDAV 服务器应用；可在应用市场自行搜索「WebDAV 服务器」，或在支持 Docker 的设备上使用上方 Docker 方案
 
 ## Osmium 端操作（通用）
 
