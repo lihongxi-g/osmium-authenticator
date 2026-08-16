@@ -85,10 +85,11 @@ fun WebDavScreen(
     // Seed the form from the saved config once (and only once, so the user's
     // edits are never overwritten by a re-emission of the flow).
     LaunchedEffect(savedConfig) {
-        if (!seeded && savedConfig != null) {
-            url = savedConfig.baseUrl
-            username = savedConfig.username
-            password = savedConfig.password
+        val cfg = savedConfig
+        if (!seeded && cfg != null) {
+            url = cfg.baseUrl
+            username = cfg.username
+            password = cfg.password
             seeded = true
         }
     }

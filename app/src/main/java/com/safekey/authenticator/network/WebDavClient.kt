@@ -103,7 +103,7 @@ object WebDavClient {
     /** Download one backup file. Returns the raw encrypted envelope bytes. */
     fun download(config: WebDavServerConfig, href: String): ByteArray {
         val absolute = absoluteHref(base(config), href)
-        val bytes = execute("GET", absolute, config, allowStatus = 200..299)
+        val bytes = execute("GET", url(absolute), config, allowStatus = 200..299)
         if (bytes.size > MAX_DOWNLOAD_BYTES) {
             throw WebDavException("Server response too large")
         }
