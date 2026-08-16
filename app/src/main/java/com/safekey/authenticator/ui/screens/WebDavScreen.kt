@@ -115,11 +115,6 @@ fun WebDavScreen(
         return ok
     }
 
-    fun saveConfig() {
-        if (url.isBlank()) return
-        doSaveConfig()
-    }
-
     fun doSaveConfig() {
         // Plaintext HTTP is useful for trusted LAN servers, but the user
         // must explicitly acknowledge the risk before we store the address.
@@ -129,6 +124,11 @@ fun WebDavScreen(
         }
         vm.saveWebDavConfig(currentConfig())
         vm.showToast(context.getString(R.string.webdav_saved))
+    }
+
+    fun saveConfig() {
+        if (url.isBlank()) return
+        doSaveConfig()
     }
 
     fun runBusy(label: String, block: suspend () -> Unit) {
