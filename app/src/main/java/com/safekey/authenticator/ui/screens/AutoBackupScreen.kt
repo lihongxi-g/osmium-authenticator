@@ -23,7 +23,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
-import androidx.compose.material3.rememberTimePickerState
+import androidx.compose.material3.TimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -163,7 +163,7 @@ fun AutoBackupScreen(
     val timePickerState = remember(
         settings.autoBackupHour, settings.autoBackupMinute
     ) {
-        rememberTimePickerState(
+        TimePickerState(
             initialHour = settings.autoBackupHour,
             initialMinute = settings.autoBackupMinute,
             is24Hour = true
@@ -458,6 +458,8 @@ private fun AutoBackupPasswordDialog(
     var password by remember { mutableStateOf("") }
     var confirm by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
+    val emptyError = stringResource(R.string.error_password_empty)
+    val mismatchError = stringResource(R.string.error_password_mismatch)
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -499,8 +501,8 @@ private fun AutoBackupPasswordDialog(
             TextButton(
                 onClick = {
                     when {
-                        password.isEmpty() -> error = stringResource(R.string.error_password_empty)
-                        password != confirm -> error = stringResource(R.string.error_password_mismatch)
+                        password.isEmpty() -> error = emptyError
+                        password != confirm -> error = mismatchError
                         else -> onConfirm(password)
                     }
                 }
