@@ -352,4 +352,7 @@
     <string name="auto_backup_keep_label">Zu behaltende Backups</string>
     <string name="auto_backup_keep_desc">Über diese Anzahl hinaus werden ältere Backups gelöscht (max. 10)</string>
     <string name="auto_backup_keep_picker_title">Anzahl wählen</string>
+
+    <string name="auto_backup_beta_label">Beta</string>
+    <string name="auto_backup_permission_warning">Erfordert „Autostart“ und „Volle Hintergrundaktivität erlauben“ in den Systemeinstellungen (Akku/Autostart) — sonst laufen geplante Backups möglicherweise nicht. Osmium verbraucht im Hintergrund keinen Akku: Es wacht nur einmal pro Backup kurz auf.</string>
 </resources>

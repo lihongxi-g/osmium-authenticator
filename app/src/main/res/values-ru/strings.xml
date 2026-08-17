@@ -352,4 +352,7 @@
     <string name="auto_backup_keep_label">Хранить копий</string>
     <string name="auto_backup_keep_desc">Свыше этого числа старые копии удаляются (макс. 10)</string>
     <string name="auto_backup_keep_picker_title">Выберите, сколько хранить</string>
+
+    <string name="auto_backup_beta_label">Beta</string>
+    <string name="auto_backup_permission_warning">Требуется включить «Автозапуск» и «Разрешить полную фоновую активность» в системных настройках (батарея/автозапуск) — иначе запланированные копии могут не выполняться. Osmium не расходует заряд в фоне: он просыпается лишь ненадолго, один раз на каждую копию.</string>
 </resources>

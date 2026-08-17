@@ -369,4 +369,7 @@
     <string name="auto_backup_keep_label">Backups to keep</string>
     <string name="auto_backup_keep_desc">Older backups are deleted beyond this count (max 10)</string>
     <string name="auto_backup_keep_picker_title">Choose how many to keep</string>
+
+    <string name="auto_backup_beta_label">Beta</string>
+    <string name="auto_backup_permission_warning">Requires \"Auto-start\" and \"Allow full background activity\" in system battery / auto-start settings — otherwise scheduled backups may not run. Osmium does not drain battery in the background: it wakes only briefly, once per backup.</string>
 </resources>

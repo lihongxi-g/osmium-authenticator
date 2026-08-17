@@ -352,4 +352,7 @@
     <string name="auto_backup_keep_label">保持するバックアップ数</string>
     <string name="auto_backup_keep_desc">この数を超えた古いバックアップは削除されます（最大10）</string>
     <string name="auto_backup_keep_picker_title">保持する数を選択</string>
+
+    <string name="auto_backup_beta_label">Beta</string>
+    <string name="auto_backup_permission_warning">システム設定（バッテリー/自動起動）で「自動起動」と「完全なバックグラウンド動作を許可」を有効にする必要があります。有効でないと、予定された自動バックアップが実行されない場合があります。Osmiumはバックグラウンドで電池を消費しません。バックアップのたびに一度、短時間起動するだけです。</string>
 </resources>

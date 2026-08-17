@@ -367,4 +367,7 @@
     <string name="auto_backup_keep_label">备份文件数量</string>
     <string name="auto_backup_keep_desc">超出数量后自动删除最早的备份（最多 10 份）</string>
     <string name="auto_backup_keep_picker_title">选择保留数量</string>
+
+    <string name="auto_backup_beta_label">Beta</string>
+    <string name="auto_backup_permission_warning">需在系统设置中开启「允许自启动」与「完全允许后台行为」，否则定时自动备份可能无法执行。本应用不会在后台持续耗电，仅在备份时短暂启动一次，请放心。</string>
 </resources>

@@ -352,4 +352,7 @@
     <string name="auto_backup_keep_label">Copias a conservar</string>
     <string name="auto_backup_keep_desc">Las copias más antiguas se borran al superar este número (máx. 10)</string>
     <string name="auto_backup_keep_picker_title">Elige cuántas conservar</string>
+
+    <string name="auto_backup_beta_label">Beta</string>
+    <string name="auto_backup_permission_warning">Requiere activar \"Autoinicio\" y \"Permitir actividad en segundo plano completa\" en los ajustes del sistema (batería/autoinicio); de lo contrario, las copias programadas podrían no ejecutarse. Osmium no consume batería en segundo plano: solo se despierta brevemente, una vez por copia.</string>
 </resources>

@@ -352,4 +352,7 @@
     <string name="auto_backup_keep_label">रखे जाने वाले बैकअप</string>
     <string name="auto_backup_keep_desc">इस संख्या से अधिक होने पर पुराने बैकअप हटा दिए जाते हैं (अधिकतम 10)</string>
     <string name="auto_backup_keep_picker_title">कितनी रखनी हैं चुनें</string>
+
+    <string name="auto_backup_beta_label">Beta</string>
+    <string name="auto_backup_permission_warning">सिस्टम सेटिंग्स (बैटरी/ऑटो-स्टार्ट) में \"ऑटो-स्टार्ट\" और \"पूर्ण बैकग्राउंड गतिविधि की अनुमति\" चालू करना ज़रूरी है — अन्यथा शेड्यूल किए गए बैकअप नहीं चल सकते। Osmium बैकग्राउंड में बैटरी नहीं खाता: यह केवल एक बार, बैकअप के समय थोड़ी देर के लिए जागता है।</string>
 </resources>
