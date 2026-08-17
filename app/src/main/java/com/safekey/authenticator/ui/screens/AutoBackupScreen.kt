@@ -56,7 +56,6 @@ import com.safekey.authenticator.data.AppSettings
 import com.safekey.authenticator.ui.components.AppIcons
 import com.safekey.authenticator.ui.components.SettingRow
 import com.safekey.authenticator.ui.components.SimpleTopBar
-import com.safekey.authenticator.ui.navigation.Screen
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -113,14 +112,18 @@ fun AutoBackupScreen(
             settings.autoBackupTarget == AppSettings.AUTO_BACKUP_TARGET_LOCAL
 
     fun continueEnable() {
-        if (settings.autoBackupTarget == AppSettings.AUTO_BACKUP_TARGET_WEBDAV &&
-            webDavConfig == null
-        ) {
-            vm.showToast(context.getString(R.string.auto_backup_webdav_missing))
-            vm.nav.push(Screen.WebDav)
-            return
+        var target = settings.autoBackupTarget
+        if (target == AppSettings.AUTO_BACKUP_TARGET_WEBDAV && webDavConfig == null) {
+            // No WebDAV server configured — fall back to local backups instead
+            // of blocking the user (the target picker greys WebDAV out anyway).
+            vm.setAutoBackupTarget(AppSettings.AUTO_BACKUP_TARGET_LOCAL)
+            vm.showToast(context.getString(R.string.auto_backup_fallback_local))
+            target = AppSettings.AUTO_BACKUP_TARGET_LOCAL
         }
-        if (needsLegacyPermission() && !hasLegacyPermission()) {
+        if (Build.VERSION.SDK_INT <= 28 &&
+            target == AppSettings.AUTO_BACKUP_TARGET_LOCAL &&
+            !hasLegacyPermission()
+        ) {
             permissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
             return
         }
@@ -149,9 +152,8 @@ fun AutoBackupScreen(
         if (settings.autoBackupTarget == AppSettings.AUTO_BACKUP_TARGET_WEBDAV &&
             webDavConfig == null
         ) {
-            vm.showToast(context.getString(R.string.auto_backup_webdav_missing))
-            vm.nav.push(Screen.WebDav)
-            return
+            vm.setAutoBackupTarget(AppSettings.AUTO_BACKUP_TARGET_LOCAL)
+            vm.showToast(context.getString(R.string.auto_backup_fallback_local))
         }
         AutoBackupScheduler.runNow(context)
         vm.showToast(context.getString(R.string.auto_backup_started))
@@ -449,17 +451,23 @@ fun AutoBackupScreen(
             text = {
                 Column {
                     TextButton(
+                        enabled = webDavConfig != null,
                         onClick = {
                             showTargetDialog = false
                             vm.setAutoBackupTarget(AppSettings.AUTO_BACKUP_TARGET_WEBDAV)
-                            if (settings.autoBackupEnabled && webDavConfig == null) {
-                                vm.showToast(
-                                    context.getString(R.string.auto_backup_webdav_missing)
-                                )
-                            }
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) { Text(stringResource(R.string.auto_backup_target_webdav)) }
+                    if (webDavConfig == null) {
+                        Text(
+                            text = stringResource(
+                                R.string.auto_backup_webdav_not_configured
+                            ),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(horizontal = 24.dp, vertical = 2.dp)
+                        )
+                    }
                     TextButton(
                         onClick = {
                             showTargetDialog = false

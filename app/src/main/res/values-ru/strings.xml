@@ -331,6 +331,8 @@
     <string name="auto_backup_local_dir_desc">Файлы сохраняются в: Загрузки/Osmium</string>
     <string name="auto_backup_local_permission_desc">Этой версии Android нужно разрешение на память — нажмите, чтобы выдать</string>
     <string name="auto_backup_webdav_missing">Сервер WebDAV не настроен — сначала настройте его</string>
+    <string name="auto_backup_webdav_not_configured">Сервер WebDAV не настроен — недоступно. Сначала настройте его.</string>
+    <string name="auto_backup_fallback_local">WebDAV не настроен — используется локальная копия.</string>
     <string name="auto_backup_need_password">Сначала задайте пароль копии</string>
     <string name="auto_backup_password_saved">Пароль сохранён</string>
     <string name="auto_backup_time_picker_title">Выберите время</string>

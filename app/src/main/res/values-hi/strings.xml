@@ -331,6 +331,8 @@
     <string name="auto_backup_local_dir_desc">फ़ाइलें यहाँ सहेजी जाती हैं: Download/Osmium</string>
     <string name="auto_backup_local_permission_desc">इस Android संस्करण को स्टोरेज अनुमति चाहिए — देने के लिए टैप करें</string>
     <string name="auto_backup_webdav_missing">कोई WebDAV सर्वर सेट नहीं है — पहले इसे सेट करें</string>
+    <string name="auto_backup_webdav_not_configured">कोई WebDAV सर्वर सेट नहीं है — उपलब्ध नहीं। पहले इसे सेट करें।</string>
+    <string name="auto_backup_fallback_local">WebDAV सेट नहीं है — लोकल बैकअप उपयोग किया जाएगा।</string>
     <string name="auto_backup_need_password">पहले बैकअप पासवर्ड सेट करें</string>
     <string name="auto_backup_password_saved">बैकअप पासवर्ड सहेजा गया</string>
     <string name="auto_backup_time_picker_title">समय चुनें</string>

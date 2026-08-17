@@ -331,6 +331,8 @@
     <string name="auto_backup_local_dir_desc">저장 위치: 다운로드/Osmium</string>
     <string name="auto_backup_local_permission_desc">이 Android 버전은 저장 권한이 필요합니다 — 눌러서 허용</string>
     <string name="auto_backup_webdav_missing">WebDAV 서버가 설정되지 않았습니다. 먼저 설정하세요</string>
+    <string name="auto_backup_webdav_not_configured">WebDAV 서버가 설정되지 않아 사용할 수 없습니다. 먼저 설정하세요.</string>
+    <string name="auto_backup_fallback_local">WebDAV 미설정 — 로컬 백업으로 대체합니다.</string>
     <string name="auto_backup_need_password">먼저 백업 비밀번호를 설정하세요</string>
     <string name="auto_backup_password_saved">백업 비밀번호 저장됨</string>
     <string name="auto_backup_time_picker_title">시간 선택</string>

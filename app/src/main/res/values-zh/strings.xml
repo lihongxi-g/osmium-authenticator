@@ -346,6 +346,8 @@
     <string name="auto_backup_local_dir_desc">备份文件保存在：下载/Osmium 目录</string>
     <string name="auto_backup_local_permission_desc">此 Android 版本需存储权限才能写入此目录，点按授权</string>
     <string name="auto_backup_webdav_missing">尚未配置 WebDAV 服务器，请先完成配置</string>
+    <string name="auto_backup_webdav_not_configured">没有配置 WebDAV 服务，无法使用，请先配置</string>
+    <string name="auto_backup_fallback_local">未配置 WebDAV，已改用本地备份</string>
     <string name="auto_backup_need_password">请先设置备份密码</string>
     <string name="auto_backup_password_saved">备份密码已保存</string>
     <string name="auto_backup_time_picker_title">选择备份时间</string>

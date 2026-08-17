@@ -331,6 +331,8 @@
     <string name="auto_backup_local_dir_desc">Ablageort: Download/Osmium</string>
     <string name="auto_backup_local_permission_desc">Diese Android-Version braucht eine Speicherberechtigung — zum Erteilen tippen</string>
     <string name="auto_backup_webdav_missing">Kein WebDAV-Server konfiguriert — bitte zuerst einrichten</string>
+    <string name="auto_backup_webdav_not_configured">Kein WebDAV-Server konfiguriert — nicht verfügbar. Bitte zuerst einrichten.</string>
+    <string name="auto_backup_fallback_local">WebDAV nicht konfiguriert — lokale Sicherung wird verwendet.</string>
     <string name="auto_backup_need_password">Zuerst ein Backup-Passwort setzen</string>
     <string name="auto_backup_password_saved">Backup-Passwort gespeichert</string>
     <string name="auto_backup_time_picker_title">Zeit wählen</string>
