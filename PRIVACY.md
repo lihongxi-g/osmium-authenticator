@@ -33,7 +33,9 @@ If you enable automatic backup (Settings → Data → Auto backup), the app runs
 
 ## Background execution
 
-Automatic backups run through the Android system scheduler. The app wakes briefly to run a backup and keeps **no persistent background service**; beyond that short job it does not consume battery in the background. On some devices, aggressive battery optimizations may defer or block scheduled backups — see the README for a recommendation.
+Automatic backups run through the Android system scheduler. The app wakes briefly to run a backup and keeps **no persistent background service**; beyond that short job it does not consume battery in the background. On some devices, aggressive battery policies may defer or block scheduled backups — see the README for a recommendation.
+
+The Auto backup screen displays the current background-activity status and can request the system's battery-optimization exemption for Osmium (the standard `ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` dialog). The request and its result are handled entirely by the Android system; the app reads no additional data from it.
 
 ## Permissions
 

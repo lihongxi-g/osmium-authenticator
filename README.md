@@ -9,6 +9,7 @@ Osmium is a privacy-first TOTP authenticator for Android. Every secret is encryp
 - **Encrypted backup** — export to a password-protected, PIN-bound encrypted file; restore on any device
 - **WebDAV backup** — upload the same encrypted export to a WebDAV server on your local network (NAS, PC, another phone) and restore from it; the server only ever stores ciphertext
 - **Automatic backup** — scheduled unattended backups to WebDAV or the phone's Download/Osmium folder; pick an interval in days, a time of day and how many backups to keep (1–10, default 5); next run shown with a GMT+8 label
+- **Background-activity grant** — the Auto backup screen shows the live background-activity status and offers a one-tap request to exempt Osmium from battery optimizations
 - **Update checks** — silent check for new releases on GitHub every time the app opens (opt-out in Settings); a dialog offers to open the GitHub releases page, the app never downloads or installs anything itself
 - **Steam Guard** — manual entry with the 26-character Steam alphabet (see warning below)
 - **Hidden codes mode** — codes render as dots; copying still works, editing and sharing are locked until the mode is turned off
@@ -56,7 +57,12 @@ Step-by-step server setup for every platform (NAS, Linux, Android, macOS, Window
 
 Automatic backups are scheduled through the Android system scheduler — the app wakes briefly to run the backup and keeps **no persistent background service**. Battery drain beyond that short job is negligible.
 
-Aggressive battery optimizations on some devices (ColorOS, MIUI, EMUI, …) may defer or block scheduled backups. **To guarantee backups run: allow Osmium to run fully in the background, or turn OFF battery restrictions for Osmium** (ColorOS: Settings → Battery → More settings → allow full background activity for Osmium). Android power saving may still run a backup a few minutes late — that is normal and expected.
+Aggressive battery policies on some devices (ColorOS, MIUI, HyperOS, EMUI, One UI, …) may defer or block scheduled backups. **To guarantee unattended night-time backups, we strongly recommend that you manually enable both of the following for Osmium in your system settings:**
+
+1. **Allow auto-start** (auto-launch) — without it, the system freezes Osmium overnight and scheduled backups will not run.
+2. **Allow full background activity** / turn OFF battery restrictions for Osmium — this lets the system scheduler wake the app for the short backup job.
+
+The names and paths of these two switches **differ between manufacturers and Android versions** — please look for them in your own device's settings. For example, on ColorOS: Settings → Battery → More settings → allow full background activity for Osmium, and Phone Manager → App management → Auto-start management. The in-app Auto backup screen shows the current background-activity status and can open the system's battery-optimization dialog for you; auto-start, however, has no standard Android API and can only be enabled by hand. Android power saving may still run a backup a few minutes late — that is normal and expected.
 
 ## Security notes
 
