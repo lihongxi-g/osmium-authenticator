@@ -1,6 +1,7 @@
 package com.safekey.authenticator.backup
 
 import android.content.Context
+import android.os.Build
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
@@ -81,16 +82,22 @@ object AutoBackupScheduler {
         wm.enqueueUniqueWork(WORK_NAME, ExistingWorkPolicy.KEEP, request)
     }
 
-    /** Trigger a backup right now (the worker re-schedules the next run).
-     *  Expedited: no initial delay is set, so the request is eligible for
-     *  high-priority execution. */
+    /** Trigger a backup right now (the worker re-schedules the next run). */
     fun runNow(context: Context) {
+        val builder = OneTimeWorkRequestBuilder<AutoBackupWorker>()
+        if (Build.VERSION.SDK_INT >= 31) {
+            // Expedited on Android 8–11 runs as a foreground service and
+            // REQUIRES the worker to implement getForegroundInfo() — without
+            // it the work fails with IllegalStateException. Gate expedited to
+            // Android 12+; older devices run a plain (still immediate) work
+            // request, which is fine because runNow only fires while the app
+            // is in the foreground anyway.
+            builder.setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+        }
         WorkManager.getInstance(context).enqueueUniqueWork(
             WORK_NAME,
             ExistingWorkPolicy.REPLACE,
-            OneTimeWorkRequestBuilder<AutoBackupWorker>()
-                .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-                .build()
+            builder.build()
         )
     }
 

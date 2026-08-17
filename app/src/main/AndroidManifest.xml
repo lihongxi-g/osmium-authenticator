@@ -15,6 +15,12 @@
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28" />
 
+    <!-- Android 17 (API 37) requires this runtime permission for local-network
+         traffic when an app targets 37+ (WebDAV to a LAN NAS depends on it).
+         Declared now so the permission is known; ignored on older platforms.
+         Request at runtime before WebDAV use once targetSdk is raised. -->
+    <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
+
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />

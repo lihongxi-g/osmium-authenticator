@@ -199,7 +199,17 @@ object WebDavClient {
         } catch (e: SSLException) {
             throw WebDavException("TLS error — the server certificate is not trusted", e)
         } catch (e: IOException) {
-            throw WebDavException("Connection failed: ${e.message ?: "I/O error"}", e)
+            val msg = e.message ?: ""
+            // Android 16+ local-network protection returns EPERM/ECONNABORTED
+            // when LAN access is blocked (Android 17 enforces it for apps
+            // targeting 37+). Surface a hint instead of a raw socket error.
+            if (msg.contains("EPERM") || msg.contains("ECONNABORTED")) {
+                throw WebDavException(
+                    "Local network access was blocked by the system — " +
+                        "check this app's local-network permission", e
+                )
+            }
+            throw WebDavException("Connection failed: $msg", e)
         } finally {
             conn.disconnect()
         }
