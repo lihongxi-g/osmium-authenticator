@@ -9,7 +9,7 @@ Osmium is a privacy-first TOTP authenticator for Android. Every secret is encryp
 - **Encrypted backup** — export to a password-protected, PIN-bound encrypted file; restore on any device
 - **WebDAV backup** — upload the same encrypted export to a WebDAV server on your local network (NAS, PC, another phone) and restore from it; the server only ever stores ciphertext
 - **Automatic backup** — scheduled unattended backups to WebDAV or the phone's Download/Osmium folder; pick an interval in days, a time of day and how many backups to keep (1–10, default 5); next run shown with a GMT+8 label
-- **Update checks** — silent once-per-day check for new releases on GitHub (opt-out in Settings); a dialog offers to open the GitHub releases page, the app never downloads or installs anything itself
+- **Update checks** — silent check for new releases on GitHub every time the app opens (opt-out in Settings); a dialog offers to open the GitHub releases page, the app never downloads or installs anything itself
 - **Steam Guard** — manual entry with the 26-character Steam alphabet (see warning below)
 - **Hidden codes mode** — codes render as dots; copying still works, editing and sharing are locked until the mode is turned off
 - **Sort modes** — random, alphabetical, add date, copy count
@@ -61,7 +61,7 @@ Aggressive battery optimizations on some devices (ColorOS, MIUI, EMUI, …) may 
 ## Security notes
 
 - Field-level AES-256-GCM encryption with a non-exportable Android Keystore key
-- INTERNET permission used only for the user-configured WebDAV backup server and the once-per-day GitHub update check (opt-out) — no analytics, no crash reporters, no cloud
+- INTERNET permission used only for the user-configured WebDAV backup server and the GitHub update check (opt-out) — no analytics, no crash reporters, no cloud
 - WebDAV addresses starting with `http://` trigger an explicit plaintext-connection warning before they are saved
 - Backups are encrypted (PBKDF2 + AES-256-GCM) before they leave the device and are bound to the app PIN
 - HTTPS uses standard certificate validation — self-signed certificates are rejected by design (no TrustAllManager in a password app)

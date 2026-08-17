@@ -184,6 +184,24 @@ class MainActivity : FragmentActivity() {
                     vm.clearToast()
                 }
             }
+
+            // Auto-backup schedule maintenance: runs once the real settings
+            // load (NOT in onStart — at that point the DataStore flow may
+            // still carry the defaults, which silently skipped the ensure).
+            LaunchedEffect(
+                settings.autoBackupEnabled,
+                settings.autoBackupHour,
+                settings.autoBackupMinute,
+                settings.autoBackupIntervalDays
+            ) {
+                if (settings.autoBackupEnabled && !destroyed) {
+                    AutoBackupScheduler.ensureScheduled(this@MainActivity, settings)
+                    // If a scheduled run was frozen overnight (OEM battery
+                    // policies), run one now instead of waiting for the
+                    // system to get around to the overdue job.
+                    AutoBackupScheduler.maybeCatchUp(this@MainActivity, settings)
+                }
+            }
         }
     }
 
@@ -191,12 +209,6 @@ class MainActivity : FragmentActivity() {
         super.onStart()
         vm.setBiometricAvailable(canAuthenticateBiometric())
         vm.onAppForeground()
-
-        // Keep the auto-backup schedule alive across reboots and settings
-        // drift. KEEP never disturbs a pending run.
-        if (!vm.destroyed.value && vm.settings.value.autoBackupEnabled) {
-            AutoBackupScheduler.ensureScheduled(this, vm.settings.value)
-        }
         maybeCheckForUpdate()
     }
 
@@ -555,10 +567,15 @@ class MainActivity : FragmentActivity() {
 
     // --------------------------------------------------------- update check
 
+    /** Minimum gap between checks (GitHub's unauthenticated rate limit is
+     *  60 requests/hour per IP; the user asked for a check on every app
+     *  open, so a short invisible floor prevents 429 storms). */
+    private var updateCheckCooldownUntil = 0L
+
     /**
-     * Silent once-per-day check against the GitHub releases API, run in the
-     * background when the app comes to the foreground. Only when the user
-     * has auto-update checks enabled. Failures stay silent; a found update
+     * Silent check against the GitHub releases API, run in the background
+     * every time the app comes to the foreground (when the user has
+     * auto-update checks enabled). Failures stay silent; a found update
      * sets [pendingUpdateTag], which the Compose tree shows as a dialog over
      * the unlocked main UI.
      */
@@ -567,16 +584,12 @@ class MainActivity : FragmentActivity() {
         if (!settings.autoCheckUpdates || updateCheckInFlight || tampered ||
             vm.destroyed.value
         ) return
+        val now = System.currentTimeMillis()
+        if (now < updateCheckCooldownUntil) return
+        updateCheckCooldownUntil = now + 60_000L
         updateCheckInFlight = true
-        val settingsRepo = (application as SafeKeyApp).settingsRepository
         lifecycleScope.launch {
             try {
-                val now = System.currentTimeMillis()
-                val lastCheck = settingsRepo.getUpdateLastCheck()
-                if (now - lastCheck < 24 * 3600_000L) return@launch
-                // Mark the day as checked even if the request fails, so a
-                // flaky network cannot trigger a request storm.
-                settingsRepo.setUpdateLastCheck(now)
                 val tag = withContext(Dispatchers.IO) { UpdateChecker.checkForUpdate() }
                 if (tag != null) pendingUpdateTag = tag
             } finally {

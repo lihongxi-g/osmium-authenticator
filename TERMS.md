@@ -28,7 +28,7 @@ You may use Osmium for your own two-factor authentication needs. You may not use
 Osmium runs no account system and connects to no third-party services except:
 
 - the WebDAV server **you configure yourself** (optional backup feature; backups are encrypted with your password before upload), and
-- the GitHub releases API (`api.github.com`) once per day for the optional update check, which sends no account or device data.
+- the GitHub releases API (`api.github.com`) for the optional update check (run when the app opens), which sends no account or device data.
 
 The optional Google Authenticator migration feature parses export codes you provide locally on the device; no data is sent to Google or anyone else.
 

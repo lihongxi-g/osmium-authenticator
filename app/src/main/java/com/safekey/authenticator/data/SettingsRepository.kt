@@ -91,7 +91,6 @@ class SettingsRepository(
         val AUTO_BACKUP_LAST_TIME = longPreferencesKey("auto_backup_last_time")
         val AUTO_BACKUP_LAST_ERROR = stringPreferencesKey("auto_backup_last_error")
         val AUTO_CHECK_UPDATES = booleanPreferencesKey("auto_check_updates")
-        val UPDATE_LAST_CHECK = longPreferencesKey("update_last_check")
     }
 
     val settings: Flow<AppSettings> = context.dataStore.data.map { prefs ->
@@ -235,14 +234,6 @@ class SettingsRepository(
 
     suspend fun setAutoCheckUpdates(enabled: Boolean) {
         context.dataStore.edit { it[Keys.AUTO_CHECK_UPDATES] = enabled }
-    }
-
-    suspend fun getUpdateLastCheck(): Long {
-        return context.dataStore.data.first()[Keys.UPDATE_LAST_CHECK] ?: 0L
-    }
-
-    suspend fun setUpdateLastCheck(timeMillis: Long) {
-        context.dataStore.edit { it[Keys.UPDATE_LAST_CHECK] = timeMillis }
     }
 
     // ------------------------------------------------------ WebDAV backup

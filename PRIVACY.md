@@ -25,7 +25,7 @@ If you enable WebDAV backup (Settings → Data → WebDAV backup), the app conne
 
 ## Network: update checks
 
-If auto-check for updates is enabled (Settings → About → Auto-check for updates; on by default), the app asks the GitHub releases API (`api.github.com`) for the latest public version **once per day** when it opens. No account data or device information is sent. The check fails silently when offline and never downloads or installs anything.
+If auto-check for updates is enabled (Settings → About → Auto-check for updates; on by default), the app asks the GitHub releases API (`api.github.com`) for the latest public version each time it opens (with a short internal cooldown). No account data or device information is sent. The check fails silently when offline and never downloads or installs anything.
 
 ## Automatic backup
 

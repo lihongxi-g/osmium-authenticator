@@ -3,6 +3,7 @@ package com.safekey.authenticator.backup
 import android.content.Context
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkManager
 import com.safekey.authenticator.data.AppSettings
 import java.util.Calendar
@@ -80,12 +81,32 @@ object AutoBackupScheduler {
         wm.enqueueUniqueWork(WORK_NAME, ExistingWorkPolicy.KEEP, request)
     }
 
-    /** Trigger a backup right now (the worker re-schedules the next run). */
+    /** Trigger a backup right now (the worker re-schedules the next run).
+     *  Expedited: no initial delay is set, so the request is eligible for
+     *  high-priority execution. */
     fun runNow(context: Context) {
         WorkManager.getInstance(context).enqueueUniqueWork(
             WORK_NAME,
             ExistingWorkPolicy.REPLACE,
-            OneTimeWorkRequestBuilder<AutoBackupWorker>().build()
+            OneTimeWorkRequestBuilder<AutoBackupWorker>()
+                .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+                .build()
         )
+    }
+
+    /**
+     * Catch-up for frozen schedules: when the last successful run is older
+     * than the configured interval, OEM battery policies have been blocking
+     * the scheduled job — run one now. Never fires when no run has happened
+     * yet (the pending scheduled job still handles the first run).
+     */
+    fun maybeCatchUp(context: Context, settings: AppSettings) {
+        if (!settings.autoBackupEnabled) return
+        val last = settings.autoBackupLastTime
+        if (last <= 0L) return
+        val intervalMs = settings.autoBackupIntervalDays * 24L * 3600_000L
+        if (System.currentTimeMillis() - last > intervalMs) {
+            runNow(context)
+        }
     }
 }
