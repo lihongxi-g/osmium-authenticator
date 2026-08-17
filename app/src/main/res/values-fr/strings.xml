@@ -331,7 +331,7 @@
     <string name="auto_backup_local_dir_desc">Fichiers enregistrés dans : Téléchargement/Osmium</string>
     <string name="auto_backup_local_permission_desc">Cette version d\'Android nécessite une autorisation de stockage — appuyez pour l\'accorder</string>
     <string name="auto_backup_webdav_missing">Aucun serveur WebDAV configuré — configurez-en un d\'abord</string>
-    <string name="auto_backup_webdav_not_configured">Aucun serveur WebDAV configuré — indisponible. Configurez-en un d'abord.</string>
+    <string name="auto_backup_webdav_not_configured">Aucun serveur WebDAV configuré — indisponible. Configurez-en un d\'abord.</string>
     <string name="auto_backup_fallback_local">WebDAV non configuré — sauvegarde locale utilisée.</string>
     <string name="auto_backup_need_password">Définissez d\'abord un mot de passe</string>
     <string name="auto_backup_password_saved">Mot de passe enregistré</string>

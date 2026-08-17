@@ -35,7 +35,7 @@ TEXTS = {
         "WebDAV не настроен — используется локальная копия.",
     ),
     "values-fr": (
-        "Aucun serveur WebDAV configuré — indisponible. Configurez-en un d'abord.",
+        "Aucun serveur WebDAV configuré — indisponible. Configurez-en un d\\'abord.",
         "WebDAV non configuré — sauvegarde locale utilisée.",
     ),
     "values-hi": (
