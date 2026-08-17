@@ -57,7 +57,7 @@ Step-by-step server setup for every platform (NAS, Linux, Android, macOS, Window
 
 Automatic backups are scheduled through the Android system scheduler — the app wakes briefly to run the backup and keeps **no persistent background service**. Battery drain beyond that short job is negligible.
 
-Aggressive battery policies on some devices (ColorOS, MIUI, HyperOS, EMUI, One UI, …) may defer or block scheduled backups. **To guarantee unattended night-time backups, we strongly recommend that you manually enable both of the following for Osmium in your system settings:**
+Aggressive battery policies on some devices (ColorOS, MIUI, HyperOS, EMUI, One UI,OxygenOS,RealmeUI,PixelUI …) may defer or block scheduled backups. **To guarantee unattended night-time backups, we strongly recommend that you manually enable both of the following for Osmium in your system settings:**
 
 1. **Allow auto-start** (auto-launch) — without it, the system freezes Osmium overnight and scheduled backups will not run.
 2. **Allow full background activity** / turn OFF battery restrictions for Osmium — this lets the system scheduler wake the app for the short backup job.
