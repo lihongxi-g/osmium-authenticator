@@ -354,5 +354,9 @@
     <string name="auto_backup_keep_picker_title">保持する数を選択</string>
 
     <string name="auto_backup_beta_label">Beta</string>
-    <string name="auto_backup_permission_warning">システム設定（バッテリー/自動起動）で「自動起動」と「完全なバックグラウンド動作を許可」を有効にする必要があります。有効でないと、予定された自動バックアップが実行されない場合があります。Osmiumはバックグラウンドで電池を消費しません。バックアップのたびに一度、短時間起動するだけです。</string>
+    <string name="auto_backup_permission_warning">システム設定（バッテリー/自動起動）で「自動起動」と「完全なバックグラウンド動作を許可」を有効にする必要があります。「自動起動」は非常に重要です。有効でないと、夜間の予定バックアップは実行されません。Osmiumはバックグラウンドで電池を消費しません。バックアップのたびに一度、短時間起動するだけです。</string>
+
+    <string name="auto_backup_grant_button">バックグラウンド動作を許可</string>
+    <string name="auto_backup_bg_granted">バックグラウンド動作：許可済み</string>
+    <string name="auto_backup_bg_denied">バックグラウンド動作：未許可（タップして申請）</string>
 </resources>

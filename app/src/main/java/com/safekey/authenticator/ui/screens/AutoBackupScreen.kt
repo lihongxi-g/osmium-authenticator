@@ -1,8 +1,12 @@
 package com.safekey.authenticator.ui.screens
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
+import android.os.PowerManager
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -28,6 +32,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -37,10 +42,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import com.safekey.authenticator.MainViewModel
 import com.safekey.authenticator.R
 import com.safekey.authenticator.backup.AutoBackupScheduler
@@ -156,6 +164,40 @@ fun AutoBackupScreen(
             context.getString(R.string.auto_backup_tz_label)
     }
 
+    // ---- background-activity status (battery optimization exemption)
+    fun isBgAllowed(): Boolean {
+        val pm = context.getSystemService(PowerManager::class.java)
+        return pm?.isIgnoringBatteryOptimizations(context.packageName) == true
+    }
+
+    var bgAllowed by remember { mutableStateOf(isBgAllowed()) }
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                // Refresh after the user returns from the system dialog.
+                bgAllowed = isBgAllowed()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
+    fun requestBackgroundActivity() {
+        val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+        intent.data = Uri.parse("package:${context.packageName}")
+        try {
+            context.startActivity(intent)
+        } catch (_: Exception) {
+            // Some ROMs hide the direct dialog — fall back to the settings list
+            try {
+                context.startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
+            } catch (_: Exception) {
+                vm.showToast(context.getString(R.string.auto_backup_bg_denied))
+            }
+        }
+    }
+
     val nextRun = if (settings.autoBackupEnabled) {
         AutoBackupScheduler.nextRunMillis(
             now = System.currentTimeMillis(),
@@ -210,6 +252,30 @@ fun AutoBackupScreen(
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 8.dp)
             )
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 20.dp, end = 20.dp, top = 6.dp)
+            ) {
+                Text(
+                    text = stringResource(
+                        if (bgAllowed) R.string.auto_backup_bg_granted
+                        else R.string.auto_backup_bg_denied
+                    ),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (bgAllowed) MaterialTheme.colorScheme.tertiary
+                    else MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.weight(1f)
+                )
+                if (!bgAllowed) {
+                    TextButton(onClick = { requestBackgroundActivity() }) {
+                        Text(stringResource(R.string.auto_backup_grant_button))
+                    }
+                }
+            }
 
             SettingRow(
                 icon = AppIcons.Timer,

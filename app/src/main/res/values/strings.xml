@@ -371,5 +371,9 @@
     <string name="auto_backup_keep_picker_title">Choose how many to keep</string>
 
     <string name="auto_backup_beta_label">Beta</string>
-    <string name="auto_backup_permission_warning">Requires \"Auto-start\" and \"Allow full background activity\" in system battery / auto-start settings — otherwise scheduled backups may not run. Osmium does not drain battery in the background: it wakes only briefly, once per backup.</string>
+    <string name="auto_backup_permission_warning">Requires \"Auto-start\" and \"Allow full background activity\" in system settings. \"Auto-start\" is CRITICAL — without it, scheduled night backups will not run. Osmium does not drain battery in the background: it wakes only briefly, once per backup.</string>
+
+    <string name="auto_backup_grant_button">Allow background activity</string>
+    <string name="auto_backup_bg_granted">Background activity: allowed</string>
+    <string name="auto_backup_bg_denied">Background activity: not allowed — tap to request</string>
 </resources>

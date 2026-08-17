@@ -354,5 +354,9 @@
     <string name="auto_backup_keep_picker_title">Choisir combien conserver</string>
 
     <string name="auto_backup_beta_label">Beta</string>
-    <string name="auto_backup_permission_warning">Nécessite d\'activer « Démarrage automatique » et « Autoriser l\'activité complète en arrière-plan » dans les réglages système (batterie/démarrage automatique) — sinon les sauvegardes planifiées peuvent ne pas s\'exécuter. Osmium ne consomme pas de batterie en arrière-plan : il ne se réveille brièvement qu\'une fois par sauvegarde.</string>
+    <string name="auto_backup_permission_warning">Nécessite d\'activer « Démarrage automatique » et « Autoriser l\'activité complète en arrière-plan » dans les réglages système. « Démarrage automatique » est CRITIQUE — sans lui, les sauvegardes nocturnes planifiées ne s\'exécuteront pas. Osmium ne consomme pas de batterie en arrière-plan : il ne se réveille brièvement qu\'une fois par sauvegarde.</string>
+
+    <string name="auto_backup_grant_button">Autoriser l\'activité en arrière-plan</string>
+    <string name="auto_backup_bg_granted">Activité en arrière-plan : autorisée</string>
+    <string name="auto_backup_bg_denied">Activité en arrière-plan : non autorisée (appuyez pour demander)</string>
 </resources>

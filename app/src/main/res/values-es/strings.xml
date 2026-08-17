@@ -354,5 +354,9 @@
     <string name="auto_backup_keep_picker_title">Elige cuántas conservar</string>
 
     <string name="auto_backup_beta_label">Beta</string>
-    <string name="auto_backup_permission_warning">Requiere activar \"Autoinicio\" y \"Permitir actividad en segundo plano completa\" en los ajustes del sistema (batería/autoinicio); de lo contrario, las copias programadas podrían no ejecutarse. Osmium no consume batería en segundo plano: solo se despierta brevemente, una vez por copia.</string>
+    <string name="auto_backup_permission_warning">Requiere activar \"Autoinicio\" y \"Permitir actividad en segundo plano completa\" en los ajustes del sistema. \"Autoinicio\" es CRÍTICO: sin él, las copias nocturnas programadas no se ejecutarán. Osmium no consume batería en segundo plano: solo se despierta brevemente, una vez por copia.</string>
+
+    <string name="auto_backup_grant_button">Permitir actividad en segundo plano</string>
+    <string name="auto_backup_bg_granted">Actividad en segundo plano: permitida</string>
+    <string name="auto_backup_bg_denied">Actividad en segundo plano: no permitida (pulsa para solicitar)</string>
 </resources>

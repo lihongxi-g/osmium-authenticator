@@ -369,5 +369,9 @@
     <string name="auto_backup_keep_picker_title">选择保留数量</string>
 
     <string name="auto_backup_beta_label">Beta</string>
-    <string name="auto_backup_permission_warning">需在系统设置中开启「允许自启动」与「完全允许后台行为」，否则定时自动备份可能无法执行。本应用不会在后台持续耗电，仅在备份时短暂启动一次，请放心。</string>
+    <string name="auto_backup_permission_warning">需在系统设置中开启「允许自启动」与「完全允许后台行为」。其中「允许自启动」至关重要——未开启则夜间定时备份不会执行。本应用不会在后台持续耗电，仅在备份时短暂启动一次，请放心。</string>
+
+    <string name="auto_backup_grant_button">允许后台运行</string>
+    <string name="auto_backup_bg_granted">后台运行：已允许</string>
+    <string name="auto_backup_bg_denied">后台运行：未允许（点按申请）</string>
 </resources>
