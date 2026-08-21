@@ -15,6 +15,7 @@ Osmium is a privacy-first TOTP authenticator for Android. Every secret is encryp
 - **Hidden codes mode** — codes render as dots; copying still works, editing and sharing are locked until the mode is turned off
 - **Sort modes** — random, alphabetical, add date, copy count
 - **Search** — find any account instantly by name or issuer
+- **Tags** — initial tag-classification work is included in the 2.3.6 test build
 - **Clock calibration** — manual offset for devices whose clock drifts
 - **Security gate** — optional verification on open (fingerprint / system password / app PIN), self-destruct PIN, screenshots blocked by default
 - **Nine languages** — English, 简体中文, Español, 日本語, 한국어, Deutsch, Русский, Français, हिन्दी
