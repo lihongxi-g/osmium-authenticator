@@ -1,6 +1,7 @@
 package com.safekey.authenticator.ui.screens
 
 import android.os.Build
+import android.net.nsd.NsdServiceInfo
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -44,6 +45,7 @@ fun LinkScreen(vm: MainViewModel, onBack: () -> Unit) {
         SimpleTopBar(stringResource(R.string.link_title), onBack)
         return
     }
+
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val discovery = remember(context) { LinkDiscovery(context) }
@@ -51,14 +53,22 @@ fun LinkScreen(vm: MainViewModel, onBack: () -> Unit) {
     val transport = remember(scope) {
         LinkTransport(scope, Build.MODEL ?: "Android") {
             vm.accountUiList.value.map { ui ->
-                LinkAccountView(ui.account.id, ui.account.issuer, ui.account.label, ui.code, ui.remainingSeconds, ui.account.type, ui.account.tags.map { it.name })
+                LinkAccountView(
+                    id = ui.account.id,
+                    issuer = ui.account.issuer,
+                    label = ui.account.label,
+                    code = ui.code,
+                    remainingSeconds = ui.remainingSeconds,
+                    type = ui.account.type,
+                    tags = ui.account.tags.map { it.name }
+                )
             }
         }
     }
     val peers by discovery.peers.collectAsState()
     val connection by transport.state.collectAsState()
     var enabled by remember { mutableStateOf(false) }
-    var selectedPeer by remember { mutableStateOf<android.net.nsd.NsdServiceInfo?>(null) }
+    var selectedPeer by remember { mutableStateOf<NsdServiceInfo?>(null) }
     var pairingCode by remember { mutableStateOf("") }
     var showTrustConfirm by remember { mutableStateOf(false) }
 
@@ -67,74 +77,196 @@ fun LinkScreen(vm: MainViewModel, onBack: () -> Unit) {
             val port = transport.startServer()
             discovery.start(Build.MODEL ?: "Android", port)
         } else {
-            discovery.stop(); transport.stop()
+            discovery.stop()
+            transport.stop()
         }
-        onDispose { discovery.stop(); transport.stop() }
+        onDispose {
+            discovery.stop()
+            transport.stop()
+        }
     }
 
     Column(Modifier.fillMaxSize()) {
         SimpleTopBar(stringResource(R.string.link_title), onBack)
-        Row(Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+        Row(
+            Modifier.fillMaxWidth().padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
             Column(Modifier.weight(1f)) {
                 Text(stringResource(R.string.link_allow_discovery), style = MaterialTheme.typography.titleMedium)
-                Text(stringResource(R.string.link_trust_warning), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+                Text(
+                    stringResource(R.string.link_trust_warning),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall
+                )
             }
             Switch(checked = enabled, onCheckedChange = { enabled = it })
         }
+
         when (val state = connection) {
             is LinkConnectionState.Connected -> {
-                Text(stringResource(R.string.link_remote_accounts), style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(16.dp))
-                Text("${state.deviceName} · ${state.fingerprint}", style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text(if (trustStore.isTrusted(state.fingerprint)) stringResource(R.string.link_trusted) else "", color = MaterialTheme.colorScheme.error)
-                    if (!trustStore.isTrusted(state.fingerprint)) TextButton(onClick = { showTrustConfirm = true }) { Text(stringResource(R.string.link_trusted), color = MaterialTheme.colorScheme.error) }
-                }
-                LazyColumn(Modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    items(state.accounts, key = { it.id }) { account ->
-                        Card(Modifier.fillMaxWidth()) { Column(Modifier.padding(16.dp)) { Text(account.issuer.ifBlank { account.label }); Text(account.label, style = MaterialTheme.typography.bodySmall); Text(account.code, style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.primary) } }
+                Text(
+                    stringResource(R.string.link_remote_accounts),
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.padding(16.dp)
+                )
+                Text(
+                    "${state.deviceName} · ${state.fingerprint}",
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Row(
+                    Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    if (trustStore.isTrusted(state.fingerprint)) {
+                        Text(stringResource(R.string.link_trusted), color = MaterialTheme.colorScheme.error)
+                    } else {
+                        TextButton(onClick = { showTrustConfirm = true }) {
+                            Text(stringResource(R.string.link_trusted), color = MaterialTheme.colorScheme.error)
+                        }
                     }
                 }
-                TextButton(onClick = { transport.stop() }) { Text(stringResource(R.string.link_disconnect)) }
+                LazyColumn(
+                    Modifier.padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(state.accounts, key = { it.id }) { account ->
+                        Card(Modifier.fillMaxWidth()) {
+                            Column(Modifier.padding(16.dp)) {
+                                Text(account.issuer.ifBlank { account.label })
+                                Text(account.label, style = MaterialTheme.typography.bodySmall)
+                                Text(
+                                    account.code,
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
+                    }
+                }
+                TextButton(onClick = { transport.stop() }) {
+                    Text(stringResource(R.string.link_disconnect))
+                }
             }
             else -> {
-                if (peers.isEmpty()) Text(stringResource(R.string.link_no_devices), Modifier.padding(16.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
-                LazyColumn(Modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (peers.isEmpty()) {
+                    Text(
+                        stringResource(R.string.link_no_devices),
+                        Modifier.padding(16.dp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                LazyColumn(
+                    Modifier.padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
                     items(peers, key = { it.serviceName }) { peer ->
-                        Card(Modifier.fillMaxWidth()) { Row(Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween) { Text(peer.serviceName.removePrefix("Osmium-").substringBeforeLast('-'), Modifier.weight(1f)); Button(onClick = { selectedPeer = peer }) { Text(stringResource(R.string.link_pair)) } } }
+                        Card(Modifier.fillMaxWidth()) {
+                            Row(
+                                Modifier.fillMaxWidth().padding(16.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    peer.serviceName.removePrefix("Osmium-").substringBeforeLast('-'),
+                                    Modifier.weight(1f)
+                                )
+                                Button(onClick = {
+                                    pairingCode = ""
+                                    selectedPeer = peer
+                                }) {
+                                    Text(stringResource(R.string.link_pair))
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
-        val accepted = connection as? LinkConnectionState.Incoming
-        if (accepted != null) {
-            AlertDialog(
-                onDismissRequest = { transport.rejectIncoming() },
-                title = { Text(accepted.deviceName) },
-                text = { Text("${stringResource(R.string.link_pair_code)}: ${accepted.code}") },
-                confirmButton = { TextButton(onClick = { transport.acceptIncoming() }) { Text(stringResource(R.string.link_pair)) } },
-                dismissButton = { TextButton(onClick = { transport.rejectIncoming() }) { Text(stringResource(R.string.cancel)) } }
-            )
-        }
+    }
+
+    // This dialog is driven directly by Incoming state. It is deliberately
+    // outside the content branch so it appears immediately and can always be
+    // dismissed without waiting for another recomposition.
+    (connection as? LinkConnectionState.Incoming)?.let { incoming ->
+        AlertDialog(
+            onDismissRequest = { transport.rejectIncoming() },
+            title = { Text(incoming.deviceName) },
+            text = { Text("${stringResource(R.string.link_pair_code)}: ${incoming.code}") },
+            confirmButton = {
+                TextButton(onClick = { transport.acceptIncoming() }) {
+                    Text(stringResource(R.string.link_pair))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { transport.rejectIncoming() }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
 
     if (showTrustConfirm) {
         AlertDialog(
             onDismissRequest = { showTrustConfirm = false },
             title = { Text(stringResource(R.string.link_trusted), color = MaterialTheme.colorScheme.error) },
             text = { Text(stringResource(R.string.link_trust_warning), color = MaterialTheme.colorScheme.error) },
-            confirmButton = { TextButton(onClick = { (connection as? LinkConnectionState.Connected)?.let { trustStore.setTrusted(it.fingerprint, true); transport.trustCurrent() }; showTrustConfirm = false }) { Text(stringResource(R.string.link_trusted), color = MaterialTheme.colorScheme.error) } },
-            dismissButton = { TextButton(onClick = { showTrustConfirm = false }) { Text(stringResource(R.string.cancel)) } }
+            confirmButton = {
+                TextButton(onClick = {
+                    (connection as? LinkConnectionState.Connected)?.let {
+                        trustStore.setTrusted(it.fingerprint, true)
+                        transport.trustCurrent()
+                    }
+                    showTrustConfirm = false
+                }) {
+                    Text(stringResource(R.string.link_trusted), color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showTrustConfirm = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
         )
     }
-
 
     selectedPeer?.let { peer ->
         AlertDialog(
             onDismissRequest = { selectedPeer = null },
             title = { Text(stringResource(R.string.link_pair_code)) },
-            text = { OutlinedTextField(pairingCode, { pairingCode = it.filter(Char::isDigit).take(6) }, singleLine = true, label = { Text(stringResource(R.string.link_pair_code)) }) },
-            confirmButton = { TextButton(enabled = pairingCode.length == 6, onClick = { transport.connect(peer.host.hostAddress ?: return@TextButton, peer.port, pairingCode) { result -> result.onSuccess { accounts -> transport.publishConnected(peer.serviceName, accounts) }; result.onFailure { transport.publishError(it.message ?: "Link failed") } }; selectedPeer = null; pairingCode = "" }) { Text(stringResource(R.string.link_pair)) } },
-            dismissButton = { TextButton(onClick = { selectedPeer = null }) { Text(stringResource(R.string.cancel)) } }
+            text = {
+                OutlinedTextField(
+                    value = pairingCode,
+                    onValueChange = { pairingCode = it.filter(Char::isDigit).take(6) },
+                    singleLine = true,
+                    label = { Text(stringResource(R.string.link_pair_code)) }
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    enabled = pairingCode.length == 6,
+                    onClick = {
+                        val host = peer.host.hostAddress ?: return@TextButton
+                        transport.connect(host, peer.port, pairingCode) { result ->
+                            result.onSuccess { accounts ->
+                                transport.publishConnected(peer.serviceName, accounts)
+                            }.onFailure {
+                                transport.publishError(it.message ?: "Link failed")
+                            }
+                        }
+                        selectedPeer = null
+                        pairingCode = ""
+                    }
+                ) {
+                    Text(stringResource(R.string.link_pair))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { selectedPeer = null }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
         )
-    }
     }
 }

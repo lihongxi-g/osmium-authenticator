@@ -19,12 +19,14 @@ class LinkDiscovery(context: Context) {
     val peers: StateFlow<List<NsdServiceInfo>> = _peers
     private var registration: NsdManager.RegistrationListener? = null
     private var discovery: NsdManager.DiscoveryListener? = null
-    private var listening = false
+    private var ownServiceName: String? = null
 
     fun start(deviceName: String, servicePort: Int) {
-        listening = true
+        stop()
+        val name = "Osmium-$deviceName-${UUID.randomUUID().toString().take(8)}"
+        ownServiceName = name
         val info = NsdServiceInfo().apply {
-            serviceName = "Osmium-$deviceName-${UUID.randomUUID().toString().take(8)}"
+            serviceName = name
             serviceType = SERVICE_TYPE
             port = servicePort
         }
@@ -41,7 +43,7 @@ class LinkDiscovery(context: Context) {
             override fun onStartDiscoveryFailed(serviceType: String, errorCode: Int) = Unit
             override fun onStopDiscoveryFailed(serviceType: String, errorCode: Int) = Unit
             override fun onServiceFound(serviceInfo: NsdServiceInfo) {
-                if (serviceInfo.serviceType == SERVICE_TYPE) nsd.resolveService(serviceInfo, resolver)
+                if (serviceInfo.serviceType == SERVICE_TYPE && LinkPeerFilter.shouldShow(serviceInfo.serviceName, ownServiceName)) nsd.resolveService(serviceInfo, resolver)
             }
             override fun onServiceLost(serviceInfo: NsdServiceInfo) { _peers.value = _peers.value.filterNot { it.serviceName == serviceInfo.serviceName } }
         }
@@ -51,13 +53,14 @@ class LinkDiscovery(context: Context) {
     private val resolver = object : NsdManager.ResolveListener {
         override fun onResolveFailed(serviceInfo: NsdServiceInfo, errorCode: Int) = Unit
         override fun onServiceResolved(serviceInfo: NsdServiceInfo) {
-            _peers.value = (_peers.value.filterNot { it.serviceName == serviceInfo.serviceName } + serviceInfo)
+            if (!LinkPeerFilter.shouldShow(serviceInfo.serviceName, ownServiceName)) return
+            _peers.value = (_peers.value.filterNot { it.serviceName == serviceInfo.serviceName } + serviceInfo).filterNot { it.serviceName == ownServiceName }
         }
     }
 
     fun stop() {
         discovery?.let { runCatching { nsd.stopServiceDiscovery(it) } }
         registration?.let { runCatching { nsd.unregisterService(it) } }
-        discovery = null; registration = null; _peers.value = emptyList()
+        discovery = null; registration = null; ownServiceName = null; _peers.value = emptyList()
     }
 }

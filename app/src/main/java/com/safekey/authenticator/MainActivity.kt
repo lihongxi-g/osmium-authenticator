@@ -60,8 +60,6 @@ import com.safekey.authenticator.data.LanguagePrefs
 import com.safekey.authenticator.security.AppLog
 import com.safekey.authenticator.security.IntegrityCheck
 import com.safekey.authenticator.totp.OtpUriParser
-import com.safekey.authenticator.ui.components.OsmiumDock
-import com.safekey.authenticator.ui.components.OsmiumDockTab
 import com.safekey.authenticator.ui.components.SwipeBackContainer
 import com.safekey.authenticator.ui.navigation.Screen
 import com.safekey.authenticator.ui.screens.AboutScreen
@@ -734,7 +732,8 @@ class MainActivity : FragmentActivity() {
                             }
                         },
                         onOpenDetail = { account -> vm.nav.push(Screen.Detail(account.id)) },
-                        onOpenSettings = { vm.nav.push(Screen.Settings) }
+                        onOpenSettings = { vm.nav.push(Screen.Settings) },
+                        onOpenLink = { vm.nav.push(Screen.Link) }
                     )
 
                     is Screen.AccountForm -> AccountFormScreen(
@@ -900,11 +899,6 @@ class MainActivity : FragmentActivity() {
                 }
             }
         }
-        OsmiumDock(
-            modifier = Modifier.align(Alignment.BottomCenter),
-            selected = if (current is Screen.Link) OsmiumDockTab.Link else OsmiumDockTab.Authenticator,
-            onSelected = { tab -> if (tab == OsmiumDockTab.Link) vm.nav.push(Screen.Link) else vm.nav.popToRoot() }
-        )
     }
 }
 }

@@ -68,7 +68,8 @@ fun AccountsScreen(
     onAddManual: () -> Unit,
     onAddPaste: () -> Unit,
     onOpenDetail: (Account) -> Unit,
-    onOpenSettings: () -> Unit
+    onOpenSettings: () -> Unit,
+    onOpenLink: () -> Unit
 ) {
     val uiList by vm.filteredSortedAccountUiList.collectAsState()
     val allUiList by vm.sortedAccountUiList.collectAsState()
@@ -169,6 +170,10 @@ fun AccountsScreen(
                 showAddSheet = false
                 onAddPaste()
             },
+            onLink = {
+                showAddSheet = false
+                onOpenLink()
+            },
             onDismiss = { showAddSheet = false }
         )
     }
@@ -246,6 +251,7 @@ private fun AddAccountSheet(
     onScan: () -> Unit,
     onManual: () -> Unit,
     onPaste: () -> Unit,
+    onLink: () -> Unit,
     onDismiss: () -> Unit
 ) {
     ModalBottomSheet(onDismissRequest = onDismiss) {
@@ -274,6 +280,11 @@ private fun AddAccountSheet(
                 icon = AppIcons.ContentPaste,
                 title = stringResource(R.string.paste_uri),
                 onClick = onPaste
+            )
+            AddSheetRow(
+                icon = AppIcons.Settings,
+                title = stringResource(R.string.link_title),
+                onClick = onLink
             )
         }
     }

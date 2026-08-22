@@ -1,23 +1,19 @@
 package com.safekey.authenticator.link
 
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
+import java.io.BufferedReader
+import java.io.BufferedWriter
 import java.net.ServerSocket
 import java.net.Socket
+import java.security.PublicKey
 import java.util.concurrent.atomic.AtomicBoolean
 
-/**
- * Framed, LAN-only Link transport. Pairing is explicit; after pairing every
- * envelope is authenticated-encrypted. The transport never accepts a raw
- * secret/account export: the caller supplies only LinkAccountView values.
- */
+/** LAN transport. Only LinkAccountView is serialized; raw secrets never enter this class. */
 class LinkTransport(
     private val scope: CoroutineScope,
     private val deviceName: String,
@@ -28,51 +24,52 @@ class LinkTransport(
     private val _state = MutableStateFlow<LinkConnectionState>(LinkConnectionState.Idle)
     val state: StateFlow<LinkConnectionState> = _state
     private var server: ServerSocket? = null
-    private var job: Job? = null
     private val closed = AtomicBoolean(false)
-    private var pendingAcceptance: CompletableDeferred<Boolean>? = null
-
-    fun currentState(): LinkConnectionState = _state.value
+    private var pendingSocket: Socket? = null
+    private var pendingOutput: BufferedWriter? = null
+    private var pendingRequest: LinkEnvelope? = null
+    private var pendingPeerKey: PublicKey? = null
 
     fun startServer(port: Int = 0): Int {
         stop()
         closed.set(false)
         val socket = ServerSocket(port)
         server = socket
-        job = scope.launch(Dispatchers.IO) {
+        scope.launch(Dispatchers.IO) {
             while (!closed.get()) {
-                runCatching { socket.accept() }.getOrNull()?.let { peer ->
-                    launch { serve(peer) }
-                }
+                val peer = runCatching { socket.accept() }.getOrNull() ?: break
+                scope.launch(Dispatchers.IO) { receiveRequest(peer) }
             }
         }
         return socket.localPort
     }
 
-    private suspend fun serve(socket: Socket) {
-        socket.use { s ->
-            val input = s.getInputStream().bufferedReader()
-            val output = s.getOutputStream().bufferedWriter()
+    private fun receiveRequest(socket: Socket) {
+        val input = socket.getInputStream().bufferedReader()
+        val output = socket.getOutputStream().bufferedWriter()
+        try {
             val code = LinkCrypto.randomPairingCode()
-            val hello = LinkEnvelope("HELLO", deviceName, LinkCrypto.encodePublicKey(keyPair.public), code)
-            output.write(json.encodeToString(LinkEnvelope.serializer(), hello)); output.newLine(); output.flush()
+            output.send(LinkEnvelope("HELLO", deviceName, LinkCrypto.encodePublicKey(keyPair.public), code))
             val request = input.readLine()?.let { json.decodeFromString(LinkEnvelope.serializer(), it) } ?: return
-            _state.value = LinkConnectionState.Incoming(request.deviceName, request.publicKey, code)
-            val accepted = CompletableDeferred<Boolean>()
-            pendingAcceptance = accepted
-            if (withTimeoutOrNull(60_000) { accepted.await() } != true) return
             if (request.type != "PAIR" || request.code != code) {
-                output.write(json.encodeToString(LinkEnvelope.serializer(), LinkEnvelope("REJECTED"))); output.newLine(); output.flush(); return
+                output.send(LinkEnvelope("REJECTED"))
+                return
             }
-            val peerKey = LinkCrypto.decodePublicKey(request.publicKey)
-            val sessionKey = LinkCrypto.deriveKey(keyPair.private, peerKey, "osmium-link-v1".toByteArray())
-            output.write(json.encodeToString(LinkEnvelope.serializer(), LinkEnvelope("ACCEPT", deviceName, LinkCrypto.encodePublicKey(keyPair.public)))); output.newLine(); output.flush()
-            val payload = json.encodeToString(ListSerializerHolder.serializer, accountSnapshot())
-            output.write(json.encodeToString(LinkEnvelope.serializer(), LinkEnvelope("DATA", payload = LinkCrypto.encrypt(sessionKey, payload.toByteArray(), "accounts".toByteArray())))); output.newLine(); output.flush()
-            _state.value = LinkConnectionState.Connected(deviceName, LinkCrypto.fingerprint(peerKey), false, accountSnapshot())
-            while (!closed.get() && input.readLine() != null) { /* keep session until either side closes */ }
+            pendingSocket = socket
+            pendingOutput = output
+            pendingRequest = request
+            pendingPeerKey = LinkCrypto.decodePublicKey(request.publicKey)
+            _state.value = LinkConnectionState.Incoming(request.deviceName, request.publicKey, code)
+            return
+        } catch (_: Exception) {
+            if (!closed.get()) _state.value = LinkConnectionState.Idle
+        } finally {
+            if (pendingSocket === socket) {
+                // Keep this accepted socket alive; the UI-owned accept/reject path closes it.
+                return
+            }
+            runCatching { socket.close() }
         }
-        if (!closed.get()) _state.value = LinkConnectionState.Idle
     }
 
     fun connect(host: String, port: Int, code: String, onResult: (Result<List<LinkAccountView>>) -> Unit) {
@@ -85,7 +82,7 @@ class LinkTransport(
                     require(hello.type == "HELLO") { "Invalid Link hello" }
                     val peerKey = LinkCrypto.decodePublicKey(hello.publicKey)
                     val sessionKey = LinkCrypto.deriveKey(keyPair.private, peerKey, "osmium-link-v1".toByteArray())
-                    output.write(json.encodeToString(LinkEnvelope.serializer(), LinkEnvelope("PAIR", publicKey = LinkCrypto.encodePublicKey(keyPair.public), code = code))); output.newLine(); output.flush()
+                    output.send(LinkEnvelope("PAIR", publicKey = LinkCrypto.encodePublicKey(keyPair.public), code = code, deviceName = deviceName))
                     val accepted = json.decodeFromString(LinkEnvelope.serializer(), input.readLine())
                     require(accepted.type == "ACCEPT") { "Pairing rejected" }
                     val data = json.decodeFromString(LinkEnvelope.serializer(), input.readLine())
@@ -97,9 +94,32 @@ class LinkTransport(
         }
     }
 
-    fun acceptIncoming() { pendingAcceptance?.complete(true); pendingAcceptance = null }
-    fun rejectIncoming() { pendingAcceptance?.complete(false); pendingAcceptance = null }
-    fun trustCurrent() { (_state.value as? LinkConnectionState.Connected)?.let { _state.value = it.copy(trusted = true) } }
+    fun acceptIncoming() {
+        val socket = pendingSocket ?: return
+        val output = pendingOutput ?: return
+        val request = pendingRequest ?: return
+        val peerKey = pendingPeerKey ?: return
+        scope.launch(Dispatchers.IO) {
+            runCatching {
+                val sessionKey = LinkCrypto.deriveKey(keyPair.private, peerKey, "osmium-link-v1".toByteArray())
+                output.send(LinkEnvelope("ACCEPT", deviceName, LinkCrypto.encodePublicKey(keyPair.public)))
+                val payload = json.encodeToString(ListSerializerHolder.serializer, accountSnapshot())
+                output.send(LinkEnvelope("DATA", payload = LinkCrypto.encrypt(sessionKey, payload.toByteArray(), "accounts".toByteArray())))
+                _state.value = LinkConnectionState.Connected(request.deviceName, LinkCrypto.fingerprint(peerKey), false, accountSnapshot())
+            }.onFailure { _state.value = LinkConnectionState.Error(it.message ?: "Link failed") }
+            clearPending()
+        }
+    }
+
+    fun rejectIncoming() {
+        pendingOutput?.let { runCatching { it.send(LinkEnvelope("REJECTED")) } }
+        clearPending()
+        _state.value = LinkConnectionState.Idle
+    }
+
+    fun trustCurrent() {
+        (_state.value as? LinkConnectionState.Connected)?.let { _state.value = it.copy(trusted = true) }
+    }
 
     fun publishConnected(deviceName: String, accounts: List<LinkAccountView>, trusted: Boolean = false) {
         _state.value = LinkConnectionState.Connected(deviceName, "", trusted, accounts)
@@ -107,7 +127,28 @@ class LinkTransport(
 
     fun publishError(message: String) { _state.value = LinkConnectionState.Error(message) }
 
-    fun stop() { closed.set(true); pendingAcceptance?.complete(false); pendingAcceptance = null; runCatching { server?.close() }; server = null; job?.cancel(); job = null; _state.value = LinkConnectionState.Idle }
+    fun stop() {
+        closed.set(true)
+        clearPending()
+        runCatching { server?.close() }
+        server = null
+        _state.value = LinkConnectionState.Idle
+    }
+
+    private fun clearPending() {
+        runCatching { pendingSocket?.close() }
+        pendingSocket = null
+        pendingOutput = null
+        pendingRequest = null
+        pendingPeerKey = null
+    }
+
+    private fun BufferedWriter.send(envelope: LinkEnvelope) {
+        write(json.encodeToString(LinkEnvelope.serializer(), envelope))
+        newLine()
+        flush()
+    }
+
     private object ListSerializerHolder {
         val serializer = kotlinx.serialization.builtins.ListSerializer(LinkAccountView.serializer())
     }
