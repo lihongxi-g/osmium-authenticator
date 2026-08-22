@@ -1,6 +1,6 @@
 # Osmium
 
-Osmium is a privacy-first TOTP authenticator for Android. Every secret is encrypted with a non-exportable Android Keystore key before it touches disk. The app creates no account and sends no telemetry — codes are computed entirely on device. The INTERNET permission exists solely for the optional WebDAV backup feature: the app connects exclusively to the server address you configure yourself (typically a NAS on your local network) and to nothing else.
+Osmium is a privacy-first TOTP authenticator for Android. This project is free software licensed under the GNU GPL v3 or later. Every secret is encrypted with a non-exportable Android Keystore key before it touches disk. The app creates no account and sends no telemetry — codes are computed entirely on device. The INTERNET permission exists solely for the optional WebDAV backup feature: the app connects exclusively to the server address you configure yourself (typically a NAS on your local network) and to nothing else.
 
 ## Features
 
@@ -84,4 +84,4 @@ Release builds are minified with R8 and split by ABI. Unit tests: `./gradlew tes
 
 ## License
 
-MIT
+GPL-3.0-or-later. See [LICENSE](LICENSE) or [COPYING](COPYING).

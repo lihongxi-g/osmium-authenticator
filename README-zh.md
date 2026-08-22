@@ -1,6 +1,6 @@
 # Osmium
 
-Osmium 是一款隐私优先的 Android TOTP 验证器。所有密钥在落盘前均使用 Android Keystore 中的不可导出密钥加密。应用无需注册账号、不收集任何遥测——验证码完全在本机计算。INTERNET 权限仅用于可选的 WebDAV 备份功能：应用只连接您自行配置的服务器地址（通常是局域网内的 NAS），不会连接其他任何地址。
+Osmium 是一款隐私优先的 Android TOTP 验证器。本项目是基于 GNU GPL v3 或更高版本发布的自由软件。所有密钥在落盘前均使用 Android Keystore 中的不可导出密钥加密。应用无需注册账号、不收集任何遥测——验证码完全在本机计算。INTERNET 权限仅用于可选的 WebDAV 备份功能：应用只连接您自行配置的服务器地址（通常是局域网内的 NAS），不会连接其他任何地址。
 
 ## 功能
 
@@ -84,4 +84,4 @@ Release 构建启用 R8 混淆并按 ABI 分包。单元测试：`./gradlew test
 
 ## 许可证
 
-MIT
+GPL-3.0-or-later，详见 [LICENSE](LICENSE) 或 [COPYING](COPYING)。

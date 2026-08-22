@@ -56,7 +56,7 @@ We share nothing, because we hold nothing. No third party receives data from the
 
 ## Changes to this policy
 
-The application is open source (MIT). Any future change that would alter these guarantees will be stated in the release notes and in this document.
+The application is open source (GPL-3.0-or-later). Any future change that would alter these guarantees will be stated in the release notes and in this document.
 
 ## Contact
 

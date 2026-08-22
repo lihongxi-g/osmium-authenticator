@@ -6,7 +6,7 @@ By installing or using Osmium, you agree to the following terms.
 
 ## License
 
-Osmium is free and open source software released under the MIT License. You may use, copy, modify and redistribute it in accordance with that license, which is included in this repository (LICENSE).
+Osmium is free and open source software released under the GNU General Public License, version 3 or later (GPL-3.0-or-later). You may use, copy, modify and redistribute it in accordance with that license, which is included in this repository (LICENSE/COPYING).
 
 ## Provided "as is"
 
