@@ -88,6 +88,7 @@
 
     <string name="settings_title">Settings</string>
     <string name="settings_appearance">Appearance</string>
+    <string name="settings_connection">Connection</string>
     <string name="settings_security">Security</string>
     <string name="settings_data">Data</string>
     <string name="settings_about">About</string>

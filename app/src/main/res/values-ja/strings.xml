@@ -83,6 +83,7 @@
     <string name="details_secret_verified">この操作には認証が必要です</string>
     <string name="settings_title">設定</string>
     <string name="settings_appearance">外観</string>
+    <string name="settings_connection">接続</string>
     <string name="settings_security">セキュリティ</string>
     <string name="settings_data">データ</string>
     <string name="settings_about">アプリ情報</string>

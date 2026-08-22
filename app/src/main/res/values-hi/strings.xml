@@ -83,6 +83,7 @@
     <string name="details_secret_verified">इस कार्रवाई के लिए प्रमाणीकरण आवश्यक है</string>
     <string name="settings_title">सेटिंग्स</string>
     <string name="settings_appearance">दिखावट</string>
+    <string name="settings_connection">कनेक्शन</string>
     <string name="settings_security">सुरक्षा</string>
     <string name="settings_data">डेटा</string>
     <string name="settings_about">जानकारी</string>

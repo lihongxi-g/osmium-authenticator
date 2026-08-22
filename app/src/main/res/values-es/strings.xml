@@ -83,6 +83,7 @@
     <string name="details_secret_verified">Esta acción requiere autenticación</string>
     <string name="settings_title">Ajustes</string>
     <string name="settings_appearance">Apariencia</string>
+    <string name="settings_connection">Conexión</string>
     <string name="settings_security">Seguridad</string>
     <string name="settings_data">Datos</string>
     <string name="settings_about">Acerca de</string>

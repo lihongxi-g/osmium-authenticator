@@ -168,6 +168,8 @@ fun SettingsScreen(
                 onClick = { vm.nav.push(Screen.Tags) }
             )
 
+            SectionHeader(stringResource(R.string.settings_connection))
+
             SettingRow(
                 icon = AppIcons.Settings,
                 title = stringResource(R.string.link_title),
