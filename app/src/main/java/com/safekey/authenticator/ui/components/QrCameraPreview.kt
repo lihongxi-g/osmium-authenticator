@@ -3,6 +3,7 @@ package com.safekey.authenticator.ui.components
 import android.os.Handler
 import android.os.Looper
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.view.LifecycleCameraController
 import androidx.camera.view.PreviewView
@@ -28,6 +29,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  * NOTE: the controller MUST be bound to the lifecycle (bindToLifecycle),
  * otherwise it never attaches and the preview stays black.
  */
+@androidx.annotation.OptIn(markerClass = [ExperimentalGetImage::class])
 @Composable
 fun QrCameraPreview(
     enabled: Boolean,

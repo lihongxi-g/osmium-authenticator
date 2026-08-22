@@ -7,6 +7,13 @@ import kotlinx.serialization.Serializable
  * Serialized as JSON, then encrypted with [com.safekey.authenticator.security.VaultCrypto].
  */
 @Serializable
+data class VaultTag(
+    val id: String = "",
+    val name: String = "",
+    val color: String = "blue"
+)
+
+@Serializable
 data class VaultAccount(
     val issuer: String = "",
     val label: String = "",
@@ -15,7 +22,8 @@ data class VaultAccount(
     val digits: Int = 6,
     val period: Int = 30,
     val type: String = "totp",
-    val counter: Long = 0
+    val counter: Long = 0,
+    val tagIds: List<String> = emptyList()
 )
 
 @Serializable
@@ -24,6 +32,7 @@ data class VaultFile(
     val format: String = "osmium-vault",
     val exportedAt: Long = 0L,
     val accounts: List<VaultAccount> = emptyList(),
+    val tags: List<VaultTag> = emptyList(),
     /** Present when the exporting device had an app PIN — import then requires it. */
     val pinSalt: String = "",
     val pinHash: String = ""

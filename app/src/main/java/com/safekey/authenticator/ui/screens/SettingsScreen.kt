@@ -162,6 +162,13 @@ fun SettingsScreen(
             )
 
             SettingRow(
+                icon = AppIcons.Palette,
+                title = stringResource(R.string.tags_title),
+                description = stringResource(R.string.tags_empty),
+                onClick = { vm.nav.push(Screen.Tags) }
+            )
+
+            SettingRow(
                 icon = AppIcons.Language,
                 title = stringResource(R.string.language),
                 trailing = {

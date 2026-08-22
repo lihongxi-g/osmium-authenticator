@@ -34,6 +34,7 @@ sealed class Screen {
     object Manual : Screen()
     object SortOrder : Screen()
     object GoogleImport : Screen()
+    object Tags : Screen()
 }
 
 /**

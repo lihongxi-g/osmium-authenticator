@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import com.safekey.authenticator.MainViewModel
 import com.safekey.authenticator.R
 import com.safekey.authenticator.model.Account
+import com.safekey.authenticator.model.Tag
 import com.safekey.authenticator.totp.Base32
 import com.safekey.authenticator.totp.OtpUriParser
 import com.safekey.authenticator.totp.ParsedOtpUri
@@ -48,6 +49,7 @@ fun AccountFormScreen(
     onBack: () -> Unit
 ) {
     val existing by vm.accounts.collectAsState()
+    val availableTags by vm.tags.collectAsState()
     val context = LocalContext.current
     val editing = accountId != null
     val editingAccount = existing.firstOrNull { it.id == accountId }
@@ -59,6 +61,7 @@ fun AccountFormScreen(
     var digits by remember { mutableStateOf(6) }
     var period by remember { mutableStateOf("30") }
     var type by remember { mutableStateOf(Account.TYPE_TOTP) }
+    var selectedTagIds by remember { mutableStateOf<Set<String>>(emptySet()) }
     var error by remember { mutableStateOf<String?>(null) }
     var initialized by remember { mutableStateOf(false) }
 
@@ -74,6 +77,7 @@ fun AccountFormScreen(
                 digits = account.digits
                 period = account.period.toString()
                 type = account.type
+                selectedTagIds = account.tags.map { it.id }.toSet()
             }
         } else if (prefillUri != null) {
             issuer = prefillUri.issuer
@@ -213,6 +217,19 @@ fun AccountFormScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
+            Text(
+                text = stringResource(R.string.tag_name),
+                style = MaterialTheme.typography.labelLarge
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                availableTags.forEach { tag ->
+                    FilterChip(
+                        selected = tag.id in selectedTagIds,
+                        onClick = { selectedTagIds = selectedTagIds.toMutableSet().also { if (!it.add(tag.id)) it.remove(tag.id) } },
+                        label = { Text(tag.name) }
+                    )
+                }
+            }
             Spacer(Modifier.height(8.dp))
             Button(
                 onClick = {
@@ -220,9 +237,9 @@ fun AccountFormScreen(
                     if (errorId == null) {
                         val p = period.toInt()
                         if (editing && accountId != null) {
-                            vm.updateAccount(accountId, issuer, label, secret, algorithm, digits, p)
+                            vm.updateAccount(accountId, issuer, label, secret, algorithm, digits, p, selectedTagIds)
                         } else {
-                            vm.addAccount(issuer, label, secret, algorithm, digits, p, type, 0L)
+                            vm.addAccount(issuer, label, secret, algorithm, digits, p, type, 0L, selectedTagIds)
                         }
                         onDone()
                     } else {

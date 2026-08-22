@@ -2,9 +2,13 @@ package com.safekey.authenticator.repository
 
 import com.safekey.authenticator.database.AccountDao
 import com.safekey.authenticator.database.AccountEntity
+import com.safekey.authenticator.database.AccountTagCrossRef
+import com.safekey.authenticator.database.TagDao
 import com.safekey.authenticator.model.Account
 import com.safekey.authenticator.model.VaultAccount
+import com.safekey.authenticator.model.Tag
 import com.safekey.authenticator.model.VaultFile
+import com.safekey.authenticator.model.VaultTag
 import com.safekey.authenticator.security.CryptoManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -15,7 +19,8 @@ import java.util.UUID
  */
 class AccountRepository(
     private val dao: AccountDao,
-    private val crypto: CryptoManager
+    private val crypto: CryptoManager,
+    private val tagDao: TagDao? = null
 ) {
 
     /** All accounts, decrypted, ordered by sortOrder. */
@@ -34,7 +39,8 @@ class AccountRepository(
         digits: Int,
         period: Int,
         type: String = Account.TYPE_TOTP,
-        counter: Long = 0
+        counter: Long = 0,
+        tagIds: Set<String> = emptySet()
     ): Account {
         val now = System.currentTimeMillis()
         val order = dao.maxSortOrder() + 1
@@ -53,10 +59,11 @@ class AccountRepository(
             counter = counter
         )
         dao.insert(account.toEntity(crypto))
+        tagDao?.insertRefs(tagIds.map { com.safekey.authenticator.database.AccountTagCrossRef(account.id, it) })
         return account
     }
 
-    suspend fun update(account: Account, issuer: String, label: String, secret: String, algorithm: String, digits: Int, period: Int) {
+    suspend fun update(account: Account, issuer: String, label: String, secret: String, algorithm: String, digits: Int, period: Int, tagIds: Set<String> = account.tags.map { it.id }.toSet()) {
         val updated = account.copy(
             issuer = issuer.trim(),
             label = autoName(label.trim(), account.createdAt),
@@ -67,6 +74,8 @@ class AccountRepository(
             updatedAt = System.currentTimeMillis()
         )
         dao.update(updated.toEntity(crypto))
+        tagDao?.deleteRefsForAccount(updated.id)
+        tagDao?.insertRefs(tagIds.map { com.safekey.authenticator.database.AccountTagCrossRef(updated.id, it) })
     }
 
     suspend fun delete(account: Account) {
@@ -101,6 +110,7 @@ class AccountRepository(
                 counter = v.counter
             )
             dao.insert(account.toEntity(crypto))
+            tagDao?.insertRefs(v.tagIds.map { com.safekey.authenticator.database.AccountTagCrossRef(account.id, it) })
         }
         for ((existing, v) in toUpdate) {
             val updated = existing.copy(
@@ -113,16 +123,20 @@ class AccountRepository(
                 updatedAt = now
             )
             dao.update(updated.toEntity(crypto))
+            tagDao?.deleteRefsForAccount(updated.id)
+            tagDao?.insertRefs(v.tagIds.map { com.safekey.authenticator.database.AccountTagCrossRef(updated.id, it) })
         }
     }
 
     /** Export all accounts; [pinSalt]/[pinHash] bind the app PIN to the file.
      *  Hidden accounts are excluded from backups entirely. */
     suspend fun exportVault(pinSalt: String = "", pinHash: String = ""): VaultFile {
-        val all = dao.getAll()
-            .mapNotNull { entity -> entity.toDomain(crypto) }
-            .filter { !it.hidden }
-            .map { domain ->
+        val domains = dao.getAll()
+            .mapNotNull { entity -> entity.toDomain(crypto)?.let { entity.id to it } }
+            .filter { !it.second.hidden }
+        val refsByAccount = tagDao?.getRefsForAccounts(domains.map { it.first })?.groupBy { it.accountId }
+            ?.mapValues { (_, refs) -> refs.map { it.tagId } } ?: emptyMap()
+        val all = domains.map { (id, domain) ->
             VaultAccount(
                 issuer = domain.issuer,
                 label = domain.label,
@@ -131,14 +145,16 @@ class AccountRepository(
                 digits = domain.digits,
                 period = domain.period,
                 type = domain.type,
-                counter = domain.counter
+                counter = domain.counter,
+                tagIds = refsByAccount[id].orEmpty()
             )
         }
         return VaultFile(
-            version = 1,
+            version = 2,
             format = "osmium-vault",
             exportedAt = System.currentTimeMillis(),
             accounts = all,
+            tags = tagDao?.getAll()?.map { VaultTag(it.id, it.name, it.color) } ?: emptyList(),
             pinSalt = pinSalt,
             pinHash = pinHash
         )

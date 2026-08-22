@@ -46,411 +46,128 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-// ---------------------------------------------------------------- Export
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ExportScreen(
-    vm: MainViewModel,
-    onDone: () -> Unit,
-    onBack: () -> Unit
-) {
+fun ExportScreen(vm: MainViewModel, onDone: () -> Unit, onBack: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-
     var password by remember { mutableStateOf("") }
     var confirm by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
     var exporting by remember { mutableStateOf(false) }
     var pendingJson by remember { mutableStateOf<String?>(null) }
-
-    val createFileLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.CreateDocument("application/octet-stream")
-    ) { uri: Uri? ->
-        if (uri != null) {
-            scope.launch {
-                val payload = pendingJson
-                if (payload != null) {
-                    try {
-                        withContext(Dispatchers.IO) {
-                            context.contentResolver.openOutputStream(uri)?.use { out ->
-                                out.write(payload.toByteArray(Charsets.UTF_8))
-                            } ?: throw IllegalStateException("Cannot open output stream")
-                        }
-                        vm.showToast(context.getString(R.string.export_done))
-                        pendingJson = null
-                        onDone()
-                    } catch (e: Exception) {
-                        error = context.getString(R.string.export_failed, e.message ?: "IOException")
-                    }
-                }
-                exporting = false
-            }
-        } else {
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/octet-stream")) { uri: Uri? ->
+        scope.launch {
+            try {
+                val payload = pendingJson ?: error("No export payload")
+                if (uri != null) withContext(Dispatchers.IO) { context.contentResolver.openOutputStream(uri)?.use { it.write(payload.toByteArray()) } ?: error("Cannot open output") }
+                if (uri != null) { vm.showToast(context.getString(R.string.export_done)); onDone() }
+            } catch (e: Exception) { error = context.getString(R.string.export_failed, e.message ?: "IOException") }
             exporting = false
         }
     }
-
-    Scaffold(
-        topBar = { SimpleTopBar(title = stringResource(R.string.export_vault), onBack = onBack) }
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Text(
-                text = stringResource(R.string.export_password_desc),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            OutlinedTextField(
-                value = password,
-                onValueChange = { password = it },
-                label = { Text(stringResource(R.string.export_password_hint)) },
-                visualTransformation = PasswordVisualTransformation(),
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth()
-            )
-            OutlinedTextField(
-                value = confirm,
-                onValueChange = { confirm = it },
-                label = { Text(stringResource(R.string.export_confirm_hint)) },
-                visualTransformation = PasswordVisualTransformation(),
-                singleLine = true,
-                isError = error != null,
-                modifier = Modifier.fillMaxWidth()
-            )
-            if (error != null) {
-                Text(
-                    text = error ?: "",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.error
-                )
-            }
-            Spacer(Modifier.height(8.dp))
-            Button(
-                onClick = {
-                    error = null
-                    if (password.isEmpty()) {
-                        error = context.getString(R.string.error_password_empty)
-                        return@Button
-                    }
-                    if (password.length < 8) {
-                        error = context.getString(R.string.error_password_weak)
-                        return@Button
-                    }
-                    if (password != confirm) {
-                        error = context.getString(R.string.error_password_mismatch)
-                        return@Button
-                    }
+    Scaffold(topBar = { SimpleTopBar(stringResource(R.string.export_vault), onBack) }) { padding ->
+        Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text(stringResource(R.string.export_password_desc), color = MaterialTheme.colorScheme.onSurfaceVariant)
+            OutlinedTextField(password, { password = it }, label = { Text(stringResource(R.string.export_password_hint)) }, visualTransformation = PasswordVisualTransformation(), singleLine = true, modifier = Modifier.fillMaxWidth())
+            OutlinedTextField(confirm, { confirm = it }, label = { Text(stringResource(R.string.export_confirm_hint)) }, visualTransformation = PasswordVisualTransformation(), singleLine = true, isError = error != null, modifier = Modifier.fillMaxWidth())
+            error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+            Button(enabled = !exporting, onClick = {
+                error = when { password.isEmpty() -> context.getString(R.string.error_password_empty); password.length < 8 -> context.getString(R.string.error_password_weak); password != confirm -> context.getString(R.string.error_password_mismatch); else -> null }
+                if (error == null) scope.launch {
                     exporting = true
-                    scope.launch {
-                        val vaultJson = try {
-                            withContext(Dispatchers.IO) {
-                                val repo = (context.applicationContext as com.safekey.authenticator.SafeKeyApp).accountRepository
-                                val pinHash = vm.pinManager.getPinHashForExport()
-                                val vf = repo.exportVault(
-                                    pinSalt = pinHash?.first ?: "",
-                                    pinHash = pinHash?.second ?: ""
-                                )
-                                VaultIO.encrypt(vf, password.toCharArray())
-                            }
-                        } catch (e: Exception) {
-                            error = context.getString(R.string.export_failed, e.message ?: "Error")
-                            exporting = false
-                            null
+                    try {
+                        val json = withContext(Dispatchers.IO) {
+                            val app = context.applicationContext as com.safekey.authenticator.SafeKeyApp
+                            val pin = vm.pinManager.getPinHashForExport()
+                            VaultIO.encrypt(app.accountRepository.exportVault(pin?.first ?: "", pin?.second ?: ""), password.toCharArray())
                         }
-                        if (vaultJson != null) {
-                            pendingJson = vaultJson
-                            createFileLauncher.launch("osmium-backup.json")
-                        } else {
-                            exporting = false
-                        }
-                    }
-                },
-                enabled = !exporting,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(stringResource(R.string.export_vault))
-            }
+                        pendingJson = json
+                        launcher.launch("osmium-backup.json")
+                    } catch (e: Exception) { error = context.getString(R.string.export_failed, e.message ?: "Error"); exporting = false }
+                }
+            }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.export_vault)) }
         }
     }
 }
 
-// ---------------------------------------------------------------- Import
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ImportScreen(
-    vm: MainViewModel,
-    onDone: () -> Unit,
-    onBack: () -> Unit
-) {
+fun ImportScreen(vm: MainViewModel, onDone: () -> Unit, onBack: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-
     var password by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
     var working by remember { mutableStateOf(false) }
     var vault by remember { mutableStateOf<VaultFile?>(null) }
-
-    val openFileLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.OpenDocument()
-    ) { uri: Uri? ->
-        if (uri != null) {
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
+        if (uri != null) scope.launch {
             working = true
-            scope.launch {
-                try {
-                    val payload = withContext(Dispatchers.IO) {
-                        context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
-                            ?: throw IllegalStateException("Cannot read file")
-                    }
-                    // Stage 1+2: decrypt and parse (shared with the WebDAV restore path)
-                    val parsed = try {
-                        withContext(Dispatchers.Default) {
-                            VaultIO.decrypt(payload, password.toCharArray())
-                        }
-                    } catch (e: VaultFormatException) {
-                        error = context.getString(
-                            if (e.wrongPassword) R.string.error_import_wrong_password
-                            else R.string.error_import_format
-                        )
-                        working = false
-                        return@launch
-                    }
-                    vault = parsed
-                    error = null
-                } catch (e: Exception) {
-                    error = context.getString(R.string.error_import_format)
-                }
-                working = false
-            }
+            try {
+                val bytes = withContext(Dispatchers.IO) { context.contentResolver.openInputStream(uri)?.use { it.readBytes() } ?: error("Cannot read") }
+                vault = withContext(Dispatchers.Default) { VaultIO.decrypt(bytes, password.toCharArray()) }
+                error = null
+            } catch (e: VaultFormatException) { error = context.getString(if (e.wrongPassword) R.string.error_import_wrong_password else R.string.error_import_format) }
+            catch (_: Exception) { error = context.getString(R.string.error_import_format) }
+            working = false
         }
     }
-
-    Scaffold(
-        topBar = { SimpleTopBar(title = stringResource(R.string.import_vault), onBack = onBack) }
-    ) { padding ->
-        val currentVault = vault
-        if (currentVault == null) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .verticalScroll(rememberScrollState())
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.import_password_desc),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                OutlinedTextField(
-                    value = password,
-                    onValueChange = { password = it },
-                    label = { Text(stringResource(R.string.export_password_hint)) },
-                    visualTransformation = PasswordVisualTransformation(),
-                    singleLine = true,
-                    isError = error != null,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                if (error != null) {
-                    Text(
-                        text = error ?: "",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-                Button(
-                    onClick = {
-                        if (password.isEmpty()) {
-                            error = context.getString(R.string.error_password_empty)
-                        } else {
-                            openFileLauncher.launch(arrayOf("*/*"))
-                        }
-                    },
-                    enabled = !working,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(stringResource(R.string.import_vault))
-                }
-            }
-        } else {
-            androidx.compose.foundation.layout.Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-            ) {
-                VaultImportFlow(
-                    vm = vm,
-                    vault = currentVault,
-                    onDone = onDone,
-                    onBackToPassword = { vault = null; error = null }
-                )
-            }
-        }
+    Scaffold(topBar = { SimpleTopBar(stringResource(R.string.import_vault), onBack) }) { padding ->
+        val parsed = vault
+        if (parsed == null) Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text(stringResource(R.string.import_password_desc), color = MaterialTheme.colorScheme.onSurfaceVariant)
+            OutlinedTextField(password, { password = it }, label = { Text(stringResource(R.string.export_password_hint)) }, visualTransformation = PasswordVisualTransformation(), singleLine = true, isError = error != null, modifier = Modifier.fillMaxWidth())
+            error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+            Button(enabled = !working && password.isNotEmpty(), onClick = { launcher.launch(arrayOf("*/*")) }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.import_vault)) }
+        } else VaultImportFlow(vm, parsed, onDone) { vault = null; error = null }
     }
 }
 
-// --------------------------------------- shared import flow (file + WebDAV)
-
-/**
- * Shared post-decryption import flow: PIN gate (when the file carries one or
- * this device has one), merge preview with per-account checkboxes, and the
- * final apply. Used by both the file import screen and WebDAV restore.
- */
 @Composable
-fun VaultImportFlow(
-    vm: MainViewModel,
-    vault: VaultFile,
-    onDone: () -> Unit,
-    onBackToPassword: () -> Unit
-) {
+fun VaultImportFlow(vm: MainViewModel, vault: VaultFile, onDone: () -> Unit, onBackToPassword: () -> Unit) {
     val context = LocalContext.current
-
-    var plan by remember { mutableStateOf<ImportPlan?>(null) }
-    var selected by remember { mutableStateOf<Set<Int>?>(null) } // null = all selected
+    var plan by remember(vault) { mutableStateOf<ImportPlan?>(null) }
+    var selected by remember(vault) { mutableStateOf<Set<Int>?>(null) }
     var working by remember { mutableStateOf(false) }
-    var pinPending by remember { mutableStateOf<VaultFile?>(null) }
+    var pinPending by remember(vault) { mutableStateOf(if (vault.pinSalt.isNotEmpty() || vm.hasLocalPin()) vault else null) }
     var pinError by remember { mutableStateOf<String?>(null) }
 
-    LaunchedEffect(vault) {
-        // PIN gate: the file itself carries a PIN, or this device has one
-        if (vault.pinSalt.isNotEmpty() || vm.hasLocalPin()) {
-            pinPending = vault
-            pinError = null
-            plan = null
-        } else {
-            plan = ImportMerger.plan(vm.accounts.value, vault.accounts)
-            selected = null
-        }
+    fun prepare() {
+        vm.applyVaultTags(vault.tags) { plan = ImportMerger.plan(vm.accounts.value, vault.accounts) }
+        selected = null
+    }
+    LaunchedEffect(vault) { if (pinPending == null) prepare() }
+
+    pinPending?.let { pending ->
+        PinVerifyScreen(
+            title = stringResource(R.string.import_pin_title), subtitle = stringResource(R.string.import_pin_desc), error = pinError, remainingAttempts = null,
+            onVerify = { pin ->
+                val ok = if (pending.pinSalt.isNotEmpty()) vm.verifyImportPin(pin, pending.pinSalt, pending.pinHash) else vm.verifyLocalPin(pin)
+                if (ok) { pinPending = null; prepare() } else { vm.checkSelfDestructPin(pin); pinError = context.getString(R.string.pin_wrong) }
+            },
+            onCancel = onBackToPassword
+        )
+        return
     }
 
-    val pendingPin = pinPending
-    if (pendingPin != null) {
-        PinVerifyScreen(
-            title = stringResource(R.string.import_pin_title),
-            subtitle = stringResource(R.string.import_pin_desc),
-            error = pinError,
-            remainingAttempts = null,
-            onVerify = { pin ->
-                val ok = if (pendingPin.pinSalt.isNotEmpty()) {
-                    vm.verifyImportPin(pin, pendingPin.pinSalt, pendingPin.pinHash)
-                } else {
-                    vm.verifyLocalPin(pin)
-                }
-                if (ok) {
-                    plan = ImportMerger.plan(vm.accounts.value, pendingPin.accounts)
-                    selected = null
-                    pinPending = null
-                    pinError = null
-                } else {
-                    // self-destruct PIN works at every PIN prompt
-                    vm.checkSelfDestructPin(pin)
-                    pinError = context.getString(R.string.pin_wrong)
-                }
-            },
-            onCancel = {
-                pinPending = null
-                onBackToPassword()
-            }
-        )
-    } else {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            val currentPlan = plan
-            if (currentPlan == null) {
-                // nothing to show yet (LaunchedEffect has not run)
-                Spacer(Modifier.height(4.dp))
-            } else {
-                // Preview & confirm
-                Text(
-                    text = stringResource(R.string.import_preview_title, currentPlan.total),
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                    text = stringResource(R.string.import_preview_desc),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                if (currentPlan.duplicatesCount > 0) {
-                    Text(
-                        text = stringResource(R.string.import_duplicate_note, currentPlan.duplicatesCount),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.tertiary
-                    )
-                }
-
-                val all = (currentPlan.toAdd + currentPlan.toUpdate.map { it.second }).toList()
-                val sel = selected
-                if (sel != null) {
-                    TextButton(
-                        onClick = {
-                            selected = if (sel.size == all.size) emptySet()
-                            else all.indices.toSet()
-                        }
-                    ) { Text(stringResource(R.string.select_all)) }
-                }
-                all.forEachIndexed { index, va ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Checkbox(
-                            checked = sel?.contains(index) ?: true,
-                            onCheckedChange = { checked ->
-                                val current = selected ?: all.indices.toSet()
-                                selected = if (checked) current + index else current - index
-                            }
-                        )
-                        Column(modifier = Modifier.padding(start = 4.dp)) {
-                            Text(
-                                text = va.issuer.ifBlank { va.label },
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Text(
-                                text = va.label,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                }
-
-                Button(
-                    onClick = {
-                        working = true
-                        val chosen = selected ?: all.indices.toSet()
-                        val add = currentPlan.toAdd.filterIndexed { i, _ -> i in chosen }
-                        val upd = currentPlan.toUpdate.filterIndexed { i, _ ->
-                            (currentPlan.toAdd.size + i) in chosen
-                        }
-                        vm.applyImport(add, upd) { count ->
-                            vm.showToast(context.getString(R.string.import_done, count))
-                            onDone()
-                        }
-                    },
-                    enabled = !working && (selected?.isNotEmpty() ?: true),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(stringResource(R.string.confirm))
-                }
-                TextButton(onClick = { onBackToPassword() }) {
-                    Text(stringResource(R.string.cancel))
-                }
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        val current = plan ?: run { Spacer(Modifier.height(4.dp)); return@Column }
+        Text(stringResource(R.string.import_preview_title, current.total), style = MaterialTheme.typography.titleLarge)
+        Text(stringResource(R.string.import_preview_desc), color = MaterialTheme.colorScheme.onSurfaceVariant)
+        val all = current.toAdd + current.toUpdate.map { it.second }
+        all.forEachIndexed { index, account ->
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Checkbox(checked = selected?.contains(index) ?: true, onCheckedChange = { checked -> val set = selected ?: all.indices.toSet(); selected = if (checked) set + index else set - index })
+                Column(Modifier.padding(start = 4.dp)) { Text(account.issuer.ifBlank { account.label }); Text(account.label, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
             }
         }
+        Button(enabled = !working && (selected?.isNotEmpty() ?: true), onClick = {
+            working = true
+            val chosen = selected ?: all.indices.toSet()
+            val add = current.toAdd.filterIndexed { i, _ -> i in chosen }.map { it.copy(tagIds = vm.remapImportedTagIds(it.tagIds).toList()) }
+            val update = current.toUpdate.filterIndexed { i, _ -> current.toAdd.size + i in chosen }.map { (account, incoming) -> account to incoming.copy(tagIds = vm.remapImportedTagIds(incoming.tagIds).toList()) }
+            vm.applyImport(add, update) { count -> vm.showToast(context.getString(R.string.import_done, count)); onDone() }
+        }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.confirm)) }
+        TextButton(onClick = onBackToPassword) { Text(stringResource(R.string.cancel)) }
     }
 }

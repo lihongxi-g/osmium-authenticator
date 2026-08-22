@@ -18,7 +18,8 @@ data class Account(
     val updatedAt: Long,
     val type: String = TYPE_TOTP,
     val counter: Long = 0,
-    val hidden: Boolean = false
+    val hidden: Boolean = false,
+    val tags: List<Tag> = emptyList()
 ) {
     /** Service (issuer) is the title; a blank issuer shows "Unknown".
      *  Account names are auto-generated at add time when left blank, so

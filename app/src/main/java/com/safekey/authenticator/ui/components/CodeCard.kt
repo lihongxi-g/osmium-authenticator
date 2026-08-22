@@ -1,6 +1,7 @@
 package com.safekey.authenticator.ui.components
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -55,6 +56,7 @@ fun CodeCard(
                 AccountHeader(
                     title = ui.account.displayTitle,
                     subtitle = ui.account.displaySubtitle,
+                    uiTags = ui.account.tags,
                     modifier = Modifier.weight(1f)
                 )
                 CodeDisplay(
@@ -81,8 +83,10 @@ fun CodeCard(
 
 /** Static per-account identity — skipped by Compose when unchanged. */
 @Composable
-private fun AccountHeader(title: String, subtitle: String, modifier: Modifier = Modifier) {
-    Column(modifier = modifier) {
+private fun AccountHeader(title: String, subtitle: String, uiTags: List<com.safekey.authenticator.model.Tag>, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+    ) {
         Text(
             text = title,
             style = MaterialTheme.typography.titleMedium,
@@ -96,6 +100,14 @@ private fun AccountHeader(title: String, subtitle: String, modifier: Modifier = 
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
+        if (uiTags.isNotEmpty()) {
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.padding(top = 3.dp)) {
+                uiTags.take(2).forEach { tag ->
+                    Text(tag.name, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+                if (uiTags.size > 2) Text("+${uiTags.size - 2}", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
     }
 }
 

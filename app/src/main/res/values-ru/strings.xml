@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Osmium</string>
+    <string name="tags_title">Tags</string>
+    <string name="tags_empty">No tags yet. Create one to organize your accounts.</string>
+    <string name="tags_create">Create tag</string>
+    <string name="tags_edit">Edit tag</string>
+    <string name="tags_delete">Delete tag</string>
+    <string name="tags_delete_title">Delete tag?</string>
+    <string name="tags_delete_message">This only unlinks “%1$s” from accounts. Accounts will not be deleted.</string>
+    <string name="tag_name">Tag name</string>
+    <string name="tag_color">Tag color</string>
+    <string name="tag_name_invalid">Name cannot be empty and must be 20 characters or fewer.</string>
+    <string name="tag_account_count">%1$d account(s)</string>
+
     <string name="app_tagline">Офлайн-аутентификатор</string>
     <string name="accounts_title">Аккаунты</string>
     <string name="add_account">Добавить аккаунт</string>

@@ -15,6 +15,8 @@ class SafeKeyApp : Application() {
         private set
     lateinit var accountDao: com.safekey.authenticator.database.AccountDao
         private set
+    lateinit var tagRepository: com.safekey.authenticator.repository.TagRepository
+        private set
 
     override fun onCreate() {
         super.onCreate()
@@ -24,7 +26,8 @@ class SafeKeyApp : Application() {
         val db = AppDatabase.get(this)
         accountDao = db.accountDao()
         val crypto = CryptoManager()
-        accountRepository = AccountRepository(accountDao, crypto)
+        accountRepository = AccountRepository(accountDao, crypto, db.tagDao())
+        tagRepository = com.safekey.authenticator.repository.TagRepository(db.tagDao())
         settingsRepository = SettingsRepository(this, crypto)
     }
 

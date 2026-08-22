@@ -51,6 +51,7 @@ import com.safekey.authenticator.model.Account
 import com.safekey.authenticator.security.ClipboardHelper
 import com.safekey.authenticator.ui.components.AppIcons
 import com.safekey.authenticator.ui.components.CodeCard
+import com.safekey.authenticator.ui.components.FilterChipRow
 import com.safekey.authenticator.ui.components.IconButtonCompat
 import com.safekey.authenticator.ui.components.SimpleTopBar
 import kotlin.math.roundToInt
@@ -69,20 +70,17 @@ fun AccountsScreen(
     onOpenDetail: (Account) -> Unit,
     onOpenSettings: () -> Unit
 ) {
-    val uiList by vm.sortedAccountUiList.collectAsState()
+    val uiList by vm.filteredSortedAccountUiList.collectAsState()
+    val allUiList by vm.sortedAccountUiList.collectAsState()
+    val tags by vm.tags.collectAsState()
+    val selectedTagIds by vm.selectedTagIds.collectAsState()
+    val uncategorized by vm.uncategorizedSelected.collectAsState()
     val settings by vm.settings.collectAsState()
     val search by vm.searchQuery.collectAsState()
     var searching by remember { mutableStateOf(false) }
     var showAddSheet by remember { mutableStateOf(false) }
     val context = androidx.compose.ui.platform.LocalContext.current
-
-    val filtered = remember(uiList, search) {
-        if (search.isBlank()) uiList
-        else uiList.filter {
-            it.account.issuer.contains(search, ignoreCase = true) ||
-                it.account.label.contains(search, ignoreCase = true)
-        }
-    }
+    val filtered = uiList
 
     Scaffold(
         topBar = {
@@ -123,13 +121,15 @@ fun AccountsScreen(
             }
         }
     ) { padding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-        ) {
+        Column(Modifier.fillMaxSize().padding(padding)) {
+            FilterChipRow(tags, selectedTagIds, uncategorized, vm)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) {
             when {
-                uiList.isEmpty() -> EmptyState(
+                allUiList.isEmpty() -> EmptyState(
                     onAdd = { showAddSheet = true },
                     modifier = Modifier.align(Alignment.Center)
                 )
@@ -150,6 +150,7 @@ fun AccountsScreen(
                     onOpen = onOpenDetail,
                     contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 96.dp)
                 )
+            }
             }
         }
     }

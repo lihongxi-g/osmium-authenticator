@@ -2,6 +2,17 @@
 <resources>
     <string name="app_name">Osmium</string>
     <string name="app_tagline">离线身份验证器</string>
+    <string name="tags_title">标签</string>
+    <string name="tags_empty">还没有标签。创建标签来整理账户。</string>
+    <string name="tags_create">创建标签</string>
+    <string name="tags_edit">编辑标签</string>
+    <string name="tags_delete">删除标签</string>
+    <string name="tags_delete_title">删除标签？</string>
+    <string name="tags_delete_message">只会解除“%1$s”与账户的关联，不会删除账户。</string>
+    <string name="tag_name">标签名称</string>
+    <string name="tag_color">标签颜色</string>
+    <string name="tag_name_invalid">名称不能为空，且最多 20 个字符。</string>
+    <string name="tag_account_count">%1$d 个账户</string>
 
     <string name="accounts_title">账户</string>
     <string name="add_account">添加账户</string>

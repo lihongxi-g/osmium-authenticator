@@ -73,6 +73,7 @@ import com.safekey.authenticator.ui.screens.PinSetupScreen
 import com.safekey.authenticator.ui.screens.PinVerifyScreen
 import com.safekey.authenticator.ui.screens.ScanScreen
 import com.safekey.authenticator.ui.screens.SettingsScreen
+import com.safekey.authenticator.ui.screens.TagsScreen
 import com.safekey.authenticator.ui.screens.ShareQrScreen
 import com.safekey.authenticator.ui.screens.SortOrderScreen
 import com.safekey.authenticator.ui.screens.ManualScreen
@@ -883,6 +884,11 @@ class MainActivity : FragmentActivity() {
                         vm = vm,
                         onBack = { vm.nav.pop() },
                         onImported = { vm.nav.pop() }
+                    )
+
+                    is Screen.Tags -> TagsScreen(
+                        vm = vm,
+                        onBack = { vm.nav.pop() }
                     )
                 }
             }
