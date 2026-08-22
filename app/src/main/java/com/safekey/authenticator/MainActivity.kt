@@ -17,6 +17,8 @@ import androidx.activity.viewModels
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -58,6 +60,8 @@ import com.safekey.authenticator.data.LanguagePrefs
 import com.safekey.authenticator.security.AppLog
 import com.safekey.authenticator.security.IntegrityCheck
 import com.safekey.authenticator.totp.OtpUriParser
+import com.safekey.authenticator.ui.components.OsmiumDock
+import com.safekey.authenticator.ui.components.OsmiumDockTab
 import com.safekey.authenticator.ui.components.SwipeBackContainer
 import com.safekey.authenticator.ui.navigation.Screen
 import com.safekey.authenticator.ui.screens.AboutScreen
@@ -68,6 +72,7 @@ import com.safekey.authenticator.ui.screens.DetailScreen
 import com.safekey.authenticator.ui.screens.ExportScreen
 import com.safekey.authenticator.ui.screens.GoogleImportScreen
 import com.safekey.authenticator.ui.screens.ImportScreen
+import com.safekey.authenticator.ui.screens.LinkScreen
 import com.safekey.authenticator.ui.screens.LockScreen
 import com.safekey.authenticator.ui.screens.PinSetupScreen
 import com.safekey.authenticator.ui.screens.PinVerifyScreen
@@ -682,8 +687,8 @@ class MainActivity : FragmentActivity() {
         val current = vm.nav.current
 
         BackHandler(enabled = vm.nav.canGoBack) { vm.nav.pop() }
-
-        SwipeBackContainer(
+        Box(Modifier.fillMaxSize()) {
+            SwipeBackContainer(
             canGoBack = vm.nav.canGoBack,
             onBack = { vm.nav.pop() }
         ) {
@@ -890,8 +895,16 @@ class MainActivity : FragmentActivity() {
                         vm = vm,
                         onBack = { vm.nav.pop() }
                     )
+
+                    is Screen.Link -> LinkScreen(vm = vm, onBack = { vm.nav.pop() })
                 }
             }
         }
+        OsmiumDock(
+            modifier = Modifier.align(Alignment.BottomCenter),
+            selected = if (current is Screen.Link) OsmiumDockTab.Link else OsmiumDockTab.Authenticator,
+            onSelected = { tab -> if (tab == OsmiumDockTab.Link) vm.nav.push(Screen.Link) else vm.nav.popToRoot() }
+        )
     }
+}
 }

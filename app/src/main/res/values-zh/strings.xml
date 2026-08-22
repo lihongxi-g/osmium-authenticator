@@ -1,6 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Osmium</string>
+    <string name="link_title">Osmium Link</string>
+    <string name="link_home">验证器</string>
+    <string name="link_discover">发现设备</string>
+    <string name="link_allow_discovery">允许被发现</string>
+    <string name="link_no_devices">没有发现局域网设备</string>
+    <string name="link_pair">请求连接</string>
+    <string name="link_trusted">信任设备</string>
+    <string name="link_trust_warning">警告：信任后，该设备无需再次输入配对码即可查看你的账户和验证码。若设备不再属于你，请立即移除信任。</string>
+    <string name="link_disconnect">断开连接</string>
+    <string name="link_revoke">移除信任</string>
+    <string name="link_remote_accounts">远端账户</string>
+    <string name="link_pair_code">配对码</string>
+    <string name="link_request_sent">已发送连接请求</string>
     <string name="app_tagline">离线身份验证器</string>
     <string name="tags_title">标签</string>
     <string name="tags_empty">还没有标签。创建标签来整理账户。</string>
