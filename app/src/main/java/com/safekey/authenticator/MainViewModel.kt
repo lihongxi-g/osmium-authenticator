@@ -158,7 +158,10 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     private val _uncategorizedSelected = MutableStateFlow(false)
     val uncategorizedSelected: StateFlow<Boolean> = _uncategorizedSelected
 
-    fun toggleTagFilter(id: String) { _selectedTagIds.value = _selectedTagIds.value.toMutableSet().also { if (!it.add(id)) it.remove(id) } }
+    fun toggleTagFilter(id: String) {
+        _selectedTagIds.value = _selectedTagIds.value.toMutableSet().also { if (!it.add(id)) it.remove(id) }
+        _uncategorizedSelected.value = false
+    }
     fun setUncategorizedSelected(value: Boolean) { _uncategorizedSelected.value = value; if (value) _selectedTagIds.value = emptySet() }
     fun clearTagFilter() { _selectedTagIds.value = emptySet(); _uncategorizedSelected.value = false }
 

@@ -21,13 +21,7 @@ class TagFilterTest {
         tags = tagIds.map { tag(it, it) }
     )
 
-    private fun tag(id: String, name: String) = Tag(
-        id = id,
-        name = name,
-        color = TagColor.BLUE,
-        createdAt = 0,
-        updatedAt = 0
-    )
+    private fun tag(id: String, name: String) = Tag(id, name, TagColor.BLUE, 0, 0)
 
     private val work = tag("work", "Work")
     private val games = tag("games", "Games")
@@ -61,5 +55,11 @@ class TagFilterTest {
     @Test
     fun `unknown selected tag yields no tagged accounts`() {
         assertEquals(emptyList<String>(), TagFilter.apply(accounts, "", setOf("missing"), false).map { it.id })
+    }
+
+    @Test
+    fun `uncategorized and tag filter are mutually exclusive`() {
+        // The ViewModel must clear the other mode when the user switches chips.
+        assertEquals(listOf("one", "four"), TagFilter.apply(accounts, "", setOf(work.id), false).map { it.id })
     }
 }
