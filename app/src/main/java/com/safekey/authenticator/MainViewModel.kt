@@ -191,6 +191,19 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     /** True while the app is in the foreground. */
     private var appInForeground = false
 
+    /**
+     * True while a system file picker (backup export/import) is covering the
+     * activity. The gate must not re-lock while one is open: locking disposes
+     * the transfer screen and destroys its in-flight state (password, decrypted
+     * vault), which made backup export/import impossible on devices with
+     * "verify on open" enabled.
+     */
+    private var transferPickerActive = false
+
+    fun setTransferPickerActive(active: Boolean) {
+        transferPickerActive = active
+    }
+
     /** Set by the activity: does this device have a usable fingerprint/face? */
     private var biometricAvailable = false
 
@@ -223,6 +236,9 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         AppLog.d("foreground: biometric=$biometricAvailable pin=${pinManager.hasPin()} gate=${settings.value.gateOnOpen}")
         if (_destroyed.value) return
         _pinError.value = null
+        // A system file picker (backup export/import) is still on top — do
+        // not gate, or the transfer screen's state would be lost on return.
+        if (transferPickerActive) return
         if (!settings.value.gateOnOpen) {
             _locked.value = false
             _pinRequired.value = false
@@ -243,7 +259,9 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     fun onAppBackground() {
         appInForeground = false
         AppLog.d("background")
-        if (settings.value.gateOnOpen) _locked.value = true
+        // Skip the lock while a system file picker covers the app — see
+        // [transferPickerActive].
+        if (settings.value.gateOnOpen && !transferPickerActive) _locked.value = true
     }
 
     fun unlock() {

@@ -56,6 +56,7 @@ fun ExportScreen(vm: MainViewModel, onDone: () -> Unit, onBack: () -> Unit) {
     var exporting by remember { mutableStateOf(false) }
     var pendingJson by remember { mutableStateOf<String?>(null) }
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/octet-stream")) { uri: Uri? ->
+        vm.setTransferPickerActive(false)
         scope.launch {
             try {
                 val payload = pendingJson ?: error("No export payload")
@@ -82,7 +83,9 @@ fun ExportScreen(vm: MainViewModel, onDone: () -> Unit, onBack: () -> Unit) {
                             VaultIO.encrypt(app.accountRepository.exportVault(pin?.first ?: "", pin?.second ?: ""), password.toCharArray())
                         }
                         pendingJson = json
-                        launcher.launch("osmium-backup.json")
+                        vm.setTransferPickerActive(true)
+                        try { launcher.launch("osmium-backup.json") }
+                        catch (e: Exception) { vm.setTransferPickerActive(false); error = context.getString(R.string.export_failed, e.message ?: "Error") }
                     } catch (e: Exception) { error = context.getString(R.string.export_failed, e.message ?: "Error"); exporting = false }
                 }
             }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.export_vault)) }
@@ -100,6 +103,7 @@ fun ImportScreen(vm: MainViewModel, onDone: () -> Unit, onBack: () -> Unit) {
     var working by remember { mutableStateOf(false) }
     var vault by remember { mutableStateOf<VaultFile?>(null) }
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
+        vm.setTransferPickerActive(false)
         if (uri != null) scope.launch {
             working = true
             try {
@@ -117,7 +121,11 @@ fun ImportScreen(vm: MainViewModel, onDone: () -> Unit, onBack: () -> Unit) {
             Text(stringResource(R.string.import_password_desc), color = MaterialTheme.colorScheme.onSurfaceVariant)
             OutlinedTextField(password, { password = it }, label = { Text(stringResource(R.string.export_password_hint)) }, visualTransformation = PasswordVisualTransformation(), singleLine = true, isError = error != null, modifier = Modifier.fillMaxWidth())
             error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-            Button(enabled = !working && password.isNotEmpty(), onClick = { launcher.launch(arrayOf("*/*")) }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.import_vault)) }
+            Button(enabled = !working && password.isNotEmpty(), onClick = {
+                vm.setTransferPickerActive(true)
+                try { launcher.launch(arrayOf("*/*")) }
+                catch (e: Exception) { vm.setTransferPickerActive(false); vm.showToast(e.message ?: "Error") }
+            }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.import_vault)) }
         } else VaultImportFlow(vm, parsed, onDone) { vault = null; error = null }
     }
 }
