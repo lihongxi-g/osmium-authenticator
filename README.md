@@ -82,6 +82,8 @@ The names and paths of these two switches **differ between manufacturers and And
 
 Release builds are minified with R8 and split by ABI. Unit tests: `./gradlew testDebugUnitTest`.
 
+Built with Kotlin 1.9 and Jetpack Compose (BOM 2024.09.03, runtime 1.7.3); `compileSdk 35`, `minSdk 26`, `targetSdk 34`.
+
 ## License
 
 GPL-3.0-or-later. See [LICENSE](LICENSE) or [COPYING](COPYING).

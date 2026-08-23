@@ -4,6 +4,12 @@
 
 ## 中文更新说明
 
+### 修复：应用随机闪退（Compose 运行时升级）
+
+- **修复在部分设备（尤其 Android 16 / 一加等新系统）上使用过程中随机闪退的问题**：崩溃发生在 Compose 框架内部的重组流程（`ComposerImpl` 组栈下溢），与应用的具体操作无关。根因是旧版 Compose 运行时（1.6.0，2024 年 1 月）在新版 Android 上的已知缺陷。
+- Compose 运行时从 1.6.0 升级到 **1.7.3**（BOM 2024.09.03），同时 Kotlin 升级到 1.9.24。该版本线修复了多组同类框架内部缺陷。
+- 侧滑返回改为先切换页面再播放动画，避免动画期间再次触发返回导致导航状态竞争。
+
 ### 修复：导入/恢复备份闪退与失败
 
 - **修复「打开时验证」开启时备份导入/导出无法完成的问题**：选择备份文件时应用进入后台，安全门会重新锁屏并把导入页面连同密码、已解密数据一起销毁，导致选完文件后解密必然失败、流程反复中断。现在系统文件选择器打开期间不再触发安全门，导入/导出全程状态保持，选完文件即可正常解密并预览。
@@ -26,6 +32,12 @@
 - 兼容 2.3.6 及更早版本的数据库与备份格式（含标签）。
 
 ## English release notes
+
+### Fixed: random app crashes (Compose runtime upgrade)
+
+- **Fixed random crashes during normal use on some devices (especially Android 16 / recent OnePlus builds)**: the crash happened inside the Compose framework's recomposition pipeline (a `ComposerImpl` group-stack underflow) and was unrelated to any specific user action. The root cause is a known defect in the old Compose runtime (1.6.0, January 2024) on newer Android versions.
+- The Compose runtime was upgraded from 1.6.0 to **1.7.3** (BOM 2024.09.03), and Kotlin to 1.9.24. That release line fixes several defects of exactly this kind.
+- Edge swipe-back now pops the screen before animating, so a second gesture during the transition can no longer race with the navigation state.
 
 ### Fixed: backup import/restore crash and failure
 

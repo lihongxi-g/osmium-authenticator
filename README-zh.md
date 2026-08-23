@@ -82,6 +82,8 @@ Osmium 是一款隐私优先的 Android TOTP 验证器。本项目是基于 GNU 
 
 Release 构建启用 R8 混淆并按 ABI 分包。单元测试：`./gradlew testDebugUnitTest`。
 
+构建环境：Kotlin 1.9 + Jetpack Compose（BOM 2024.09.03，runtime 1.7.3）；`compileSdk 35`、`minSdk 26`、`targetSdk 34`。
+
 ## 许可证
 
 GPL-3.0-or-later，详见 [LICENSE](LICENSE) 或 [COPYING](COPYING)。
