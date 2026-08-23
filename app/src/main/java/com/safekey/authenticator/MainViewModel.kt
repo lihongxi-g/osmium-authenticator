@@ -485,7 +485,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                 _pendingImportedTagIds.value = tagPlan.idMap.mapNotNull { (incomingId, mapped) ->
                     val real = createdByIncomingId[mapped] ?: mapped
                     if (real == incomingId) null else incomingId to real
-                }
+                }.toMap()
                 val current = withContext(Dispatchers.Default) { repo.getAll() }
                 onDone(ImportMerger.plan(current, incoming))
             } catch (e: Exception) {
