@@ -22,6 +22,10 @@ class VaultFormatException(
  */
 object VaultIO {
 
+    /** Hard cap for imported payloads (matches the WebDAV download limit) —
+     *  a huge picked file must fail as a format error, not OOM the app. */
+    const val MAX_PAYLOAD_BYTES = 64 * 1024 * 1024
+
     private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
 
     /** Serialize + password-encrypt a vault into the portable envelope JSON. */
@@ -38,6 +42,9 @@ object VaultIO {
      *   and wrongPassword=false when the decrypted JSON is not an Osmium vault.
      */
     fun decrypt(payload: ByteArray, password: CharArray): VaultFile {
+        if (payload.size > MAX_PAYLOAD_BYTES) {
+            throw VaultFormatException(wrongPassword = false)
+        }
         val plainJson = try {
             VaultCrypto.decrypt(String(payload, Charsets.UTF_8), password)
         } catch (e: IllegalArgumentException) {

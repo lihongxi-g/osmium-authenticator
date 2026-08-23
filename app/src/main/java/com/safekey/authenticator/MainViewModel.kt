@@ -7,6 +7,10 @@ import com.safekey.authenticator.data.AppSettings
 import com.safekey.authenticator.data.WebDavServerConfig
 import com.safekey.authenticator.model.Account
 import com.safekey.authenticator.model.VaultAccount
+import com.safekey.authenticator.model.VaultTag
+import com.safekey.authenticator.repository.ImportMerger
+import com.safekey.authenticator.repository.ImportPlan
+import com.safekey.authenticator.repository.TagImportPlanner
 import com.safekey.authenticator.security.AppLog
 import com.safekey.authenticator.security.PinManager
 import com.safekey.authenticator.security.SelfDestructManager
@@ -26,6 +30,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /** A rendered account: domain data + the live code for the current tick. */
 data class AccountUi(
@@ -451,25 +456,58 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch { repo.reorder(orderedIds) }
     }
 
-    fun applyVaultTags(tags: List<com.safekey.authenticator.model.VaultTag>, onDone: () -> Unit = {}) {
+    /**
+     * Prepares a vault import with no crash path: merges the vault's tags into
+     * the local tag set (creating missing ones, reusing local tags by
+     * case-insensitive name), then computes the account merge plan from a
+     * FRESH database snapshot — the live flow value may still be stale right
+     * after a previous import, which used to produce duplicate accounts.
+     *
+     * Problem tags are skipped and logged, never thrown, and [onDone] always
+     * runs so the import preview can never get stuck.
+     */
+    fun prepareImport(tags: List<VaultTag>, incoming: List<VaultAccount>, onDone: (ImportPlan) -> Unit) {
         viewModelScope.launch {
-            val existing = tagRepo.tags.first()
-            val idsByName = existing.associateBy { it.name.trim().lowercase() }.toMutableMap()
-            tags.forEach { incoming ->
-                val key = incoming.name.trim().lowercase()
-                if (idsByName[key] == null) idsByName[key] = tagRepo.create(incoming.name, incoming.color)
+            try {
+                val existing = tagRepo.tags.first()
+                val tagPlan = TagImportPlanner.plan(existing, tags)
+                val createdByIncomingId = mutableMapOf<String, String>()
+                tagPlan.toCreate.forEach { vt ->
+                    try {
+                        createdByIncomingId[vt.id] = tagRepo.create(vt.name, vt.color).id
+                    } catch (e: Exception) {
+                        AppLog.d("import: tag '${vt.name}' skipped: ${e.message}")
+                    }
+                }
+                // Placeholder (incoming) ids of successfully created tags are
+                // swapped for the real local ids; anything still unresolved is
+                // dropped so account refs can never violate the tags FK.
+                _pendingImportedTagIds.value = tagPlan.idMap.mapNotNull { (incomingId, mapped) ->
+                    val real = createdByIncomingId[mapped] ?: mapped
+                    if (real == incomingId) null else incomingId to real
+                }
+                val current = withContext(Dispatchers.Default) { repo.getAll() }
+                onDone(ImportMerger.plan(current, incoming))
+            } catch (e: Exception) {
+                AppLog.d("import prepare failed: ${e.message}")
+                _pendingImportedTagIds.value = emptyMap()
+                onDone(ImportMerger.plan(emptyList(), incoming))
             }
-            _pendingImportedTagIds.value = tags.associate { it.id to idsByName[it.name.trim().lowercase()]!!.id }
-            onDone()
         }
     }
 
     private val _pendingImportedTagIds = MutableStateFlow<Map<String, String>>(emptyMap())
     fun remapImportedTagIds(ids: List<String>): Set<String> = ids.mapNotNull { _pendingImportedTagIds.value[it] }.toSet()
+
     fun applyImport(toAdd: List<VaultAccount>, toUpdate: List<Pair<Account, VaultAccount>>, onDone: (Int) -> Unit) {
         viewModelScope.launch {
-            repo.applyImport(toAdd, toUpdate)
-            onDone(toAdd.size + toUpdate.size)
+            try {
+                repo.applyImport(toAdd, toUpdate)
+                onDone(toAdd.size + toUpdate.size)
+            } catch (e: Exception) {
+                AppLog.d("import apply failed: ${e.message}")
+                showToast(e.message ?: "Error")
+            }
         }
     }
 

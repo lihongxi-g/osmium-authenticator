@@ -37,7 +37,6 @@ import androidx.compose.ui.unit.dp
 import com.safekey.authenticator.MainViewModel
 import com.safekey.authenticator.R
 import com.safekey.authenticator.model.VaultFile
-import com.safekey.authenticator.repository.ImportMerger
 import com.safekey.authenticator.repository.ImportPlan
 import com.safekey.authenticator.security.VaultFormatException
 import com.safekey.authenticator.security.VaultIO
@@ -133,7 +132,7 @@ fun VaultImportFlow(vm: MainViewModel, vault: VaultFile, onDone: () -> Unit, onB
     var pinError by remember { mutableStateOf<String?>(null) }
 
     fun prepare() {
-        vm.applyVaultTags(vault.tags) { plan = ImportMerger.plan(vm.accounts.value, vault.accounts) }
+        vm.prepareImport(vault.tags, vault.accounts) { plan = it }
         selected = null
     }
     LaunchedEffect(vault) { if (pinPending == null) prepare() }
@@ -142,7 +141,13 @@ fun VaultImportFlow(vm: MainViewModel, vault: VaultFile, onDone: () -> Unit, onB
         PinVerifyScreen(
             title = stringResource(R.string.import_pin_title), subtitle = stringResource(R.string.import_pin_desc), error = pinError, remainingAttempts = null,
             onVerify = { pin ->
-                val ok = if (pending.pinSalt.isNotEmpty()) vm.verifyImportPin(pin, pending.pinSalt, pending.pinHash) else vm.verifyLocalPin(pin)
+                // A foreign/corrupt file could carry malformed pin data —
+                // verification must degrade to "wrong PIN", never crash.
+                val ok = try {
+                    if (pending.pinSalt.isNotEmpty()) vm.verifyImportPin(pin, pending.pinSalt, pending.pinHash) else vm.verifyLocalPin(pin)
+                } catch (_: Exception) {
+                    false
+                }
                 if (ok) { pinPending = null; prepare() } else { vm.checkSelfDestructPin(pin); pinError = context.getString(R.string.pin_wrong) }
             },
             onCancel = onBackToPassword

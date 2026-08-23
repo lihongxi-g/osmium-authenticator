@@ -52,4 +52,33 @@ class VaultIOTest {
             assertFalse(e.wrongPassword)
         }
     }
+
+    @Test
+    fun `oversized payload is rejected as a format error, not an OOM`() {
+        val huge = ByteArray(VaultIO.MAX_PAYLOAD_BYTES + 1)
+        try {
+            VaultIO.decrypt(huge, password)
+            fail("expected VaultFormatException")
+        } catch (e: VaultFormatException) {
+            assertFalse(e.wrongPassword)
+        }
+    }
+
+    @Test
+    fun `tags survive an encrypt-decrypt round trip`() {
+        val vault = VaultFile(
+            version = 2,
+            format = "osmium-vault",
+            exportedAt = 123456789L,
+            accounts = listOf(
+                VaultAccount(issuer = "Google", label = "a@gmail.com", secret = "JBSWY3DPEHPK3PXP", tagIds = listOf("t1"))
+            ),
+            tags = listOf(com.safekey.authenticator.model.VaultTag("t1", "Work", "blue"))
+        )
+        val envelope = VaultIO.encrypt(vault, password)
+        val restored = VaultIO.decrypt(envelope.toByteArray(Charsets.UTF_8), password)
+        assertEquals(1, restored.tags.size)
+        assertEquals("Work", restored.tags[0].name)
+        assertEquals(listOf("t1"), restored.accounts[0].tagIds)
+    }
 }
