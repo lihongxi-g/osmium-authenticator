@@ -70,7 +70,6 @@ import com.safekey.authenticator.ui.screens.DetailScreen
 import com.safekey.authenticator.ui.screens.ExportScreen
 import com.safekey.authenticator.ui.screens.GoogleImportScreen
 import com.safekey.authenticator.ui.screens.ImportScreen
-import com.safekey.authenticator.ui.screens.LinkScreen
 import com.safekey.authenticator.ui.screens.LockScreen
 import com.safekey.authenticator.ui.screens.PinSetupScreen
 import com.safekey.authenticator.ui.screens.PinVerifyScreen
@@ -732,8 +731,7 @@ class MainActivity : FragmentActivity() {
                             }
                         },
                         onOpenDetail = { account -> vm.nav.push(Screen.Detail(account.id)) },
-                        onOpenSettings = { vm.nav.push(Screen.Settings) },
-                        onOpenLink = { vm.nav.push(Screen.Link) }
+                        onOpenSettings = { vm.nav.push(Screen.Settings) }
                     )
 
                     is Screen.AccountForm -> AccountFormScreen(
@@ -894,8 +892,6 @@ class MainActivity : FragmentActivity() {
                         vm = vm,
                         onBack = { vm.nav.pop() }
                     )
-
-                    is Screen.Link -> LinkScreen(vm = vm, onBack = { vm.nav.pop() })
                 }
             }
         }

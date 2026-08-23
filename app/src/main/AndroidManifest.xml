@@ -4,11 +4,6 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
     <uses-permission android:name="android.permission.VIBRATE" />
-    <!-- Used ONLY for the WebDAV backup feature: the app connects exclusively
-         to the server address the user configures (typically a NAS on the
-         local network) and to nothing else. No telemetry, no cloud. -->
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
 
     <!-- Auto-backup to the public Download/Osmium folder on Android 8/9 only.

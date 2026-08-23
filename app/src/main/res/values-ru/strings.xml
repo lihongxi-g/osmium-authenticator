@@ -1,19 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Osmium</string>
-    <string name="link_title">Osmium Link</string>
-    <string name="link_home">Authenticator</string>
-    <string name="link_discover">Discover devices</string>
-    <string name="link_allow_discovery">Allow discovery</string>
-    <string name="link_no_devices">No devices found on this LAN</string>
-    <string name="link_pair">Request connection</string>
-    <string name="link_trusted">Trusted device</string>
-    <string name="link_trust_warning">WARNING: A trusted device can view your account names and codes without another pairing code. Remove trust immediately if you no longer control it.</string>
-    <string name="link_disconnect">Disconnect</string>
-    <string name="link_revoke">Remove trust</string>
-    <string name="link_remote_accounts">Remote accounts</string>
-    <string name="link_pair_code">Pairing code</string>
-    <string name="link_request_sent">Connection request sent</string>
     <string name="tags_title">Tags</string>
     <string name="tags_empty">No tags yet. Create one to organize your accounts.</string>
     <string name="tags_create">Create tag</string>
@@ -83,7 +70,6 @@
     <string name="details_secret_verified">Это действие требует аутентификации</string>
     <string name="settings_title">Настройки</string>
     <string name="settings_appearance">Внешний вид</string>
-    <string name="settings_connection">Подключение</string>
     <string name="settings_security">Безопасность</string>
     <string name="settings_data">Данные</string>
     <string name="settings_about">О приложении</string>
