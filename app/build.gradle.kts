@@ -61,7 +61,8 @@ android {
         buildConfig = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.8"
+        // 1.5.14 is the last of the 1.5.x line; matches Kotlin 1.9.24.
+        kotlinCompilerExtensionVersion = "1.5.14"
     }
     packaging {
         resources {
@@ -71,7 +72,12 @@ android {
 }
 
 dependencies {
-    val composeBom = platform("androidx.compose:compose-bom:2024.01.00")
+    // BOM 2024.09.03 = Compose 1.7.3 (runtime). Upgraded from 2024.01.00
+    // (runtime 1.6.0) to fix a ComposerImpl pendingStack underflow crash
+    // (IndexOutOfBoundsException in end()/exitGroup) observed on Android 16 /
+    // OnePlus during ordinary recomposition — several composer group-stack
+    // imbalance bugs were fixed across the 1.7.0–1.7.3 line.
+    val composeBom = platform("androidx.compose:compose-bom:2024.09.03")
     implementation(composeBom)
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")

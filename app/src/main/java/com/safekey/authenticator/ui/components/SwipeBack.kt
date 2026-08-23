@@ -54,7 +54,7 @@ fun SwipeBackContainer(
                         edgeActive = start.x < edgePx
                     },
                     onHorizontalDrag = { change, amount ->
-                        if (edgeActive) {
+                        if (edgeActive && !settling) {
                             change.consume()
                             total = (total + amount).coerceAtLeast(0f)
                             dragPx = total // direct state write, no coroutine
@@ -63,16 +63,22 @@ fun SwipeBackContainer(
                     onDragEnd = {
                         if (edgeActive && total > 0f) {
                             edgeActive = false
-                            settling = true
                             if (total > widthPx * 0.25f) {
+                                // Pop FIRST, then animate the old screen out.
+                                // Popping inside the animation coroutine let a
+                                // second gesture or back press mutate the nav
+                                // stack mid-transition — one of the triggers of
+                                // the ComposerImpl pendingStack underflow crash.
+                                settling = true
+                                onBack()
                                 scope.launch {
                                     settle.snapTo(total)
                                     settle.animateTo(widthPx, tween(200, easing = FastOutSlowInEasing))
                                     dragPx = 0f
                                     settling = false
-                                    onBack()
                                 }
                             } else {
+                                settling = true
                                 scope.launch {
                                     settle.snapTo(total)
                                     settle.animateTo(0f, tween(200, easing = FastOutSlowInEasing))
