@@ -175,6 +175,7 @@ fun SettingsScreen(
                     Text(
                         text = when (com.safekey.authenticator.data.LanguagePrefs.get(context)) {
                             "zh" -> stringResource(R.string.lang_zh)
+                            "zh-TW", "zh-Hant" -> stringResource(R.string.lang_zh_tw)
                             "en" -> stringResource(R.string.lang_en)
                             "es" -> stringResource(R.string.lang_es)
                             "ja" -> stringResource(R.string.lang_ja)
@@ -364,6 +365,16 @@ fun SettingsScreen(
             )
 
             SettingRow(
+                icon = AppIcons.Wifi,
+                title = stringResource(R.string.lan_transfer_title),
+                description = stringResource(R.string.lan_transfer_desc),
+                onClick = {
+                    pendingNav = { vm.nav.push(Screen.LanTransfer) }
+                    showVerifyDialog = true
+                }
+            )
+
+            SettingRow(
                 icon = AppIcons.Dns,
                 title = stringResource(R.string.webdav_title),
                 description = stringResource(R.string.webdav_desc),
@@ -550,6 +561,10 @@ fun SettingsScreen(
                     }
                     ThemeOption(stringResource(R.string.lang_zh), "zh", com.safekey.authenticator.data.LanguagePrefs.get(context) ?: "system") {
                         onLanguageChanged?.invoke("zh")
+                        showLanguageDialog = false
+                    }
+                    ThemeOption(stringResource(R.string.lang_zh_tw), "zh-TW", com.safekey.authenticator.data.LanguagePrefs.get(context) ?: "system") {
+                        onLanguageChanged?.invoke("zh-TW")
                         showLanguageDialog = false
                     }
                     ThemeOption(stringResource(R.string.lang_en), "en", com.safekey.authenticator.data.LanguagePrefs.get(context) ?: "system") {

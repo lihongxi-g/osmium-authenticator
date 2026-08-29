@@ -206,6 +206,7 @@
     <string name="language">语言</string>
     <string name="lang_system">跟随系统</string>
     <string name="lang_zh">简体中文</string>
+    <string name="lang_zh_tw">繁體中文</string>
     <string name="lang_en">English</string>
     <string name="lang_es">Español</string>
     <string name="lang_ja">日本語</string>
@@ -387,4 +388,32 @@
     <string name="auto_backup_grant_button">允许后台运行</string>
     <string name="auto_backup_bg_granted">后台运行：已允许</string>
     <string name="auto_backup_bg_denied">后台运行：未允许（点按申请）</string>
+
+    <string name="refresh">刷新</string>
+    <string name="lan_transfer_title">局域网快捷传输</string>
+    <string name="lan_transfer_desc">在同一 WiFi 局域网内与另一台设备快速迁移或同步账户</string>
+    <string name="lan_transfer_send_desc">请在发送设备上保持此页面开启，接收方输入配对码后即可开始传输。</string>
+    <string name="lan_transfer_receive_desc">请与发送方连接至同一 WiFi 网络，并输入发送方屏幕上显示的 6 位配对码。</string>
+    <string name="lan_send_tab">发送账户</string>
+    <string name="lan_receive_tab">接收账户</string>
+    <string name="lan_pairing_code_label">配对码</string>
+    <string name="lan_pairing_code_hint">输入 6 位数字配对码</string>
+    <string name="lan_server_ip_label">本机地址</string>
+    <string name="lan_status_waiting">等待接收方连接并输入配对码…</string>
+    <string name="lan_status_transferring">正在传输数据…</string>
+    <string name="lan_status_done_send">已成功发送 %1$d 个账户</string>
+    <string name="lan_select_device_title">选择发送设备</string>
+    <string name="lan_status_searching">正在搜索附近的 Osmium 设备…</string>
+    <string name="lan_status_manual_ip">手动输入 IP 连接</string>
+    <string name="lan_use_auto_discovery">自动搜索设备</string>
+    <string name="lan_ip_port_label">发送方 IP 和端口</string>
+    <string name="lan_ip_port_hint">例如 192.168.1.100:52026</string>
+    <string name="lan_connect_btn">连接并拉取数据</string>
+    <string name="lan_error_no_wifi">未连接 WiFi 局域网，请先连接同一 WiFi</string>
+    <string name="lan_error_no_device_selected">请选择要连接的发送设备</string>
+    <string name="lan_error_invalid_ip">请输入合法的 IP:端口，如 192.168.1.100:52026</string>
+    <string name="lan_error_invalid_code_length">配对码必须为 6 位数字</string>
+    <string name="lan_error_wrong_code">配对码错误或解密失败</string>
+    <string name="lan_error_connection">连接失败：%1$s</string>
+    <string name="lan_security_tip">数据经 6 位配对码端到端 AES-256-GCM 加密传输，局域网内的第三方无法解密或窃听。</string>
 </resources>

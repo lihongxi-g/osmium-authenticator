@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Pre-push checks: bracket balance in changed Kotlin files + R.string cross-check."""
-import re, subprocess, sys
+import os, re, subprocess, sys
 
-ROOT = "/root/osmium-audit-20260816"
+ROOT = os.path.dirname(os.path.abspath(__file__))
 
 changed = subprocess.run(
     ["git", "-C", ROOT, "diff", "--name-only"], capture_output=True, text=True

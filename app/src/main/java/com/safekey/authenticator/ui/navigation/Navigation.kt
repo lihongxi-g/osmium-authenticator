@@ -22,6 +22,8 @@ sealed class Screen {
     object WebDav : Screen()
     /** Scheduled automatic backup (WebDAV server or local storage). */
     object AutoBackup : Screen()
+    /** Quick LAN transfer between nearby devices over Wi-Fi. */
+    object LanTransfer : Screen()
     /** mode: "pin" = app PIN, "destroy_pin" = self-destruct PIN */
     data class PinSetup(val mode: String) : Screen()
     /** Verify the current app PIN before a sensitive action.

@@ -122,7 +122,9 @@ fun AccountsScreen(
         }
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
-            FilterChipRow(tags, selectedTagIds, uncategorized, vm)
+            if (tags.isNotEmpty()) {
+                FilterChipRow(tags, selectedTagIds, uncategorized, vm)
+            }
             Box(
                 modifier = Modifier
                     .fillMaxWidth()

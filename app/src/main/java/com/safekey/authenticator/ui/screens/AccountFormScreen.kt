@@ -217,20 +217,22 @@ fun AccountFormScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Text(
-                text = stringResource(R.string.tag_name),
-                style = MaterialTheme.typography.labelLarge
-            )
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                availableTags.forEach { tag ->
-                    FilterChip(
-                        selected = tag.id in selectedTagIds,
-                        onClick = { selectedTagIds = selectedTagIds.toMutableSet().also { if (!it.add(tag.id)) it.remove(tag.id) } },
-                        label = { Text(tag.name) }
-                    )
+            if (availableTags.isNotEmpty()) {
+                Text(
+                    text = stringResource(R.string.tag_name),
+                    style = MaterialTheme.typography.labelLarge
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    availableTags.forEach { tag ->
+                        FilterChip(
+                            selected = tag.id in selectedTagIds,
+                            onClick = { selectedTagIds = selectedTagIds.toMutableSet().also { if (!it.add(tag.id)) it.remove(tag.id) } },
+                            label = { Text(tag.name) }
+                        )
+                    }
                 }
+                Spacer(Modifier.height(8.dp))
             }
-            Spacer(Modifier.height(8.dp))
             Button(
                 onClick = {
                     val errorId = validate(issuer, label, secret, period)

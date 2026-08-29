@@ -13,8 +13,8 @@ android {
         applicationId = "com.safekey.authenticator"
         minSdk = 26
         targetSdk = 34
-        versionCode = 45
-        versionName = "2.3.8"
+        versionCode = 46
+        versionName = "2.3.9"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
     }
@@ -39,13 +39,15 @@ android {
 
     buildTypes {
         debug {
-            signingConfig = signingConfigs.getByName("safekey")
+            // Default debug keystore
         }
         release {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            signingConfig = signingConfigs.getByName("safekey")
+            if (file(System.getenv("SAFEKEY_KEYSTORE") ?: "safekey.keystore").exists()) {
+                signingConfig = signingConfigs.getByName("safekey")
+            }
         }
     }
 

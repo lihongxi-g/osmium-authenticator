@@ -373,4 +373,34 @@
     <string name="auto_backup_grant_button">백그라운드 동작 허용</string>
     <string name="auto_backup_bg_granted">백그라운드 동작: 허용됨</string>
     <string name="auto_backup_bg_denied">백그라운드 동작: 허용 안 됨 — 눌러서 요청</string>
+
+    <!-- Fallback entries for v2.3.9 -->
+    <string name="lang_zh_tw">繁體中文</string>
+    <string name="refresh">Refresh</string>
+    <string name="lan_transfer_title">LAN Transfer</string>
+    <string name="lan_transfer_desc">Quickly transfer accounts with a nearby device over local Wi-Fi</string>
+    <string name="lan_transfer_send_desc">Keep this screen open on the sending device. The receiver can enter the pairing code to transfer accounts.</string>
+    <string name="lan_transfer_receive_desc">Connect to the same Wi-Fi network as the sending device and enter the 6-digit pairing code.</string>
+    <string name="lan_send_tab">Send</string>
+    <string name="lan_receive_tab">Receive</string>
+    <string name="lan_pairing_code_label">Pairing Code</string>
+    <string name="lan_pairing_code_hint">Enter 6-digit code</string>
+    <string name="lan_server_ip_label">Local Address</string>
+    <string name="lan_status_waiting">Waiting for receiver to connect…</string>
+    <string name="lan_status_transferring">Transferring data…</string>
+    <string name="lan_status_done_send">Successfully sent %1$d accounts</string>
+    <string name="lan_select_device_title">Select Sender Device</string>
+    <string name="lan_status_searching">Searching for nearby Osmium devices…</string>
+    <string name="lan_status_manual_ip">Enter IP manually</string>
+    <string name="lan_use_auto_discovery">Auto-discover devices</string>
+    <string name="lan_ip_port_label">Sender IP:Port</string>
+    <string name="lan_ip_port_hint">e.g. 192.168.1.100:52026</string>
+    <string name="lan_connect_btn">Connect &amp; Transfer</string>
+    <string name="lan_error_no_wifi">Not connected to a Wi-Fi network. Please connect both devices to the same Wi-Fi.</string>
+    <string name="lan_error_no_device_selected">Please select a device to connect</string>
+    <string name="lan_error_invalid_ip">Please enter a valid IP:Port, e.g. 192.168.1.100:52026</string>
+    <string name="lan_error_invalid_code_length">Pairing code must be 6 digits</string>
+    <string name="lan_error_wrong_code">Wrong pairing code or decryption failed</string>
+    <string name="lan_error_connection">Connection failed: %1$s</string>
+    <string name="lan_security_tip">Protected with end-to-end AES-256-GCM encryption derived from the pairing code. Third parties on the local network cannot intercept your accounts.</string>
 </resources>

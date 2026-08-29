@@ -70,6 +70,7 @@ import com.safekey.authenticator.ui.screens.DetailScreen
 import com.safekey.authenticator.ui.screens.ExportScreen
 import com.safekey.authenticator.ui.screens.GoogleImportScreen
 import com.safekey.authenticator.ui.screens.ImportScreen
+import com.safekey.authenticator.ui.screens.LanTransferScreen
 import com.safekey.authenticator.ui.screens.LockScreen
 import com.safekey.authenticator.ui.screens.PinSetupScreen
 import com.safekey.authenticator.ui.screens.PinVerifyScreen
@@ -829,6 +830,11 @@ class MainActivity : FragmentActivity() {
                     )
 
                     is Screen.AutoBackup -> AutoBackupScreen(
+                        vm = vm,
+                        onBack = { vm.nav.pop() }
+                    )
+
+                    is Screen.LanTransfer -> LanTransferScreen(
                         vm = vm,
                         onBack = { vm.nav.pop() }
                     )
