@@ -554,7 +554,7 @@ fun SettingsScreen(
             onDismissRequest = { showLanguageDialog = false },
             title = { Text(stringResource(R.string.language)) },
             text = {
-                Column {
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                     ThemeOption(stringResource(R.string.lang_system), "system", com.safekey.authenticator.data.LanguagePrefs.get(context) ?: "system") {
                         onLanguageChanged?.invoke(null)
                         showLanguageDialog = false

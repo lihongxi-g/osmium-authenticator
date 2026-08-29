@@ -4,6 +4,8 @@ import android.content.Context
 import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
 import android.net.wifi.WifiManager
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import com.safekey.authenticator.model.VaultFile
 import com.safekey.authenticator.security.VaultFormatException
@@ -12,6 +14,8 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.net.InetSocketAddress
 import java.net.Socket
+import java.util.Collections
+import java.util.LinkedList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -30,8 +34,14 @@ class LanTransferClient(private val context: Context) {
         const val TAG = "LanTransferClient"
     }
 
+    private val mainHandler = Handler(Looper.getMainLooper())
     private var nsdDiscoveryListener: NsdManager.DiscoveryListener? = null
     private var multicastLock: WifiManager.MulticastLock? = null
+    
+    // Resolve queue to avoid "listener already in use" on older and newer Android NSD stacks
+    private val resolveQueue = Collections.synchronizedList(LinkedList<NsdServiceInfo>())
+    @Volatile
+    private var isResolving = false
 
     fun startDiscovery(
         onDeviceFound: (DiscoveredDevice) -> Unit,
@@ -39,13 +49,22 @@ class LanTransferClient(private val context: Context) {
     ) {
         stopDiscovery()
 
-        val wifiManager = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
-        multicastLock = wifiManager?.createMulticastLock("osmium_nsd_lock")?.apply {
-            setReferenceCounted(true)
-            acquire()
+        try {
+            val wifiManager = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
+            multicastLock = wifiManager?.createMulticastLock("osmium_nsd_lock")?.apply {
+                setReferenceCounted(false)
+                acquire()
+            }
+        } catch (e: Throwable) {
+            Log.d(TAG, "MulticastLock error: ${e.message}")
         }
 
-        val nsdManager = context.getSystemService(Context.NSD_SERVICE) as? NsdManager ?: return
+        val nsdManager = try {
+            context.getSystemService(Context.NSD_SERVICE) as? NsdManager
+        } catch (e: Throwable) {
+            Log.d(TAG, "Failed to get NSD_SERVICE: ${e.message}")
+            null
+        } ?: return
 
         val listener = object : NsdManager.DiscoveryListener {
             override fun onStartDiscoveryFailed(serviceType: String?, errorCode: Int) {
@@ -62,48 +81,97 @@ class LanTransferClient(private val context: Context) {
             }
             override fun onServiceFound(serviceInfo: NsdServiceInfo) {
                 Log.d(TAG, "NSD service found: ${serviceInfo.serviceName}")
-                try {
-                    nsdManager.resolveService(serviceInfo, object : NsdManager.ResolveListener {
-                        override fun onResolveFailed(serviceInfo: NsdServiceInfo?, errorCode: Int) {
-                            Log.d(TAG, "NSD resolve failed: $errorCode")
-                        }
-
-                        override fun onServiceResolved(resolvedInfo: NsdServiceInfo) {
-                            val host = resolvedInfo.host?.hostAddress ?: return
-                            val port = resolvedInfo.port
-                            val name = resolvedInfo.serviceName
-                            onDeviceFound(DiscoveredDevice(name = name, host = host, port = port))
-                        }
-                    })
-                } catch (e: Exception) {
-                    Log.d(TAG, "NSD resolve exception: ${e.message}")
-                }
+                enqueueResolve(nsdManager, serviceInfo, onDeviceFound)
             }
 
             override fun onServiceLost(serviceInfo: NsdServiceInfo) {
                 Log.d(TAG, "NSD service lost: ${serviceInfo.serviceName}")
-                onDeviceLost(serviceInfo.serviceName)
+                mainHandler.post {
+                    try {
+                        onDeviceLost(serviceInfo.serviceName)
+                    } catch (_: Throwable) {}
+                }
             }
         }
         nsdDiscoveryListener = listener
         try {
             nsdManager.discoverServices(LanTransferServer.SERVICE_TYPE, NsdManager.PROTOCOL_DNS_SD, listener)
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             Log.d(TAG, "NSD discoverServices exception: ${e.message}")
         }
     }
 
+    private fun enqueueResolve(
+        nsdManager: NsdManager,
+        serviceInfo: NsdServiceInfo,
+        onDeviceFound: (DiscoveredDevice) -> Unit
+    ) {
+        synchronized(resolveQueue) {
+            resolveQueue.add(serviceInfo)
+        }
+        processNextResolve(nsdManager, onDeviceFound)
+    }
+
+    private fun processNextResolve(
+        nsdManager: NsdManager,
+        onDeviceFound: (DiscoveredDevice) -> Unit
+    ) {
+        synchronized(resolveQueue) {
+            if (isResolving || resolveQueue.isEmpty()) return
+            isResolving = true
+            val nextService = resolveQueue.removeAt(0)
+            
+            try {
+                nsdManager.resolveService(nextService, object : NsdManager.ResolveListener {
+                    override fun onResolveFailed(serviceInfo: NsdServiceInfo?, errorCode: Int) {
+                        Log.d(TAG, "NSD resolve failed for ${serviceInfo?.serviceName}: $errorCode")
+                        synchronized(resolveQueue) { isResolving = false }
+                        processNextResolve(nsdManager, onDeviceFound)
+                    }
+
+                    override fun onServiceResolved(resolvedInfo: NsdServiceInfo) {
+                        try {
+                            val host = resolvedInfo.host?.hostAddress
+                            val port = resolvedInfo.port
+                            val name = resolvedInfo.serviceName
+                            if (!host.isNullOrBlank() && port > 0) {
+                                mainHandler.post {
+                                    onDeviceFound(DiscoveredDevice(name = name, host = host, port = port))
+                                }
+                            }
+                        } catch (e: Throwable) {
+                            Log.d(TAG, "Error handling resolved service: ${e.message}")
+                        } finally {
+                            synchronized(resolveQueue) { isResolving = false }
+                            processNextResolve(nsdManager, onDeviceFound)
+                        }
+                    }
+                })
+            } catch (e: Throwable) {
+                Log.d(TAG, "NSD resolveService exception: ${e.message}")
+                isResolving = false
+                processNextResolve(nsdManager, onDeviceFound)
+            }
+        }
+    }
+
     fun stopDiscovery() {
+        resolveQueue.clear()
+        isResolving = false
+
         nsdDiscoveryListener?.let { listener ->
             try {
                 val nsdManager = context.getSystemService(Context.NSD_SERVICE) as? NsdManager
                 nsdManager?.stopServiceDiscovery(listener)
-            } catch (_: Exception) {}
+            } catch (_: Throwable) {}
             nsdDiscoveryListener = null
         }
-        multicastLock?.let {
-            if (it.isHeld) it.release()
-        }
+        
+        try {
+            multicastLock?.let {
+                if (it.isHeld) it.release()
+            }
+        } catch (_: Throwable) {}
         multicastLock = null
     }
 
@@ -150,7 +218,7 @@ class LanTransferClient(private val context: Context) {
             Log.d(TAG, "LanTransferClient fetch error: ${e.message}")
             Result.failure(e)
         } finally {
-            try { socket.close() } catch (_: Exception) {}
+            try { socket.close() } catch (_: Throwable) {}
         }
     }
 }
