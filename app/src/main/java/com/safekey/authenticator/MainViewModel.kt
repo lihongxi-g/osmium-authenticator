@@ -155,6 +155,11 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     val searchQuery: StateFlow<String> = _searchQuery
     fun setSearchQuery(q: String) { _searchQuery.value = q }
 
+    fun setTagsEnabled(enabled: Boolean) = viewModelScope.launch {
+        settingsRepo.setTagsEnabled(enabled)
+        if (!enabled) clearTagFilter()
+    }
+
     /** Random-order shuffle, computed once per app launch (see sortMode). */
     private var randomOrder: List<String> = emptyList()
 
@@ -170,8 +175,18 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     fun setUncategorizedSelected(value: Boolean) { _uncategorizedSelected.value = value; if (value) _selectedTagIds.value = emptySet() }
     fun clearTagFilter() { _selectedTagIds.value = emptySet(); _uncategorizedSelected.value = false }
 
-    val filteredSortedAccountUiList: StateFlow<List<AccountUi>> = combine(sortedAccountUiList, searchQuery, selectedTagIds, uncategorizedSelected) { list, query, ids, uncategorized ->
-        val filteredIds = TagFilter.apply(list.map { it.account }, query, ids, uncategorized).map { it.id }.toSet()
+    val filteredSortedAccountUiList: StateFlow<List<AccountUi>> = combine(
+        sortedAccountUiList,
+        searchQuery,
+        selectedTagIds,
+        uncategorizedSelected,
+        settings
+    ) { list, query, ids, uncategorized, currentSettings ->
+        val effectiveIds = ids.takeIf { currentSettings.tagsEnabled }.orEmpty()
+        val effectiveUncategorized = currentSettings.tagsEnabled && uncategorized
+        val filteredIds = TagFilter.apply(list.map { it.account }, query, effectiveIds, effectiveUncategorized)
+            .map { it.id }
+            .toSet()
         list.filter { it.account.id in filteredIds }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 

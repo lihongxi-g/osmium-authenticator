@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -58,6 +59,7 @@ import com.safekey.authenticator.ui.navigation.Screen
 @Composable
 fun SettingsScreen(
     vm: MainViewModel,
+    scrollState: ScrollState,
     onBack: () -> Unit,
     onExport: () -> Unit,
     onImport: () -> Unit,
@@ -121,7 +123,7 @@ fun SettingsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scrollState)
         ) {
             SectionHeader(stringResource(R.string.settings_appearance))
 
@@ -164,8 +166,8 @@ fun SettingsScreen(
             SettingRow(
                 icon = AppIcons.Palette,
                 title = stringResource(R.string.tags_title),
-                description = stringResource(R.string.tags_empty),
-                onClick = { vm.nav.push(Screen.Tags) }
+                description = stringResource(R.string.tags_settings_desc),
+                onClick = { vm.nav.push(Screen.TagSettings) }
             )
 
             SettingRow(

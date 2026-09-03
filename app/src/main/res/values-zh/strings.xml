@@ -416,4 +416,15 @@
     <string name="lan_error_wrong_code">配对码错误或解密失败</string>
     <string name="lan_error_connection">连接失败：%1$s</string>
     <string name="lan_security_tip">数据经 6 位配对码端到端 AES-256-GCM 加密传输，局域网内的第三方无法解密或窃听。</string>
+    <string name="filter_all">全部</string>
+    <string name="filter_uncategorized">未分类</string>
+    <string name="tags_settings_desc">配置标签功能并管理标签。</string>
+    <string name="tags_settings_section">标签设置</string>
+    <string name="tags_feature">启用标签</string>
+    <string name="tags_feature_desc">在主页显示标签，并允许为账户分配标签。</string>
+    <string name="tags_manage">管理标签</string>
+    <string name="tags_manage_desc">创建、重命名、删除和更改标签颜色。</string>
+    <string name="tag_custom_color">自定义颜色</string>
+    <string name="tag_custom_color_hint">输入六位颜色值，例如 #3F51B5，也可以选择上方颜色。</string>
+    <string name="tag_custom_color_invalid">请输入 #RRGGBB 格式的有效颜色。</string>
 </resources>

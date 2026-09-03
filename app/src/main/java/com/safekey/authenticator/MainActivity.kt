@@ -31,6 +31,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -76,6 +80,7 @@ import com.safekey.authenticator.ui.screens.PinSetupScreen
 import com.safekey.authenticator.ui.screens.PinVerifyScreen
 import com.safekey.authenticator.ui.screens.ScanScreen
 import com.safekey.authenticator.ui.screens.SettingsScreen
+import com.safekey.authenticator.ui.screens.TagSettingsScreen
 import com.safekey.authenticator.ui.screens.TagsScreen
 import com.safekey.authenticator.ui.screens.ShareQrScreen
 import com.safekey.authenticator.ui.screens.SortOrderScreen
@@ -132,6 +137,12 @@ class MainActivity : FragmentActivity() {
             val destroyed by vm.destroyed.collectAsState()
             val toast by vm.toast.collectAsState()
             val context = LocalContext.current
+            // Keep these UI holders above the lock gate and AnimatedContent.
+            // Navigating to a child route, or briefly showing the lock screen,
+            // must not reset the user's home/settings scroll positions.
+            val accountsListState = rememberLazyListState()
+            val accountTagRowState = rememberScrollState()
+            val settingsScrollState = rememberScrollState()
 
             SafeKeyTheme(
                 themeMode = settings.themeMode,
@@ -170,7 +181,11 @@ class MainActivity : FragmentActivity() {
                         destroyed -> DestroyedScreen()
                         pinRequired -> PinGate()
                         locked -> LockGate()
-                        else -> MainNavHost()
+                        else -> MainNavHost(
+                            accountsListState = accountsListState,
+                            accountTagRowState = accountTagRowState,
+                            settingsScrollState = settingsScrollState
+                        )
                     }
                     // Update notification only over the unlocked main UI.
                     val updateTag = pendingUpdateTag
@@ -679,7 +694,11 @@ class MainActivity : FragmentActivity() {
     }
 
     @Composable
-    private fun MainNavHost() {
+    private fun MainNavHost(
+        accountsListState: LazyListState,
+        accountTagRowState: ScrollState,
+        settingsScrollState: ScrollState
+    ) {
         val context = LocalContext.current
         val direction = vm.nav.direction
         val current = vm.nav.current
@@ -706,6 +725,8 @@ class MainActivity : FragmentActivity() {
                 when (screen) {
                     is Screen.Accounts -> AccountsScreen(
                         vm = vm,
+                        listState = accountsListState,
+                        tagRowState = accountTagRowState,
                         onAddScan = { vm.nav.push(Screen.Scan) },
                         onAddManual = { vm.nav.push(Screen.AccountForm(accountId = null, prefill = null)) },
                         onAddPaste = {
@@ -778,6 +799,7 @@ class MainActivity : FragmentActivity() {
 
                     is Screen.Settings -> SettingsScreen(
                         vm = vm,
+                        scrollState = settingsScrollState,
                         onBack = { vm.nav.pop() },
                         onExport = { vm.nav.push(Screen.Export) },
                         onImport = { vm.nav.push(Screen.Import) },
@@ -810,6 +832,12 @@ class MainActivity : FragmentActivity() {
                             LanguagePrefs.set(this@MainActivity, lang)
                             recreate()
                         }
+                    )
+
+                    is Screen.TagSettings -> TagSettingsScreen(
+                        vm = vm,
+                        onBack = { vm.nav.pop() },
+                        onManageTags = { vm.nav.push(Screen.Tags) }
                     )
 
                     is Screen.Export -> ExportScreen(

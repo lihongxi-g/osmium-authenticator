@@ -418,4 +418,15 @@
     <string name="lan_error_wrong_code">Wrong pairing code or decryption failed</string>
     <string name="lan_error_connection">Connection failed: %1$s</string>
     <string name="lan_security_tip">Protected with end-to-end AES-256-GCM encryption derived from the pairing code. Third parties on the local network cannot intercept your accounts.</string>
+    <string name="filter_all">All</string>
+    <string name="filter_uncategorized">Uncategorized</string>
+    <string name="tags_settings_desc">Configure tag support and manage your tags.</string>
+    <string name="tags_settings_section">Tag settings</string>
+    <string name="tags_feature">Enable tags</string>
+    <string name="tags_feature_desc">Show tags on the home screen and allow assigning them to accounts.</string>
+    <string name="tags_manage">Manage tags</string>
+    <string name="tags_manage_desc">Create, rename, delete, and recolor your tags.</string>
+    <string name="tag_custom_color">Custom color</string>
+    <string name="tag_custom_color_hint">Enter a six-digit color such as #3F51B5, or choose a color above.</string>
+    <string name="tag_custom_color_invalid">Enter a valid color in the format #RRGGBB.</string>
 </resources>

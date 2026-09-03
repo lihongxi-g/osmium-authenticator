@@ -50,6 +50,7 @@ fun AccountFormScreen(
 ) {
     val existing by vm.accounts.collectAsState()
     val availableTags by vm.tags.collectAsState()
+    val settings by vm.settings.collectAsState()
     val context = LocalContext.current
     val editing = accountId != null
     val editingAccount = existing.firstOrNull { it.id == accountId }
@@ -217,7 +218,7 @@ fun AccountFormScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            if (availableTags.isNotEmpty()) {
+            if (settings.tagsEnabled && availableTags.isNotEmpty()) {
                 Text(
                     text = stringResource(R.string.tag_name),
                     style = MaterialTheme.typography.labelLarge
