@@ -30,7 +30,7 @@
   - `osmium-2.3.9-armeabi-v7a.apk`
   - `osmium-2.3.9-x86_64.apk`
 
-SHA-256：arm64-v8a `ae0d1d418e9a4f076c502a1fd39c0c81bf36e0e377441cba6c5b3275f3abf203`；armeabi-v7a `2871472d50355037da27d048d831801ce9a6f34fd033605ca1dd50af38bae55d`；x86_64 `c3f39ae3e26b1807846cf1daef2d880d749b8805520db1e527ff6b4fdeb33c6d`。这些值来自 CI 实际产物；GitHub Release 资产上传后还会再次回读核对。
+SHA-256：arm64-v8a `a8b1d159436e47dd0396770288137dcf2282aeb88ca6ef5b8016962a267a1aca`；armeabi-v7a `f501e4382575ad8f18fe0b7fdd8bc7559f5d5bbdce800752e1485a4c77fff962`；x86_64 `eaac7376f3554d41d326b3966662fdb6a9e6358b836e61e8a3862956d05fae4e`。这些值来自 GitHub Release 实际上传资产的 digest，已与对应 CI 产物重新构建得到的文件名和大小核对。
 
 APK signing certificate SHA-256 / 签名证书 SHA-256：
 
