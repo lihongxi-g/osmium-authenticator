@@ -282,10 +282,10 @@
 
     <string name="webdav_title">Sauvegarde WebDAV</string>
     <string name="webdav_desc">Sauvegarde vers un serveur WebDAV sur votre réseau local (NAS, PC, téléphone)</string>
-    <string name="webdav_intro">Sauvegardez vers n'importe quel serveur WebDAV de votre réseau local : un NAS, un PC ou un autre téléphone. Les sauvegardes sont chiffrées avec votre mot de passe d'export avant l'envoi ; le serveur ne stocke que du texte chiffré.</string>
+    <string name="webdav_intro">Sauvegardez vers n&#39;importe quel serveur WebDAV de votre réseau local : un NAS, un PC ou un autre téléphone. Les sauvegardes sont chiffrées avec votre mot de passe d&#39;export avant l&#39;envoi ; le serveur ne stocke que du texte chiffré.</string>
     <string name="webdav_url_label">Adresse du serveur</string>
     <string name="webdav_url_hint">http://192.168.1.5:5005 ou https://nas.local</string>
-    <string name="webdav_username_label">Nom d'utilisateur (facultatif)</string>
+    <string name="webdav_username_label">Nom d&#39;utilisateur (facultatif)</string>
     <string name="webdav_password_label">Mot de passe</string>
     <string name="webdav_save">Enregistrer</string>
     <string name="webdav_saved">Paramètres du serveur enregistrés</string>
@@ -304,11 +304,11 @@
     <string name="webdav_backup_password_title">Définir un mot de passe de sauvegarde</string>
     <string name="webdav_backup_password_desc">Ce mot de passe protège le fichier envoyé. Notez-le : vous en aurez besoin pour restaurer.</string>
     <string name="webdav_restore_password_desc">Saisissez le mot de passe utilisé lors de la création de cette sauvegarde.</string>
-    <string name="webdav_error_url">Saisissez l'adresse du serveur, ex. http://192.168.1.5:5005</string>
-    <string name="webdav_warning">N'utilisez que des serveurs de confiance. Le fichier de sauvegarde est chiffré, mais gardez précieusement le mot de passe d'export : quiconque peut atteindre le fichier ET connaît le mot de passe peut le restaurer.</string>
+    <string name="webdav_error_url">Saisissez l&#39;adresse du serveur, ex. http://192.168.1.5:5005</string>
+    <string name="webdav_warning">N&#39;utilisez que des serveurs de confiance. Le fichier de sauvegarde est chiffré, mais gardez précieusement le mot de passe d&#39;export : quiconque peut atteindre le fichier ET connaît le mot de passe peut le restaurer.</string>
     <string name="manual_webdav_title">Sauvegarde WebDAV</string>
     <string name="manual_webdav_body">Réglages → Données → Sauvegarde WebDAV envoie le fichier d’export chiffré vers un serveur WebDAV. Saisissez l’adresse, l’utilisateur et le mot de passe.\n\nLa restauration liste les sauvegardes et leur gestion permet de supprimer les anciennes. Le serveur ne reçoit que des données chiffrées ; cette fonction se connecte uniquement à l’adresse configurée.</string>
-    <string name="about_terms_title">Conditions d'utilisation</string>
+    <string name="about_terms_title">Conditions d&#39;utilisation</string>
     <string name="about_privacy_title">Politique de confidentialité</string>
     <string name="terms_body">En installant ou en utilisant Osmium, vous acceptez ces conditions.\n\nOsmium est un logiciel libre sous GNU GPL 3 ou ultérieure. Il est fourni sans garantie et la responsabilité du développeur est limitée par la loi.\n\nProtégez vos secrets, PIN et mots de passe de sauvegarde. Conservez vos propres sauvegardes : effacer les données supprime les comptes locaux. Les sauvegardes automatiques dépendent d’Android et du fabricant. Le transfert LAN est temporaire, lancé par vous, et n’est pas une synchronisation cloud. Vérifiez l’aperçu ; les deux appareils doivent être sur le même Wi‑Fi et utiliser un code d’association à 6 chiffres. Le PIN d’autodestruction est irréversible.\n\nUtilisez Osmium uniquement avec des comptes propres ou autorisés. Il n’y a ni compte ni cloud Osmium. L’application peut joindre le WebDAV configuré, GitHub pour une vérification publique ou l’autre appareil pendant un transfert LAN ; les données LAN ne passent pas par un serveur Osmium.\n\nContact : zhif0776@hotmail.com · https://t.me/osmium2fa</string>
     <string name="privacy_body">Osmium ne collecte, ne vend et n’analyse aucune donnée personnelle à des fins publicitaires. Il n’y a ni compte, inscription, analyse, publicité, rapport de plantage ni cloud Osmium.\n\nLes secrets, comptes, tags et couleurs sont chiffrés sur l’appareil avec AES-256-GCM et une clé Android Keystore non exportable. Les sauvegardes exportées utilisent votre mot de passe avec PBKDF2 et AES-256-GCM ; les identifiants WebDAV restent protégés localement.\n\nLe réseau n’est utilisé que lorsque la fonction est activée ou lancée : WebDAV vers l’adresse configurée, GitHub pour les informations publiques de version et LAN entre deux appareils sur le même Wi‑Fi. Le LAN utilise AES-256-GCM et ne passe pas par le cloud Osmium.\n\nAndroid planifie les sauvegardes et le fabricant peut les retarder. Caméra, biométrie et identifiants sont traités localement. Wi‑Fi et multicast servent à découvrir les appareils LAN et s’arrêtent en quittant l’écran. WRITE_EXTERNAL_STORAGE ne concerne qu’Android 8/9 ; ACCESS_LOCAL_NETWORK est déclarée pour de futures plateformes et n’est pas demandée avec targetSdk 34.\n\nWebDAV reçoit les fichiers chiffrés que vous envoyez, le récepteur LAN reçoit le transfert lancé par vous et GitHub reçoit seulement une requête publique. Les copies externes ne sont pas supprimées par la désinstallation.\n\nContact : zhif0776@hotmail.com · https://t.me/osmium2fa</string>
@@ -332,45 +332,45 @@
     <string name="auto_backup_password_label">Mot de passe de sauvegarde</string>
     <string name="auto_backup_password_set">Défini (appuyez pour changer)</string>
     <string name="auto_backup_password_missing">Non défini</string>
-    <string name="auto_backup_password_desc">Les sauvegardes automatiques nécessitent un mot de passe enregistré. Il est chiffré avec la clé Android Keystore et ne quitte jamais l'appareil.</string>
+    <string name="auto_backup_password_desc">Les sauvegardes automatiques nécessitent un mot de passe enregistré. Il est chiffré avec la clé Android Keystore et ne quitte jamais l&#39;appareil.</string>
     <string name="auto_backup_next_run">Prochaine sauvegarde : %1$s</string>
     <string name="auto_backup_last_success">Dernière sauvegarde : %1$s (réussie)</string>
     <string name="auto_backup_last_failed">Dernière sauvegarde : %1$s (échec : %2$s)</string>
-    <string name="auto_backup_never_run">Aucune sauvegarde pour l'instant</string>
+    <string name="auto_backup_never_run">Aucune sauvegarde pour l&#39;instant</string>
     <string name="auto_backup_tz_label">(GMT+8)</string>
     <string name="auto_backup_run_now">Sauvegarder maintenant</string>
     <string name="auto_backup_started">Sauvegarde lancée</string>
     <string name="auto_backup_local_dir_desc">Fichiers enregistrés dans : Téléchargement/Osmium</string>
-    <string name="auto_backup_local_permission_desc">Cette version d'Android nécessite une autorisation de stockage — appuyez pour l'accorder</string>
-    <string name="auto_backup_webdav_missing">Aucun serveur WebDAV configuré — configurez-en un d'abord</string>
-    <string name="auto_backup_webdav_not_configured">Aucun serveur WebDAV configuré — indisponible. Configurez-en un d'abord.</string>
+    <string name="auto_backup_local_permission_desc">Cette version d&#39;Android nécessite une autorisation de stockage — appuyez pour l&#39;accorder</string>
+    <string name="auto_backup_webdav_missing">Aucun serveur WebDAV configuré — configurez-en un d&#39;abord</string>
+    <string name="auto_backup_webdav_not_configured">Aucun serveur WebDAV configuré — indisponible. Configurez-en un d&#39;abord.</string>
     <string name="auto_backup_fallback_local">WebDAV non configuré — sauvegarde locale utilisée.</string>
-    <string name="auto_backup_need_password">Définissez d'abord un mot de passe</string>
+    <string name="auto_backup_need_password">Définissez d&#39;abord un mot de passe</string>
     <string name="auto_backup_password_saved">Mot de passe enregistré</string>
     <string name="auto_backup_time_picker_title">Choisir une heure</string>
     <string name="auto_backup_interval_picker_title">Choisir une fréquence</string>
     <string name="update_check_label">Vérification automatique des mises à jour</string>
-    <string name="update_check_desc">Vérifie silencieusement GitHub à l'ouverture</string>
+    <string name="update_check_desc">Vérifie silencieusement GitHub à l&#39;ouverture</string>
     <string name="update_available_title">Nouvelle version disponible</string>
     <string name="update_available_body">La version %1$s est disponible (installée : %2$s). Ouvrir GitHub ?</string>
     <string name="update_go_github">Ouvrir GitHub</string>
     <string name="update_later">Plus tard</string>
     <string name="webdav_http_warning_title">Avertissement de connexion en clair</string>
-    <string name="webdav_http_warning_body">Cette adresse http:// transmet les données en clair — n'importe qui sur le réseau peut les lire. Utilisez-la uniquement sur un réseau local de confiance. Enregistrer quand même ?</string>
+    <string name="webdav_http_warning_body">Cette adresse http:// transmet les données en clair — n&#39;importe qui sur le réseau peut les lire. Utilisez-la uniquement sur un réseau local de confiance. Enregistrer quand même ?</string>
     <string name="webdav_http_confirm">Enregistrer quand même</string>
     <string name="manual_auto_backup_title">Sauvegarde automatique</string>
-    <string name="manual_auto_backup_body">Réglages → Données → Sauvegarde automatique exécute des sauvegardes sans intervention selon un planning : choisissez la cible (serveur WebDAV ou stockage du téléphone), un intervalle en jours et une heure. La prochaine exécution est affichée avec le libellé GMT+8.\n\nLes sauvegardes utilisent le même format d'export chiffré par mot de passe que les sauvegardes manuelles. Le mot de passe est stocké chiffré avec la clé Android Keystore et ne sert qu'à chiffrer les fichiers. Les sauvegardes locales vont dans le dossier public Téléchargement/Osmium ; un nombre configurable est conservé (5 par défaut, 10 max.) et les anciennes sont supprimées.\n\nLe résultat du dernier essai est affiché sur l'écran de sauvegarde automatique. Un échec (serveur injoignable, etc.) y est noté puis réessayé une fois ; le prochain lancement planifié réessaiera.</string>
+    <string name="manual_auto_backup_body">Réglages → Données → Sauvegarde automatique exécute des sauvegardes sans intervention selon un planning : choisissez la cible (serveur WebDAV ou stockage du téléphone), un intervalle en jours et une heure. La prochaine exécution est affichée avec le libellé GMT+8.\n\nLes sauvegardes utilisent le même format d&#39;export chiffré par mot de passe que les sauvegardes manuelles. Le mot de passe est stocké chiffré avec la clé Android Keystore et ne sert qu&#39;à chiffrer les fichiers. Les sauvegardes locales vont dans le dossier public Téléchargement/Osmium ; un nombre configurable est conservé (5 par défaut, 10 max.) et les anciennes sont supprimées.\n\nLe résultat du dernier essai est affiché sur l&#39;écran de sauvegarde automatique. Un échec (serveur injoignable, etc.) y est noté puis réessayé une fois ; le prochain lancement planifié réessaiera.</string>
     <string name="manual_updates_title">Vérification des mises à jour</string>
-    <string name="manual_updates_body">Si la vérification automatique est activée (Réglages → À propos → Vérification automatique des mises à jour), Osmium interroge silencieusement l'API des versions GitHub à chaque ouverture de l'app. Si une version plus récente existe, une boîte de dialogue propose d'ouvrir la page des versions GitHub — l'app ne télécharge ni n'installe jamais rien elle-même.\n\nAucune donnée de compte ni information d'appareil n'est envoyée ; seule la dernière version publique est demandée. En cas de panne réseau, la vérification reste silencieuse.</string>
+    <string name="manual_updates_body">Si la vérification automatique est activée (Réglages → À propos → Vérification automatique des mises à jour), Osmium interroge silencieusement l&#39;API des versions GitHub à chaque ouverture de l&#39;app. Si une version plus récente existe, une boîte de dialogue propose d&#39;ouvrir la page des versions GitHub — l&#39;app ne télécharge ni n&#39;installe jamais rien elle-même.\n\nAucune donnée de compte ni information d&#39;appareil n&#39;est envoyée ; seule la dernière version publique est demandée. En cas de panne réseau, la vérification reste silencieuse.</string>
 
     <string name="auto_backup_keep_label">Sauvegardes à conserver</string>
     <string name="auto_backup_keep_desc">Au-delà de ce nombre, les sauvegardes les plus anciennes sont supprimées (max. 10)</string>
     <string name="auto_backup_keep_picker_title">Choisir combien conserver</string>
 
     <string name="auto_backup_beta_label">Beta</string>
-    <string name="auto_backup_permission_warning">Nécessite d'activer « Démarrage automatique » et « Autoriser l'activité complète en arrière-plan » dans les réglages système. « Démarrage automatique » est CRITIQUE — sans lui, les sauvegardes nocturnes planifiées ne s'exécuteront pas. Osmium ne consomme pas de batterie en arrière-plan : il ne se réveille brièvement qu'une fois par sauvegarde.</string>
+    <string name="auto_backup_permission_warning">Nécessite d&#39;activer « Démarrage automatique » et « Autoriser l&#39;activité complète en arrière-plan » dans les réglages système. « Démarrage automatique » est CRITIQUE — sans lui, les sauvegardes nocturnes planifiées ne s&#39;exécuteront pas. Osmium ne consomme pas de batterie en arrière-plan : il ne se réveille brièvement qu&#39;une fois par sauvegarde.</string>
 
-    <string name="auto_backup_grant_button">Autoriser l'activité en arrière-plan</string>
+    <string name="auto_backup_grant_button">Autoriser l&#39;activité en arrière-plan</string>
     <string name="auto_backup_bg_granted">Activité en arrière-plan : autorisée</string>
     <string name="auto_backup_bg_denied">Activité en arrière-plan : non autorisée (appuyez pour demander)</string>
 
