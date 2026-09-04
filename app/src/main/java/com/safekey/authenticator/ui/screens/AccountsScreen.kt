@@ -1,6 +1,7 @@
 package com.safekey.authenticator.ui.screens
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Arrangement
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -56,6 +58,7 @@ import com.safekey.authenticator.ui.components.IconButtonCompat
 import com.safekey.authenticator.ui.components.SimpleTopBar
 import kotlin.math.roundToInt
 import androidx.compose.foundation.layout.statusBarsPadding
+import com.safekey.authenticator.tags.TagPresentation
 
 private val ItemSpacingPx = 8.dp
 private val CardHeightPx = 96.dp
@@ -64,6 +67,8 @@ private val CardHeightPx = 96.dp
 @Composable
 fun AccountsScreen(
     vm: MainViewModel,
+    listState: LazyListState,
+    tagRowState: ScrollState,
     onAddScan: () -> Unit,
     onAddManual: () -> Unit,
     onAddPaste: () -> Unit,
@@ -122,8 +127,8 @@ fun AccountsScreen(
         }
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
-            if (tags.isNotEmpty()) {
-                FilterChipRow(tags, selectedTagIds, uncategorized, vm)
+            if (TagPresentation.shouldShowFilterRow(settings.tagsEnabled, tags)) {
+                FilterChipRow(tags, selectedTagIds, uncategorized, vm, tagRowState)
             }
             Box(
                 modifier = Modifier
@@ -144,13 +149,15 @@ fun AccountsScreen(
                 else -> AccountList(
                     items = filtered,
                     hideCodes = settings.hideCodes,
+                    showTags = settings.tagsEnabled,
                     onCopyCode = { ui ->
                         ClipboardHelper.copy(context, ui.code)
                         vm.incrementCopyCount(ui.account.id)
                         vm.showToast(context.getString(R.string.code_copied))
                     },
                     onOpen = onOpenDetail,
-                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 96.dp)
+                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 96.dp),
+                    state = listState
                 )
             }
             }
@@ -313,11 +320,14 @@ private fun AddSheetRow(icon: androidx.compose.ui.graphics.vector.ImageVector, t
 private fun AccountList(
     items: List<AccountUi>,
     hideCodes: Boolean,
+    showTags: Boolean,
     onCopyCode: (AccountUi) -> Unit,
     onOpen: (Account) -> Unit,
-    contentPadding: PaddingValues
+    contentPadding: PaddingValues,
+    state: LazyListState
 ) {
     LazyColumn(
+        state = state,
         contentPadding = contentPadding,
         verticalArrangement = Arrangement.spacedBy(ItemSpacingPx)
     ) {
@@ -325,6 +335,7 @@ private fun AccountList(
             CodeCard(
                 ui = ui,
                 hideCode = hideCodes,
+                showTags = showTags,
                 onCopyCode = { onCopyCode(ui) },
                 modifier = Modifier
                     .height(CardHeightPx)

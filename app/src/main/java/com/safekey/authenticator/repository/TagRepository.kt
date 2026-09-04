@@ -20,20 +20,24 @@ class TagRepository(private val dao: TagDao) {
     suspend fun create(name: String, color: String = TagColor.BLUE): Tag {
         val clean = validate(name)
         val now = System.currentTimeMillis()
-        val tag = Tag(UUID.randomUUID().toString(), clean, color.takeIf { it in TagColor.ALL } ?: TagColor.BLUE, now, now)
+        val tag = Tag(UUID.randomUUID().toString(), clean, TagColor.normalize(color), now, now)
         dao.insert(tag.toEntity())
         return tag
     }
 
     suspend fun createImported(id: String, name: String, color: String): Tag {
         val clean = validate(name)
-        val tag = Tag(id, clean, color.takeIf { it in TagColor.ALL } ?: TagColor.BLUE, System.currentTimeMillis(), System.currentTimeMillis())
+        val tag = Tag(id, clean, TagColor.normalize(color), System.currentTimeMillis(), System.currentTimeMillis())
         dao.insert(tag.toEntity())
         return dao.getByName(clean)!!.let { Tag(it.id, it.name, it.color, it.createdAt, it.updatedAt) }
     }
     suspend fun update(tag: Tag, name: String, color: String): Tag {
         val clean = validate(name, tag.id)
-        val updated = tag.copy(name = clean, color = color.takeIf { it in TagColor.ALL } ?: tag.color, updatedAt = System.currentTimeMillis())
+        val updated = tag.copy(
+            name = clean,
+            color = color.takeIf { TagColor.isValid(it) }?.let(TagColor::normalize) ?: tag.color,
+            updatedAt = System.currentTimeMillis()
+        )
         dao.update(updated.id, updated.name, updated.color, updated.updatedAt)
         return updated
     }

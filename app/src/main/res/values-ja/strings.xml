@@ -13,7 +13,7 @@
     <string name="tag_name_invalid">Name cannot be empty and must be 20 characters or fewer.</string>
     <string name="tag_account_count">%1$d account(s)</string>
 
-    <string name="app_tagline">オフライン認証アプリ</string>
+    <string name="app_tagline">プライバシー重視の認証アプリ</string>
     <string name="accounts_title">アカウント</string>
     <string name="add_account">アカウントを追加</string>
     <string name="scan_qr">QRコードをスキャン</string>
@@ -116,7 +116,7 @@
     <string name="lock_cancelled">認証がキャンセルされました</string>
     <string name="version">バージョン</string>
     <string name="accounts_count">%1$d件のアカウント</string>
-    <string name="about_desc">Osmium はプライバシー重視の TOTP 認証アプリです。すべてのデータは Android Keystore で暗号化されます。アプリが接続するのは、あなた自身が設定した WebDAV バックアップサーバー以外には何もありません。</string>
+    <string name="about_desc">Osmium はプライバシー重視の Android TOTP/HOTP 認証アプリです。アカウントデータは Android Keystore で暗号化されます。任意のネットワーク機能は、設定した WebDAV バックアップ、GitHub の更新確認、ユーザーが開始する LAN 転送です。</string>
     <string name="sorting_hint">長押しで並べ替え</string>
     <string name="account_type_label">アカウントタイプ</string>
     <string name="account_type_totp">時間ベース（TOTP）</string>
@@ -154,7 +154,7 @@
     <string name="manual_hotp_title">HOTP（カウンタベース）</string>
     <string name="manual_hotp_body">HOTPコードは自動更新されません。アカウント詳細の「次のコード」をタップするとカウンタが+1されます。カウンタはアカウントごとに保存されます。HOTPはサービスが明示的に要求する場合のみ使用してください。</string>
     <string name="manual_security_title">セキュリティ</string>
-    <string name="manual_security_body">• 起動時の確認：コードを表示する前に指紋 / システムパスワード / Osmium PIN で確認します。\n• 自爆 PIN：どの PIN 画面で入力しても、確認後にすべてのアカウントが消去されます。\n• スクリーンショットはデフォルトで禁止。設定で許可できますが、非表示データは常に保護されます。\n• Osmiumが接続するのは、あなた自身が設定したWebDAVバックアップサーバーと、更新確認のためのGitHub Releases API（自動確認が有効な場合）のみです。アカウントなし、テレメトリなし、クラウドなし。</string>
+    <string name="manual_security_body">• 起動時の確認：コードを表示する前に指紋 / システムパスワード / Osmium PIN で確認します。\n• 自爆 PIN は対応する PIN 画面で確認後にアカウントを削除します。\n• スクリーンショットはデフォルトで禁止です。\n• Osmium が接続するのは設定した WebDAV、更新確認用の GitHub API、または開始した LAN 転送中の相手機器だけです。アカウント、テレメトリー、クラウドはありません。</string>
     <string name="manual_backup_title">バックアップと復元</string>
     <string name="manual_backup_body">設定 → データ → エクスポート で暗号化バックアップ（パスワード + アプリPIN）を作成できます。パスワードは大切に保管してください。ないと復元できません。Google Authenticatorからの移行は読み取り専用のインポートです。</string>
     <string name="manual_tester_title">認証アプリのテスト</string>
@@ -162,7 +162,7 @@
     <string name="manual_naming_title">アカウント名と発行元</string>
     <string name="manual_naming_body">アカウント名と発行元はどちらも省略できます。\n\nアカウント名を空にすると、Osmiumが追加日と追加順から自動で名前を生成します — 例：2026年5月に追加した最初のアカウントは 20260501 となります。\n\n発行元を空にすると「Unknown」と表示されます。</string>
     <string name="manual_notes_title">重要な注意事項</string>
-    <string name="manual_notes_body">• 秘密鍵はエクスポート不可のAndroid Keystore鍵で暗号化され、あなた自身のパスワード暗号化バックアップの中でのみ端末の外に出ます。\n• アプリのアンインストールやデータ消去で全アカウントが削除されます。先にバックアップを書き出してください。\n• コピーしたコードはクリップボードに残ります。自動クリアはありません。\n• 端末の時計がずれているとコードもずれます。ネットワーク時刻同期を有効にしてください。</string>
+    <string name="manual_notes_body">• 秘密鍵はエクスポート不可の Android Keystore 鍵で暗号化され、端末外に出るのは自分の暗号化バックアップまたは開始した LAN 転送だけです。\n• アプリの削除やデータ消去で全アカウントが削除されます。\n• コピーしたコードはクリップボードに残ります。\n• 端末の時計がずれるとコードもずれます。</string>
     <string name="sort_mode_desc">リストでのアカウントの並び順</string>
     <string name="sort_random">ランダム</string>
     <string name="sort_random_desc">起動ごとにシャッフル</string>
@@ -307,11 +307,11 @@
     <string name="webdav_error_url">サーバーアドレスを入力してください（例：http://192.168.1.5:5005）</string>
     <string name="webdav_warning">信頼できるサーバーのみ使用してください。バックアップファイル自体は暗号化されていますが、書き出し用パスワードは大切に保管してください。ファイルにアクセスでき、かつパスワードを知っている人なら復元できてしまいます。</string>
     <string name="manual_webdav_title">WebDAV バックアップ</string>
-    <string name="manual_webdav_body">設定 → データ → WebDAV バックアップで、同じ暗号化書き出しファイルをローカルネットワーク上の WebDAV サーバー（NAS、PC、WebDAV サーバーアプリを動かす別のスマホ）にアップロードできます。サーバーアドレス（ホスト名またはローカル IP）、ユーザー名、パスワードを入力してください。\n\n復元ではサーバーに保存されたバックアップの一覧を表示し、どれか一つを選んで復元します。バックアップの管理では同じ一覧を表示し、サーバー上の古いバックアップを削除できます。サーバーが受け取るのはパスワードで暗号化されたデータだけです。アプリが接続するのは、あなたが設定したサーバーアドレス以外には何もありません。\n\nサーバーアドレスが頻繁に変わる場合は、ルーターで NAS に固定 IP を割り当てるか、ホスト名を使ってください。</string>
+    <string name="manual_webdav_body">設定 → データ → WebDAV バックアップで暗号化した書き出しファイルを WebDAV サーバーに送信します。アドレス、ユーザー名、パスワードを入力してください。\n\n復元ではサーバーのバックアップを一覧表示し、管理画面で古いものを削除できます。サーバーが受け取るのは暗号化データだけで、この機能は設定したアドレスにのみ接続します。</string>
     <string name="about_terms_title">利用規約</string>
     <string name="about_privacy_title">プライバシーポリシー</string>
-    <string name="terms_body">Osmium をインストールまたは使用することで、以下の規約に同意したことになります。\n\nOsmium は GNU GPL バージョン3以降 (GPL-3.0-or-later)で公開された無料のオープンソースソフトウェアです。\n\n本ソフトウェアは“現状のまま”提供され、いかなる保証もありません。法律で認められる最大限の範囲で、開発者はソフトウェアの使用に起因するいかなる損害についても責任を負いません。\n\nあなたの責任：\n• 秘密鍵とバックアップ用パスワードを大切に保管してください。暗号鍵は開発者を含め誰にも復元できません。PIN を忘れたり、バックアップ用パスワードを失った場合、リセットはできません。\n• バックアップは自分で保管してください。アプリをアンインストールするかデータを消去すると、すべてのアカウントが永久に削除されます。\n• 自爆 PIN は設計上、取り消せません。\n• 端末の時計を正確に保ってください。時間ベースのコードは時計に依存します。\n\nOsmium は自身の二要素認証に使用できます。アクセス権のないシステムやデータへのアクセスには使用しないでください。\n\nOsmiumが接続するのは、あなた自身が設定したWebDAVバックアップサーバー（通常はローカルネットワーク上）と、自動更新確認が有効な場合に接続するGitHub Releases APIのみです。それ以外には一切接続しません。</string>
-    <string name="privacy_body">Osmiumはデータを一切収集しません。アカウントシステム、登録、解析、広告SDK、クラッシュレポートはありません。\n\n保存：秘密鍵、アカウント名、発行者はこの端末にのみ保存され、Android Keystoreのエクスポート不可キーによるAES-256-GCMで暗号化されます。バックアップファイルはあなたのパスワードで暗号化されます（PBKDF2 + AES-256-GCM）。\n\nネットワーク：INTERNET権限は2つの機能のみに使われます。(1) WebDAVバックアップ：アプリはあなたが設定したサーバーアドレス——通常はローカルネットワーク上のNASやPC——にのみ、バックアップまたは復元の実行時のみ接続します。(2) 更新確認：自動確認が有効な場合、アプリは開くたびにGitHub Releases APIに最新の公開バージョンを問い合わせます。バックアップは端末を離れる前にパスワードで暗号化されます。\n\n自動バックアップ：スケジュールされたバックアップは無人で実行されます。設定したエクスポート用パスワードはAndroid Keystoreキーで暗号化して保存され、バックアップファイルの暗号化にのみ使用されます。ローカルバックアップは公開フォルダ「ダウンロード/Osmium」に書き込まれ、設定した件数を残して（デフォルト5、最大10）古いものは削除されます。\n\nカメラ：QRコードのスキャンにのみ使用され、端末上で処理されます。映像が保存・送信されることはありません。\n\n生体認証：完全にAndroidシステムが処理します。アプリが指紋や顔のデータを見たり保存したりすることはありません。\n\n- ストレージ（Android 8/9のみ）：WRITE_EXTERNAL_STORAGEはAndroid 8および9でのみ、自動バックアップを公開フォルダ「ダウンロード/Osmium」に書き込むために要求されます。Android 10以降では不要です。\n\n私たちは何も保持していないため、何も共有しません。アプリをアンインストールすると、ローカルに保存されたデータはすべて削除されます。\n\nこれらの保証に影響する将来の変更は、リリースノートに明記されます。\n\n連絡先：zhif0776@hotmail.com · https://t.me/osmium2fa</string>
+    <string name="terms_body">Osmium をインストールまたは使用することで、以下の規約に同意したことになります。\n\nOsmium は GNU GPL バージョン3以降で公開された無料のオープンソースソフトウェアです。無保証で提供され、法律の範囲で開発者は損害に責任を負いません。\n\n秘密鍵、PIN、バックアップパスワードを管理してください。アプリデータを消去すると端末内のアカウントは削除されるため、自分でバックアップを保管してください。自動バックアップは Android とメーカーの設定に依存します。LAN 転送はユーザーが開始する一時的な転送で、クラウド同期ではありません。プレビューを確認し、同じ Wi‑Fi と 6 桁のペアリングコードを使ってください。自爆 PIN は取り消せません。\n\nOsmium にアカウントやクラウドはありません。設定した WebDAV、公開バージョン確認用の GitHub、または開始した LAN 転送中の相手機器にのみ接続します。LAN データは Osmium のクラウドを経由しません。\n\n連絡先：zhif0776@hotmail.com · https://t.me/osmium2fa</string>
+    <string name="privacy_body">Osmium は広告分析のために個人データを収集、販売、利用しません。アカウント、登録、分析、広告 SDK、クラッシュレポート、Osmium クラウドはありません。\n\n秘密鍵、アカウント、タグ、色は、エクスポート不可の Android Keystore 鍵を使う AES-256-GCM で端末上に暗号化保存されます。書き出したバックアップはパスワードと PBKDF2、AES-256-GCM で暗号化され、WebDAV の認証情報も端末内で保護されます。\n\nネットワークは機能を有効化または開始した時だけ使用します。WebDAV は設定したアドレス、GitHub は公開バージョン情報、LAN は同じ Wi‑Fi の2台の一時転送に使います。LAN は AES-256-GCM を使用し、Osmium クラウドを経由しません。\n\n自動バックアップは Android がスケジュールし、メーカー設定で遅れることがあります。カメラ、生体認証、端末認証情報は端末上で処理されます。Wi‑Fi と multicast は LAN 検出に使い、転送画面を離れると停止します。WRITE_EXTERNAL_STORAGE は Android 8/9 のみ、ACCESS_LOCAL_NETWORK は将来向けの宣言で targetSdk 34 では要求しません。\n\nWebDAV には送信した暗号化ファイル、LAN 受信機には開始した転送、GitHub には公開バージョン問い合わせだけが届きます。外部コピーはアンインストールで削除されません。\n\n連絡先：zhif0776@hotmail.com · https://t.me/osmium2fa</string>
 
     <string name="webdav_manage">バックアップの管理</string>
     <string name="webdav_delete">削除</string>
@@ -403,4 +403,15 @@
     <string name="lan_error_wrong_code">Wrong pairing code or decryption failed</string>
     <string name="lan_error_connection">Connection failed: %1$s</string>
     <string name="lan_security_tip">Protected with end-to-end AES-256-GCM encryption derived from the pairing code. Third parties on the local network cannot intercept your accounts.</string>
+    <string name="filter_all">All</string>
+    <string name="filter_uncategorized">Uncategorized</string>
+    <string name="tags_settings_desc">Configure tag support and manage your tags.</string>
+    <string name="tags_settings_section">Tag settings</string>
+    <string name="tags_feature">Enable tags</string>
+    <string name="tags_feature_desc">Show tags on the home screen and allow assigning them to accounts.</string>
+    <string name="tags_manage">Manage tags</string>
+    <string name="tags_manage_desc">Create, rename, delete, and recolor your tags.</string>
+    <string name="tag_custom_color">Custom color</string>
+    <string name="tag_custom_color_hint">Enter a six-digit color such as #3F51B5, or choose a color above.</string>
+    <string name="tag_custom_color_invalid">Enter a valid color in the format #RRGGBB.</string>
 </resources>

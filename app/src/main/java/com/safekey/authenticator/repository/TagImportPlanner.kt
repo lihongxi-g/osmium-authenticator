@@ -3,6 +3,7 @@ package com.safekey.authenticator.repository
 import com.safekey.authenticator.model.Tag
 import com.safekey.authenticator.model.VaultTag
 import com.safekey.authenticator.tags.TagRules
+import com.safekey.authenticator.tags.TagColor
 
 /**
  * Pure planning for the tag half of a vault import (same pattern as
@@ -43,8 +44,9 @@ object TagImportPlanner {
             } else {
                 // First occurrence wins; later duplicates map to the same tag.
                 val target = createdKeyToTag.getOrPut(key) {
-                    created.add(vt)
-                    vt
+                    val normalized = vt.copy(color = TagColor.normalize(vt.color))
+                    created.add(normalized)
+                    normalized
                 }
                 idMap[vt.id] = target.id
             }

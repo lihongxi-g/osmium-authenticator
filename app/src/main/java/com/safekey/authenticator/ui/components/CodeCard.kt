@@ -36,7 +36,8 @@ fun CodeCard(
     ui: AccountUi,
     onCopyCode: () -> Unit,
     modifier: Modifier = Modifier,
-    hideCode: Boolean = false
+    hideCode: Boolean = false,
+    showTags: Boolean = true
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -56,7 +57,7 @@ fun CodeCard(
                 AccountHeader(
                     title = ui.account.displayTitle,
                     subtitle = ui.account.displaySubtitle,
-                    uiTags = ui.account.tags,
+                    uiTags = if (showTags) ui.account.tags else emptyList(),
                     modifier = Modifier.weight(1f)
                 )
                 CodeDisplay(

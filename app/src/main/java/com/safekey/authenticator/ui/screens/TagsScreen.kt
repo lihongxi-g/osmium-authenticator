@@ -1,6 +1,5 @@
 package com.safekey.authenticator.ui.screens
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -32,10 +31,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+
 import com.safekey.authenticator.MainViewModel
 import com.safekey.authenticator.R
 import com.safekey.authenticator.model.Tag
@@ -43,6 +41,7 @@ import com.safekey.authenticator.tags.TagColor
 import com.safekey.authenticator.tags.TagRules
 import com.safekey.authenticator.ui.components.AppIcons
 import com.safekey.authenticator.ui.components.SimpleTopBar
+import com.safekey.authenticator.ui.components.TagColorDot
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -66,7 +65,7 @@ fun TagsScreen(vm: MainViewModel, onBack: () -> Unit) {
                         val count = accounts.count { account -> account.tags.any { it.id == tag.id } }
                         Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
                             Row(Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                                TagDot(tag.color)
+                                TagColorDot(tag.color, Modifier.size(12.dp))
                                 Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
                                     Text(tag.name, style = MaterialTheme.typography.titleMedium)
                                     Text(stringResource(R.string.tag_account_count, count), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -101,27 +100,57 @@ private fun TagEditorDialog(tag: Tag?, onDismiss: () -> Unit, onSave: (Tag, Stri
     if (tag == null) return
     var name by remember(tag.id) { mutableStateOf(tag.name) }
     var color by remember(tag.id) { mutableStateOf(tag.color) }
-    var error by remember(tag.id) { mutableStateOf(false) }
+    var nameError by remember(tag.id) { mutableStateOf(false) }
+    var colorError by remember(tag.id) { mutableStateOf(false) }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(if (tag.id.isEmpty()) stringResource(R.string.tags_create) else stringResource(R.string.tags_edit)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                OutlinedTextField(value = name, onValueChange = { name = it; error = false }, label = { Text(stringResource(R.string.tag_name)) }, singleLine = true, isError = error)
+                OutlinedTextField(value = name, onValueChange = { name = it; nameError = false }, label = { Text(stringResource(R.string.tag_name)) }, singleLine = true, isError = nameError, modifier = Modifier.fillMaxWidth())
                 Text(stringResource(R.string.tag_color), style = MaterialTheme.typography.labelLarge)
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    TagColor.ALL.forEach { value -> FilterChip(selected = color == value, onClick = { color = value }, label = { Text(value) }) }
+                    TagColor.PALETTE.forEach { value ->
+                        FilterChip(
+                            selected = color == value,
+                            onClick = { color = value; colorError = false },
+                            label = { TagColorDot(value, Modifier.size(18.dp)) }
+                        )
+                    }
                 }
-                if (error) Text(stringResource(R.string.tag_name_invalid), color = MaterialTheme.colorScheme.error)
+                OutlinedTextField(
+                    value = if (color in TagColor.ALL) "" else color,
+                    onValueChange = { color = it.uppercase(); colorError = false },
+                    label = { Text(stringResource(R.string.tag_custom_color)) },
+                    placeholder = { Text("#3F51B5") },
+                    singleLine = true,
+                    isError = colorError,
+                    modifier = Modifier.fillMaxWidth(),
+                    supportingText = { Text(stringResource(R.string.tag_custom_color_hint)) }
+                )
+                if (nameError || colorError) Text(
+                    stringResource(
+                        if (colorError) {
+                            R.string.tag_custom_color_invalid
+                        } else {
+                            R.string.tag_name_invalid
+                        }
+                    ),
+                    color = MaterialTheme.colorScheme.error
+                )
             }
         },
-        confirmButton = { TextButton(onClick = { if (TagRules.isValidName(name)) onSave(tag, name, color) else error = true }) { Text(stringResource(R.string.save)) } },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    colorError = color.isNotBlank() && !TagColor.isValid(color)
+                    nameError = !TagRules.isValidName(name)
+                    if (TagRules.isValidName(name) && (color.isBlank() || TagColor.isValid(color))) {
+                        onSave(tag, name, if (color.isBlank()) tag.color else color)
+                    }
+                }
+            ) { Text(stringResource(R.string.save)) }
+        },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } }
     )
-}
-
-@Composable
-fun TagDot(color: String, modifier: Modifier = Modifier) {
-    val c = when (color) { TagColor.RED -> androidx.compose.ui.graphics.Color(0xFFBA1A1A); TagColor.ORANGE -> androidx.compose.ui.graphics.Color(0xFF9A4500); TagColor.YELLOW -> androidx.compose.ui.graphics.Color(0xFF806000); TagColor.GREEN -> androidx.compose.ui.graphics.Color(0xFF006D3B); TagColor.CYAN -> androidx.compose.ui.graphics.Color(0xFF006874); TagColor.PURPLE -> androidx.compose.ui.graphics.Color(0xFF6750A4); else -> MaterialTheme.colorScheme.primary }
-    androidx.compose.foundation.layout.Spacer(modifier.size(12.dp).clip(CircleShape).background(c))
 }

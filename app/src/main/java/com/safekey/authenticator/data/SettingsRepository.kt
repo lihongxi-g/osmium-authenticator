@@ -35,7 +35,8 @@ data class AppSettings(
     val autoBackupKeepCount: Int = 5,
     val autoBackupLastTime: Long = 0L,
     val autoBackupLastError: String = "",
-    val autoCheckUpdates: Boolean = true
+    val autoCheckUpdates: Boolean = true,
+    val tagsEnabled: Boolean = true
 ) {
     companion object {
         const val THEME_SYSTEM = "system"
@@ -91,6 +92,7 @@ class SettingsRepository(
         val AUTO_BACKUP_LAST_TIME = longPreferencesKey("auto_backup_last_time")
         val AUTO_BACKUP_LAST_ERROR = stringPreferencesKey("auto_backup_last_error")
         val AUTO_CHECK_UPDATES = booleanPreferencesKey("auto_check_updates")
+        val TAGS_ENABLED = booleanPreferencesKey("tags_enabled")
     }
 
     val settings: Flow<AppSettings> = context.dataStore.data.map { prefs ->
@@ -115,7 +117,8 @@ class SettingsRepository(
             autoBackupKeepCount = prefs[Keys.AUTO_BACKUP_KEEP] ?: AppSettings.AUTO_BACKUP_KEEP_DEFAULT,
             autoBackupLastTime = prefs[Keys.AUTO_BACKUP_LAST_TIME] ?: 0L,
             autoBackupLastError = prefs[Keys.AUTO_BACKUP_LAST_ERROR] ?: "",
-            autoCheckUpdates = prefs[Keys.AUTO_CHECK_UPDATES] ?: true
+            autoCheckUpdates = prefs[Keys.AUTO_CHECK_UPDATES] ?: true,
+            tagsEnabled = prefs[Keys.TAGS_ENABLED] ?: true
         )
     }
 
@@ -234,6 +237,10 @@ class SettingsRepository(
 
     suspend fun setAutoCheckUpdates(enabled: Boolean) {
         context.dataStore.edit { it[Keys.AUTO_CHECK_UPDATES] = enabled }
+    }
+
+    suspend fun setTagsEnabled(enabled: Boolean) {
+        context.dataStore.edit { it[Keys.TAGS_ENABLED] = enabled }
     }
 
     // ------------------------------------------------------ WebDAV backup

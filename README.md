@@ -1,88 +1,72 @@
 # Osmium
 
-Osmium is a privacy-first TOTP authenticator for Android. This project is free software licensed under the GNU GPL v3 or later. Every secret is encrypted with a non-exportable Android Keystore key before it touches disk. The app creates no account and sends no telemetry — codes are computed entirely on device. The INTERNET permission exists solely for the optional WebDAV backup feature: the app connects exclusively to the server address you configure yourself (typically a NAS on your local network) and to nothing else.
+Osmium is a privacy-first Android TOTP/HOTP authenticator, released under the GNU GPL v3 or later. Codes are computed on-device; account data is encrypted before it is written using a non-exportable Android Keystore key. No account is required and no telemetry is collected.
+
+Network features are optional: user-configured WebDAV backup, GitHub update checks, and user-initiated encrypted transfer between two devices on the same Wi-Fi network. External links such as GitHub and the verification lab are opened by the system browser or another app.
 
 ## Features
 
 - **TOTP and HOTP** — SHA-1 / SHA-256 / SHA-512, 6 or 8 digits, periods from 1 to 600 seconds
-- **Google Authenticator migration** — scan the "Transfer accounts" QR code from Google Authenticator and import all accounts in one step
-- **Encrypted backup** — export to a password-protected, PIN-bound encrypted file; restore on any device
-- **WebDAV backup** — upload the same encrypted export to a WebDAV server on your local network (NAS, PC, another phone) and restore from it; the server only ever stores ciphertext
-- **Automatic backup** — scheduled unattended backups to WebDAV or the phone's Download/Osmium folder; pick an interval in days, a time of day and how many backups to keep (1–10, default 5); next run shown with a GMT+8 label
-- **Background-activity grant** — the Auto backup screen shows the live background-activity status and offers a one-tap request to exempt Osmium from battery optimizations
-- **Update checks** — silent check for new releases on GitHub every time the app opens (opt-out in Settings); a dialog offers to open the GitHub releases page, the app never downloads or installs anything itself
-- **Steam Guard** — manual entry with the 26-character Steam alphabet (see warning below)
-- **Hidden codes mode** — codes render as dots; copying still works, editing and sharing are locked until the mode is turned off
-- **Sort modes** — random, alphabetical, add date, copy count
-- **Search** — find any account instantly by name or issuer
-- **Tags** — create local multi-tags, filter accounts by tag, and keep tag metadata inside encrypted backups
-- **Clock calibration** — manual offset for devices whose clock drifts
-- **Security gate** — optional verification on open (fingerprint / system password / app PIN), self-destruct PIN, screenshots blocked by default
-- **Nine languages** — English, 简体中文, Español, 日本語, 한국어, Deutsch, Русский, Français, हिन्दी
-- **In-app manual** — feature guide and important notes
-- **Terms & privacy in-app** — Settings → About shows the Terms of Use and Privacy Policy
-- **Optional account name and issuer** — blank names are auto-generated from the add date and order (e.g. `20260801`); a blank issuer shows as `Unknown`
+- **Google Authenticator migration** — scan the “Transfer accounts” QR code and import supported accounts in a batch
+- **Encrypted backup** — export a password-protected encrypted file and restore it on a device running a compatible Osmium version
+- **WebDAV backup** — upload encrypted backups to a WebDAV server you configure (NAS, PC, or another phone) and restore them; the server receives ciphertext only
+- **LAN quick transfer** — connect two devices to the same Wi-Fi and transfer accounts through end-to-end encryption derived from a 6-digit pairing code; no cloud server is involved; the receiver can preview and select accounts
+- **Automatic backup** — schedule backups to WebDAV or the phone’s Download/Osmium folder, with configurable interval, time and retention
+- **Update checks** — optionally query the GitHub Releases API for public version information; no account or device data is sent, and the app never downloads or installs updates automatically
+- **Steam Guard** — manually add Steam accounts and generate 5-character alphanumeric codes
+- **Hidden codes mode** — render codes as dots; copying still works, while editing and sharing remain locked
+- **Sort and search** — random, alphabetical, date-added or copy-count order; search by account name or issuer
+- **Optional tags** — enable under Settings → Appearance → Tags; create multiple tags, filter accounts, and choose palette or custom `#RRGGBB` colors. When no tags exist, `Uncategorized` is not shown on the home screen
+- **Security gate** — optional verification on open (biometrics / device credential / app PIN), self-destruct PIN, and screenshots blocked by default
+- **Clock calibration** — manually compensate for device-clock drift
+- **11 languages** — English, 简体中文, 繁體中文, Español, 日本語, 한국어, Deutsch, Русский, Français, हिन्दी
+- **Built-in manual, Terms of Use and Privacy Policy** — available offline
 
 ## ⚠ Steam Guard — read this first
 
-**When adding a Steam account manually, you must enter `Steam` in the issuer (服务商) field.** Otherwise the account is treated as a regular TOTP entry and the generated codes will be wrong. Steam Guard codes are 5-character alphanumeric strings, not 6-digit numbers.
+When adding a Steam account manually, enter `Steam` in the issuer field. Otherwise the account is treated as regular TOTP and its codes will be wrong. Steam Guard codes are 5-character alphanumeric strings, not 6-digit numbers.
 
 ## Verify your authenticator
 
-A live test page is available at **https://otp.osmium.im** — it issues a test secret, you add it to any authenticator, and enter the code back to verify. Supports TOTP, HOTP and Steam Guard. Everything runs in the browser; nothing is uploaded.
+The live test page at **https://otp.osmium.im** supports TOTP, HOTP and Steam Guard. The test runs in the browser and uploads nothing.
 
 ## Download
 
-Pick the APK matching your device:
+Latest stable release: **Osmium v2.3.9** (`versionCode 46`). Choose the ABI matching your device:
 
-| File | Architecture | Devices |
-|---|---|---|
-| `app-arm64-v8a-release.apk` | arm64-v8a | Virtually all modern phones (recommended) |
-| `app-armeabi-v7a-release.apk` | armeabi-v7a | Older 32-bit phones |
-| `app-x86_64-release.apk` | x86_64 | Emulators |
+| File | Architecture | Devices | Download |
+|---|---|---|---|
+| `osmium-2.3.9-arm64-v8a.apk` | arm64-v8a | Virtually all modern phones (recommended) | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.3.9/osmium-2.3.9-arm64-v8a.apk) |
+| `osmium-2.3.9-armeabi-v7a.apk` | armeabi-v7a | Older 32-bit phones | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.3.9/osmium-2.3.9-armeabi-v7a.apk) |
+| `osmium-2.3.9-x86_64.apk` | x86_64 | Android emulators | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.3.9/osmium-2.3.9-x86_64.apk) |
 
-Installing the wrong architecture will crash on launch. The signing certificate fingerprint (SHA-256) is `B65BB0131CAA22C45D99EA4E2C3E99B3980EAE0DC5647190F41A2878E6D88412`.
+Installing an incompatible ABI may prevent the app from starting. All three APKs use the same signing certificate, SHA-256 fingerprint: `B65BB0131CAA22C45D99EA4E2C3E99B3980EAE0DC5647190F41A2878E6D88412`.
+
+APK SHA-256 checksums are listed in the [v2.3.9 release notes](release-notes-v2.3.9.md) and on the GitHub Release page.
 
 ## Privacy & Terms
 
 - [Privacy Policy](PRIVACY.md) ([中文](PRIVACY-zh.md))
 - [Terms of Use](TERMS.md) ([中文](TERMS-zh.md))
 
-Both are also available in the app: Settings → About.
+Both are also available in the app: Settings → About. LAN transfer and WebDAV backup are user-initiated; LAN transfer uses pairing-code-derived end-to-end encryption and does not pass through an Osmium server.
 
 ## WebDAV backup guide
 
-Step-by-step server setup for every platform (NAS, Linux, Android, macOS, Windows, iOS, HarmonyOS): [WEBDAV-GUIDE.md](WEBDAV-GUIDE.md) ([中文](WEBDAV-GUIDE-zh.md))
+Step-by-step setup for WebDAV servers: [WEBDAV-GUIDE.md](WEBDAV-GUIDE.md) ([中文](WEBDAV-GUIDE-zh.md)). WebDAV and LAN quick transfer are separate features: WebDAV is for a backup server, while LAN transfer is for another device on the same local network.
 
 ## Battery & background behavior
 
-Automatic backups are scheduled through the Android system scheduler — the app wakes briefly to run the backup and keeps **no persistent background service**. Battery drain beyond that short job is negligible.
-
-Aggressive battery policies on some devices (ColorOS, MIUI, HyperOS, EMUI, One UI,OxygenOS,RealmeUI,PixelUI …) may defer or block scheduled backups. **To guarantee unattended night-time backups, we strongly recommend that you manually enable both of the following for Osmium in your system settings:**
-
-1. **Allow auto-start** (auto-launch) — without it, the system freezes Osmium overnight and scheduled backups will not run.
-2. **Allow full background activity** / turn OFF battery restrictions for Osmium — this lets the system scheduler wake the app for the short backup job.
-
-The names and paths of these two switches **differ between manufacturers and Android versions** — please look for them in your own device's settings. For example, on ColorOS: Settings → Battery → More settings → allow full background activity for Osmium, and Phone Manager → App management → Auto-start management. The in-app Auto backup screen shows the current background-activity status and can open the system's battery-optimization dialog for you; auto-start, however, has no standard Android API and can only be enabled by hand. Android power saving may still run a backup a few minutes late — that is normal and expected.
-
-## Security notes
-
-- Field-level AES-256-GCM encryption with a non-exportable Android Keystore key
-- INTERNET permission used only for the user-configured WebDAV backup server and the GitHub update check (opt-out) — no analytics, no crash reporters, no cloud
-- WebDAV addresses starting with `http://` trigger an explicit plaintext-connection warning before they are saved
-- Backups are encrypted (PBKDF2 + AES-256-GCM) before they leave the device and are bound to the app PIN
-- HTTPS uses standard certificate validation — self-signed certificates are rejected by design (no TrustAllManager in a password app)
-- The self-destruct PIN wipes all data irreversibly from any PIN prompt
+Automatic backups run through the Android system scheduler. The app wakes briefly for a backup and keeps no persistent background service. Device power policies may defer or block scheduled work; follow the guidance in the README and the in-app Auto backup page.
 
 ## Building
 
 ```bash
 ./gradlew assembleRelease
+./gradlew testDebugUnitTest
 ```
 
-Release builds are minified with R8 and split by ABI. Unit tests: `./gradlew testDebugUnitTest`.
-
-Built with Kotlin 1.9 and Jetpack Compose (BOM 2024.09.03, runtime 1.7.3); `compileSdk 35`, `minSdk 26`, `targetSdk 34`.
+Release builds are minified with R8 and split by ABI. Build environment: Kotlin 1.9, Jetpack Compose BOM 2024.09.03, `compileSdk 35`, `minSdk 26`, `targetSdk 34`. GitHub Actions runs unit tests and builds Release APKs. Official release assets always use the format `osmium-version-architecture.apk`.
 
 ## License
 

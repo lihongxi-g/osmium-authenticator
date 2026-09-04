@@ -13,7 +13,7 @@
     <string name="tag_name_invalid">Name cannot be empty and must be 20 characters or fewer.</string>
     <string name="tag_account_count">%1$d account(s)</string>
 
-    <string name="app_tagline">Autenticador sin conexión</string>
+    <string name="app_tagline">Autenticador centrado en la privacidad</string>
     <string name="accounts_title">Cuentas</string>
     <string name="add_account">Añadir cuenta</string>
     <string name="scan_qr">Escanear código QR</string>
@@ -116,7 +116,7 @@
     <string name="lock_cancelled">Autenticación cancelada</string>
     <string name="version">Versión</string>
     <string name="accounts_count">%1$d cuenta(s)</string>
-    <string name="about_desc">Osmium es un autenticador TOTP centrado en la privacidad. Todos los datos se cifran con el Android Keystore. La app nunca se conecta a nada que no sea el servidor de copias WebDAV que configures tú.</string>
+    <string name="about_desc">Osmium es un autenticador Android TOTP/HOTP centrado en la privacidad. Los datos de las cuentas se cifran con Android Keystore. Las funciones de red opcionales son la copia WebDAV, la comprobación de actualizaciones de GitHub y la transferencia LAN iniciada por el usuario.</string>
     <string name="sorting_hint">Mantén pulsada una cuenta para reordenar</string>
     <string name="account_type_label">Tipo de cuenta</string>
     <string name="account_type_totp">Basado en tiempo (TOTP)</string>
@@ -154,7 +154,7 @@
     <string name="manual_hotp_title">HOTP (basado en contador)</string>
     <string name="manual_hotp_body">Los códigos HOTP no se actualizan solos. Toca «Código siguiente» en los detalles de la cuenta para avanzar el contador (+1). El contador se guarda por cuenta. Usa HOTP solo cuando el servicio lo exija explícitamente.</string>
     <string name="manual_security_title">Seguridad</string>
-    <string name="manual_security_body">• Verificación al abrir: huella / contraseña del sistema / PIN de Osmium antes de mostrar los códigos.\n• PIN de autodestrucción: al introducirlo en CUALQUIER pantalla de PIN borra todas las cuentas tras confirmar.\n• Las capturas están bloqueadas por defecto; puedes permitirlas en Ajustes, pero los datos ocultos siguen protegidos.\n• Osmium solo se conecta con el servidor WebDAV de copias que configures y con la API de versiones de GitHub para buscar actualizaciones (si está activada). Sin cuentas, sin telemetría, sin nube.</string>
+    <string name="manual_security_body">• Verificación al abrir: huella / contraseña del sistema / PIN de Osmium antes de mostrar códigos.\n• El PIN de autodestrucción borra todas las cuentas tras confirmarlo en una pantalla PIN compatible.\n• Las capturas están bloqueadas por defecto.\n• Osmium solo se conecta al WebDAV que configures, a GitHub para comprobar versiones o al otro dispositivo durante una transferencia LAN que inicies; sin cuentas, telemetría ni nube.</string>
     <string name="manual_backup_title">Copia de seguridad y restauración</string>
     <string name="manual_backup_body">Ajustes → Datos → Exportar crea una copia cifrada (contraseña + PIN de la aplicación). Guarda bien la contraseña: sin ella no se puede restaurar. La migración de Google Authenticator es solo de importación.</string>
     <string name="manual_tester_title">Prueba tu autenticador</string>
@@ -162,7 +162,7 @@
     <string name="manual_naming_title">Nombres de cuenta y emisores</string>
     <string name="manual_naming_body">Tanto el nombre de la cuenta como el emisor son opcionales.\n\nSi dejas el NOMBRE DE CUENTA en blanco, Osmium genera uno automáticamente con la fecha de añadido y el orden — p. ej., la primera cuenta añadida en mayo de 2026 se llama 20260501.\n\nSi dejas el EMISOR en blanco, se muestra como "Unknown".</string>
     <string name="manual_notes_title">Notas importantes</string>
-    <string name="manual_notes_body">• Los secretos se cifran con una clave no exportable de Android Keystore; solo salen del dispositivo dentro de tus propias copias cifradas.\n• Desinstalar la app o borrar sus datos ELIMINA todas las cuentas: exporta una copia antes.\n• Los códigos copiados quedan en el portapapeles; no se borran solos.\n• Si el reloj del dispositivo está mal, los códigos fallarán: activa la sincronización horaria por red.</string>
+    <string name="manual_notes_body">• Los secretos se cifran con una clave no exportable de Android Keystore; solo salen del dispositivo dentro de tus copias cifradas o de una transferencia LAN que inicies.\n• Desinstalar o borrar datos elimina todas las cuentas.\n• Los códigos copiados quedan en el portapapeles.\n• Un reloj incorrecto produce códigos incorrectos.</string>
     <string name="sort_mode_desc">Cómo se ordenan las cuentas en la lista</string>
     <string name="sort_random">Aleatorio</string>
     <string name="sort_random_desc">Barajadas una vez por inicio</string>
@@ -307,11 +307,11 @@
     <string name="webdav_error_url">Introduce la dirección del servidor, p. ej. http://192.168.1.5:5005</string>
     <string name="webdav_warning">Usa solo servidores de confianza. El archivo de copia va cifrado, pero guarda bien la contraseña de exportación: quien pueda acceder al archivo y conozca la contraseña podrá restaurarlo.</string>
     <string name="manual_webdav_title">Copia de seguridad WebDAV</string>
-    <string name="manual_webdav_body">Ajustes → Datos → Copia de seguridad WebDAV sube el mismo archivo cifrado a un servidor WebDAV de tu red local: un NAS, un PC u otro móvil con una app de servidor WebDAV. Introduce la dirección del servidor (nombre de host o IP local), el usuario y la contraseña.\n\nRestaurar muestra las copias guardadas en el servidor y te deja elegir una. Gestionar copias muestra las mismas copias y puede eliminar las antiguas del servidor. El servidor solo recibe datos cifrados con contraseña; la app nunca se conecta a nada que no sea la dirección que configures.\n\nSi la dirección del servidor cambia a menudo, asigna una IP fija al NAS en el router o usa su nombre de host.</string>
+    <string name="manual_webdav_body">Ajustes → Datos → Copia WebDAV sube el archivo cifrado a un servidor WebDAV. Introduce su dirección, usuario y contraseña.\n\nRestaurar lista las copias del servidor y Gestionar copias permite borrar las antiguas. El servidor solo recibe datos cifrados; esta función se conecta únicamente a la dirección configurada.</string>
     <string name="about_terms_title">Términos de uso</string>
     <string name="about_privacy_title">Política de privacidad</string>
-    <string name="terms_body">Al instalar o usar Osmium aceptas los siguientes términos.\n\nOsmium es software libre y de código abierto bajo la licencia GNU GPL versión 3 o posterior (GPL-3.0-or-later).\n\nEl software se ofrece “tal cual”, sin garantía de ningún tipo. En la máxima medida permitida por la ley, el desarrollador no se hace responsable de los daños derivados del uso del software.\n\nTus responsabilidades:\n• Protege tus secretos y contraseñas de copia. Las claves de cifrado no las puede recuperar nadie: un PIN olvidado o una contraseña perdida no se pueden restablecer.\n• Guarda copias de seguridad. Desinstalar la app o borrar sus datos elimina todas las cuentas para siempre.\n• El PIN de autodestrucción es irreversible, por diseño.\n• Mantén el reloj del dispositivo exacto: los códigos dependen de él.\n\nPuedes usar Osmium para tu propia autenticación de dos factores. No lo uses para acceder a sistemas o datos a los que no estés autorizado.\n\nOsmium solo se conecta al servidor WebDAV de copias que configures (normalmente en tu red local) y a la API de versiones de GitHub para buscar actualizaciones si la comprobación automática está activada. Nunca se conecta a nada más.</string>
-    <string name="privacy_body">Osmium no recoge ningún dato. No hay sistema de cuentas, registro, analíticas, SDK de publicidad ni informes de fallos.\n\nAlmacenamiento: tus secretos, nombres de cuenta y emisores se guardan solo en este dispositivo, cifrados con AES-256-GCM mediante una clave no exportable del Android Keystore. Los archivos de copia se cifran con tu contraseña (PBKDF2 + AES-256-GCM).\n\nRed: el permiso INTERNET se usa solo para dos funciones. (1) Copia WebDAV: la app solo se conecta a la dirección del servidor que configures — normalmente un NAS o PC en tu red local — y solo al copiar o restaurar. (2) Comprobación de actualizaciones: si está activada, la app pregunta a la API de versiones de GitHub por la última versión pública cada vez que se abre. Las copias se cifran con contraseña antes de salir del dispositivo.\n\nCopia automática: las copias programadas se ejecutan sin intervención. La contraseña de exportación se guarda cifrada con la clave de Android Keystore y solo sirve para cifrar los archivos de copia. Las copias locales van a la carpeta pública Download/Osmium; se conserva una cantidad configurable (por defecto 5, máx. 10) y se borran las antiguas.\n\nCámara: solo para escanear códigos QR, procesados en el dispositivo; las imágenes nunca se guardan ni transmiten.\n\nBiometría: gestionada exclusivamente por el sistema Android; la app nunca ve ni guarda datos de huella o rostro.\n\n- Almacenamiento (solo Android 8/9): WRITE_EXTERNAL_STORAGE se solicita únicamente en Android 8 y 9, solo para escribir las copias automáticas en la carpeta pública Download/Osmium. Android 10+ no necesita este permiso.\n\nNo compartimos nada, porque no tenemos nada. Desinstalar la app elimina todos los datos locales.\n\nCualquier cambio futuro que afecte a estas garantías se indicará en las notas de la versión.\n\nContacto: zhif0776@hotmail.com · https://t.me/osmium2fa</string>
+    <string name="terms_body">Al instalar o usar Osmium aceptas estos términos.\n\nOsmium es software libre bajo GNU GPL 3 o posterior. Se ofrece sin garantía y el desarrollador no responde por daños en la medida permitida por la ley.\n\nProtege tus secretos, PIN y contraseñas de copia. Guarda tus propias copias: borrar los datos elimina las cuentas locales. Las copias automáticas dependen de Android y del fabricante. La transferencia LAN es temporal, la inicias tú y no es sincronización en la nube. Revisa la vista previa; ambos dispositivos necesitan la misma Wi‑Fi y un código de emparejamiento de 6 dígitos. El PIN de autodestrucción es irreversible.\n\nUsa Osmium solo con cuentas propias o autorizadas. No hay cuentas ni nube de Osmium. La app puede conectarse al WebDAV configurado, a GitHub para comprobar versiones o al otro dispositivo durante una transferencia LAN; los datos LAN no pasan por un servidor de Osmium.\n\nContacto: zhif0776@hotmail.com · https://t.me/osmium2fa</string>
+    <string name="privacy_body">Osmium no recopila, vende ni usa datos personales para analítica publicitaria. No hay cuentas, registro, analítica, publicidad, informes de fallos ni nube de Osmium.\n\nLos secretos, cuentas, etiquetas y colores se guardan cifrados en el dispositivo con AES-256-GCM y una clave no exportable de Android Keystore. Las copias exportadas usan tu contraseña con PBKDF2 y AES-256-GCM; las credenciales WebDAV se protegen localmente.\n\nLa red solo se usa al activar o iniciar la función: WebDAV hacia la dirección configurada, GitHub para información pública de versiones y LAN entre dos dispositivos en la misma Wi‑Fi. LAN usa AES-256-GCM y no pasa por la nube de Osmium.\n\nAndroid programa las copias automáticas y el fabricante puede retrasarlas. Cámara, biometría y credenciales se procesan localmente. Wi‑Fi y multicast sirven para descubrir dispositivos LAN y se detienen al salir de la pantalla. WRITE_EXTERNAL_STORAGE solo aplica a Android 8/9; ACCESS_LOCAL_NETWORK se declara para futuras plataformas y targetSdk 34 no la solicita.\n\nWebDAV recibe archivos cifrados que subas, el receptor LAN recibe una transferencia que inicies y GitHub solo una consulta pública. Desinstalar no borra copias externas.\n\nContacto: zhif0776@hotmail.com · https://t.me/osmium2fa</string>
 
     <string name="webdav_manage">Gestionar copias</string>
     <string name="webdav_delete">Eliminar</string>
@@ -403,4 +403,15 @@
     <string name="lan_error_wrong_code">Wrong pairing code or decryption failed</string>
     <string name="lan_error_connection">Connection failed: %1$s</string>
     <string name="lan_security_tip">Protected with end-to-end AES-256-GCM encryption derived from the pairing code. Third parties on the local network cannot intercept your accounts.</string>
+    <string name="filter_all">All</string>
+    <string name="filter_uncategorized">Uncategorized</string>
+    <string name="tags_settings_desc">Configure tag support and manage your tags.</string>
+    <string name="tags_settings_section">Tag settings</string>
+    <string name="tags_feature">Enable tags</string>
+    <string name="tags_feature_desc">Show tags on the home screen and allow assigning them to accounts.</string>
+    <string name="tags_manage">Manage tags</string>
+    <string name="tags_manage_desc">Create, rename, delete, and recolor your tags.</string>
+    <string name="tag_custom_color">Custom color</string>
+    <string name="tag_custom_color_hint">Enter a six-digit color such as #3F51B5, or choose a color above.</string>
+    <string name="tag_custom_color_invalid">Enter a valid color in the format #RRGGBB.</string>
 </resources>
