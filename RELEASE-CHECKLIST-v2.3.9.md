@@ -20,4 +20,4 @@ This release updates Osmium to version 2.3.9 (versionCode 46) and includes the t
 - Mainland download node: https://download.osmium.im/
 - Main website: https://osmium.im/
 
-The final SHA-256 values come from the same CI artifact's `SHA256SUMS.txt`; re-read and compare GitHub asset digests after upload.
+CI artifact SHA-256 values: arm64-v8a `ae0d1d418e9a4f076c502a1fd39c0c81bf36e0e377441cba6c5b3275f3abf203`; armeabi-v7a `2871472d50355037da27d048d831801ce9a6f34fd033605ca1dd50af38bae55d`; x86_64 `c3f39ae3e26b1807846cf1daef2d880d749b8805520db1e527ff6b4fdeb33c6d`. Re-read and compare GitHub asset digests after upload.
