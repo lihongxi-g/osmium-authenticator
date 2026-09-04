@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Osmium</string>
-    <string name="app_tagline">离线身份验证器</string>
+    <string name="app_tagline">隐私优先的身份验证器</string>
     <string name="tags_title">标签</string>
     <string name="tags_empty">还没有标签。创建标签来整理账户。</string>
     <string name="tags_create">创建标签</string>
@@ -123,7 +123,7 @@
 
     <string name="version">版本</string>
     <string name="accounts_count">共 %1$d 个账户</string>
-    <string name="about_desc">Osmium 是一款隐私优先的 TOTP 验证器。所有数据都通过 Android Keystore 加密。应用除了你自己配置的 WebDAV 备份服务器外，不会连接任何地址。</string>
+    <string name="about_desc">Osmium 是一款隐私优先的 Android TOTP/HOTP 验证器。账户数据使用 Android Keystore 加密。可选网络功能包括用户配置的 WebDAV 备份、GitHub 更新检查和用户主动发起的局域网传输。</string>
     <string name="sorting_hint">长按账户可拖动排序</string>
     <string name="account_type_label">账户类型</string>
     <string name="account_type_totp">时间型（TOTP）</string>
@@ -161,7 +161,7 @@
     <string name="manual_hotp_title">HOTP（计数器型）</string>
     <string name="manual_hotp_body">HOTP 验证码不会自动刷新，在账户详情页点击「下一个验证码」使计数器 +1。计数器随账户持久保存。仅当服务明确要求时使用 HOTP。</string>
     <string name="manual_security_title">安全</string>
-    <string name="manual_security_body">• 打开时验证：显示验证码前需通过指纹 / 系统密码 / Osmium PIN。\n• 自毁 PIN：在任何 PIN 界面输入它，确认后即清除所有账户。\n• 默认禁止截屏；可在设置中允许，但隐藏数据始终受保护。\n• Osmium 只连接你自行配置的 WebDAV 备份服务器，以及用于更新检查的 GitHub Releases API（启用自动检查时）——无账号、无遥测、无云。</string>
+    <string name="manual_security_body">• 打开时验证：显示验证码前需通过指纹 / 系统密码 / Osmium PIN。\n• 自毁 PIN：在任何 PIN 界面输入它，确认后即清除所有账户。\n• 默认禁止截屏；可在设置中允许，但隐藏数据始终受保护。\n• Osmium 只连接你配置的 WebDAV 服务器、用于更新检查的 GitHub Releases API，或局域网传输期间的另一台设备——无账号、无遥测、无云。</string>
     <string name="manual_backup_title">备份与恢复</string>
     <string name="manual_backup_body">设置 → 数据 → 导出 生成加密备份（密码 + 应用 PIN 双重绑定）。请妥善保管密码，丢失密码将无法恢复备份。Google 验证器迁移为只读导入。</string>
     <string name="manual_tester_title">测试你的验证器</string>
@@ -169,7 +169,7 @@
     <string name="manual_naming_title">账户名与服务商</string>
     <string name="manual_naming_body">账户名和服务商都可留空。\n\n账户名留空时，Osmium 会用添加日期和添加位次自动生成一个名称——例如 2026 年 5 月添加的第一个账户名为 20260501。\n\n服务商留空时统一显示为 "Unknown"。</string>
     <string name="manual_notes_title">重要注意事项</string>
-    <string name="manual_notes_body">• 密钥使用不可导出的 Android Keystore 密钥加密；只有在你自己的密码加密备份中才会离开设备。\n• 卸载应用或清除数据会删除所有账户——请先导出备份。\n• 复制的验证码会留在剪贴板，不会自动清除。\n• 如果设备时钟不准，验证码就会出错——请开启网络时间同步。</string>
+    <string name="manual_notes_body">• 密钥使用不可导出的 Android Keystore 密钥加密；只有在你自己的密码加密备份或主动发起的局域网传输中才会离开设备。\n• 卸载应用或清除数据会删除所有账户——请先导出备份。\n• 复制的验证码会留在剪贴板，不会自动清除。\n• 如果设备时钟不准，验证码就会出错——请开启网络时间同步。</string>
     <string name="sort_mode_desc">账户在列表中的排列方式</string>
     <string name="sort_random">随机排序</string>
     <string name="sort_random_desc">每次启动应用洗牌一次</string>
@@ -322,11 +322,11 @@
     <string name="webdav_error_url">请输入服务器地址，例如 http://192.168.1.5:5005</string>
     <string name="webdav_warning">只使用你信任的服务器。备份文件本身已加密，但请妥善保管导出密码——任何能拿到文件且知道密码的人都能恢复它。</string>
     <string name="manual_webdav_title">WebDAV 备份</string>
-    <string name="manual_webdav_body">设置 → 数据 → WebDAV 备份会将同一份加密导出文件上传到局域网内的 WebDAV 服务器——NAS、电脑，或运行 WebDAV 服务器应用的另一部手机。填写服务器地址（主机名或局域网 IP）、用户名和密码。\n\n恢复功能会列出服务器上存储的备份，供你选择其一恢复。管理备份同样列出备份，并可删除服务器上的旧备份。服务器只会收到密码加密的数据；应用除了你配置的服务器地址外，不会连接任何其他地址。\n\n如果服务器地址经常变化，可以在路由器中为 NAS 设置固定 IP，或改用其主机名。</string>
+    <string name="manual_webdav_body">设置 → 数据 → WebDAV 备份会将加密导出文件上传到 WebDAV 服务器。填写服务器地址（主机名或局域网 IP）、用户名和密码。\n\n恢复功能会列出服务器上的备份供你选择；“管理备份”可以删除该服务器上的旧备份。服务器只会收到密码加密的数据；此功能只连接你配置的地址。\n\n如果地址经常变化，可以为 NAS 设置固定 IP 或使用主机名。</string>
     <string name="about_terms_title">用户协议</string>
     <string name="about_privacy_title">隐私政策</string>
-    <string name="terms_body">安装或使用 Osmium 即表示你同意以下条款。\n\nOsmium 是基于 GNU 通用公共许可证第三版或更高版本（GPL-3.0-or-later；许可证见仓库 LICENSE/COPYING 文件）。\n\n本软件按"现状"提供，不附带任何明示或默示的担保。在法律允许的最大范围内，开发者不对因使用本软件而产生的任何损失承担责任。\n\n你的责任：\n• 保管好密钥和备份密码。加密密钥无法被开发者或任何人恢复——遗忘的 PIN 或丢失的备份密码无法重置。自动备份密码存储在本机（经 Android Keystore 加密），应用数据被清除后同样无法恢复。\n• 自行备份。卸载应用或清除应用数据将永久删除全部账户。自动备份通过 Android 系统调度器无人值守运行，受设备电源状态与后台运行设置影响（建议做法见 README）；应用不驻留任何常驻后台服务，除短暂的备份任务外不会额外耗电。\n• 自毁 PIN 不可逆，属设计行为。\n• 保持设备时间准确——时间型验证码依赖设备时钟。\n\n你可将 Osmium 用于自身账户的双因素认证。不得利用本软件访问未经授权的系统或数据。\n\n除你自行配置的 WebDAV 服务器（备份在上传前已用密码加密）与用于可选更新检查的 GitHub Releases API（不发送任何账户或设备数据）外，Osmium 不运行任何账号体系、不连接任何第三方服务。Google 验证器迁移功能仅在设备本地解析导出码。\n\n联系方式：zhif0776@hotmail.com · https://t.me/osmium2fa</string>
-    <string name="privacy_body">Osmium 不收集任何数据。没有账号体系、注册、统计分析、广告 SDK 或崩溃上报。\n\n存储：你的密钥、账户名与服务商仅存于本机，使用 Android Keystore 中不可导出的密钥进行 AES-256-GCM 加密。备份文件使用你的密码加密（PBKDF2 + AES-256-GCM）。WebDAV 服务器地址与登录信息存储在本机，密码经 Android Keystore 加密。\n\n网络：INTERNET 权限仅用于两个可选功能。(1) WebDAV 备份：应用只连接你自行配置的服务器地址——通常是局域网内的 NAS 或电脑——且仅在你执行备份或恢复时连接；以 http:// 开头的明文地址需在屏幕上明确确认后才会保存。(2) 更新检查：开启自动检查后，应用每次打开时向 GitHub Releases API 查询最新公开版本，不发送任何账户或设备数据。\n\n自动备份：定时备份通过 Android 系统调度器无人值守运行。你设置的备份密码用 Android Keystore 密钥加密存储，仅用于加密备份文件。本地备份写入公共的 下载/Osmium 目录，按设置保留最近若干份（默认 5 份，最多 10 份）并清理更旧的备份。应用不驻留任何常驻后台服务，除短暂的备份任务外不会额外耗电。\n\n相机：仅用于扫描二维码，全部在本机处理；画面不会被存储或传输。\n\n生物识别：完全由 Android 系统处理；应用不会看到或存储指纹、人脸数据。\n\n存储权限（仅 Android 8/9）：WRITE_EXTERNAL_STORAGE 仅在 Android 8 和 9 上申请，仅用于将自动备份写入公共的 下载/Osmium 目录。\n\n我们不共享任何数据，因为我们不持有任何数据。卸载应用会删除全部本地数据。\n\n任何影响上述保证的变更都会在发布说明中声明。\n\n联系方式：zhif0776@hotmail.com · https://t.me/osmium2fa</string>
+    <string name="terms_body">安装或使用 Osmium 即表示你同意以下条款。\n\nOsmium 是基于 GNU 通用公共许可证第三版或更高版本（GPL-3.0-or-later；许可证见 LICENSE/COPYING）发布的免费开源软件。\n\n本软件按“现状”提供，不附带任何明示或默示的担保。在法律允许的最大范围内，开发者不对因使用或无法使用本软件而产生的损失承担责任。\n\n你的责任：\n• 保管好密钥、PIN 和备份密码。开发者及第三方无法恢复加密密钥。\n• 自行保存备份。卸载应用或清除数据会永久删除本地账户和设置；自动备份受 Android 和厂商调度策略影响。局域网传输是用户主动发起的临时传输，不是云同步。\n• 核对接收内容。局域网传输要求同一 Wi‑Fi 和 6 位配对码；请检查导入预览，并只把配对码提供给预期接收方。\n• 自毁 PIN 不可逆；请保持设备时间准确并遵守法律。\n\n你可以将 Osmium 用于自己的双因素认证，以及在你控制或获授权的设备之间迁移账户。\n\nOsmium 不运行账号体系，也不提供云同步。应用可能连接你配置的 WebDAV 服务器、用于可选版本检查的 GitHub Releases API，或局域网传输期间的另一台设备。局域网传输使用由配对码派生的 AES‑256‑GCM 加密，不经过 Osmium 云服务器。\n\n联系方式：zhif0776@hotmail.com · https://t.me/osmium2fa</string>
+    <string name="privacy_body">Osmium 不收集、出售或用于广告分析个人数据。没有账号体系、注册、统计分析、广告 SDK、崩溃上报，也没有 Osmium 云端账号或同步服务器。\n\n存储：验证器密钥、账户名、服务商、标签及标签颜色存储在设备上，使用 Android Keystore 中不可导出的密钥进行 AES‑256‑GCM 加密。导出备份使用你的密码（PBKDF2 + AES‑256‑GCM）加密；WebDAV 登录信息在本机存储并受 Keystore 保护。\n\n网络：只有在相应功能启用或主动执行时才会连接。WebDAV 连接你配置的地址；GitHub 更新检查只请求公开版本信息，不发送账户或设备数据；局域网快捷传输连接同一 Wi‑Fi 下的两台设备进行临时加密传输。\n\n自动备份使用 Android 系统调度，可能受厂商省电策略推迟。相机扫描、生物识别和设备凭据由 Android 在本机处理。Wi‑Fi 状态和组播用于发现局域网设备；离开传输页面后会停止发现和服务。WRITE_EXTERNAL_STORAGE 仅适用于 Android 8/9 自动备份；ACCESS_LOCAL_NETWORK 为未来平台要求预先声明，当前 targetSdk 34 不请求。\n\n我们不向广告商、分析服务或 Osmium 云端共享数据。WebDAV 服务器会收到你上传的加密文件；预期接收设备会收到你主动传输的数据；GitHub 只收到公开版本查询。卸载或清除数据不会删除你保存在其他位置的副本。\n\n联系方式：zhif0776@hotmail.com · https://t.me/osmium2fa</string>
 
     <string name="webdav_manage">管理备份</string>
     <string name="webdav_delete">删除</string>

@@ -1,88 +1,72 @@
 # Osmium
 
-Osmium 是一款隐私优先的 Android TOTP 验证器。本项目是基于 GNU GPL v3 或更高版本发布的自由软件。所有密钥在落盘前均使用 Android Keystore 中的不可导出密钥加密。应用无需注册账号、不收集任何遥测——验证码完全在本机计算。INTERNET 权限仅用于可选的 WebDAV 备份功能：应用只连接您自行配置的服务器地址（通常是局域网内的 NAS），不会连接其他任何地址。
+Osmium 是一款隐私优先的 Android TOTP/HOTP 验证器。本项目基于 GNU GPL v3 或更高版本发布。验证码在设备本地计算；账户数据使用 Android Keystore 中的不可导出密钥加密后才落盘。应用无需注册账号、不收集遥测。
+
+应用的网络功能是可选的：用户配置的 WebDAV 备份、GitHub 更新检查，以及用户主动发起的两台设备局域网快捷传输。点击 GitHub、验证实验室等外部链接时，流量由系统浏览器或其他应用处理。
 
 ## 功能
 
 - **TOTP 与 HOTP**——支持 SHA-1 / SHA-256 / SHA-512，6 位或 8 位，周期 1–600 秒
-- **Google 验证器迁移**——扫描 Google Authenticator 的「转移账户」二维码，一步导入全部账户
-- **加密备份**——导出为密码保护、绑定应用 PIN 的加密文件，可在任意设备恢复
-- **WebDAV 备份**——将同一份加密导出文件上传到局域网内的 WebDAV 服务器（NAS、电脑、另一部手机）并从中恢复；服务器只存放密文
-- **自动备份**——按计划无人值守备份到 WebDAV 或手机的 下载/Osmium 目录；可设间隔天数、每日时间与保留数量（1–10 份，默认 5）；下次执行时间以 GMT+8 标注显示
-- **后台运行一键申请**——自动备份页实时显示后台运行状态，可一键弹出系统的「忽略电池优化」授权框
-- **更新检查**——每次打开应用时静默检查 GitHub 上的新版本（可在设置中关闭）；发现新版本时弹窗询问是否前往 GitHub Releases 页面，应用不会自行下载或安装任何内容
-- **Steam Guard**——手动添加，使用 26 字符 Steam 字母表（见下方警告）
+- **Google 验证器迁移**——扫描 Google Authenticator 的「转移账户」二维码，批量导入受支持的账户
+- **加密备份**——导出为密码保护的加密文件，可在安装兼容版本 Osmium 的设备上恢复
+- **WebDAV 备份**——将加密备份上传到用户自行配置的 WebDAV 服务器（NAS、电脑或另一部手机）并从中恢复；服务器只接收密文
+- **局域网快捷传输**——两台设备连接同一 Wi‑Fi 后，通过 6 位配对码端到端加密传输账户，不经过云端；接收前可预览并选择账户
+- **自动备份**——按计划备份到 WebDAV 或手机的 下载/Osmium 目录；可设置间隔、时间和保留数量
+- **更新检查**——可选查询 GitHub Releases API；只读取公开版本信息，不发送账户或设备数据，也不会自动下载或安装
+- **Steam Guard**——手动添加 Steam 账户，生成 5 位字母数字验证码
 - **隐藏验证码模式**——验证码以圆点显示，复制不受影响；编辑与分享在关闭该模式前被锁定
-- **排序方式**——随机、字母、添加时间、复制次数
-- **搜索**——按账户名或服务商即时查找
-- **标签**——创建本地多标签、按标签筛选账户，标签数据随加密备份保存
-- **时钟校准**——设备时间漂移时手动补偿
-- **安全门禁**——可选的打开时验证（指纹 / 系统密码 / 应用 PIN）、自毁 PIN、默认禁止截屏
-- **九种语言**——简体中文、English、Español、日本語、한국어、Deutsch、Русский、Français、हिन्दी
-- **内置使用手册**——功能说明与注意事项
-- **内置协议与隐私政策**——设置 → 关于 页内可查看用户协议与隐私政策
-- **账户名与服务商可留空**——账户名留空时按添加日期与位次自动命名（如 `20260801`）；服务商留空时显示 `Unknown`
+- **排序与搜索**——支持随机、字母、添加时间、复制次数排序，并可按账户名或服务商搜索
+- **可选标签**——在 设置 → 外观 → 标签 中开启标签功能；可创建多标签、筛选账户，并使用调色盘或自定义 `#RRGGBB` 颜色。没有创建标签时，主页不会显示 `Uncategorized`
+- **安全门禁**——可选的打开时验证（指纹 / 系统凭据 / 应用 PIN）、自毁 PIN、默认禁止截屏
+- **时钟校准**——设备时间漂移时手动补偿 TOTP 时钟
+- **11 种语言**——English、简体中文、繁體中文、Español、日本語、한국어、Deutsch、Русский、Français、हिन्दी
+- **内置使用手册、用户协议与隐私政策**——无需联网即可查看
 
 ## ⚠ Steam Guard 使用前必读
 
-**手动添加 Steam 账户时，必须在服务商（issuer）一栏填写 `Steam`，否则该账户会被当作普通 TOTP 处理，生成的验证码是错误的。** Steam Guard 验证码是 5 位字母数字组合，不是 6 位纯数字。
+手动添加 Steam 账户时，服务商（issuer）一栏必须填写 `Steam`，否则账户会被当作普通 TOTP 处理，验证码会错误。Steam Guard 验证码是 5 位字母数字组合，不是 6 位纯数字。
 
 ## 验证你的验证器
 
-在线测试站 **https://otp.osmium.im** ——发放测试密钥，添加进任意验证器后回填验证码即可校验。支持 TOTP、HOTP 与 Steam Guard，全部在浏览器本地完成，不上传任何数据。
+在线测试站 **https://otp.osmium.im** 支持 TOTP、HOTP 与 Steam Guard。测试过程在浏览器本地完成，不上传数据。
 
 ## 下载
 
-请选择与设备匹配的架构安装包：
+最新正式版：**Osmium v2.3.9**（versionCode 46）。请选择与设备匹配的架构：
 
-| 文件 | 架构 | 适用设备 |
-|---|---|---|
-| `app-arm64-v8a-release.apk` | arm64-v8a | 几乎所有现代手机（推荐） |
-| `app-armeabi-v7a-release.apk` | armeabi-v7a | 老款 32 位手机 |
-| `app-x86_64-release.apk` | x86_64 | 模拟器 |
+| 文件 | 架构 | 适用设备 | 下载 |
+|---|---|---|---|
+| `osmium-2.3.9-arm64-v8a.apk` | arm64-v8a | 几乎所有现代手机（推荐） | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.3.9/osmium-2.3.9-arm64-v8a.apk) |
+| `osmium-2.3.9-armeabi-v7a.apk` | armeabi-v7a | 老款 32 位手机 | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.3.9/osmium-2.3.9-armeabi-v7a.apk) |
+| `osmium-2.3.9-x86_64.apk` | x86_64 | Android 模拟器 | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.3.9/osmium-2.3.9-x86_64.apk) |
 
-安装与设备架构不符的包会导致启动闪退。签名证书 SHA-256 指纹：`B65BB0131CAA22C45D99EA4E2C3E99B3980EAE0DC5647190F41A2878E6D88412`。
+安装与设备架构不符的包可能无法启动。三个架构使用同一签名证书，SHA-256 指纹为：`B65BB0131CAA22C45D99EA4E2C3E99B3980EAE0DC5647190F41A2878E6D88412`。
+
+APK 的 SHA-256 校验和见 [v2.3.9 发布说明](release-notes-v2.3.9.md) 及 GitHub Release 页面。
 
 ## 隐私与条款
 
-- [隐私政策](PRIVACY.md)（[中文版](PRIVACY-zh.md)）
-- [用户协议](TERMS.md)（[中文版](TERMS-zh.md)）
+- [隐私政策](PRIVACY-zh.md)（[English](PRIVACY.md)）
+- [用户协议](TERMS-zh.md)（[English](TERMS.md)）
 
-应用内 设置 → 关于 亦可查看。
+应用内 设置 → 关于 也可查看。局域网传输和 WebDAV 备份均由用户主动操作触发；局域网传输使用配对码派生的端到端加密，不经过 Osmium 服务器。
 
 ## WebDAV 备份教程
 
-各平台（NAS、Linux、Android、macOS、Windows、iOS、鸿蒙）搭建 WebDAV 服务器的分步教程：[WEBDAV-GUIDE-zh.md](WEBDAV-GUIDE-zh.md)（[English](WEBDAV-GUIDE.md)）
+各平台搭建 WebDAV 服务器的分步教程：[WEBDAV-GUIDE-zh.md](WEBDAV-GUIDE-zh.md)（[English](WEBDAV-GUIDE.md)）。WebDAV 与局域网快捷传输是两个独立功能：前者面向备份服务器，后者面向同一局域网内的另一台设备。
 
 ## 电池与后台行为
 
-自动备份通过 Android 系统调度器执行——应用仅在备份时短暂唤醒，**不驻留任何常驻后台服务**，除这一短暂任务外不会额外耗电。
-
-部分机型（ColorOS、MIUI、HyperOS、EMUI、One UI 等）的激进省电策略可能推迟或拦截定时备份。**为保证夜间无人值守备份正常执行，强烈建议您在系统设置中手动为 Osmium 开启以下两项：**
-
-1. **允许自启动**——未开启时，系统会在夜间冻结 Osmium，定时备份将不会执行。
-2. **允许完全后台行为** / 关闭对 Osmium 的后台限制——让系统调度器能唤醒应用完成短暂的备份任务。
-
-这两项开关的名称与路径**因厂商和 Android 版本而异**，请在自己的手机设置中自行查找并开启。以 ColorOS 为例：设置 → 电池 → 更多设置 → 允许 Osmium 完全后台行为；以及手机管家 → 应用管理 → 自启动管理。应用内自动备份页会实时显示后台运行状态，并可为您弹出系统的电池优化授权框；但「允许自启动」没有标准 Android API，只能手动开启。Android 省电模式可能让备份晚几分钟执行，属正常现象。
-
-## 安全说明
-
-- 字段级 AES-256-GCM 加密，密钥不可导出，存于 Android Keystore
-- INTERNET 权限仅用于用户自行配置的 WebDAV 备份服务器，以及 GitHub 更新检查（可关闭）——无统计、无崩溃上报、无云
-- 以 `http://` 开头的 WebDAV 地址在保存前会弹出明文连接警告，需确认后才保存
-- 备份在离开设备前采用 PBKDF2 + AES-256-GCM 加密，并与应用 PIN 绑定
-- HTTPS 使用标准证书校验——自签证书按设计直接拒绝（密码类应用绝不内置 TrustAllManager）
-- 自毁 PIN 可在任意 PIN 输入处触发不可逆的数据销毁
+自动备份通过 Android 系统调度器执行——应用仅在备份时短暂唤醒，不驻留常驻后台服务。部分机型的省电策略可能推迟或拦截定时备份，请按 README 和应用内自动备份页面提示，为 Osmium 开启自启动及允许后台运行。
 
 ## 构建
 
 ```bash
 ./gradlew assembleRelease
+./gradlew testDebugUnitTest
 ```
 
-Release 构建启用 R8 混淆并按 ABI 分包。单元测试：`./gradlew testDebugUnitTest`。
-
-构建环境：Kotlin 1.9 + Jetpack Compose（BOM 2024.09.03，runtime 1.7.3）；`compileSdk 35`、`minSdk 26`、`targetSdk 34`。
+Release 构建启用 R8 并按 ABI 分包。构建环境：Kotlin 1.9、Jetpack Compose BOM 2024.09.03、`compileSdk 35`、`minSdk 26`、`targetSdk 34`。GitHub Actions 会运行单元测试并构建 Release APK；正式发布资产固定命名为 `osmium-版本号-架构.apk`。
 
 ## 许可证
 

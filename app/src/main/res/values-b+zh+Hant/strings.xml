@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Osmium</string>
-    <string name="app_tagline">離線身分驗證器</string>
+    <string name="app_tagline">隱私優先驗證器</string>
     <string name="tags_title">標籤</string>
     <string name="tags_empty">還沒有標籤。建立標籤来整理帳戶。</string>
     <string name="tags_create">建立標籤</string>
@@ -123,7 +123,7 @@
 
     <string name="version">版本</string>
     <string name="accounts_count">共 %1$d 個帳戶</string>
-    <string name="about_desc">Osmium 是一款隱私優先的 TOTP 驗證器。所有数據都通過 Android Keystore 加密。應用除了你自己配置的 WebDAV 備份伺服器外，不會連線任何位址。</string>
+    <string name="about_desc">Osmium 是一款隱私優先的 Android TOTP/HOTP 驗證器。帳戶資料使用 Android Keystore 加密。可選網路功能包括使用者設定的 WebDAV 備份、GitHub 更新檢查，以及使用者主動發起的區域網路傳輸。</string>
     <string name="sorting_hint">长按帳戶可拖動排序</string>
     <string name="account_type_label">帳戶類型</string>
     <string name="account_type_totp">時間型（TOTP）</string>
@@ -161,7 +161,7 @@
     <string name="manual_hotp_title">HOTP（計数器型）</string>
     <string name="manual_hotp_body">HOTP 驗證碼不會自動重新整理，在帳戶詳情頁點擊「下一個驗證碼」使計数器 +1。計数器隨帳戶持久儲存。僅當服務明确要求時使用 HOTP。</string>
     <string name="manual_security_title">安全性</string>
-    <string name="manual_security_body">• 打開時驗證：顯示驗證碼前需通過指紋 / 系統密碼 / Osmium PIN。\n• 自毀 PIN：在任何 PIN 界面輸入它，確認后即清除所有帳戶。\n• 預設禁止螢幕截圖；可在設定中允許，但隱藏数據始終受保護。\n• Osmium 只連線你自行配置的 WebDAV 備份伺服器，以及用於更新檢查的 GitHub Releases API（啟用自動檢查時）——無賬號、無遙測、無雲。</string>
+    <string name="manual_security_body">• 開啟時驗證：顯示驗證碼前需通過指紋 / 系統密碼 / Osmium PIN。\n• 自毀 PIN 在支援的 PIN 畫面確認後會刪除帳戶。\n• 預設禁止螢幕截圖。\n• Osmium 只連線你設定的 WebDAV、用於更新檢查的 GitHub API，或你主動發起的區域網路傳輸中的另一台裝置。無帳號、無遙測、無雲端。</string>
     <string name="manual_backup_title">備份與還原</string>
     <string name="manual_backup_body">設定 → 数據 → 匯出 生成加密備份（密碼 + 應用 PIN 雙重绑定）。請妥善保管密碼，丟失密碼將無法還原備份。Google 驗證器遷移為只讀匯入。</string>
     <string name="manual_tester_title">測試你的驗證器</string>
@@ -169,7 +169,7 @@
     <string name="manual_naming_title">帳戶名與服務商</string>
     <string name="manual_naming_body">帳戶名和服務商都可留空。\n\n帳戶名留空時，Osmium 會用新增日期和新增位次自動生成一個名稱——例如 2026 年 5 月新增的第一個帳戶名為 20260501。\n\n服務商留空時統一顯示為 "Unknown"。</string>
     <string name="manual_notes_title">重要注意事項</string>
-    <string name="manual_notes_body">• 金鑰使用不可匯出的 Android Keystore 金鑰加密；只有在你自己的密碼加密備份中才會离開裝置。\n• 解除安裝應用或清除数據會刪除所有帳戶——請先匯出備份。\n• 複製的驗證碼會留在剪貼簿，不會自動清除。\n• 如果裝置時鐘不准，驗證碼就會出錯——請開啟網絡時間同步。</string>
+    <string name="manual_notes_body">• 金鑰使用不可匯出的 Android Keystore 金鑰加密；只有在你的加密備份或你主動發起的區域網路傳輸中才會離開裝置。\n• 解除安裝或清除資料會刪除所有帳戶。\n• 複製的驗證碼會留在剪貼簿。\n• 裝置時鐘錯誤會導致驗證碼錯誤。</string>
     <string name="sort_mode_desc">帳戶在清單中的排列方式</string>
     <string name="sort_random">隨機排序</string>
     <string name="sort_random_desc">每次啟動應用洗牌一次</string>
@@ -322,11 +322,11 @@
     <string name="webdav_error_url">請輸入伺服器位址，例如 http://192.168.1.5:5005</string>
     <string name="webdav_warning">只使用你信任的伺服器。備份檔案本身已加密，但請妥善保管匯出密碼——任何能拿到檔案且知道密碼的人都能還原它。</string>
     <string name="manual_webdav_title">WebDAV 備份</string>
-    <string name="manual_webdav_body">設定 → 数據 → WebDAV 備份會將同一份加密匯出檔案上傳到區域網路內的 WebDAV 伺服器——NAS、電腦，或運行 WebDAV 伺服器應用的另一部手机。填寫伺服器位址（主機名稱或區域網路 IP）、使用者名稱和密碼。\n\n還原功能會列出伺服器上儲存的備份，供你選取其一還原。管理備份同样列出備份，並可刪除伺服器上的舊備份。伺服器只會收到密碼加密的数據；應用除了你配置的伺服器位址外，不會連線任何其他位址。\n\n如果伺服器位址經常變化，可以在路由器中為 NAS 設定固定 IP，或改用其主機名稱。</string>
+    <string name="manual_webdav_body">設定 → 資料 → WebDAV 備份會將加密匯出檔案上傳到 WebDAV 伺服器。輸入伺服器位址、使用者名稱和密碼。\n\n還原會列出伺服器備份，管理功能可刪除舊備份。伺服器只會收到加密資料；此功能只連線你設定的位址。</string>
     <string name="about_terms_title">使用者條款</string>
     <string name="about_privacy_title">隱私權政策</string>
-    <string name="terms_body">安裝或使用 Osmium 即表示你同意以下条款。\n\nOsmium 是基於 GNU 通用公共許可證第三版或更高版本（GPL-3.0-or-later；許可證見倉庫 LICENSE/COPYING 檔案）。\n\n本軟體按"現状"提供，不附帶任何明示或默示的擔保。在法律允許的最大範圍內，開發者不对因使用本軟體而產生的任何損失承擔責任。\n\n你的責任：\n• 保管好金鑰和備份密碼。加密金鑰無法被開發者或任何人還原——遺忘的 PIN 或丟失的備份密碼無法重設。自動備份密碼儲存在本機（經 Android Keystore 加密），應用数據被清除后同样無法還原。\n• 自行備份。解除安裝應用或清除應用数據將永久刪除全部帳戶。自動備份通過 Android 系統調度器無人值守運行，受裝置電源狀態與背景執行設定影響（建议做法見 README）；應用不駐留任何常駐背景服務，除短暫的備份任務外不會額外耗電。\n• 自毀 PIN 不可逆，屬設計行為。\n• 保持裝置時間准确——時間型驗證碼依賴裝置時鐘。\n\n你可將 Osmium 用於自身帳戶的雙因素驗證。不得利用本軟體訪問未經授權的系統或数據。\n\n除你自行配置的 WebDAV 伺服器（備份在上傳前已用密碼加密）與用於可選更新檢查的 GitHub Releases API（不傳送任何帳戶或裝置数據）外，Osmium 不運行任何賬號體系、不連線任何第三方服務。Google 驗證器遷移功能僅在裝置本地解析匯出碼。\n\n聯絡方式：zhif0776@hotmail.com · https://t.me/osmium2fa</string>
-    <string name="privacy_body">Osmium 不收集任何数據。沒有賬號體系、注冊、統計分析、廣告 SDK 或崩潰上報。\n\n儲存：你的金鑰、帳戶名與服務商僅存於本機，使用 Android Keystore 中不可匯出的金鑰進行 AES-256-GCM 加密。備份檔案使用你的密碼加密（PBKDF2 + AES-256-GCM）。WebDAV 伺服器位址與登錄信息儲存在本機，密碼經 Android Keystore 加密。\n\n網絡：INTERNET 權限僅用於兩個可選功能。(1) WebDAV 備份：應用只連線你自行配置的伺服器位址——通常是區域網路內的 NAS 或電腦——且僅在你執行備份或還原時連線；以 http:// 開頭的明文位址需在屏幕上明确確認后才會儲存。(2) 更新檢查：開啟自動檢查后，應用每次打開時向 GitHub Releases API 查詢最新公開版本，不傳送任何帳戶或裝置数據。\n\n自動備份：定時備份通過 Android 系統調度器無人值守運行。你設定的備份密碼用 Android Keystore 金鑰加密儲存，僅用於加密備份檔案。本地備份寫入公共的 下載/Osmium 目錄，按設定保留最近若乾份（預設 5 份，最多 10 份）並清理更舊的備份。應用不駐留任何常駐背景服務，除短暫的備份任務外不會額外耗電。\n\n相機：僅用於掃描二維碼，全部在本機处理；畫面不會被儲存或傳輸。\n\n生物辨識：完全由 Android 系統处理；應用不會看到或儲存指紋、人臉数據。\n\n儲存權限（僅 Android 8/9）：WRITE_EXTERNAL_STORAGE 僅在 Android 8 和 9 上申請，僅用於將自動備份寫入公共的 下載/Osmium 目錄。\n\n我們不共享任何数據，因為我們不持有任何数據。解除安裝應用會刪除全部本地数據。\n\n任何影響上述保證的變更都會在發布說明中聲明。\n\n聯絡方式：zhif0776@hotmail.com · https://t.me/osmium2fa</string>
+    <string name="terms_body">安裝或使用 Osmium 即表示你同意以下條款。\n\nOsmium 是基於 GNU GPL 第三版或更高版本發布的免費開源軟體。軟體按現狀提供，開發者責任受法律限制。\n\n請保管好金鑰、PIN 和備份密碼，並自行保存備份；清除應用資料會永久刪除本機帳戶。自動備份受 Android 與廠商策略影響。區域網路傳輸是你主動發起的臨時傳輸，不是雲端同步。請檢查預覽；兩台裝置需使用同一 Wi‑Fi 和 6 位配對碼。自毀 PIN 不可逆。\n\nOsmium 沒有帳號或雲端。應用可連線你設定的 WebDAV、GitHub 公開版本檢查，或你主動發起的區域網路傳輸中的另一台裝置；LAN 資料不經過 Osmium 雲端。\n\n聯絡方式：zhif0776@hotmail.com · https://t.me/osmium2fa</string>
+    <string name="privacy_body">Osmium 不會為廣告分析收集、出售或使用個人資料。沒有帳號、註冊、分析、廣告 SDK、崩潰回報或 Osmium 雲端。\n\n秘密金鑰、帳戶、標籤和顏色會在裝置上使用 Android Keystore 不可匯出金鑰的 AES-256-GCM 加密。匯出備份使用你的密碼經 PBKDF2 和 AES-256-GCM 加密；WebDAV 登入資料在本機受保護。\n\n只有在功能啟用或主動執行時才會使用網路：WebDAV 連線設定位址，GitHub 取得公開版本資訊，LAN 在同一 Wi‑Fi 的兩台裝置間進行臨時傳輸。LAN 使用 AES-256-GCM，不經過 Osmium 雲端。\n\n自動備份由 Android 排程，可能受廠商省電策略延遲。相機、生物辨識和裝置憑據在本機處理。Wi‑Fi 和 multicast 用於 LAN 搜尋，離開傳輸頁面後停止。WRITE_EXTERNAL_STORAGE 僅適用 Android 8/9；ACCESS_LOCAL_NETWORK 為未來平台宣告，targetSdk 34 不會請求。\n\nWebDAV 會收到你上傳的加密檔案，LAN 接收裝置會收到你主動發起的資料，GitHub 只收到公開版本查詢。解除安裝不會刪除外部副本。\n\n聯絡方式：zhif0776@hotmail.com · https://t.me/osmium2fa</string>
 
     <string name="webdav_manage">管理備份</string>
     <string name="webdav_delete">刪除</string>

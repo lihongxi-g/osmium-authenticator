@@ -1,62 +1,65 @@
 # Osmium Privacy Policy
 
-*Effective date: August 16, 2026*
+*Effective date: September 4, 2026*
 
-Osmium is a privacy-first TOTP authenticator designed to run fully offline. This policy describes, in plain terms, what the application does and does not do with your data.
+Osmium is a privacy-first Android TOTP/HOTP authenticator. This policy explains, in plain terms, what the application does and does not do with your data.
 
 ## Data we collect
 
-**We do not collect any data.** Specifically:
+**We do not collect, sell or use personal data for advertising analytics.** Specifically:
 
-- There is **no account system, no registration, no analytics, no advertising SDK, and no crash reporter**.
-- We operate **no server** for the application. There is nothing to upload to and nothing to sync with.
-- The INTERNET permission exists only for two optional features, both described below: WebDAV backup and update checks.
+- There is no account system, registration, analytics, advertising SDK or crash reporter.
+- We operate no Osmium cloud account or synchronization server.
+- Network requests occur only when the relevant feature is enabled or initiated: user-configured WebDAV backup, GitHub update checks, and a LAN quick transfer that you start yourself.
 
 ## Storage on your device
 
-- Your authenticator secrets, account names and issuers are stored **only on your device**, encrypted with AES-256-GCM using a non-exportable key in the Android Keystore.
-- Backup files you export are encrypted with your password (PBKDF2 + AES-256-GCM) and stored wherever you choose to save them. We have no access to them.
-- The optional app PIN and self-destruct PIN are stored as salted hashes and encrypted values; they cannot be recovered by anyone, including us.
-- The WebDAV server address and login are stored on your device, with the password encrypted by the Android Keystore.
+- Your authenticator secrets, account names, issuers, tags and tag colors are stored on your device and encrypted with AES-256-GCM using a non-exportable key in the Android Keystore.
+- Exported backup files are encrypted with your password (PBKDF2 + AES-256-GCM) and saved wherever you choose; the developer cannot access them.
+- The optional app PIN and self-destruct PIN are stored as salted hashes or protected ciphertext and cannot be recovered by the developer.
+- WebDAV server addresses and login information are stored locally; the password is protected by the Android Keystore.
+- The tag feature switch and tag-filter selection are application/UI state. Turning tags off does not upload or delete the tags already stored locally.
 
 ## Network: WebDAV backup
 
-If you enable WebDAV backup (Settings → Data → WebDAV backup), the app connects **exclusively** to the server address you enter — typically a NAS, a PC, or another device on your local network — and only when you run a backup, list backups, or restore one. Backups are encrypted with your export password **before they leave the device**; the server only ever stores ciphertext. Plaintext `http://` addresses require an explicit on-screen confirmation before they are saved.
+When WebDAV backup is enabled, the app connects only to the server address you enter, and only when you test the connection, upload a backup, list backups or restore one. Backups are encrypted with your export password before leaving the device; the server stores ciphertext only. A plaintext `http://` address requires explicit on-screen confirmation before it is saved. The address may identify a local device or a remote server that you manage; assess its trustworthiness yourself.
 
-## Network: update checks
+## Network: GitHub update checks
 
-If auto-check for updates is enabled (Settings → About → Auto-check for updates; on by default), the app asks the GitHub releases API (`api.github.com`) for the latest public version each time it opens (with a short internal cooldown). No account data or device information is sent. The check fails silently when offline and never downloads or installs anything.
+When automatic update checks are enabled (on by default), the app asks the GitHub Releases API (`api.github.com`) for public version information. The request contains no account data or device identifier. A failed check is silent, and the app never downloads or installs an update itself. After saved settings have loaded, turning the switch off prevents the app from initiating normal update checks; during cold start there may be a short window before preferences finish loading in which one check can be triggered.
 
-## Automatic backup
+## Network: LAN quick transfer
 
-If you enable automatic backup (Settings → Data → Auto backup), the app runs scheduled backups **unattended** via the Android system scheduler: choose WebDAV or the phone's Download/Osmium folder, an interval in days, a time of day, and how many backups to keep (1–10, default 5; older ones are pruned automatically). The export password you set is stored on your device, encrypted with the Android Keystore key, and used only to encrypt backup files. Local backups are written to the public Download/Osmium folder.
+LAN quick transfer is started by you between two devices. Both devices must be connected to the same Wi‑Fi network. The app discovers a peer or uses an IP/port that you enter, establishes a temporary connection, and transfers account data with AES-256-GCM encryption derived from a 6-digit pairing code. Account data does not pass through an Osmium cloud service or another third-party server. The receiver can preview and select accounts before importing them. Osmium cannot control LAN isolation, router behavior or other devices on the network; share the pairing code only with the intended receiver.
 
-## Background execution
+## Automatic backup and background execution
 
-Automatic backups run through the Android system scheduler. The app wakes briefly to run a backup and keeps **no persistent background service**; beyond that short job it does not consume battery in the background. On some devices, aggressive battery policies may defer or block scheduled backups — see the README for a recommendation.
+If automatic backup is enabled, Android’s system scheduler runs it on a schedule. You can choose WebDAV or the phone’s Download/Osmium folder. The backup password is stored locally under Android Keystore protection and is used only to encrypt backup files. Local backups are pruned according to your retention setting. The app keeps no persistent background service, but manufacturer power policies may defer or block scheduled work.
 
-The Auto backup screen displays the current background-activity status and can request the system's battery-optimization exemption for Osmium (the standard `ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` dialog). The request and its result are handled entirely by the Android system; the app reads no additional data from it.
+The Auto backup screen can ask Android to show the battery-optimization exemption dialog. Android decides whether to grant it; the app reads no additional personal data from that dialog.
 
 ## Permissions
 
-- **Camera** — used solely to scan QR codes during account import. Frames are processed in real time on the device (ML Kit, bundled offline mode) and are never stored or transmitted.
-- **Biometrics / device credential** — handled exclusively by the Android system. The application never sees or stores fingerprint or face data.
-- **Internet** — used solely for the WebDAV backup feature and the update check described above.
-- **Storage (Android 8/9 only)** — `WRITE_EXTERNAL_STORAGE` is requested only on Android 8 and 9, solely to write automatic backups to the public Download/Osmium folder. Android 10 and later need no such permission.
+- **Camera** — used only to scan QR codes during account import; frames are processed on-device and never stored or transmitted.
+- **Biometrics / device credentials** — handled by Android; the app does not access fingerprint or face data.
+- **Internet** — used for the WebDAV, GitHub update-check and LAN-transfer functions described above.
+- **Wi-Fi state and multicast** — used to discover and connect to LAN transfer peers; discovery and the transfer service stop when the LAN transfer screen is left.
+- **Storage (Android 8/9 only)** — `WRITE_EXTERNAL_STORAGE` is used only to write automatic backups to the public Download/Osmium folder; Android 10 and later do not need it.
+- **ACCESS_LOCAL_NETWORK** — pre-declared for future Android/target-SDK local-network access requirements; the current `targetSdk 34` does not actively request this runtime permission.
 
 ## Data sharing
 
-We share nothing, because we hold nothing. No third party receives data from the application.
+We do not share data with advertisers, analytics services or an Osmium cloud because we do not hold that data. A WebDAV server receives encrypted backup files you actively upload. The intended receiving device receives account data from a transfer you actively start. GitHub receives only a public version-information request, not account or device data.
 
 ## Data deletion
 
-- Uninstalling the application deletes all locally stored data.
-- The self-destruct PIN, when configured and entered, irreversibly destroys all accounts and settings.
-- Backups are deleted when you delete the exported files; automatic backups are additionally pruned by the retention setting.
+- Uninstalling the app or clearing its data deletes local application data, but does not automatically delete exported files, backups in the public Download folder, WebDAV backups or data already received by another device.
+- Configuring and entering the self-destruct PIN irreversibly destroys local accounts, PINs, settings and the local encryption master key. It does not delete backups or received copies in other locations.
+- You can delete exported files and WebDAV/LAN-received copies yourself; automatic backups also remove older files according to the retention setting.
 
 ## Changes to this policy
 
-The application is open source (GPL-3.0-or-later). Any future change that would alter these guarantees will be stated in the release notes and in this document.
+The application is open source under GPL-3.0-or-later. Any future change to the data practices described here will be stated in the release notes and in this document.
 
 ## Contact
 
