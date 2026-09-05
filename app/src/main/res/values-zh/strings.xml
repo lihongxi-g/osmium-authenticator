@@ -129,6 +129,8 @@
     <string name="account_type_totp">时间型（TOTP）</string>
     <string name="account_type_hotp">计数器（HOTP）</string>
     <string name="hotp_counter">计数器：%1$d</string>
+    <string name="hotp_counter_label">起始计数器</string>
+    <string name="hotp_counter_hint">留空从 0 开始。迁移已有 HOTP 账户时，请填入服务端显示的当前计数值。</string>
     <string name="hotp_next">下一个验证码（计数器 +1）</string>
     <string name="hotp_params">HOTP · %1$s · %2$d 位</string>
     <string name="sort_mode">排序方式</string>
@@ -159,7 +161,7 @@
     <string name="manual_steam_title">Steam Guard</string>
     <string name="manual_steam_body">Steam 账户需手动添加：发行方填 Steam，密钥填 Base32 共享密钥。应用会自动生成 5 位字母数字组合的 Steam 验证码。\n\nSteam 的二维码和 otpauth:// 链接不支持导入（Steam 无官方 TOTP 标准，手动添加保证特殊格式明确无误）。</string>
     <string name="manual_hotp_title">HOTP（计数器型）</string>
-    <string name="manual_hotp_body">HOTP 验证码不会自动刷新，在账户详情页点击「下一个验证码」使计数器 +1。计数器随账户持久保存。仅当服务明确要求时使用 HOTP。</string>
+    <string name="manual_hotp_body">HOTP 验证码不会自动刷新，在账户详情页点击「下一个验证码」使计数器 +1。添加或编辑 HOTP 账户时可直接设置起始计数器（便于迁移计数器已前进的存量账户）。仅当服务明确要求时使用 HOTP。</string>
     <string name="manual_security_title">安全</string>
     <string name="manual_security_body">• 打开时验证：显示验证码前需通过指纹 / 系统密码 / Osmium PIN。\n• 自毁 PIN：在任何 PIN 界面输入它，确认后即清除所有账户。\n• 默认禁止截屏；可在设置中允许，但隐藏数据始终受保护。\n• Osmium 只连接你配置的 WebDAV 服务器、用于更新检查的 GitHub Releases API，或局域网传输期间的另一台设备——无账号、无遥测、无云。</string>
     <string name="manual_backup_title">备份与恢复</string>

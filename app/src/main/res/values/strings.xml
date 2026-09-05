@@ -129,6 +129,8 @@
     <string name="account_type_totp">Time-based (TOTP)</string>
     <string name="account_type_hotp">Counter (HOTP)</string>
     <string name="hotp_counter">Counter: %1$d</string>
+    <string name="hotp_counter_label">Starting counter</string>
+    <string name="hotp_counter_hint">Leave empty to start at 0. When migrating an existing HOTP account, enter the current counter from the service.</string>
     <string name="hotp_next">Next code (counter +1)</string>
     <string name="hotp_params">HOTP · %1$s · %2$d digits</string>
     <string name="sort_mode">Sort order</string>
@@ -159,7 +161,7 @@
     <string name="manual_steam_title">Steam Guard</string>
     <string name="manual_steam_body">Steam accounts must be added MANUALLY: issuer = Steam, secret = the Base32 shared secret. The app then generates the 5-character alphanumeric Steam codes automatically.\n\nQR codes and otpauth:// links for Steam are intentionally not imported — Steam Guard has no official TOTP standard, and manual entry keeps the special format explicit.</string>
     <string name="manual_hotp_title">HOTP (counter-based)</string>
-    <string name="manual_hotp_body">HOTP codes do not refresh by themselves. Tap \u201CNext code\u201D in the account details to advance the counter (+1). The counter persists per account. Use HOTP only when the service explicitly requires it.</string>
+    <string name="manual_hotp_body">HOTP codes do not refresh by themselves. Tap \u201CNext code\u201D in the account details to advance the counter (+1). When adding or editing a HOTP account you can set the starting counter directly (migrating an existing account mid-sequence). Use HOTP only when the service explicitly requires it.</string>
     <string name="manual_security_title">Security</string>
     <string name="manual_security_body">• Require verification on open: fingerprint / system password / Osmium PIN before showing codes.\n• Self-destruct PIN: entering it at ANY PIN prompt wipes all accounts after confirmation.\n• Screenshots are blocked by default; you can allow them in Settings, but hidden data stays protected.\n• Osmium connects only to your configured WebDAV server, the GitHub Releases API for update checks, or the other device during a LAN transfer — no accounts, no telemetry, no cloud.</string>
     <string name="manual_backup_title">Backup &amp; restore</string>

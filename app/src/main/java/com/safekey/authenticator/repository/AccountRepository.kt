@@ -63,7 +63,7 @@ class AccountRepository(
         return account
     }
 
-    suspend fun update(account: Account, issuer: String, label: String, secret: String, algorithm: String, digits: Int, period: Int, tagIds: Set<String> = account.tags.map { it.id }.toSet()) {
+    suspend fun update(account: Account, issuer: String, label: String, secret: String, algorithm: String, digits: Int, period: Int, tagIds: Set<String> = account.tags.map { it.id }.toSet(), counter: Long? = null) {
         val updated = account.copy(
             issuer = issuer.trim(),
             label = autoName(label.trim(), account.createdAt),
@@ -71,6 +71,9 @@ class AccountRepository(
             algorithm = algorithm,
             digits = digits,
             period = period,
+            // HOTP: allow the UI to set a starting counter (e.g. migrating an
+            // existing account mid-sequence). TOTP passes null → unchanged.
+            counter = counter ?: account.counter,
             updatedAt = System.currentTimeMillis()
         )
         dao.update(updated.toEntity(crypto))

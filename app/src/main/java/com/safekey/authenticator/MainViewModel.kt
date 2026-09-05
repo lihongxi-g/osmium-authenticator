@@ -476,11 +476,11 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    fun updateAccount(accountId: String, issuer: String, label: String, secret: String, algorithm: String, digits: Int, period: Int, tagIds: Set<String> = emptySet()) {
+    fun updateAccount(accountId: String, issuer: String, label: String, secret: String, algorithm: String, digits: Int, period: Int, tagIds: Set<String> = emptySet(), counter: Long? = null) {
         viewModelScope.launch {
             val account = repo.getById(accountId) ?: return@launch
             try {
-                repo.update(account, issuer, label, secret, algorithm, digits, period, tagIds)
+                repo.update(account, issuer, label, secret, algorithm, digits, period, tagIds, counter)
                 showToast(getApplication<Application>().getString(R.string.account_updated))
             } catch (e: Exception) {
                 showToast(e.message ?: "Error")

@@ -62,6 +62,9 @@ fun AccountFormScreen(
     var digits by remember { mutableStateOf(6) }
     var period by remember { mutableStateOf("30") }
     var type by remember { mutableStateOf(Account.TYPE_TOTP) }
+    // HOTP starting counter, kept as text so the field can be cleared
+    // (empty ⇒ 0). Digits-only, capped at 15 chars (Long.MAX is 19 digits).
+    var counterText by remember { mutableStateOf("0") }
     var selectedTagIds by remember { mutableStateOf<Set<String>>(emptySet()) }
     var error by remember { mutableStateOf<String?>(null) }
     var initialized by remember { mutableStateOf(false) }
@@ -78,6 +81,7 @@ fun AccountFormScreen(
                 digits = account.digits
                 period = account.period.toString()
                 type = account.type
+                counterText = account.counter.toString()
                 selectedTagIds = account.tags.map { it.id }.toSet()
             }
         } else if (prefillUri != null) {
@@ -88,6 +92,7 @@ fun AccountFormScreen(
             digits = prefillUri.digits
             period = prefillUri.period.toString()
             type = prefillUri.type
+            counterText = prefillUri.counter.toString()
         }
         initialized = true
     }
@@ -166,6 +171,18 @@ fun AccountFormScreen(
                 )
             }
 
+            if (type == Account.TYPE_HOTP) {
+                OutlinedTextField(
+                    value = counterText,
+                    onValueChange = { counterText = it.filter(Char::isDigit).take(15) },
+                    label = { Text(stringResource(R.string.hotp_counter_label)) },
+                    supportingText = { Text(stringResource(R.string.hotp_counter_hint)) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
             Text(
                 text = stringResource(R.string.algorithm_label),
                 style = MaterialTheme.typography.labelLarge
@@ -239,10 +256,22 @@ fun AccountFormScreen(
                     val errorId = validate(issuer, label, secret, period)
                     if (errorId == null) {
                         val p = period.toInt()
+                        // Empty counter field = 0; the field only accepts
+                        // digits so a parse failure is impossible after the
+                        // 15-char cap (Long.MAX is 19 digits).
+                        val hotpCounter = counterText.toLongOrNull() ?: 0L
                         if (editing && accountId != null) {
-                            vm.updateAccount(accountId, issuer, label, secret, algorithm, digits, p, selectedTagIds)
+                            vm.updateAccount(
+                                accountId, issuer, label, secret, algorithm, digits, p,
+                                selectedTagIds,
+                                if (type == Account.TYPE_HOTP) hotpCounter else null
+                            )
                         } else {
-                            vm.addAccount(issuer, label, secret, algorithm, digits, p, type, 0L, selectedTagIds)
+                            vm.addAccount(
+                                issuer, label, secret, algorithm, digits, p,
+                                type, if (type == Account.TYPE_HOTP) hotpCounter else 0L,
+                                selectedTagIds
+                            )
                         }
                         onDone()
                     } else {
