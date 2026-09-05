@@ -7,7 +7,9 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkManager
 import com.safekey.authenticator.data.AppSettings
-import java.util.Calendar
+import java.time.Instant
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.util.concurrent.TimeUnit
 
 /**
@@ -26,19 +28,22 @@ object AutoBackupScheduler {
     /**
      * Next occurrence of [hour]:[minute] strictly after [now], stepping by
      * [intervalDays] days. Pure function — unit-tested without Android.
+     *
+     * Resolves every candidate through the local zone (java.time), so DST
+     * transitions cannot skew the wall-clock time: a nonexistent time in a
+     * spring-forward gap shifts forward, an ambiguous fall-back time keeps
+     * its earlier offset, and day steps preserve the wall-clock hour.
      */
     fun nextRunMillis(now: Long, hour: Int, minute: Int, intervalDays: Int): Long {
-        val cal = Calendar.getInstance().apply { timeInMillis = now }
-        cal.set(Calendar.HOUR_OF_DAY, hour)
-        cal.set(Calendar.MINUTE, minute)
-        cal.set(Calendar.SECOND, 0)
-        cal.set(Calendar.MILLISECOND, 0)
-        var candidate = cal.timeInMillis
-        if (candidate <= now) {
-            cal.add(Calendar.DAY_OF_YEAR, intervalDays.coerceAtLeast(1))
-            candidate = cal.timeInMillis
+        val zone = ZoneId.systemDefault()
+        val nowZoned = Instant.ofEpochMilli(now).atZone(zone)
+        var candidate = ZonedDateTime.of(
+            nowZoned.toLocalDate().atTime(hour, minute), zone
+        )
+        if (candidate.toInstant().toEpochMilli() <= now) {
+            candidate = candidate.plusDays(intervalDays.coerceAtLeast(1).toLong())
         }
-        return candidate
+        return candidate.toInstant().toEpochMilli()
     }
 
     /**
