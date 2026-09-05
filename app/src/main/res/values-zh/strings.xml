@@ -416,6 +416,7 @@
     <string name="lan_error_invalid_ip">请输入合法的 IP:端口，如 192.168.1.100:52026</string>
     <string name="lan_error_invalid_code_length">配对码必须为 6 位数字</string>
     <string name="lan_error_wrong_code">配对码错误或解密失败</string>
+    <string name="lan_error_too_many_attempts">失败连接尝试过多。请停止传输并重新开始。</string>
     <string name="lan_error_connection">连接失败：%1$s</string>
     <string name="lan_security_tip">数据经 6 位配对码端到端 AES-256-GCM 加密传输，局域网内的第三方无法解密或窃听。</string>
     <string name="filter_all">全部</string>

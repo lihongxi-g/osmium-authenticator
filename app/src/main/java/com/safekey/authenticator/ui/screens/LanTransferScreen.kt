@@ -172,10 +172,11 @@ private fun SendTabContent(vm: MainViewModel) {
                 },
                 onError = { err ->
                     isTransferring = false
-                    if (err == "NO_WIFI") {
-                        errorText = context.getString(R.string.lan_error_no_wifi)
-                    } else {
-                        errorText = err
+                    when (err) {
+                        "NO_WIFI" -> errorText = context.getString(R.string.lan_error_no_wifi)
+                        LanTransferServer.ERR_TOO_MANY_FAILED_ATTEMPTS ->
+                            errorText = context.getString(R.string.lan_error_too_many_attempts)
+                        else -> errorText = err
                     }
                 }
             )

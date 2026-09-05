@@ -418,6 +418,7 @@
     <string name="lan_error_invalid_ip">Please enter a valid IP:Port, e.g. 192.168.1.100:52026</string>
     <string name="lan_error_invalid_code_length">Pairing code must be 6 digits</string>
     <string name="lan_error_wrong_code">Wrong pairing code or decryption failed</string>
+    <string name="lan_error_too_many_attempts">Too many failed connection attempts. Please stop and restart the transfer.</string>
     <string name="lan_error_connection">Connection failed: %1$s</string>
     <string name="lan_security_tip">Protected with end-to-end AES-256-GCM encryption derived from the pairing code. Third parties on the local network cannot intercept your accounts.</string>
     <string name="filter_all">All</string>

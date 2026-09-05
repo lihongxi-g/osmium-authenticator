@@ -7,6 +7,7 @@ import android.os.Build
 import android.util.Log
 import com.safekey.authenticator.model.VaultFile
 import com.safekey.authenticator.security.VaultIO
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -34,6 +35,12 @@ class LanTransferServer(
         const val SERVICE_TYPE = "_osmium-transfer._tcp."
         const val MAGIC_HEADER = "OSMIUM_TRANSFER_V1"
         const val MAGIC_ACK = "OSMIUM_TRANSFER_ACK"
+        const val ERR_TOO_MANY_FAILED_ATTEMPTS = "TOO_MANY_FAILED_ATTEMPTS"
+
+        /** A stalled/rogue peer must not pin a handler coroutine forever. */
+        private const val SOCKET_TIMEOUT_MS = 15_000
+        /** Failed exchanges allowed per server session (successes don't count). */
+        private const val MAX_FAILED_ATTEMPTS = 10
     }
 
     private var serverSocket: ServerSocket? = null
@@ -85,16 +92,13 @@ class LanTransferServer(
                         break
                     }
 
-                    if (attempts.incrementAndGet() > 10) {
-                        socket.close()
-                        withContext(Dispatchers.Main) {
-                            onError("Too many failed attempts. Restart transfer.")
-                        }
-                        break
-                    }
-
                     launch(Dispatchers.IO) {
+                        var failed = false
                         try {
+                            // A peer that connects and stalls must not pin this
+                            // coroutine (and the session's attempt budget) forever.
+                            socket.soTimeout = SOCKET_TIMEOUT_MS
+
                             withContext(Dispatchers.Main) {
                                 onClientConnected()
                             }
@@ -104,7 +108,7 @@ class LanTransferServer(
 
                             val magic = dis.readUTF()
                             if (magic != MAGIC_HEADER) {
-                                socket.close()
+                                failed = true
                                 return@launch
                             }
 
@@ -119,12 +123,27 @@ class LanTransferServer(
                             withContext(Dispatchers.Main) {
                                 onTransferSuccess(vault.accounts.size)
                             }
+                        } catch (e: CancellationException) {
+                            throw e
                         } catch (e: Exception) {
+                            // Read timeout, protocol error or socket error — any
+                            // failed exchange counts toward the attempt limit.
+                            failed = true
                             Log.d(TAG, "Transfer handler error: ${e.message}")
                         } finally {
-                            try {
-                                socket.close()
-                            } catch (_: Exception) {}
+                            // Only failed exchanges consume the budget, so a
+                            // port scanner or stalled peer cannot kill a
+                            // working session; successful transfers never do.
+                            if (failed && attempts.incrementAndGet() > MAX_FAILED_ATTEMPTS) {
+                                running.set(false)
+                                runCatching {
+                                    withContext(Dispatchers.Main) {
+                                        onError(ERR_TOO_MANY_FAILED_ATTEMPTS)
+                                    }
+                                }
+                                runCatching { serverSocket?.close() }
+                            }
+                            runCatching { socket.close() }
                         }
                     }
                 }
