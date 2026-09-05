@@ -1,37 +1,40 @@
-# Osmium v2.3.9 / Osmium v2.3.9
+# Osmium v2.3.9（紧急修复版 / Emergency fix）
 
-**发布日期 / Release date: 2026-09-04**
+**发布日期 / Release date: 2026-09-05**
+
+> 版本号与 versionCode 与 v2.3.9 正式版一致（v2.3.9 / 46），APK 文件名带
+> `-emergency-fix1` 后缀用于区分。若已安装 v2.3.9，直接覆盖安装即可。
 
 ## 中文更新说明
 
-- 修复主页和设置页从子页面返回后滚动位置跳回顶部的问题。
-- 新增“标签”二级设置页和可选的标签功能开关；关闭后主页、账户编辑页和标签管理内容不显示标签，入口仍保留以便重新开启。
-- 没有创建标签时，主页顶部不显示“未分类 / Uncategorized”筛选项，也不显示空筛选条。
-- 标签支持低饱和调色盘与自定义 `#RRGGBB` 颜色，旧备份中的命名颜色继续兼容。
-- 局域网快捷传输已在本次版本中正式提供：同一 Wi‑Fi 下两台设备通过 6 位配对码建立临时加密连接，接收端可预览并选择导入，不经过 Osmium 云端或 WebDAV 服务器。
-- GitHub 文档、应用内用户协议/隐私政策和 WebDAV 教程已同步更新。
+本版为 v2.3.9 的紧急修复，无新功能，包含以下修复：
+
+- 修复「随机排序」模式下，应用启动后新添加（或导入）的账户不会出现在列表中、必须彻底退出重进才能看到的问题；现在新账户会立即追加到列表末尾，启动时的原有排序保持不变。
+- 手动添加或编辑 HOTP 账户时，现在可以直接设置起始计数器。此前新账户只能从 0 开始、且详情页只能每次 +1，迁移计数器已前进的存量账户几乎不可行。
+- 从账户详情页复制验证码现在会计入「按复制次数排序」的统计，与主页卡片行为一致。
+- 局域网快捷传输服务器加固：对端连接增加 15 秒读取超时；只有失败的交换才消耗尝试次数，成功的传输或无关的杂散连接不再导致发送端服务器被强制关闭；相关错误提示已本地化。
+- 自动备份的调度计算改用 java.time，正确处理夏令时切换日的跳变与重复时刻（对不使用夏令时的时区无行为变化）。
 
 ## English release notes
 
-- Fixed home and settings scroll positions resetting after returning from child screens.
-- Added a second-level Tags settings page and optional tag switch. Disabling it hides tag UI from the home screen, account editor and tag-management content while keeping the entry available to re-enable it.
-- The home screen no longer shows the Uncategorized filter or an empty filter row before any tags are created.
-- Added a muted palette and custom `#RRGGBB` tag colors, while keeping named colors in older backups compatible.
-- LAN quick transfer is now officially available in this release: two devices on the same Wi‑Fi establish a temporary encrypted connection with a 6-digit pairing code; the receiver can preview and selectively import accounts. No Osmium cloud or WebDAV server is involved.
-- Updated GitHub documentation, in-app Terms/Privacy text and the WebDAV guide.
+This is an emergency-fix build of v2.3.9 — the versionCode stays 46 and the
+APK filenames carry the `-emergency-fix1` suffix to tell it apart from the
+original v2.3.9 release assets. Install over an existing v2.3.9 directly.
 
-## 版本与资产 / Version and assets
-
-- `versionName 2.3.9`
-- `versionCode 46`
-- Minimum Android: 8.0 / API 26
-- Official ABI-split asset names:
-  - `osmium-2.3.9-arm64-v8a.apk`
-  - `osmium-2.3.9-armeabi-v7a.apk`
-  - `osmium-2.3.9-x86_64.apk`
-
-SHA-256：arm64-v8a `a8b1d159436e47dd0396770288137dcf2282aeb88ca6ef5b8016962a267a1aca`；armeabi-v7a `f501e4382575ad8f18fe0b7fdd8bc7559f5d5bbdce800752e1485a4c77fff962`；x86_64 `eaac7376f3554d41d326b3966662fdb6a9e6358b836e61e8a3862956d05fae4e`。这些值来自 GitHub Release 实际上传资产的 digest，已与对应 CI 产物重新构建得到的文件名和大小核对。
-
-APK signing certificate SHA-256 / 签名证书 SHA-256：
-
-`B65BB0131CAA22C45D99EA4E2C3E99B3980EAE0DC5647190F41A2878E6D88412`
+- Fixed accounts added or imported after launch being invisible under the
+  "shuffle once per launch" sort mode until the app was fully restarted. New
+  accounts now appear immediately at the end of the list without disturbing
+  the launch-time order.
+- Manually adding or editing a HOTP account now lets you set the starting
+  counter directly. Previously every new HOTP account started at 0 with no
+  way to jump ahead, making migration of existing mid-sequence accounts
+  impractical.
+- Copying a code from the account detail screen now counts toward the
+  "sort by copies" ordering, matching the home-screen cards.
+- LAN transfer server hardening: peer sockets now have a 15 s read timeout,
+  only failed exchanges consume the attempt budget (successful transfers or
+  stray connections no longer shut the sender down), and the shutdown notice
+  is localised.
+- Auto-backup scheduling now computes next-run times with java.time and
+  handles DST transitions correctly (no behaviour change for zones without
+  DST).
