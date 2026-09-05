@@ -139,9 +139,19 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                 }
                 AppSettings.SORT_COPIES -> list.sortedByDescending { it.account.copyCount }
                 AppSettings.SORT_RANDOM -> {
-                    // shuffled once per launch (stable across ticks)
+                    // Shuffled once per launch (stable across ticks). Accounts
+                    // added AFTER that first shuffle are not in the list and
+                    // used to be silently dropped (invisible until restart) —
+                    // append any new ids at the end so they appear immediately
+                    // without disturbing the existing launch-time order.
                     if (randomOrder.isEmpty()) {
                         randomOrder = list.map { it.account.id }.shuffled()
+                    } else {
+                        val known = randomOrder.toHashSet()
+                        val added = list.map { it.account.id }.filterNot { it in known }
+                        if (added.isNotEmpty()) {
+                            randomOrder = randomOrder + added
+                        }
                     }
                     randomOrder.mapNotNull { id -> list.firstOrNull { it.account.id == id } }
                 }
