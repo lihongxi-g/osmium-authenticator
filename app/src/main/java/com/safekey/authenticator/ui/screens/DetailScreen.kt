@@ -152,6 +152,7 @@ fun DetailScreen(
                             .fillMaxWidth()
                             .clickable {
                                 ClipboardHelper.copy(context, ui.code)
+                                vm.incrementCopyCount(account.id)
                                 vm.showToast(context.getString(R.string.code_copied))
                             }
                             .padding(vertical = 24.dp),
