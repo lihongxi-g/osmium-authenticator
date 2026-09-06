@@ -78,7 +78,7 @@ class RaivoImporterTest {
     fun `detect only claims raivo-shaped json`() {
         assertTrue(RaivoImporter.detect(fixture("raivo_sample.json")))
         assertTrue(RaivoImporter.detect(fixture("raivo_single_object.json")))
-        assertFalse(RaivoImporter.detect(fixture("lastpass_accounts.json")))
+        assertFalse(RaivoImporter.detect(fixture("aegis_plain.json")))
         assertFalse(RaivoImporter.detect(fixture("2fas_v4.json")))
         assertFalse(RaivoImporter.detect(""))
         // "kind" alone is not enough — account and secret must be there too

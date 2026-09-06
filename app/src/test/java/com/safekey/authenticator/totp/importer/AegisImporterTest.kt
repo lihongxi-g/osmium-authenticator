@@ -91,8 +91,8 @@ class AegisImporterTest {
     fun `detect only claims aegis-shaped json`() {
         assertTrue(AegisImporter.detect(fixture("aegis_plain.json")))
         assertTrue(AegisImporter.detect(fixture("aegis_encrypted.json")))
-        assertFalse(AegisImporter.detect(fixture("andotp_plain.json")))
         assertFalse(AegisImporter.detect(fixture("2fas_v4.json")))
+        assertFalse(AegisImporter.detect(fixture("raivo_sample.json")))
         assertFalse(AegisImporter.detect("""{"db":{"entries":[]}}"""))
         assertFalse(AegisImporter.detect(""))
     }
