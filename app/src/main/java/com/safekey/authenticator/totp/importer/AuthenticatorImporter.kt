@@ -14,7 +14,9 @@ import com.safekey.authenticator.model.VaultAccount
  *  - Aegis importers (GPL-3.0): beemdevelopment/Aegis
  *    `app/src/main/java/com/beemdevelopment/aegis/importers/`
  *  - 2FAS: twofas/2fas-android + Aegis test fixtures
- *  - Community converters for LastPass (MIT) and Raivo samples.
+ *  - Raivo legacy format: OtpTranslate article (tygertec.com) + samples
+ *    accepted by Ente Auth's Raivo importer.
+ * Attribution for these references is shown in-app (About → Attributions).
  */
 interface AuthenticatorImporter {
 

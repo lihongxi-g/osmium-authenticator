@@ -8,7 +8,7 @@ Osmium does not collect, sell or use personal data for advertising or analytics.
 
 Storage: authenticator secrets, account names, issuers, tags and tag colors are stored on this device only, encrypted with AES-256-GCM using a non-exportable Android Keystore key. Exported backups are encrypted with your password (PBKDF2-HMAC-SHA256 with 120,000 iterations, then AES-256-GCM). The WebDAV login and the automatic-backup password are stored locally, encrypted with the Keystore key.
 
-Import: importing from Google Authenticator QR codes and from Aegis, 2FAS, andOTP, Raivo OTP and LastPass Authenticator export files happens entirely on this device. The selected file is read into memory to build the import preview; it is not copied, uploaded or sent anywhere. Only the entries you confirm are saved into the encrypted vault; everything else is discarded.
+Import: importing from Google Authenticator QR codes and from Aegis, 2FAS and Raivo OTP export files happens entirely on this device. The selected file is read into memory to build the import preview; it is not copied, uploaded or sent anywhere. Only the entries you confirm are saved into the encrypted vault; everything else is discarded.
 
 Network: the app connects only when the relevant feature is enabled or initiated. WebDAV connects to the address you configure; GitHub update checks request public version information without account or device data; LAN quick transfer connects two devices on the same Wi-Fi for one temporary encrypted session.
 
