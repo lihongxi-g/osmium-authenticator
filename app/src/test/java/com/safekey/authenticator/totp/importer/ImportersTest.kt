@@ -22,15 +22,13 @@ class ImportersTest {
     private val samples: Map<String, String> = mapOf(
         "aegis_plain.json" to "aegis",
         "aegis_encrypted.json" to "aegis", // still an Aegis file — parse rejects it later
-        "andotp_plain.json" to "andotp",
         "2fas_v1.json" to "2fas",
         "2fas_v2.json" to "2fas",
         "2fas_v3.json" to "2fas",
         "2fas_v4.json" to "2fas",
         "2fas_v4_encrypted.json" to "2fas",
         "raivo_sample.json" to "raivo",
-        "raivo_single_object.json" to "raivo",
-        "lastpass_accounts.json" to "lastpass"
+        "raivo_single_object.json" to "raivo"
     )
 
     @Test
@@ -61,6 +59,21 @@ class ImportersTest {
     }
 
     @Test
+    fun `removed formats are no longer detected`() {
+        // andOTP plaintext exports and LastPass accounts.json are intentionally
+        // unsupported since v2.4.0 — they must not resolve to any importer.
+        val removed = listOf(
+            // andOTP plaintext array shape
+            """[{"type":"TOTP","secret":"JBSWY3DPEHPK3PXP","issuer":"GitHub","label":"octocat","digits":6,"period":30,"algorithm":"SHA1"}]""",
+            // LastPass accounts.json shape
+            """{"accounts":[{"issuerName":"GitHub","userName":"octocat","secret":"JBSWY3DPEHPK3PXP"}]}"""
+        )
+        removed.forEach { content ->
+            assertNull("must not detect a removed format: ${content.take(60)}", Importers.find(content))
+        }
+    }
+
+    @Test
     fun `garbage and unrelated files are not detected`() {
         val probes = listOf(
             "",
@@ -74,8 +87,7 @@ class ImportersTest {
             """{"services":[]}""",
             // Aegis needs header too
             """{"db":{"entries":[]}}""",
-            // andOTP needs a real JSON array of entry objects; this string
-            // array carries no format markers at all
+            // andOTP-like shape without the format markers
             """["one","two","three"]""",
             // A root array whose only object lacks the format markers
             """[{"foo":"bar"}]"""
@@ -86,14 +98,6 @@ class ImportersTest {
     }
 
     @Test
-    fun `empty-but-structurally-valid exports are still detected`() {
-        // These look like real (empty) exports — detection must succeed so
-        // the UI can show the "no accounts" message instead of "unknown file".
-        assertEquals("lastpass", Importers.find("""{"accounts":[]}""")?.id)
-        assertEquals("aegis", Importers.find("""{"version":1,"header":{"slots":null,"params":null},"db":{"version":1,"entries":[]}}""")?.id)
-    }
-
-    @Test
     fun `unrecognized JSON roots do not throw`() {
         assertNull(Importers.find("null"))
         assertNull(Importers.find("12345"))
@@ -101,8 +105,15 @@ class ImportersTest {
     }
 
     @Test
+    fun `empty-but-structurally-valid exports are still detected`() {
+        // These look like real (empty) exports — detection must succeed so
+        // the UI can show the "no accounts" message instead of "unknown file".
+        assertEquals("aegis", Importers.find("""{"version":1,"header":{"slots":null,"params":null},"db":{"version":1,"entries":[]}}""")?.id)
+    }
+
+    @Test
     fun `BOM and whitespace do not break detection`() {
-        assertEquals("andotp", Importers.find("\uFEFF  " + fixture("andotp_plain.json"))?.id)
+        assertEquals("aegis", Importers.find("\uFEFF  " + fixture("aegis_plain.json"))?.id)
         assertEquals("2fas", Importers.find("\n\t" + fixture("2fas_v4.json"))?.id)
     }
 

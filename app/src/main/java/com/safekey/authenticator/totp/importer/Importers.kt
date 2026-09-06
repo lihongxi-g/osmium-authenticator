@@ -8,13 +8,11 @@ package com.safekey.authenticator.totp.importer
  */
 object Importers {
 
-    /** All registered importers, in detection-priority order (object shapes before arrays). */
+    /** All registered importers, in detection-priority order. */
     val all: List<AuthenticatorImporter> = listOf(
         AegisImporter,
         TwoFasImporter,
-        AndOtpImporter,
-        RaivoImporter,
-        LastPassImporter
+        RaivoImporter
     )
 
     /** First importer whose [AuthenticatorImporter.detect] matches, or null. */
