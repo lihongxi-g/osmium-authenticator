@@ -37,6 +37,8 @@ sealed class Screen {
     object Manual : Screen()
     object SortOrder : Screen()
     object GoogleImport : Screen()
+    /** File import from other authenticators (Aegis/2FAS/andOTP/Raivo/LastPass). */
+    object FileImport : Screen()
     object Tags : Screen()
 }
 
