@@ -44,14 +44,11 @@ jobs:
         run: |
           set -euo pipefail
           version=$(grep -oP 'versionName\s*=\s*"\K[^"]+' app/build.gradle.kts)
-          test "$version" = "2.3.9"
+          test "$version" = "2.4.0"
           mkdir -p dist
           for abi in arm64-v8a armeabi-v7a x86_64; do
             source="app/build/outputs/apk/release/app-${abi}-release.apk"
-            # Emergency-fix builds keep the same versionCode/versionName as the
-            # published release; the filename suffix tells them apart so a
-            # test APK can never be mistaken for the release asset.
-            target="dist/osmium-${version}-emergency-fix1-${abi}.apk"
+            target="dist/osmium-${version}-${abi}.apk"
             test -s "$source"
             cp "$source" "$target"
           done
