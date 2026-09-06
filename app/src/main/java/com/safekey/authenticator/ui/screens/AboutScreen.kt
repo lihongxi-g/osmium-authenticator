@@ -40,6 +40,7 @@ import com.safekey.authenticator.security.AppLog
 import com.safekey.authenticator.security.ClipboardHelper
 import com.safekey.authenticator.ui.components.AppIcons
 import com.safekey.authenticator.ui.components.SimpleTopBar
+import com.safekey.authenticator.ui.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -111,6 +112,7 @@ fun AboutScreen(
             Spacer(Modifier.height(8.dp))
             AboutLinkRow(stringResource(R.string.about_terms_title)) { showTerms = true }
             AboutLinkRow(stringResource(R.string.about_privacy_title)) { showPrivacy = true }
+            AboutLinkRow(stringResource(R.string.attributions_title)) { vm.nav.push(Screen.Attributions) }
 
             Spacer(Modifier.height(24.dp))
             Divider(color = MaterialTheme.colorScheme.surfaceVariant)

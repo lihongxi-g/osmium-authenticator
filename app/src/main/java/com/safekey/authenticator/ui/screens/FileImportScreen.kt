@@ -45,7 +45,7 @@ import kotlinx.coroutines.withContext
 
 /**
  * Import accounts from another authenticator's export FILE (Aegis / 2FAS /
- * andOTP / Raivo OTP / LastPass Authenticator).
+ * Raivo OTP).
  *
  * Flow: SAF file picker → read text → auto-detect the source format
  * (Importers.find — the user never picks a source app) → parse → merge with

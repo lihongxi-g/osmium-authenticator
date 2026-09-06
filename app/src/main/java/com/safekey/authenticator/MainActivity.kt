@@ -69,6 +69,7 @@ import com.safekey.authenticator.ui.navigation.Screen
 import com.safekey.authenticator.ui.screens.AboutScreen
 import com.safekey.authenticator.ui.screens.AccountFormScreen
 import com.safekey.authenticator.ui.screens.AccountsScreen
+import com.safekey.authenticator.ui.screens.AttributionsScreen
 import com.safekey.authenticator.ui.screens.AutoBackupScreen
 import com.safekey.authenticator.ui.screens.DetailScreen
 import com.safekey.authenticator.ui.screens.ExportScreen
@@ -82,6 +83,7 @@ import com.safekey.authenticator.ui.screens.PinVerifyScreen
 import com.safekey.authenticator.ui.screens.ScanScreen
 import com.safekey.authenticator.ui.screens.SettingsScreen
 import com.safekey.authenticator.ui.screens.TagSettingsScreen
+import com.safekey.authenticator.ui.screens.ThirdPartyImportScreen
 import com.safekey.authenticator.ui.screens.TagsScreen
 import com.safekey.authenticator.ui.screens.ShareQrScreen
 import com.safekey.authenticator.ui.screens.SortOrderScreen
@@ -927,6 +929,16 @@ class MainActivity : FragmentActivity() {
                         vm = vm,
                         onBack = { vm.nav.pop() },
                         onImported = { vm.nav.pop() }
+                    )
+
+                    is Screen.ThirdPartyImport -> ThirdPartyImportScreen(
+                        vm = vm,
+                        onBack = { vm.nav.pop() }
+                    )
+
+                    is Screen.Attributions -> AttributionsScreen(
+                        vm = vm,
+                        onBack = { vm.nav.pop() }
                     )
 
                     is Screen.Tags -> TagsScreen(

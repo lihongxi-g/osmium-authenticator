@@ -346,17 +346,10 @@ fun SettingsScreen(
             SectionHeader(stringResource(R.string.settings_data))
 
             SettingRow(
-                icon = AppIcons.Devices,
-                title = stringResource(R.string.fileimport_title),
-                description = stringResource(R.string.fileimport_desc),
-                onClick = { vm.nav.push(Screen.FileImport) }
-            )
-
-            SettingRow(
                 icon = AppIcons.ImportExport,
-                title = stringResource(R.string.migration_title),
-                description = stringResource(R.string.migration_desc),
-                onClick = { vm.nav.push(Screen.GoogleImport) }
+                title = stringResource(R.string.thirdparty_import_title),
+                description = stringResource(R.string.thirdparty_import_desc),
+                onClick = { vm.nav.push(Screen.ThirdPartyImport) }
             )
 
             SettingRow(
