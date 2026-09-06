@@ -1,0 +1,38 @@
+[
+  {
+    "kind": "TOTP",
+    "account": "google@gmail.com",
+    "secret": "JBSWY3DPEHPK3PXP",
+    "issuer": "Google.com",
+    "timer": "30",
+    "digits": "6",
+    "counter": "0",
+    "algorithm": "SHA1",
+    "iconType": "raivo_repository",
+    "iconValue": "google.com/google-gmail.png"
+  },
+  {
+    "kind": "TOTP",
+    "account": "elijah",
+    "secret": "5OM4WOOGPLQEF6UGN3CPEOOLWU",
+    "issuer": "SPDX",
+    "timer": "20",
+    "digits": "8",
+    "counter": "0",
+    "algorithm": "SHA256",
+    "iconType": "",
+    "iconValue": ""
+  },
+  {
+    "kind": "HOTP",
+    "account": "james",
+    "secret": "YOOMIXWS5GN6RTBPUFFWKTW5M4",
+    "issuer": "Issuu",
+    "timer": "30",
+    "digits": "6",
+    "counter": "1",
+    "algorithm": "SHA1",
+    "iconType": "",
+    "iconValue": ""
+  }
+]

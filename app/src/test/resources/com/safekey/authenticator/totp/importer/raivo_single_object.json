@@ -1,0 +1,12 @@
+{
+  "kind": "TOTP",
+  "account": "user@example.com",
+  "secret": "7ELGJSGXNCCTV3O6LKJWYFV2RA",
+  "issuer": "Airbnb",
+  "timer": "50",
+  "digits": "8",
+  "counter": "0",
+  "algorithm": "SHA512",
+  "iconType": "raivo_repository",
+  "iconValue": "airbnb/airbnb.png"
+}
