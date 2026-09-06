@@ -8,6 +8,7 @@ Network features are optional: user-configured WebDAV backup, GitHub update chec
 
 - **TOTP and HOTP** — SHA-1 / SHA-256 / SHA-512, 6 or 8 digits, periods from 1 to 600 seconds
 - **Google Authenticator migration** — scan the “Transfer accounts” QR code and import supported accounts in a batch
+- **Import from other authenticators** — restore accounts from plaintext export files of Aegis, 2FAS, andOTP, Raivo OTP and LastPass Authenticator (Settings → Data); the format is detected automatically and every entry is previewed with checkboxes before merging; unsupported entries are listed with a reason instead of being silently dropped
 - **Encrypted backup** — export a password-protected encrypted file and restore it on a device running a compatible Osmium version
 - **WebDAV backup** — upload encrypted backups to a WebDAV server you configure (NAS, PC, or another phone) and restore them; the server receives ciphertext only
 - **LAN quick transfer** — connect two devices to the same Wi-Fi and transfer accounts through end-to-end encryption derived from a 6-digit pairing code; no cloud server is involved; the receiver can preview and select accounts
