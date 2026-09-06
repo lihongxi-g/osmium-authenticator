@@ -149,6 +149,30 @@
     <string name="migration_hotp_badge">HOTP</string>
     <string name="migration_totp_badge">TOTP</string>
     <string name="migration_imported">已导入 %1$d 个账户</string>
+
+    <string name="fileimport_title">从其他验证器导入</string>
+    <string name="fileimport_desc">从 Aegis、2FAS、andOTP、Raivo 或 LastPass 的导出文件恢复账户</string>
+    <string name="fileimport_instructions">选择其他验证器应用导出的备份文件。Osmium 会自动识别格式，并在导入前展示预览。\n\n支持的来源：\n• Aegis —— 无密码（明文）导出\n• andOTP —— 明文备份（JSON）\n• 2FAS —— 无密码导出的 .2fas 备份\n• Raivo OTP —— 旧版明文 JSON 导出\n• LastPass Authenticator —— accounts.json\n\n暂不支持带密码加密的导出：请在来源应用中改用无密码（明文）导出后再试。</string>
+    <string name="fileimport_security_note">文件仅在本机读取，不会上传。导出文件包含你的密钥，导入后请及时删除。</string>
+    <string name="fileimport_pick_button">选择导出文件</string>
+    <string name="fileimport_pick_another">重新选择文件</string>
+    <string name="fileimport_empty_file">所选文件为空。</string>
+    <string name="fileimport_found">发现 %1$d 个可导入的账户</string>
+    <string name="fileimport_import_button">导入所选</string>
+    <string name="fileimport_will_update">已存在，导入后将更新</string>
+    <string name="fileimport_subtitle">%1$s · %2$s</string>
+    <string name="fileimport_steam_badge">Steam</string>
+    <string name="fileimport_error_encrypted">此文件带密码加密，暂不支持。请在来源应用中改用无密码（明文）导出，再重新导入。</string>
+    <string name="fileimport_error_not_json">无法按 JSON 解析此文件。请选择 Aegis、andOTP、2FAS、Raivo OTP 或 LastPass Authenticator 的明文导出文件。</string>
+    <string name="fileimport_error_version">此导出由较新版本的应用生成，格式暂不支持。请更新 Osmium，或在来源应用中重新导出账户。</string>
+    <string name="fileimport_error_empty">文件中没有找到账户。</string>
+    <string name="fileimport_error_unknown">无法识别此文件格式。支持：Aegis、andOTP、2FAS、Raivo OTP、LastPass Authenticator 的明文导出文件；暂不支持加密（带密码）导出。</string>
+    <string name="fileimport_error_read">无法读取文件：%1$s</string>
+    <string name="fileimport_reason_type">账户类型不受支持</string>
+    <string name="fileimport_reason_algorithm">算法不受支持（仅 SHA1/SHA256/SHA512）</string>
+    <string name="fileimport_reason_digits">验证码位数不受支持（仅 6/8 位）</string>
+    <string name="fileimport_reason_secret">密钥无效，无法导入</string>
+
     <string name="loading">加载中…</string>
     <string name="manual_title">使用手册</string>
     <string name="manual_entry_desc">功能介绍与注意事项</string>
@@ -327,8 +351,8 @@
     <string name="manual_webdav_body">设置 → 数据 → WebDAV 备份会将加密导出文件上传到 WebDAV 服务器。填写服务器地址（主机名或局域网 IP）、用户名和密码。\n\n恢复功能会列出服务器上的备份供你选择；“管理备份”可以删除该服务器上的旧备份。服务器只会收到密码加密的数据；此功能只连接你配置的地址。\n\n如果地址经常变化，可以为 NAS 设置固定 IP 或使用主机名。</string>
     <string name="about_terms_title">用户协议</string>
     <string name="about_privacy_title">隐私政策</string>
-    <string name="terms_body">安装或使用 Osmium 即表示你同意以下条款。\n\nOsmium 是基于 GNU 通用公共许可证第三版或更高版本（GPL-3.0-or-later；许可证见 LICENSE/COPYING）发布的免费开源软件。\n\n本软件按“现状”提供，不附带任何明示或默示的担保。在法律允许的最大范围内，开发者不对因使用或无法使用本软件而产生的损失承担责任。\n\n你的责任：\n• 保管好密钥、PIN 和备份密码。开发者及第三方无法恢复加密密钥。\n• 自行保存备份。卸载应用或清除数据会永久删除本地账户和设置；自动备份受 Android 和厂商调度策略影响。局域网传输是用户主动发起的临时传输，不是云同步。\n• 核对接收内容。局域网传输要求同一 Wi‑Fi 和 6 位配对码；请检查导入预览，并只把配对码提供给预期接收方。\n• 自毁 PIN 不可逆；请保持设备时间准确并遵守法律。\n\n你可以将 Osmium 用于自己的双因素认证，以及在你控制或获授权的设备之间迁移账户。\n\nOsmium 不运行账号体系，也不提供云同步。应用可能连接你配置的 WebDAV 服务器、用于可选版本检查的 GitHub Releases API，或局域网传输期间的另一台设备。局域网传输使用由配对码派生的 AES‑256‑GCM 加密，不经过 Osmium 云服务器。\n\n联系方式：zhif0776@hotmail.com · https://t.me/osmium2fa</string>
-    <string name="privacy_body">Osmium 不收集、出售或用于广告分析个人数据。没有账号体系、注册、统计分析、广告 SDK、崩溃上报，也没有 Osmium 云端账号或同步服务器。\n\n存储：验证器密钥、账户名、服务商、标签及标签颜色存储在设备上，使用 Android Keystore 中不可导出的密钥进行 AES‑256‑GCM 加密。导出备份使用你的密码（PBKDF2 + AES‑256‑GCM）加密；WebDAV 登录信息在本机存储并受 Keystore 保护。\n\n网络：只有在相应功能启用或主动执行时才会连接。WebDAV 连接你配置的地址；GitHub 更新检查只请求公开版本信息，不发送账户或设备数据；局域网快捷传输连接同一 Wi‑Fi 下的两台设备进行临时加密传输。\n\n自动备份使用 Android 系统调度，可能受厂商省电策略推迟。相机扫描、生物识别和设备凭据由 Android 在本机处理。Wi‑Fi 状态和组播用于发现局域网设备；离开传输页面后会停止发现和服务。WRITE_EXTERNAL_STORAGE 仅适用于 Android 8/9 自动备份；ACCESS_LOCAL_NETWORK 为未来平台要求预先声明，当前 targetSdk 34 不请求。\n\n我们不向广告商、分析服务或 Osmium 云端共享数据。WebDAV 服务器会收到你上传的加密文件；预期接收设备会收到你主动传输的数据；GitHub 只收到公开版本查询。卸载或清除数据不会删除你保存在其他位置的副本。\n\n联系方式：zhif0776@hotmail.com · https://t.me/osmium2fa</string>
+    <string name="terms_body">安装或使用 Osmium 即表示你同意以下条款。\n\nOsmium 是基于 GNU 通用公共许可证第三版或更高版本（GPL-3.0-or-later；许可证见 LICENSE/COPYING）发布的免费开源软件。\n\n本软件按“现状”提供，不附带任何明示或默示的担保。在法律允许的最大范围内，开发者不对因使用或无法使用本软件而产生的损失承担责任。\n\n你的责任：\n• 保管好密钥、PIN 和备份密码。加密密钥无法由开发者或任何第三方恢复；忘记 PIN、丢失备份密码或清除应用数据都无法找回。\n• 自行保存备份。卸载应用或清除数据会永久删除本地账户和设置；自动备份依赖 Android 与厂商的调度策略，可能被省电策略推迟或阻止。\n• 只导入你信任的文件。Osmium 支持从 Google Authenticator 的转移二维码，以及 Aegis、2FAS、andOTP、Raivo OTP、LastPass Authenticator 的导出文件导入。导入前请逐条核对预览，确认文件确实来自你要迁出的验证器；导出文件以明文包含你的密钥，用后请删除。\n• 核对接收内容。局域网快捷传输要求同一 Wi-Fi 与 6 位配对码；请检查导入预览，只把配对码提供给预期接收方。\n• 自毁 PIN 不可逆。请保持设备时间准确，并遵守你所配置的服务器与设备适用的法律和网络规则。\n\n你可以将 Osmium 用于自己的双因素认证，以及在你控制或获授权的设备之间迁移账户。\n\nOsmium 不运行账号体系，也不提供云同步；所有导入功能完全在本机完成。应用可能连接你配置的 WebDAV 服务器、用于可选版本检查的 GitHub Releases API，或局域网传输期间的另一台设备。局域网传输使用由配对码派生的 AES-256-GCM 加密，不经过 Osmium 云服务器。\n\n联系方式：zhif0776@hotmail.com · https://t.me/osmium2fa</string>
+    <string name="privacy_body">Osmium 不收集、出售或用于广告分析个人数据。没有账号体系、注册、广告 SDK 或崩溃上报，也没有 Osmium 云端账号或同步服务器。\n\n存储：验证器密钥、账户名、服务商、标签及标签颜色仅存储在本设备上，使用 Android Keystore 中不可导出的密钥进行 AES-256-GCM 加密。导出备份使用你的密码加密（PBKDF2-HMAC-SHA256，120,000 次迭代后 AES-256-GCM）。WebDAV 登录信息与自动备份密码在本机加密存储，受 Keystore 保护。\n\n导入：无论是 Google Authenticator 二维码迁移，还是从 Aegis、2FAS、andOTP、Raivo OTP、LastPass Authenticator 的导出文件导入，全部在本机完成。所选文件只会读入内存用于生成导入预览，不会被复制、上传或发送到任何地方；只有你确认的条目才会写入加密库，其余数据随即丢弃。\n\n网络：只有在相应功能启用或主动执行时才会连接。WebDAV 连接你配置的地址；GitHub 更新检查只请求公开版本信息，不发送账户或设备数据；局域网快捷传输连接同一 Wi-Fi 下的两台设备，进行一次性临时加密传输。\n\n自动备份使用 Android 系统调度，可能被厂商省电策略推迟。备份会以加密文件写入你配置的 WebDAV 服务器或 Download/Osmium 目录（默认保留最近 5 份，最多可设 10 份，更旧的会自动清理）。相机扫码、二维码识别与生物识别由 Android 在本机处理；仅当传输页面打开时才会使用 Wi-Fi 状态与组播进行设备发现。WRITE_EXTERNAL_STORAGE 仅适用于 Android 8/9 上的自动备份；ACCESS_LOCAL_NETWORK 为未来平台要求预先声明，当前 targetSdk 34 不请求。\n\n我们不向广告商、分析服务或 Osmium 云端共享数据。WebDAV 服务器会收到你上传的加密文件；预期接收设备会收到你主动传输的数据；GitHub 只收到公开版本查询。卸载或清除数据不会删除你保存在其他位置的副本。\n\n联系方式：zhif0776@hotmail.com · https://t.me/osmium2fa</string>
 
     <string name="webdav_manage">管理备份</string>
     <string name="webdav_delete">删除</string>
