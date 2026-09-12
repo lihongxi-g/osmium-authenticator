@@ -58,7 +58,7 @@ class OsmiumAutofillService : AutofillService() {
     private class ParsedRequest(
         val packageName: String,
         val fieldInfos: List<FieldInfo>,
-        val nodes: List<android.service.autofill.AssistStructure.ViewNode>,
+        val nodes: List<android.app.assist.AssistStructure.ViewNode>,
         val detection: Detection,
     )
 
@@ -115,9 +115,9 @@ class OsmiumAutofillService : AutofillService() {
         val app = applicationContext as? SafeKeyApp ?: return null
 
         val fields = ArrayList<FieldInfo>()
-        val nodes = ArrayList<android.service.autofill.AssistStructure.ViewNode>()
+        val nodes = ArrayList<android.app.assist.AssistStructure.ViewNode>()
 
-        fun visit(node: android.service.autofill.AssistStructure.ViewNode?) {
+        fun visit(node: android.app.assist.AssistStructure.ViewNode?) {
             node ?: return
             val autofillId: AutofillId? = node.autofillId
             val autofillable = autofillId != null && node.autofillType != View.AUTOFILL_TYPE_NONE
