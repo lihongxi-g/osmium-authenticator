@@ -1,6 +1,6 @@
 # Privacy Policy
 
-*Effective date: September 6, 2026 · Osmium v2.4.0*
+*Effective date: September 12, 2026 · Osmium v2.5.0*
 
 *This document mirrors the in-app Privacy Policy (About screen).*
 
@@ -9,6 +9,8 @@ Osmium does not collect, sell or use personal data for advertising or analytics.
 Storage: authenticator secrets, account names, issuers, tags and tag colors are stored on this device only, encrypted with AES-256-GCM using a non-exportable Android Keystore key. Exported backups are encrypted with your password (PBKDF2-HMAC-SHA256 with 120,000 iterations, then AES-256-GCM). The WebDAV login and the automatic-backup password are stored locally, encrypted with the Keystore key.
 
 Import: importing from Google Authenticator QR codes and from Aegis, 2FAS and Raivo OTP export files happens entirely on this device. The selected file is read into memory to build the import preview; it is not copied, uploaded or sent anywhere. Only the entries you confirm are saved into the encrypted vault; everything else is discarded.
+
+Autofill (optional): if you choose Osmium as the system autofill service, it inspects only the requesting screen field metadata (type, id and hint) to decide whether a fill was requested on a one-time-code field. It never reads or stores what you type, generates codes on-device, and fills only the suggestion you tap; when your device supports it, filling first asks for your screen lock or biometrics. A small diagnostic record (the requesting app and the detection result — never field contents) is written to the local log, which leaves your device only if you export it yourself. The feature stays off until you select Osmium in system settings, and can be turned off there at any time.
 
 Network: the app connects only when the relevant feature is enabled or initiated. WebDAV connects to the address you configure; GitHub update checks request public version information without account or device data; LAN quick transfer connects two devices on the same Wi-Fi for one temporary encrypted session.
 
