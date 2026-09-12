@@ -12,6 +12,7 @@ Network features are optional: user-configured WebDAV backup, GitHub update chec
 - **Encrypted backup** — export a password-protected encrypted file and restore it on a device running a compatible Osmium version
 - **WebDAV backup** — upload encrypted backups to a WebDAV server you configure (NAS, PC, or another phone) and restore them; the server receives ciphertext only
 - **LAN quick transfer** — connect two devices to the same Wi-Fi and transfer accounts through end-to-end encryption derived from a 6-digit pairing code; no cloud server is involved; the receiver can preview and select accounts
+- **Autofill (opt-in)** — make Osmium your system autofill service and verification-code fields in other apps can be filled from your accounts; per-app bindings keep suggestions accurate, filling verifies your identity first when the device supports it, and only field metadata — never the text you type — is inspected
 - **Automatic backup** — schedule backups to WebDAV or the phone’s Download/Osmium folder, with configurable interval, time and retention
 - **Update checks** — optionally query the GitHub Releases API for public version information; no account or device data is sent, and the app never downloads or installs updates automatically
 - **Steam Guard** — manually add Steam accounts and generate 5-character alphanumeric codes
@@ -33,17 +34,17 @@ The live test page at **https://otp.osmium.im** supports TOTP, HOTP and Steam Gu
 
 ## Download
 
-Latest stable release: **Osmium v2.3.9** (`versionCode 46`). Choose the ABI matching your device:
+Latest stable release: **Osmium v2.4.0** (`versionCode 47`). Choose the ABI matching your device:
 
 | File | Architecture | Devices | Download |
 |---|---|---|---|
-| `osmium-2.3.9-arm64-v8a.apk` | arm64-v8a | Virtually all modern phones (recommended) | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.3.9/osmium-2.3.9-arm64-v8a.apk) |
-| `osmium-2.3.9-armeabi-v7a.apk` | armeabi-v7a | Older 32-bit phones | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.3.9/osmium-2.3.9-armeabi-v7a.apk) |
-| `osmium-2.3.9-x86_64.apk` | x86_64 | Android emulators | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.3.9/osmium-2.3.9-x86_64.apk) |
+| `osmium-2.4.0-arm64-v8a.apk` | arm64-v8a | Virtually all modern phones (recommended) | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.4.0/osmium-2.4.0-arm64-v8a.apk) |
+| `osmium-2.4.0-armeabi-v7a.apk` | armeabi-v7a | Older 32-bit phones | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.4.0/osmium-2.4.0-armeabi-v7a.apk) |
+| `osmium-2.4.0-x86_64.apk` | x86_64 | Android emulators | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.4.0/osmium-2.4.0-x86_64.apk) |
 
 Installing an incompatible ABI may prevent the app from starting. All three APKs use the same signing certificate, SHA-256 fingerprint: `B65BB0131CAA22C45D99EA4E2C3E99B3980EAE0DC5647190F41A2878E6D88412`.
 
-APK SHA-256 checksums are listed in the [v2.3.9 release notes](release-notes-v2.3.9.md) and on the GitHub Release page.
+APK SHA-256 checksums are listed in the [v2.4.0 release notes](release-notes-v2.4.0.md) and on the GitHub Release page.
 
 ## Privacy & Terms
 

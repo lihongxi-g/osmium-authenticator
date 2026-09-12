@@ -12,6 +12,7 @@ Osmium 是一款隐私优先的 Android TOTP/HOTP 验证器。本项目基于 GN
 - **加密备份**——导出为密码保护的加密文件，可在安装兼容版本 Osmium 的设备上恢复
 - **WebDAV 备份**——将加密备份上传到用户自行配置的 WebDAV 服务器（NAS、电脑或另一部手机）并从中恢复；服务器只接收密文
 - **局域网快捷传输**——两台设备连接同一 Wi‑Fi 后，通过 6 位配对码端到端加密传输账户，不经过云端；接收前可预览并选择账户
+- **自动填充（可选）**——在系统设置中将 Osmium 选为自动填充服务后，其他应用的验证码输入框可直接从你的账户填充；支持按应用绑定账户以精准候选；设备支持时填充前会验证身份；仅检查输入框元数据，不读取你输入的内容
 - **自动备份**——按计划备份到 WebDAV 或手机的 下载/Osmium 目录；可设置间隔、时间和保留数量
 - **更新检查**——可选查询 GitHub Releases API；只读取公开版本信息，不发送账户或设备数据，也不会自动下载或安装
 - **Steam Guard**——手动添加 Steam 账户，生成 5 位字母数字验证码
@@ -33,17 +34,17 @@ Osmium 是一款隐私优先的 Android TOTP/HOTP 验证器。本项目基于 GN
 
 ## 下载
 
-最新正式版：**Osmium v2.3.9**（versionCode 46）。请选择与设备匹配的架构：
+最新正式版：**Osmium v2.4.0**（versionCode 47）。请选择与设备匹配的架构：
 
 | 文件 | 架构 | 适用设备 | 下载 |
 |---|---|---|---|
-| `osmium-2.3.9-arm64-v8a.apk` | arm64-v8a | 几乎所有现代手机（推荐） | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.3.9/osmium-2.3.9-arm64-v8a.apk) |
-| `osmium-2.3.9-armeabi-v7a.apk` | armeabi-v7a | 老款 32 位手机 | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.3.9/osmium-2.3.9-armeabi-v7a.apk) |
-| `osmium-2.3.9-x86_64.apk` | x86_64 | Android 模拟器 | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.3.9/osmium-2.3.9-x86_64.apk) |
+| `osmium-2.4.0-arm64-v8a.apk` | arm64-v8a | 几乎所有现代手机（推荐） | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.4.0/osmium-2.4.0-arm64-v8a.apk) |
+| `osmium-2.4.0-armeabi-v7a.apk` | armeabi-v7a | 老款 32 位手机 | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.4.0/osmium-2.4.0-armeabi-v7a.apk) |
+| `osmium-2.4.0-x86_64.apk` | x86_64 | Android 模拟器 | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.4.0/osmium-2.4.0-x86_64.apk) |
 
 安装与设备架构不符的包可能无法启动。三个架构使用同一签名证书，SHA-256 指纹为：`B65BB0131CAA22C45D99EA4E2C3E99B3980EAE0DC5647190F41A2878E6D88412`。
 
-APK 的 SHA-256 校验和见 [v2.3.9 发布说明](release-notes-v2.3.9.md) 及 GitHub Release 页面。
+APK 的 SHA-256 校验和见 [v2.4.0 发布说明](release-notes-v2.4.0.md) 及 GitHub Release 页面。
 
 ## 隐私与条款
 
