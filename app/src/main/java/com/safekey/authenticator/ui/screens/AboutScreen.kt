@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
@@ -23,9 +24,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,11 +39,16 @@ import androidx.compose.ui.unit.dp
 import com.safekey.authenticator.BuildConfig
 import com.safekey.authenticator.MainViewModel
 import com.safekey.authenticator.R
+import com.safekey.authenticator.legal.LegalDoc
+import com.safekey.authenticator.legal.LegalDocState
+import com.safekey.authenticator.legal.LegalDocsRepository
+import com.safekey.authenticator.legal.LegalLang
 import com.safekey.authenticator.security.AppLog
 import com.safekey.authenticator.security.ClipboardHelper
 import com.safekey.authenticator.ui.components.AppIcons
 import com.safekey.authenticator.ui.components.SimpleTopBar
 import com.safekey.authenticator.ui.navigation.Screen
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,6 +59,8 @@ fun AboutScreen(
     val context = LocalContext.current
     var showTerms by remember { mutableStateOf(false) }
     var showPrivacy by remember { mutableStateOf(false) }
+    val legalStates by LegalDocsRepository.states.collectAsState()
+    val scope = rememberCoroutineScope()
 
     Scaffold(
         topBar = { SimpleTopBar(title = stringResource(R.string.settings_about), onBack = onBack) }
@@ -77,7 +87,6 @@ fun AboutScreen(
             Spacer(Modifier.height(24.dp))
 
             // check updates → opens the GitHub Releases page in the browser.
-            // Osmium stays fully offline; "check" happens in the browser.
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -155,20 +164,36 @@ fun AboutScreen(
     if (showTerms) {
         LegalDialog(
             title = stringResource(R.string.about_terms_title),
-            body = stringResource(R.string.terms_body),
+            state = legalStates[LegalDoc.TERMS] ?: LegalDocState.Loading,
+            onOpenWebsite = {
+                openUrl(
+                    context,
+                    LegalDocsRepository.pageUrl(LegalDoc.TERMS, LegalLang.currentSiteCode(context)),
+                    vm
+                )
+            },
+            onRetry = { scope.launch { LegalDocsRepository.refreshNow(context.applicationContext) } },
             onDismiss = { showTerms = false }
         )
     }
     if (showPrivacy) {
         LegalDialog(
             title = stringResource(R.string.about_privacy_title),
-            body = stringResource(R.string.privacy_body),
+            state = legalStates[LegalDoc.PRIVACY] ?: LegalDocState.Loading,
+            onOpenWebsite = {
+                openUrl(
+                    context,
+                    LegalDocsRepository.pageUrl(LegalDoc.PRIVACY, LegalLang.currentSiteCode(context)),
+                    vm
+                )
+            },
+            onRetry = { scope.launch { LegalDocsRepository.refreshNow(context.applicationContext) } },
             onDismiss = { showPrivacy = false }
         )
     }
 }
 
-/** A plain text row that opens a scrollable dialog — used for the legal docs. */
+/** A plain text row that opens the legal-document dialog. */
 @Composable
 private fun AboutLinkRow(label: String, onClick: () -> Unit) {
     Row(
@@ -193,8 +218,20 @@ private fun AboutLinkRow(label: String, onClick: () -> Unit) {
     }
 }
 
+/**
+ * Shows the fetched legal document. Three states: loading, the fetched
+ * text, or — when the fetch failed — a "Request failed" notice with a
+ * retry button and a link to the website.
+ */
 @Composable
-private fun LegalDialog(title: String, body: String, onDismiss: () -> Unit) {
+private fun LegalDialog(
+    title: String,
+    state: LegalDocState,
+    onOpenWebsite: () -> Unit,
+    onRetry: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    val failed = state is LegalDocState.Failed
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },
@@ -202,15 +239,70 @@ private fun LegalDialog(title: String, body: String, onDismiss: () -> Unit) {
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState())
             ) {
-                Text(
-                    text = body,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                when (state) {
+                    LegalDocState.Loading -> {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(20.dp),
+                                strokeWidth = 2.dp
+                            )
+                            Spacer(Modifier.width(12.dp))
+                            Text(
+                                text = stringResource(R.string.legal_loading),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+
+                    is LegalDocState.Loaded -> {
+                        Text(
+                            text = state.text,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
+                    LegalDocState.Failed -> {
+                        Text(
+                            text = stringResource(R.string.legal_fetch_failed),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            text = stringResource(R.string.legal_fetch_failed_hint),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
             }
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.close)) }
+            if (failed) {
+                Row {
+                    TextButton(onClick = onRetry) {
+                        Text(stringResource(R.string.legal_retry))
+                    }
+                    TextButton(onClick = onOpenWebsite) {
+                        Text(stringResource(R.string.legal_open_website))
+                    }
+                }
+            } else {
+                TextButton(onClick = onDismiss) {
+                    Text(stringResource(R.string.close))
+                }
+            }
+        },
+        dismissButton = if (failed) {
+            {
+                TextButton(onClick = onDismiss) {
+                    Text(stringResource(R.string.close))
+                }
+            }
+        } else {
+            null
         }
     )
 }

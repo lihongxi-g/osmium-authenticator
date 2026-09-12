@@ -61,6 +61,7 @@ import androidx.lifecycle.lifecycleScope
 import com.safekey.authenticator.backup.AutoBackupScheduler
 import com.safekey.authenticator.data.AppSettings
 import com.safekey.authenticator.data.LanguagePrefs
+import com.safekey.authenticator.legal.LegalDocsRepository
 import com.safekey.authenticator.security.AppLog
 import com.safekey.authenticator.security.IntegrityCheck
 import com.safekey.authenticator.totp.OtpUriParser
@@ -232,6 +233,7 @@ class MainActivity : FragmentActivity() {
         vm.setBiometricAvailable(canAuthenticateBiometric())
         vm.onAppForeground()
         maybeCheckForUpdate()
+        maybeRefreshLegalDocs()
     }
 
     override fun onStop() {
@@ -617,6 +619,21 @@ class MainActivity : FragmentActivity() {
             } finally {
                 updateCheckInFlight = false
             }
+        }
+    }
+
+    // --------------------------------------------------------- legal docs
+
+    /**
+     * Reads the latest Terms of Use / Privacy Policy from osmium.im in the
+     * background when the app opens. Throttling lives inside
+     * [LegalDocsRepository]; failures stay silent here — the About dialogs
+     * show a failure notice with retry and a link to the website.
+     */
+    private fun maybeRefreshLegalDocs() {
+        if (tampered || vm.destroyed.value) return
+        lifecycleScope.launch {
+            LegalDocsRepository.refreshIfDue(applicationContext)
         }
     }
 

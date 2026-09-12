@@ -364,8 +364,11 @@
     <string name="manual_webdav_body">設定 → 資料 → WebDAV 備份會將加密匯出檔案上傳到 WebDAV 伺服器。輸入伺服器位址、使用者名稱和密碼。\n\n還原會列出伺服器備份，管理功能可刪除舊備份。伺服器只會收到加密資料；此功能只連線你設定的位址。</string>
     <string name="about_terms_title">使用者條款</string>
     <string name="about_privacy_title">隱私權政策</string>
-    <string name="terms_body">安裝或使用 Osmium 即表示你同意以下條款。\n\nOsmium 是根據 GNU 通用公共授權條款第 3 版或更高版本發布的免費開源軟體（GPL-3.0-or-later；請參閱 LICENSE/COPYING）。\n\n本軟體依「現狀」提供，不附帶任何形式的保證。在法律允許的最大範圍內，開發者不對因使用本軟體所造成的損害承擔責任。\n\n你的責任：\n• 妥善保管你的金鑰、PIN 與備份密碼。加密金鑰無法由開發者或任何第三方找回；忘記的 PIN、遺失的備份密碼或已清除的應用資料，任何人都無法還原。\n• 自行保存備份。解除安裝 App 或清除其資料，會永久刪除本機的帳戶與設定。自動備份取決於 Android 與廠商的排程機制，可能因省電策略而延遲或受阻。\n• 只匯入你信任的檔案。Osmium 可從 Google Authenticator 的遷移二維碼，以及 Aegis、2FAS 與 Raivo OTP 的匯出檔案匯入。匯入前請逐一檢查預覽中的每個項目，確認檔案確實來自你打算停用的那個驗證器；使用完畢後刪除匯出檔案——它們以明文形式含有你的金鑰。\n• 檢查收到的資料。LAN 快速傳輸需要同一 Wi-Fi 網絡與 6 位數字配對碼；請從匯入預覽中選擇帳戶，並僅將配對碼分享給預期的接收者。\n• 自毀 PIN 不可逆。請保持裝置時鐘準確，並遵守適用於你所設定之伺服器與裝置的法律與網路規範。\n\n你可以將 Osmium 用於自己的兩步驗證，也可用於你所控制或經授權使用的裝置。\n\nOsmium 沒有帳號系統，也沒有雲端同步；所有匯入功能完全在此裝置上執行。App 可能連線你設定的 WebDAV 伺服器、用於選用性版本檢查的 GitHub Releases API，或在 LAN 傳輸期間連線另一台裝置。LAN 傳輸使用由配對碼衍生的 AES-256-GCM 加密，不會經過 Osmium 雲端伺服器。\n\n聯絡方式：zhif0776@hotmail.com · https://t.me/osmium2fa</string>
-    <string name="privacy_body">Osmium 不會為廣告或分析之目的收集、販售或使用個人資料。沒有帳號系統、不需註冊、沒有廣告 SDK，也沒有當機回報機制，更沒有 Osmium 雲端帳號或同步伺服器。\n\n儲存：驗證器金鑰、帳戶名稱、服務商、標籤與標籤顏色僅儲存在此裝置上，並以不可匯出的 Android Keystore 金鑰進行 AES-256-GCM 加密。匯出的備份以你的密碼加密（PBKDF2-HMAC-SHA256，進行 120,000 次迭代，再以 AES-256-GCM 加密）。WebDAV 的登入資訊與自動備份密碼儲存在本機，並以 Keystore 金鑰加密。\n\n匯入：從 Google Authenticator 的二維碼，以及 Aegis、2FAS 與 Raivo OTP 的匯出檔案匯入時，一切都在此裝置上進行。選取的檔案會被讀入記憶體以建立匯入預覽；不會被複製、上傳或傳送到任何地方。只有你確認的項目才會存入加密保險庫，其餘一律捨棄。\n\n網路：只有當相關功能被啟用或由你發起時，App 才會連線。WebDAV 連線到你設定位址；GitHub 更新檢查只請求公開的版本資訊，不含帳號或裝置資料；LAN 快速傳輸則讓同一 Wi-Fi 下的兩台裝置進行一次臨時加密連線。\n\n自動備份使用 Android 系統排程，可能因廠商的省電政策而延遲。它們會將加密檔案寫入你設定的 WebDAV 伺服器，或寫入 下載/Osmium 目錄（預設保留最新 5 份，最多可設定保留 10 份；較舊的檔案會被清除）。相機掃描、二維碼讀取與生物辨識皆由 Android 在裝置本機處理。Wi-Fi 狀態與 multicast 僅在傳輸畫面開啟期間用於 LAN 裝置探索。WRITE_EXTERNAL_STORAGE 僅適用於 Android 8/9 上的自動備份。ACCESS_LOCAL_NETWORK 是為未來平台需求而宣告，在 targetSdk 34 上不會提出請求。\n\n我們不會與廣告商、分析服務或 Osmium 雲端分享資料。WebDAV 伺服器會收到你上傳的加密檔案；預期的 LAN 接收端會收到你發起之傳輸的資料；GitHub 只會收到公開的版本查詢。解除安裝或清除應用資料，不會刪除你另行保存的副本。\n\n聯絡方式：zhif0776@hotmail.com · https://t.me/osmium2fa</string>
+    <string name="legal_loading">載入中…</string>
+    <string name="legal_fetch_failed">請求失敗</string>
+    <string name="legal_fetch_failed_hint">未能取得最新版本，請前往官網查看。</string>
+    <string name="legal_open_website">前往官網查看</string>
+    <string name="legal_retry">重試</string>
 
     <string name="webdav_manage">管理備份</string>
     <string name="webdav_delete">刪除</string>
