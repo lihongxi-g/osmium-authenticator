@@ -63,6 +63,18 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch { settingsRepo.setWebDavConfig(config) }
     }
 
+    /** package name → account id bindings used by the autofill service. */
+    val autofillBindings: StateFlow<Map<String, String>> = settingsRepo.autofillBindings
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap())
+
+    fun setAutofillBinding(packageName: String, accountId: String) {
+        viewModelScope.launch { settingsRepo.setAutofillBinding(packageName, accountId) }
+    }
+
+    fun removeAutofillBinding(packageName: String) {
+        viewModelScope.launch { settingsRepo.removeAutofillBinding(packageName) }
+    }
+
     // UI tick, ~2 Hz — smooth countdown without recomputing codes constantly
     private val _now = MutableStateFlow(System.currentTimeMillis())
     val now: StateFlow<Long> = _now

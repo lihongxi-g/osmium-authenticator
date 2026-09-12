@@ -44,6 +44,8 @@ sealed class Screen {
     /** Open-source attributions and format-source references. */
     object Attributions : Screen()
     object Tags : Screen()
+    /** Autofill service configuration: status, app bindings, help. */
+    object AutofillSettings : Screen()
 }
 
 /**

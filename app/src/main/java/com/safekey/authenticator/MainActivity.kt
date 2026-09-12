@@ -71,6 +71,7 @@ import com.safekey.authenticator.ui.screens.AccountFormScreen
 import com.safekey.authenticator.ui.screens.AccountsScreen
 import com.safekey.authenticator.ui.screens.AttributionsScreen
 import com.safekey.authenticator.ui.screens.AutoBackupScreen
+import com.safekey.authenticator.ui.screens.AutofillSettingsScreen
 import com.safekey.authenticator.ui.screens.DetailScreen
 import com.safekey.authenticator.ui.screens.ExportScreen
 import com.safekey.authenticator.ui.screens.FileImportScreen
@@ -102,6 +103,11 @@ class MainActivity : FragmentActivity() {
     private val vm: MainViewModel by viewModels()
     private var tampered = false
 
+    companion object {
+        /** Set when AutofillSettingsActivity (system autofill "gear") launches us. */
+        const val EXTRA_OPEN_AUTOFILL_SETTINGS = "open_autofill_settings"
+    }
+
     // Update-check state: silent once-per-day GitHub query, one dialog.
     private var pendingUpdateTag by mutableStateOf<String?>(null)
     private var updateCheckInFlight = false
@@ -125,6 +131,9 @@ class MainActivity : FragmentActivity() {
         super.onCreate(savedInstanceState)
         // Anti-repackaging: refuse to run a re-signed APK.
         tampered = IntegrityCheck.isTampered(this)
+
+        // Deep link from the system autofill settings "gear" (if any).
+        maybeOpenAutofillSettings(intent)
 
         // Block screenshots and the recents thumbnail — no secrets leak.
         window.setFlags(
@@ -391,6 +400,23 @@ class MainActivity : FragmentActivity() {
                     )
                 }
             }
+        }
+    }
+
+    // -------------------------------------------------- autofill deep link
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        maybeOpenAutofillSettings(intent)
+    }
+
+    /** Opens the Autofill page when the system autofill "gear" trampoline
+     *  (AutofillSettingsActivity) launched us. */
+    private fun maybeOpenAutofillSettings(intent: Intent?) {
+        if (intent?.getBooleanExtra(EXTRA_OPEN_AUTOFILL_SETTINGS, false) == true) {
+            intent.removeExtra(EXTRA_OPEN_AUTOFILL_SETTINGS)
+            vm.nav.push(Screen.AutofillSettings)
         }
     }
 
@@ -942,6 +968,11 @@ class MainActivity : FragmentActivity() {
                     )
 
                     is Screen.Tags -> TagsScreen(
+                        vm = vm,
+                        onBack = { vm.nav.pop() }
+                    )
+
+                    is Screen.AutofillSettings -> AutofillSettingsScreen(
                         vm = vm,
                         onBack = { vm.nav.pop() }
                     )

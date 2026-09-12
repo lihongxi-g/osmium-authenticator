@@ -343,6 +343,17 @@ fun SettingsScreen(
                 )
             }
 
+            // ------------------------------------------------------- features
+
+            SectionHeader(stringResource(R.string.settings_features))
+
+            SettingRow(
+                icon = AppIcons.TouchApp,
+                title = stringResource(R.string.autofill_title),
+                description = stringResource(R.string.autofill_desc),
+                onClick = { vm.nav.push(Screen.AutofillSettings) }
+            )
+
             SectionHeader(stringResource(R.string.settings_data))
 
             SettingRow(

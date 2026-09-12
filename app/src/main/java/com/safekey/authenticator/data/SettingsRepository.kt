@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.safekey.authenticator.autofill.AutofillBindings
 import com.safekey.authenticator.security.CryptoManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -93,6 +94,7 @@ class SettingsRepository(
         val AUTO_BACKUP_LAST_ERROR = stringPreferencesKey("auto_backup_last_error")
         val AUTO_CHECK_UPDATES = booleanPreferencesKey("auto_check_updates")
         val TAGS_ENABLED = booleanPreferencesKey("tags_enabled")
+        val AUTOFILL_BINDINGS = stringPreferencesKey("autofill_bindings")
     }
 
     val settings: Flow<AppSettings> = context.dataStore.data.map { prefs ->
@@ -241,6 +243,29 @@ class SettingsRepository(
 
     suspend fun setTagsEnabled(enabled: Boolean) {
         context.dataStore.edit { it[Keys.TAGS_ENABLED] = enabled }
+    }
+
+    // ------------------------------------------------------ autofill (opt-in)
+
+    /** package name → account id; used to prioritize suggestions. */
+    val autofillBindings: Flow<Map<String, String>> = context.dataStore.data.map { prefs ->
+        AutofillBindings.decode(prefs[Keys.AUTOFILL_BINDINGS])
+    }
+
+    suspend fun setAutofillBinding(packageName: String, accountId: String) {
+        context.dataStore.edit { prefs ->
+            val current = AutofillBindings.decode(prefs[Keys.AUTOFILL_BINDINGS]).toMutableMap()
+            current[packageName] = accountId
+            prefs[Keys.AUTOFILL_BINDINGS] = AutofillBindings.encode(current)
+        }
+    }
+
+    suspend fun removeAutofillBinding(packageName: String) {
+        context.dataStore.edit { prefs ->
+            val current = AutofillBindings.decode(prefs[Keys.AUTOFILL_BINDINGS]).toMutableMap()
+            current.remove(packageName)
+            prefs[Keys.AUTOFILL_BINDINGS] = AutofillBindings.encode(current)
+        }
     }
 
     // ------------------------------------------------------ WebDAV backup
