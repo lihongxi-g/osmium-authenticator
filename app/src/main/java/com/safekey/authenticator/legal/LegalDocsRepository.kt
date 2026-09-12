@@ -40,9 +40,10 @@ object LegalDocsRepository {
     private var lastSuccessAt = 0L
     private var inFlight = false
 
-    /** True when enough time has passed since the last successful refresh. */
+    /** True when enough time has passed since the last successful refresh
+     *  (a document that was never fetched successfully is always due). */
     fun isDue(lastSuccessAt: Long, now: Long): Boolean =
-        now - lastSuccessAt >= COOLDOWN_MS
+        lastSuccessAt == 0L || now - lastSuccessAt >= COOLDOWN_MS
 
     /** Fetches both documents if a successful refresh did not happen recently. */
     suspend fun refreshIfDue(context: Context) = refresh(context, force = false)
