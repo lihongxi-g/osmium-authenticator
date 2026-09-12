@@ -2,7 +2,7 @@
 
 Osmium 是一款隐私优先的 Android TOTP/HOTP 验证器。本项目基于 GNU GPL v3 或更高版本发布。验证码在设备本地计算；账户数据使用 Android Keystore 中的不可导出密钥加密后才落盘。应用无需注册账号、不收集遥测。
 
-应用的网络功能是可选的：用户配置的 WebDAV 备份、GitHub 更新检查，以及用户主动发起的两台设备局域网快捷传输。点击 GitHub、验证实验室等外部链接时，流量由系统浏览器或其他应用处理。
+应用每次打开时会从官网 osmium.im 获取最新的用户协议与隐私政策（不发送任何用户数据）；除此之外，网络功能均为可选：用户配置的 WebDAV 备份、GitHub 更新检查，以及用户主动发起的两台设备局域网快捷传输。点击 GitHub、验证实验室等外部链接时，流量由系统浏览器或其他应用处理。
 
 ## 功能
 
@@ -21,7 +21,7 @@ Osmium 是一款隐私优先的 Android TOTP/HOTP 验证器。本项目基于 GN
 - **安全门禁**——可选的打开时验证（指纹 / 系统凭据 / 应用 PIN）、自毁 PIN、默认禁止截屏
 - **时钟校准**——设备时间漂移时手动补偿 TOTP 时钟
 - **11 种语言**——English、简体中文、繁體中文、Español、日本語、한국어、Deutsch、Русский、Français、हिन्दी
-- **内置使用手册、用户协议与隐私政策**——无需联网即可查看
+- **内置使用手册**（离线可用）；**用户协议与隐私政策**每次打开应用时从官网获取最新版（获取失败时给出官网链接）
 
 ## ⚠ Steam Guard 使用前必读
 
@@ -47,10 +47,10 @@ APK 的 SHA-256 校验和见 [v2.3.9 发布说明](release-notes-v2.3.9.md) 及 
 
 ## 隐私与条款
 
-- [隐私政策](PRIVACY-zh.md)（[English](PRIVACY.md)）
-- [用户协议](TERMS-zh.md)（[English](TERMS.md)）
+- [隐私政策](PRIVACY-zh.md)（[English](PRIVACY.md)）——官网版：[osmium.im/privacypolicy](https://osmium.im/privacypolicy/)
+- [用户协议](TERMS-zh.md)（[English](TERMS.md)）——官网版：[osmium.im/useragreement](https://osmium.im/useragreement/)
 
-应用内 设置 → 关于 也可查看。局域网传输和 WebDAV 备份均由用户主动操作触发；局域网传输使用配对码派生的端到端加密，不经过 Osmium 服务器。
+应用内 设置 → 关于 展示的就是官网最新版（每次打开应用时自动获取）。局域网传输和 WebDAV 备份均由用户主动操作触发；局域网传输使用配对码派生的端到端加密，不经过 Osmium 服务器。
 
 ## WebDAV 备份教程
 

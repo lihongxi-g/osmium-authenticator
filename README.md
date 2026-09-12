@@ -2,7 +2,7 @@
 
 Osmium is a privacy-first Android TOTP/HOTP authenticator, released under the GNU GPL v3 or later. Codes are computed on-device; account data is encrypted before it is written using a non-exportable Android Keystore key. No account is required and no telemetry is collected.
 
-Network features are optional: user-configured WebDAV backup, GitHub update checks, and user-initiated encrypted transfer between two devices on the same Wi-Fi network. External links such as GitHub and the verification lab are opened by the system browser or another app.
+The app itself fetches the latest Terms of Use and Privacy Policy from osmium.im each time it opens, so you always see the current versions (no user data is sent). All other network features are optional: user-configured WebDAV backup, GitHub update checks, and user-initiated encrypted transfer between two devices on the same Wi-Fi network. External links such as GitHub and the verification lab are opened by the system browser or another app.
 
 ## Features
 
@@ -21,7 +21,7 @@ Network features are optional: user-configured WebDAV backup, GitHub update chec
 - **Security gate** — optional verification on open (biometrics / device credential / app PIN), self-destruct PIN, and screenshots blocked by default
 - **Clock calibration** — manually compensate for device-clock drift
 - **11 languages** — English, 简体中文, 繁體中文, Español, 日本語, 한국어, Deutsch, Русский, Français, हिन्दी
-- **Built-in manual, Terms of Use and Privacy Policy** — available offline
+- **Built-in manual** — available offline; the **Terms of Use and Privacy Policy** are fetched from osmium.im each time the app opens (a website link is shown when they can't be fetched)
 
 ## ⚠ Steam Guard — read this first
 
@@ -47,10 +47,10 @@ APK SHA-256 checksums are listed in the [v2.3.9 release notes](release-notes-v2.
 
 ## Privacy & Terms
 
-- [Privacy Policy](PRIVACY.md) ([中文](PRIVACY-zh.md))
-- [Terms of Use](TERMS.md) ([中文](TERMS-zh.md))
+- [Privacy Policy](PRIVACY.md) ([中文](PRIVACY-zh.md)) — also on the website: [osmium.im/privacypolicy](https://osmium.im/privacypolicy/)
+- [Terms of Use](TERMS.md) ([中文](TERMS-zh.md)) — also on the website: [osmium.im/useragreement](https://osmium.im/useragreement/)
 
-Both are also available in the app: Settings → About. LAN transfer and WebDAV backup are user-initiated; LAN transfer uses pairing-code-derived end-to-end encryption and does not pass through an Osmium server.
+The app shows the current version under Settings → About; it fetches both documents from the website each time it opens. LAN transfer and WebDAV backup are user-initiated; LAN transfer uses pairing-code-derived end-to-end encryption and does not pass through an Osmium server.
 
 ## WebDAV backup guide
 
