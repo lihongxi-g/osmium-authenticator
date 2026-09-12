@@ -365,8 +365,8 @@
     <string name="manual_webdav_body">设置 → 数据 → WebDAV 备份会将加密导出文件上传到 WebDAV 服务器。填写服务器地址（主机名或局域网 IP）、用户名和密码。\n\n恢复功能会列出服务器上的备份供你选择；“管理备份”可以删除该服务器上的旧备份。服务器只会收到密码加密的数据；此功能只连接你配置的地址。\n\n如果地址经常变化，可以为 NAS 设置固定 IP 或使用主机名。</string>
     <string name="about_terms_title">用户协议</string>
     <string name="about_privacy_title">隐私政策</string>
-    <string name="terms_body">安装或使用 Osmium 即表示你同意以下条款。\n\nOsmium 是基于 GNU 通用公共许可证第三版或更高版本（GPL-3.0-or-later；许可证见 LICENSE/COPYING）发布的免费开源软件。\n\n本软件按“现状”提供，不附带任何明示或默示的担保。在法律允许的最大范围内，开发者不对因使用或无法使用本软件而产生的损失承担责任。\n\n你的责任：\n• 保管好密钥、PIN 和备份密码。加密密钥无法由开发者或任何第三方恢复；忘记 PIN、丢失备份密码或清除应用数据都无法找回。\n• 自行保存备份。卸载应用或清除数据会永久删除本地账户和设置；自动备份依赖 Android 与厂商的调度策略，可能被省电策略推迟或阻止。\n• 只导入你信任的文件。Osmium 支持从 Google Authenticator 的转移二维码，以及 Aegis、2FAS、Raivo OTP 的导出文件导入。导入前请逐条核对预览，确认文件确实来自你要迁出的验证器；导出文件以明文包含你的密钥，用后请删除。\n• 核对接收内容。局域网快捷传输要求同一 Wi-Fi 与 6 位配对码；请检查导入预览，只把配对码提供给预期接收方。\n• 自毁 PIN 不可逆。请保持设备时间准确，并遵守你所配置的服务器与设备适用的法律和网络规则。\n\n你可以将 Osmium 用于自己的双因素认证，以及在你控制或获授权的设备之间迁移账户。\n\nOsmium 不运行账号体系，也不提供云同步；所有导入功能完全在本机完成。应用可能连接你配置的 WebDAV 服务器、用于可选版本检查的 GitHub Releases API，或局域网传输期间的另一台设备。局域网传输使用由配对码派生的 AES-256-GCM 加密，不经过 Osmium 云服务器。\n\n联系方式：zhif0776@hotmail.com · https://t.me/osmium2fa</string>
-    <string name="privacy_body">Osmium 不收集、出售或用于广告分析个人数据。没有账号体系、注册、广告 SDK 或崩溃上报，也没有 Osmium 云端账号或同步服务器。\n\n存储：验证器密钥、账户名、服务商、标签及标签颜色仅存储在本设备上，使用 Android Keystore 中不可导出的密钥进行 AES-256-GCM 加密。导出备份使用你的密码加密（PBKDF2-HMAC-SHA256，120,000 次迭代后 AES-256-GCM）。WebDAV 登录信息与自动备份密码在本机加密存储，受 Keystore 保护。\n\n导入：无论是 Google Authenticator 二维码迁移，还是从 Aegis、2FAS、Raivo OTP 的导出文件导入，全部在本机完成。所选文件只会读入内存用于生成导入预览，不会被复制、上传或发送到任何地方；只有你确认的条目才会写入加密库，其余数据随即丢弃。\n\n网络：只有在相应功能启用或主动执行时才会连接。WebDAV 连接你配置的地址；GitHub 更新检查只请求公开版本信息，不发送账户或设备数据；局域网快捷传输连接同一 Wi-Fi 下的两台设备，进行一次性临时加密传输。\n\n自动备份使用 Android 系统调度，可能被厂商省电策略推迟。备份会以加密文件写入你配置的 WebDAV 服务器或 Download/Osmium 目录（默认保留最近 5 份，最多可设 10 份，更旧的会自动清理）。相机扫码、二维码识别与生物识别由 Android 在本机处理；仅当传输页面打开时才会使用 Wi-Fi 状态与组播进行设备发现。WRITE_EXTERNAL_STORAGE 仅适用于 Android 8/9 上的自动备份；ACCESS_LOCAL_NETWORK 为未来平台要求预先声明，当前 targetSdk 34 不请求。\n\n我们不向广告商、分析服务或 Osmium 云端共享数据。WebDAV 服务器会收到你上传的加密文件；预期接收设备会收到你主动传输的数据；GitHub 只收到公开版本查询。卸载或清除数据不会删除你保存在其他位置的副本。\n\n联系方式：zhif0776@hotmail.com · https://t.me/osmium2fa</string>
+    <string name="terms_body">安装或使用 Osmium 即表示你同意以下条款。\n\nOsmium 是基于 GNU 通用公共许可证第三版或更高版本（GPL-3.0-or-later；许可证见 LICENSE/COPYING）发布的免费开源软件。\n\n本软件按“现状”提供，不附带任何明示或默示的担保。在法律允许的最大范围内，开发者不对因使用或无法使用本软件而产生的损失承担责任。\n\n你的责任：\n• 保管好密钥、PIN 和备份密码。加密密钥无法由开发者或任何第三方恢复；忘记 PIN、丢失备份密码或清除应用数据都无法找回。\n• 自行保存备份。卸载应用或清除数据会永久删除本地账户和设置；自动备份依赖 Android 与厂商的调度策略，可能被省电策略推迟或阻止。\n• 只导入你信任的文件。Osmium 支持从 Google Authenticator 的转移二维码，以及 Aegis、2FAS、Raivo OTP 的导出文件导入。导入前请逐条核对预览，确认文件确实来自你要迁出的验证器；导出文件以明文包含你的密钥，用后请删除。\n• 核对接收内容。局域网快捷传输要求同一 Wi-Fi 与 6 位配对码；请检查导入预览，只把配对码提供给预期接收方。\n• 自动填充由你选择开启。若你在系统设置中选择 Osmium 作为自动填充服务，它只会在需要验证码的界面提供候选，并仅填入你点选的建议；提交前请核对目标输入框，可随时在系统设置中关闭该服务。\n• 自毁 PIN 不可逆。请保持设备时间准确，并遵守你所配置的服务器与设备适用的法律和网络规则。\n\n你可以将 Osmium 用于自己的双因素认证，以及在你控制或获授权的设备之间迁移账户。\n\nOsmium 不运行账号体系，也不提供云同步；所有导入功能完全在本机完成。应用可能连接你配置的 WebDAV 服务器、用于可选版本检查的 GitHub Releases API，或局域网传输期间的另一台设备。局域网传输使用由配对码派生的 AES-256-GCM 加密，不经过 Osmium 云服务器。自动填充功能（如启用）同样完全在本机运行，不产生任何网络连接。\n\n联系方式：zhif0776@hotmail.com · https://t.me/osmium2fa</string>
+    <string name="privacy_body">Osmium 不收集、出售或用于广告分析个人数据。没有账号体系、注册、广告 SDK 或崩溃上报，也没有 Osmium 云端账号或同步服务器。\n\n存储：验证器密钥、账户名、服务商、标签及标签颜色仅存储在本设备上，使用 Android Keystore 中不可导出的密钥进行 AES-256-GCM 加密。导出备份使用你的密码加密（PBKDF2-HMAC-SHA256，120,000 次迭代后 AES-256-GCM）。WebDAV 登录信息与自动备份密码在本机加密存储，受 Keystore 保护。\n\n导入：无论是 Google Authenticator 二维码迁移，还是从 Aegis、2FAS、Raivo OTP 的导出文件导入，全部在本机完成。所选文件只会读入内存用于生成导入预览，不会被复制、上传或发送到任何地方；只有你确认的条目才会写入加密库，其余数据随即丢弃。\n\n自动填充（可选）：若你选择 Osmium 作为系统自动填充服务，它只会检查请求填充界面的字段元数据（字段类型、标识与提示文字），用于判断是否为验证码输入框；它不会读取或保存你输入的内容，验证码在本机生成，且只会填入你点选的输入框；设备支持时，填入前会先要求锁屏或生物识别。诊断记录（请求的应用与识别结果，不含任何输入内容）会写入本机日志，仅当你主动导出时才离开设备。该功能在你于系统设置中选中 Osmium 前不会生效，并可随时在系统设置中关闭。\n\n网络：只有在相应功能启用或主动执行时才会连接。WebDAV 连接你配置的地址；GitHub 更新检查只请求公开版本信息，不发送账户或设备数据；局域网快捷传输连接同一 Wi-Fi 下的两台设备，进行一次性临时加密传输。\n\n自动备份使用 Android 系统调度，可能被厂商省电策略推迟。备份会以加密文件写入你配置的 WebDAV 服务器或 Download/Osmium 目录（默认保留最近 5 份，最多可设 10 份，更旧的会自动清理）。相机扫码、二维码识别与生物识别由 Android 在本机处理；仅当传输页面打开时才会使用 Wi-Fi 状态与组播进行设备发现。WRITE_EXTERNAL_STORAGE 仅适用于 Android 8/9 上的自动备份；ACCESS_LOCAL_NETWORK 为未来平台要求预先声明，当前 targetSdk 34 不请求。\n\n我们不向广告商、分析服务或 Osmium 云端共享数据。WebDAV 服务器会收到你上传的加密文件；预期接收设备会收到你主动传输的数据；GitHub 只收到公开版本查询。卸载或清除数据不会删除你保存在其他位置的副本。\n\n联系方式：zhif0776@hotmail.com · https://t.me/osmium2fa</string>
 
     <string name="webdav_manage">管理备份</string>
     <string name="webdav_delete">删除</string>
@@ -468,4 +468,32 @@
     <string name="tag_custom_color">自定义颜色</string>
     <string name="tag_custom_color_hint">输入六位颜色值，例如 #3F51B5，也可以选择上方颜色。</string>
     <string name="tag_custom_color_invalid">请输入 #RRGGBB 格式的有效颜色。</string>
+
+    <!-- 自动填充（系统填充服务，需主动开启） -->
+    <string name="settings_features">功能</string>
+    <string name="autofill_title">自动填充</string>
+    <string name="autofill_desc">在其他应用的键盘上方提供 Osmium 验证码</string>
+    <string name="autofill_status_on">自动填充已开启</string>
+    <string name="autofill_status_off">自动填充未启用</string>
+    <string name="autofill_status_on_desc">应用请求验证码时，Osmium 会提供你的验证码候选。</string>
+    <string name="autofill_status_desc">在系统设置中选择 Osmium 作为自动填充服务，即可在其他应用中提供验证码。</string>
+    <string name="autofill_open_settings">打开系统设置</string>
+    <string name="autofill_how_title">工作原理</string>
+    <string name="autofill_how_body">当应用或网页出现验证码输入框时，Osmium 会在键盘上方显示匹配的账户；点选后自动填入当前验证码。全部在本机完成；只有在系统设置中选择 Osmium 作为自动填充服务后，该功能才会生效。</string>
+    <string name="autofill_auth_note">设备支持时，填入前会先要求指纹、人脸或锁屏验证。</string>
+    <string name="autofill_privacy_note">仅检查输入框的类型与标识来识别验证码字段，不读取你输入的内容，也不会向任何地方发送数据。</string>
+    <string name="autofill_bindings_title">应用绑定</string>
+    <string name="autofill_bindings_empty">还没有绑定。将某个应用绑定到指定账户，候选会更准确。</string>
+    <string name="autofill_bindings_desc">把某个账户固定给某个应用；未绑定时按名称自动匹配。</string>
+    <string name="autofill_add_binding">绑定应用</string>
+    <string name="autofill_binding_saved">绑定已保存</string>
+    <string name="autofill_binding_removed">绑定已删除</string>
+    <string name="autofill_binding_missing_account">账户已不存在</string>
+    <string name="autofill_pick_app">选择应用</string>
+    <string name="autofill_pick_account">选择账户</string>
+    <string name="autofill_no_apps">没有找到应用</string>
+    <string name="autofill_no_accounts">还没有账户</string>
+    <string name="autofill_footer">新功能——如果填充失败，请导出日志（设置 → 关于）并反馈给我们。</string>
+    <string name="autofill_auth_title">验证身份</string>
+    <string name="autofill_auth_subtitle">验证后填入验证码</string>
 </resources>
