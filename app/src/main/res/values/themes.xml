@@ -5,4 +5,12 @@
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar">true</item>
     </style>
+
+    <!-- Transparent host for the autofill authentication prompt
+         (AutofillAuthActivity): shows only the system biometric/lock
+         dialog on top of whatever app asked for the fill. -->
+    <style name="Theme.SafeKey.Transparent" parent="@android:style/Theme.Translucent.NoTitleBar">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:backgroundDimEnabled">true</item>
+    </style>
 </resources>

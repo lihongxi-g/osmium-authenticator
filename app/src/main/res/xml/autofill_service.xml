@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Service configuration for the Android autofill framework
+     (referenced from AndroidManifest.xml via the "android.autofill"
+     meta-data). Points the "settings" gear shown next to Osmium in the
+     system autofill screen at our trampoline, which opens the in-app
+     Autofill page. -->
+<autofill-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:settingsActivity="com.safekey.authenticator.autofill.AutofillSettingsActivity" />

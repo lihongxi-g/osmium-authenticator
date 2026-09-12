@@ -30,6 +30,15 @@
         android:name="android.hardware.camera"
         android:required="false" />
 
+    <!-- Android 11+ package visibility: required to list installed apps for
+         the autofill "bind an app" picker. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
+    </queries>
+
     <application
         android:name=".SafeKeyApp"
         android:allowBackup="false"
@@ -51,6 +60,42 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Autofill service: offers Osmium codes above the keyboard in other
+             apps. Opt-in by design — the system only binds it after the user
+             selects Osmium as the autofill service in system settings.
+             See res/xml/autofill_service.xml and OsmiumAutofillService.kt. -->
+        <service
+            android:name=".autofill.OsmiumAutofillService"
+            android:label="@string/app_name"
+            android:permission="android.permission.BIND_AUTOFILL_SERVICE"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.service.autofill.AutofillService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.autofill"
+                android:resource="@xml/autofill_service" />
+        </service>
+
+        <!-- Transparent one-shot screen that verifies the user before an
+             autofilled dataset is released (launched by the system via our
+             PendingIntent, hence not exported). -->
+        <activity
+            android:name=".autofill.AutofillAuthActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:taskAffinity="com.safekey.authenticator.autofillauth"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden|uiMode"
+            android:theme="@style/Theme.SafeKey.Transparent" />
+
+        <!-- Invisible trampoline behind the system autofill settings "gear";
+             forwards to the in-app Autofill page. -->
+        <activity
+            android:name=".autofill.AutofillSettingsActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:theme="@android:style/Theme.NoDisplay" />
     </application>
 
 </manifest>
