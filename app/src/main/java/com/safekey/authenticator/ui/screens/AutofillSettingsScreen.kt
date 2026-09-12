@@ -1,7 +1,9 @@
 package com.safekey.authenticator.ui.screens
 
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.provider.Settings
 import android.view.autofill.AutofillManager
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -371,21 +373,47 @@ private fun isAutofillEnabled(context: Context): Boolean =
     context.getSystemService(AutofillManager::class.java)?.hasEnabledAutofillServices() == true
 
 /**
- * Opens the system autofill picker. The dedicated action exists since
- * API 26 (Settings.ACTION_REQUEST_SET_AUTOFILL_SERVICE); some OEM builds
- * may not resolve it, so fall back to the general settings screen.
+ * Opens the system screen for choosing the autofill service.
+ *
+ * The platform contract (Settings#ACTION_REQUEST_SET_AUTOFILL_SERVICE)
+ * requires the intent to carry a data URI of scheme "package" pointing at
+ * the caller (e.g. "package:com.my.app"). Modern ROMs register the picker
+ * with a matching <data android:scheme="package"/> filter, so an intent
+ * without this URI resolves to nothing and the user ends up on the generic
+ * settings home. Older ROMs register the action without a data constraint
+ * and accept the same intent, so this form is the safe superset.
  */
 private fun openAutofillSystemSettings(
     context: Context,
     launcher: ActivityResultLauncher<Intent>
 ) {
-    try {
-        launcher.launch(Intent(Settings.ACTION_REQUEST_SET_AUTOFILL_SERVICE))
-    } catch (_: Exception) {
+    val pkgUri = Uri.parse("package:${context.packageName}")
+    val attempts = listOf(
+        // 1) Spec-compliant request: action + "package:" data.
+        Intent(Settings.ACTION_REQUEST_SET_AUTOFILL_SERVICE).setData(pkgUri),
+        // 2) + 3) Forced targets for ROMs whose picker filter differs from
+        // the documented one (skipped automatically when not present).
+        Intent(Settings.ACTION_REQUEST_SET_AUTOFILL_SERVICE).setData(pkgUri).setComponent(
+            ComponentName(
+                "com.android.settings",
+                "com.android.settings.applications.credentials.CredentialsPickerActivity"
+            )
+        ),
+        Intent(Settings.ACTION_REQUEST_SET_AUTOFILL_SERVICE).setData(pkgUri).setComponent(
+            ComponentName(
+                "com.android.settings",
+                "com.android.settings.applications.autofill.AutofillPickerActivity"
+            )
+        ),
+        // 4) Last resort: the top-level settings screen.
+        Intent(Settings.ACTION_SETTINGS),
+    )
+    for (attempt in attempts) {
         try {
-            launcher.launch(Intent(Settings.ACTION_SETTINGS))
+            launcher.launch(attempt)
+            return
         } catch (_: Exception) {
-            // Nothing more we can do on this ROM.
+            // Try the next candidate.
         }
     }
 }
