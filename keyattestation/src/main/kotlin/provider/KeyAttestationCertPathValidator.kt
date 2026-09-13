@@ -1,0 +1,347 @@
+/*
+ * Copyright 2024 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.keyattestation.verifier.provider
+
+import androidx.annotation.RequiresApi
+import com.android.keyattestation.verifier.KeyAttestationReason
+import java.security.GeneralSecurityException
+import java.security.InvalidAlgorithmParameterException
+import java.security.PublicKey
+import java.security.SignatureException
+import java.security.cert.CertPath
+import java.security.cert.CertPathParameters
+import java.security.cert.CertPathValidatorException
+import java.security.cert.CertPathValidatorException.BasicReason
+import java.security.cert.CertPathValidatorResult
+import java.security.cert.CertPathValidatorSpi
+import java.security.cert.Certificate
+import java.security.cert.CertificateExpiredException
+import java.security.cert.CertificateNotYetValidException
+import java.security.cert.PKIXCertPathChecker
+import java.security.cert.PKIXCertPathValidatorResult
+import java.security.cert.PKIXParameters
+import java.security.cert.PKIXReason
+import java.security.cert.TrustAnchor
+import java.security.cert.X509CertSelector
+import java.security.cert.X509Certificate
+import java.util.Date
+import javax.security.auth.x500.X500Principal
+
+/**
+ * A [CertPathValidatorSpi] for verifying Android Key Attestation certificate chains.
+ *
+ * Older Android devices produce Key Attestation certificate chains that do not fully conform to RFC
+ * 5280 and thus cannot be validated using [sun.security.provider.certpath.PKIXCertPathValidator].
+ * This provider implements a more permissive [CertPathValidatorSpi] implementation that is able to
+ * validate these chains.
+ *
+ * See go/how-to-validate-key-attestations for details for how to verify Android Key Attestation
+ * certificate chains.
+ */
+class KeyAttestationCertPathValidator : CertPathValidatorSpi() {
+  @RequiresApi(24)
+  override fun engineValidate(
+    certPath: CertPath?,
+    params: CertPathParameters?,
+  ): CertPathValidatorResult {
+    if (certPath == null) {
+      throw InvalidAlgorithmParameterException("certPath is null")
+    }
+    if (certPath.type != "X.509") {
+      throw InvalidAlgorithmParameterException(
+        "CertPath must have type \"X.509\", was \"${certPath.type}\""
+      )
+    }
+    if (params !is PKIXParameters) {
+      throw InvalidAlgorithmParameterException("params must be an instance of PKIXParameters")
+    }
+    if (certPath !is KeyAttestationCertPath) {
+      throw InvalidAlgorithmParameterException(
+        "certPath must be an instance of KeyAttestationCertPath"
+      )
+    }
+    return validate(
+      certPath,
+      params.trustAnchors,
+      params.certPathCheckers,
+      params.date ?: Date(),
+      params.sigProvider,
+    )
+  }
+
+  @RequiresApi(24)
+  private fun validate(
+    certPath: KeyAttestationCertPath,
+    trustAnchors: Set<TrustAnchor>,
+    extraCertPathCheckers: List<PKIXCertPathChecker>,
+    date: Date,
+    sigProvider: String?,
+  ): CertPathValidatorResult {
+    val certList = certPath.toCertList()
+    val selector = X509CertSelector().apply { subject = certList.first().issuerX500Principal }
+
+    var lastException: CertPathValidatorException? = null
+    for (anchor in trustAnchors) {
+      if (anchor.trustedCert != null && !selector.match(anchor.trustedCert)) continue
+
+      try {
+        return validate(certPath, anchor, extraCertPathCheckers, date, sigProvider)
+      } catch (e: CertPathValidatorException) {
+        lastException = e
+      }
+    }
+
+    if (lastException != null) {
+      throw lastException
+    } else {
+      throw CertPathValidatorException(
+        "No matching trust anchor found",
+        null,
+        null,
+        -1,
+        PKIXReason.NO_TRUST_ANCHOR,
+      )
+    }
+  }
+
+  @RequiresApi(24)
+  private fun validate(
+    certPath: KeyAttestationCertPath,
+    anchor: TrustAnchor,
+    extraCertPathCheckers: List<PKIXCertPathChecker>,
+    date: Date,
+    sigProvider: String?,
+  ): CertPathValidatorResult {
+    val certList = certPath.toCertList()
+    val basicChecker = BasicChecker(anchor, certPath, date, sigProvider)
+    val certPathCheckers = listOf(basicChecker, *extraCertPathCheckers.toTypedArray())
+
+    certList.forEachIndexed { idx, cert ->
+      val unresolvedCritExts = cert.criticalExtensionOIDs ?: emptyList()
+      if (idx == 0) certPathCheckers.forEach { it.init(false) }
+      for (checker in certPathCheckers) {
+        try {
+          checker.check(cert, unresolvedCritExts)
+        } catch (e: CertPathValidatorException) {
+          throw CertPathValidatorException(
+            e.message,
+            e.cause ?: e,
+            certPath,
+            certList.size - (idx + 1),
+            e.reason,
+          )
+        }
+      }
+    }
+
+    return PKIXCertPathValidatorResult(anchor, /* policyTree= */ null, basicChecker.publicKey)
+  }
+
+  private fun CertPath.toCertList(): List<X509Certificate> =
+    this.certificates.reversed().map {
+      require(it is X509Certificate)
+      it
+    }
+}
+
+enum class Step {
+  FACTORY_INTERMEDIATE,
+  RKP_INTERMEDIATE,
+  RKP_SERVER,
+  ATTESTATION,
+  TARGET,
+}
+
+@RequiresApi(24)
+private class BasicChecker(
+  anchor: TrustAnchor,
+  val certPath: KeyAttestationCertPath,
+  val date: Date,
+  val sigProvider: String?,
+) : PKIXCertPathChecker() {
+  private val trustedPublicKey = anchor.trustedCert?.publicKey ?: anchor.caPublicKey
+  private val caName = anchor.trustedCert?.subjectX500Principal ?: anchor.ca
+  private var prevPubKey: PublicKey? = null
+  private var prevSubject: X500Principal? = null
+  private var step: Step? = null
+  private var remainingCerts = 0
+
+  /** The public key of the last certificate that was checked. */
+  val publicKey: PublicKey
+    get() = checkNotNull(prevPubKey)
+
+  override fun init(forward: Boolean) {
+    if (forward) throw CertPathValidatorException("forward checking not supported")
+    prevPubKey = trustedPublicKey
+    prevSubject = caName
+    remainingCerts = certPath.certificates.size
+  }
+
+  override fun isForwardCheckingSupported() = false
+
+  override fun getSupportedExtensions() = null
+
+  override fun check(cert: Certificate, unresolvedCritExts: MutableCollection<String>) {
+    step = getStep(cert as X509Certificate) // cert will always be an X509Certificate
+    remainingCerts--
+    verifyNameChaining(cert)
+    verifySignature(cert)
+    verifyValidity(cert)
+    verifyExpectations(cert)
+    prevPubKey = cert.publicKey
+    prevSubject = cert.subjectX500Principal
+  }
+
+  private fun verifyNameChaining(cert: X509Certificate) {
+    if (cert.issuerX500Principal != prevSubject) {
+      throw CertPathValidatorException(
+        "Subject/Issuer name chaining check failed ${cert.issuerX500Principal} != ${prevSubject}",
+        /* cause = */ null,
+        certPath,
+        /* index = */ remainingCerts,
+        PKIXReason.NAME_CHAINING,
+      )
+    }
+  }
+
+  private fun getStep(cert: X509Certificate) =
+    when (step) {
+      null -> {
+        if (certPath.provisioningMethod() == ProvisioningMethod.REMOTELY_PROVISIONED) {
+          Step.RKP_INTERMEDIATE
+        } else if (
+          certPath.provisioningMethod() == ProvisioningMethod.FACTORY_PROVISIONED ||
+            certPath.certificatesWithAnchor.size == 4
+        ) {
+          // TODO(google-internal bug): Remove size check once test data is better formed.
+          Step.FACTORY_INTERMEDIATE
+        } else {
+          // Software cert chains are just ROOT -> ATTESTATION -> TARGET.
+          Step.ATTESTATION
+        }
+      }
+      Step.RKP_INTERMEDIATE -> Step.RKP_SERVER
+      Step.RKP_SERVER -> Step.ATTESTATION
+      Step.FACTORY_INTERMEDIATE -> Step.ATTESTATION
+      Step.ATTESTATION -> Step.TARGET
+      Step.TARGET -> {
+        if (cert.hasAttestationExtension()) {
+          throw CertPathValidatorException(
+            "Unexpected attestation extension after the target certificate",
+            /* cause = */ null,
+            certPath,
+            /* index = */ remainingCerts,
+            KeyAttestationReason.CHAIN_EXTENDED_WITH_FAKE_ATTESTATION_EXTENSION,
+          )
+        }
+        throw CertPathValidatorException(
+          "Unexpected certificate after the target certificate",
+          /* cause = */ null,
+          certPath,
+          /* index = */ remainingCerts,
+          KeyAttestationReason.CHAIN_EXTENDED_FOR_KEY,
+        )
+      }
+    }
+
+  private fun verifySignature(cert: X509Certificate) {
+    try {
+      cert.verify(prevPubKey, sigProvider)
+    } catch (e: SignatureException) {
+      throw CertPathValidatorException(
+        "Signature check failed",
+        e,
+        certPath,
+        /* index = */ remainingCerts,
+        BasicReason.INVALID_SIGNATURE,
+      )
+    } catch (e: GeneralSecurityException) {
+      /*
+       * If the signing key has a different algorithm than the signature, InvalidKeyException will
+       * be thrown instead of SignatureException. InvalidKeyException along with the other
+       * exceptions that verify() throws are all subclasses of GeneralSecurityException.
+       */
+      throw CertPathValidatorException(
+        "Verify signature failed",
+        e,
+        certPath,
+        /* index = */ remainingCerts,
+        BasicReason.UNSPECIFIED,
+      )
+    }
+  }
+
+  private fun verifyValidity(cert: X509Certificate) {
+    /*
+     * Do not check the validity of the final certificate in the path. The
+     * validity period of the final cert is set on the device so could both be
+     * subject to tampering and could be impacted by clock skew.
+     */
+    if (remainingCerts == 0) return
+    try {
+      cert.checkValidity(date)
+    } catch (e: CertificateNotYetValidException) {
+      throw CertPathValidatorException(
+        "Validity check failed",
+        e,
+        certPath,
+        /* index = */ remainingCerts,
+        BasicReason.NOT_YET_VALID,
+      )
+    } catch (e: CertificateExpiredException) {
+      // Ignore validity on factory-provisioned certificate chains because it is not possible to
+      // safely rotate the keys.
+      if (certPath.provisioningMethod() == ProvisioningMethod.FACTORY_PROVISIONED) return
+
+      throw CertPathValidatorException(
+        "Validity check failed",
+        e,
+        certPath,
+        /* index = */ remainingCerts,
+        BasicReason.EXPIRED,
+      )
+    }
+  }
+
+  private fun verifyExpectations(cert: X509Certificate) {
+    when (step) {
+      Step.TARGET -> {
+        if (!cert.hasAttestationExtension()) {
+          throw CertPathValidatorException(
+            "Target certificate does not contain an attestation extension",
+            /* cause = */ null,
+            certPath,
+            /* index = */ remainingCerts,
+            KeyAttestationReason.TARGET_MISSING_ATTESTATION_EXTENSION,
+          )
+        }
+      }
+      else -> {
+        // TODO(google-internal bug): Add support for ATTEST_KEY chains.
+        if (cert.hasAttestationExtension()) {
+          throw CertPathValidatorException(
+            "Only the target certificate should contain an attestation extension, attestation extension found in ${step}",
+            /* cause = */ null,
+            certPath,
+            /* index = */ remainingCerts,
+            KeyAttestationReason.CHAIN_EXTENDED_WITH_FAKE_ATTESTATION_EXTENSION,
+          )
+        }
+      }
+    }
+  }
+}

@@ -42,11 +42,12 @@ import com.safekey.authenticator.MainViewModel
 import com.safekey.authenticator.R
 import com.safekey.authenticator.security.KeystoreTools
 import com.safekey.authenticator.security.RootState
-import com.safekey.authenticator.security.RootTier
 import com.safekey.authenticator.ui.components.AppIcons
 import com.safekey.authenticator.ui.components.SectionHeader
 import com.safekey.authenticator.ui.components.SettingRow
 import com.safekey.authenticator.ui.components.SimpleTopBar
+import com.safekey.authenticator.ui.components.integrityCheckTitle
+import com.safekey.authenticator.ui.components.integrityStatusColor
 import com.safekey.authenticator.ui.dev.DevStrings
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -165,11 +166,11 @@ fun DeveloperScreen(
                 Text(
                     text = when {
                         report == null -> dev.rootStatusUnknown
-                        report.rooted -> dev.rootStatusDetected
+                        report.compromised -> dev.rootStatusDetected
                         else -> dev.rootStatusClean
                     },
                     style = MaterialTheme.typography.titleMedium,
-                    color = if (report?.rooted == true) {
+                    color = if (report?.compromised == true) {
                         MaterialTheme.colorScheme.error
                     } else {
                         MaterialTheme.colorScheme.onSurface
@@ -187,7 +188,7 @@ fun DeveloperScreen(
                         modifier = Modifier.padding(top = 2.dp)
                     )
                 }
-                if (report?.rooted == true) {
+                if (report?.compromised == true) {
                     Text(
                         text = if (settings.devDisableRootSecurity) {
                             dev.restrictionLifted
@@ -287,6 +288,14 @@ fun DeveloperScreen(
                 onClick = { vm.setDevExtraDigits(!settings.devExtraDigits) }
             )
 
+            SettingRow(
+                icon = AppIcons.Info,
+                title = dev.detailedLogging,
+                description = dev.detailedLoggingDesc,
+                trailing = { DevStateText(settings.devDetailedLogging, dev) },
+                onClick = { vm.setDevDetailedLogging(!settings.devDetailedLogging) }
+            )
+
             Spacer(Modifier.height(24.dp))
 
             SettingRow(
@@ -322,23 +331,23 @@ fun DeveloperScreen(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Spacer(Modifier.height(8.dp))
-                        report.signals.forEach { s ->
+                        report.checks.forEach { s ->
                             Row(modifier = Modifier.padding(vertical = 3.dp)) {
                                 Text(
                                     text = if (s.hit) dev.hitLabel else dev.missLabel,
                                     style = MaterialTheme.typography.labelMedium,
-                                    color = if (s.hit) {
-                                        MaterialTheme.colorScheme.error
-                                    } else {
-                                        MaterialTheme.colorScheme.onSurfaceVariant
-                                    },
+                                    color = integrityStatusColor(s.hit, s.severity),
                                     modifier = Modifier.width(64.dp)
                                 )
                                 Column {
-                                    val tier = if (s.tier == RootTier.STRONG) dev.tierStrong else dev.tierInfo
+                                    // A quiet check reads PASS — the severity
+                                    // classes are firing weights, not verdicts
+                                    // for checks that did not fire.
+                                    val status = if (s.hit) s.severity.name else "PASS"
                                     Text(
-                                        text = "${s.id}  [$tier]",
-                                        style = MaterialTheme.typography.bodyMedium
+                                        text = "${integrityCheckTitle(s.id)}  [$status]",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = integrityStatusColor(s.hit, s.severity)
                                     )
                                     if (s.detail.isNotBlank()) {
                                         Text(
@@ -361,9 +370,10 @@ fun DeveloperScreen(
                             val text = buildString {
                                 appendLine("Osmium root report")
                                 appendLine("checkedAt=${report.checkedAt}")
-                                report.signals.forEach { s ->
+                                report.checks.forEach { s ->
+                                    val status = if (s.hit) s.severity.name else "PASS"
                                     appendLine(
-                                        "${s.id} tier=${s.tier.name} hit=${s.hit}" +
+                                        "${s.id} $status" +
                                             if (s.detail.isNotBlank()) " detail=${s.detail}" else ""
                                     )
                                 }
@@ -616,6 +626,7 @@ private val HIDEABLE_ITEMS: List<Pair<String, Int>> = listOf(
     "screenshots" to R.string.allow_screenshots,
     "hideCodes" to R.string.hide_codes,
     "timeOffset" to R.string.time_offset,
+    "integrity" to R.string.integrity_entry_title,
     "pin" to R.string.settings_pin,
     "destroy" to R.string.settings_destroy,
     "thirdparty" to R.string.thirdparty_import_title,

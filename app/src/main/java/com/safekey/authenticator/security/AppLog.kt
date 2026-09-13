@@ -37,6 +37,17 @@ object AppLog {
         dRaw("$time $message")
     }
 
+    /**
+     * Detection logging is off by default: device-integrity results must not
+     * end up in the log unless the developer-mode "detailed logging" switch
+     * is on (AppSettings.devDetailedLogging drives this flag).
+     */
+    @Volatile var detectionLoggingEnabled = false
+
+    fun detection(message: String) {
+        if (detectionLoggingEnabled) d(message)
+    }
+
     private fun dRaw(line: String) {
         synchronized(lock) {
             buffer.addLast(line)

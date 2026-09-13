@@ -3,6 +3,7 @@ package com.safekey.authenticator
 import android.app.Application
 import com.safekey.authenticator.database.AppDatabase
 import com.safekey.authenticator.data.SettingsRepository
+import com.safekey.authenticator.integrity.IntegrityEarly
 import com.safekey.authenticator.repository.AccountRepository
 import com.safekey.authenticator.security.AppLog
 import com.safekey.authenticator.security.CryptoManager
@@ -20,6 +21,13 @@ class SafeKeyApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        // K0 early snapshot on a dedicated thread: capture the earliest
+        // observable system state without ever stalling app start (the
+        // capture spawns getprop once).
+        Thread { IntegrityEarly.capture() }.apply {
+            isDaemon = true
+            name = "integrity-early"
+        }.start()
         AppLog.init(this)
         installCrashHandler()
         AppLog.d("app start v${BuildConfig.VERSION_NAME}")

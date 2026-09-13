@@ -23,17 +23,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
 /**
  * Single M3 TopAppBar wrapper so every screen gets a consistent bar
  * and all experimental OptIns live in one place.
+ *
+ * [titleStyle] lets long titles (e.g. the integrity report) use a slightly
+ * smaller style so the full text fits instead of being clipped.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SimpleTopBar(
     title: String,
     onBack: (() -> Unit)? = null,
+    titleStyle: TextStyle = MaterialTheme.typography.titleLarge,
     actions: @Composable RowScope.() -> Unit = {}
 ) {
     TopAppBar(
@@ -41,8 +47,9 @@ fun SimpleTopBar(
         title = {
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleLarge,
-                maxLines = 1
+                style = titleStyle,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         },
         navigationIcon = {

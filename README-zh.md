@@ -19,8 +19,8 @@ Osmium 是一款隐私优先的 Android TOTP/HOTP 验证器。本项目基于 GN
 - **排序与搜索**——支持随机、字母、添加时间、复制次数排序，并可按账户名或服务商搜索
 - **可选标签**——在 设置 → 外观 → 标签 中开启标签功能；可创建多标签、筛选账户，并使用调色盘或自定义 `#RRGGBB` 颜色。没有创建标签时，主页不会显示 `Uncategorized`
 - **安全门禁**——可选的打开时验证（指纹 / 系统凭据 / 应用 PIN）、自毁 PIN、默认禁止截屏
-- **设备 Root 检测（纯本地）**——启动时在本地检测，不联网、不上报。检测到 Root 后，安全功能强制开启，局域网快捷传输、WebDAV 备份、自动备份、自毁模式设置、从第三方验证器导入五项敏感功能停用，并给出一次性说明；可在开发者模式中解除限制。日志仅记录命中的信号名称，绝不记录密钥内容
-- **开发者模式（默认隐藏；英文 / 简体中文）**——在「关于」页连点标题 7 次并通过身份验证后开启。提供手动 Root 检测报告、KeyStore 加密状态、解除 Root 安全限制、明文导出 / 明文导入、强制重新加密数据库、隐藏设置项、支持 4/5/7 位验证码；危险操作需身份验证 + 免责声明 + 逐字确认短语
+- **设备完整性检测（纯离线）**——三层证据链 + 硬件级 Key Attestation 证明（内嵌 Google 官方验证器），以 L0–L3 分级呈现，报告页逐项列出全部检查与证据；不联网、不上报。只装有 Root 管理器应用时按「提示」处理，不会判定 Root。检测到 Root 后，安全功能强制开启，局域网快捷传输、WebDAV 备份、自动备份、自毁模式设置、从第三方验证器导入五项敏感功能停用，打开应用时会提醒；可在开发者模式中解除限制。日志仅记录命中的信号名称，绝不记录密钥内容
+- **开发者模式（默认隐藏；英文 / 简体中文）**——在「关于」页连点标题 7 次并通过身份验证后开启。提供设备完整性检测报告与详细检测日志、KeyStore 加密状态、解除 Root 安全限制、明文导出 / 明文导入、强制重新加密数据库、隐藏设置项、支持 4/5/7 位验证码；危险操作需身份验证 + 免责声明 + 逐字确认短语
 - **时钟校准**——设备时间漂移时手动补偿 TOTP 时钟
 - **10 种语言**——English、简体中文、繁體中文、Español、日本語、한국어、Deutsch、Русский、Français、हिन्दी
 - **内置使用手册**（离线可用）；**用户协议与隐私政策**每次打开应用时从官网获取最新版（获取失败时给出官网链接）
@@ -35,17 +35,17 @@ Osmium 是一款隐私优先的 Android TOTP/HOTP 验证器。本项目基于 GN
 
 ## 下载
 
-最新正式版：**Osmium v2.4.2**（versionCode 52）。请选择与设备匹配的架构：
+最新正式版：**Osmium v2.4.3**（versionCode 58）。请选择与设备匹配的架构：
 
 | 文件 | 架构 | 适用设备 | 下载 |
 |---|---|---|---|
-| `osmium-2.4.2-arm64-v8a.apk` | arm64-v8a | 几乎所有现代手机（推荐） | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.4.2/osmium-2.4.2-arm64-v8a.apk) |
-| `osmium-2.4.2-armeabi-v7a.apk` | armeabi-v7a | 老款 32 位手机 | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.4.2/osmium-2.4.2-armeabi-v7a.apk) |
-| `osmium-2.4.2-x86_64.apk` | x86_64 | Android 模拟器 | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.4.2/osmium-2.4.2-x86_64.apk) |
+| `osmium-2.4.3-arm64-v8a.apk` | arm64-v8a | 几乎所有现代手机（推荐） | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.4.3/osmium-2.4.3-arm64-v8a.apk) |
+| `osmium-2.4.3-armeabi-v7a.apk` | armeabi-v7a | 老款 32 位手机 | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.4.3/osmium-2.4.3-armeabi-v7a.apk) |
+| `osmium-2.4.3-x86_64.apk` | x86_64 | Android 模拟器 | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.4.3/osmium-2.4.3-x86_64.apk) |
 
 安装与设备架构不符的包可能无法启动。三个架构使用同一签名证书，SHA-256 指纹为：`B65BB0131CAA22C45D99EA4E2C3E99B3980EAE0DC5647190F41A2878E6D88412`。
 
-APK 的 SHA-256 校验和见 [v2.4.2 发布说明](release-notes-v2.4.2.md) 及 GitHub Release 页面。
+APK 的 SHA-256 校验和见 [v2.4.3 发布说明](release-notes-v2.4.3.md) 及 GitHub Release 页面。
 
 ## 隐私与条款
 
@@ -70,6 +70,10 @@ APK 的 SHA-256 校验和见 [v2.4.2 发布说明](release-notes-v2.4.2.md) 及 
 ```
 
 Release 构建启用 R8 并按 ABI 分包。构建环境：Kotlin 1.9、Jetpack Compose BOM 2024.09.03、`compileSdk 35`、`minSdk 26`、`targetSdk 34`。GitHub Actions 会运行单元测试并构建 Release APK；正式发布资产固定命名为 `osmium-版本号-架构.apk`。
+
+## 内置组件
+
+「设备完整性检测」内嵌了一个固定提交的 Google [android/keyattestation](https://github.com/android/keyattestation) 验证器源码副本（Apache-2.0，见 [keyattestation/NOTICE](keyattestation/NOTICE)），并附有明确的修改清单。其官方测试套件（`keyattestation/testdata/` 中的真机 attestation 证书链）会在 CI 中通过 `./gradlew :keyattestation:test` 运行。检测思路借鉴了社区研究（如 Duck Detector 项目）但未复用其代码；两者均在应用内「设置 → 关于 → 来源说明」中致谢。APK 内随包分发的构建期快照——`keyattestation/roots.json` 与 `app/src/main/assets/attestation_status.json`——来自 Google 公开的 attestation 端点（`android.googleapis.com/attestation/…`），由 `scripts/fetch_attestation_data.py` 在构建时尽力刷新；刷新失败时使用仓库内的上一份副本。
 
 ## 许可证
 

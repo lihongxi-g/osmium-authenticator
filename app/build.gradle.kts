@@ -13,8 +13,8 @@ android {
         applicationId = "com.safekey.authenticator"
         minSdk = 26
         targetSdk = 34
-        versionCode = 52
-        versionName = "2.4.2"
+        versionCode = 58
+        versionName = "2.4.3"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
     }
@@ -32,6 +32,7 @@ android {
         abi {
             isEnable = true
             reset()
+            // x86_64 included for Android emulator builds (restored 2026-09-13).
             include("arm64-v8a", "armeabi-v7a", "x86_64")
             isUniversalApk = false
         }
@@ -69,6 +70,16 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            // Vendored crypto jars (bcprov/bcpkix/bcutil) carry per-jar
+            // multi-release and JAR-signature metadata that collides when the
+            // release resources are merged; Android never reads these entries.
+            excludes += "/META-INF/versions/9/OSGI-INF/MANIFEST.MF"
+            excludes += "/META-INF/versions/11/OSGI-INF/MANIFEST.MF"
+            excludes += "/META-INF/versions/15/OSGI-INF/MANIFEST.MF"
+            excludes += "/META-INF/versions/21/OSGI-INF/MANIFEST.MF"
+            excludes += "/META-INF/versions/9/module-info.class"
+            excludes += "/META-INF/BC2048KE.SF"
+            excludes += "/META-INF/BC2048KE.DSA"
         }
     }
 }
@@ -117,6 +128,9 @@ dependencies {
     implementation("com.google.mlkit:barcode-scanning:17.2.0")
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
+
+    // Vendored Google Android Key Attestation verifier (see keyattestation/NOTICE).
+    implementation(project(":keyattestation"))
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
