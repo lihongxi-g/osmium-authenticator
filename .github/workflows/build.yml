@@ -40,6 +40,20 @@ jobs:
           chmod +x gradlew
           ./gradlew testDebugUnitTest :keyattestation:test assembleRelease --stacktrace
 
+      - name: Unit test summary
+        if: always()
+        run: |
+          python3 -c "
+          import glob, xml.etree.ElementTree as ET
+          for mod in ('app', 'keyattestation'):
+              total = failed = 0
+              for fn in glob.glob(f'{mod}/build/test-results/**/*.xml', recursive=True):
+                  r = ET.parse(fn).getroot()
+                  total += int(r.get('tests') or 0)
+                  failed += int(r.get('failures') or 0) + int(r.get('errors') or 0)
+              print(f'{mod}: {total} tests, {failed} failed')
+          "
+
       - name: Prepare release APKs
         run: |
           set -euo pipefail

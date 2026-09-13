@@ -118,6 +118,9 @@ dependencies {
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
 
+    // Vendored Google Android Key Attestation verifier (see keyattestation/NOTICE).
+    implementation(project(":keyattestation"))
+
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
     // XmlPullParser on the JVM for unit-testing the WebDAV multistatus parser
