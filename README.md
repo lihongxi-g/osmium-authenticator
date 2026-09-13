@@ -35,17 +35,17 @@ The live test page at **https://otp.osmium.im** supports TOTP, HOTP and Steam Gu
 
 ## Download
 
-Latest stable release: **Osmium v2.4.3** (`versionCode 58`). Choose the ABI matching your device:
+Latest stable release: **Osmium v2.4.4** (`versionCode 59`). Choose the ABI matching your device:
 
 | File | Architecture | Devices | Download |
 |---|---|---|---|
-| `osmium-2.4.3-arm64-v8a.apk` | arm64-v8a | Virtually all modern phones (recommended) | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.4.3/osmium-2.4.3-arm64-v8a.apk) |
-| `osmium-2.4.3-armeabi-v7a.apk` | armeabi-v7a | Older 32-bit phones | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.4.3/osmium-2.4.3-armeabi-v7a.apk) |
-| `osmium-2.4.3-x86_64.apk` | x86_64 | Android emulators | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.4.3/osmium-2.4.3-x86_64.apk) |
+| `osmium-2.4.4-arm64-v8a.apk` | arm64-v8a | Virtually all modern phones (recommended) | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.4.4/osmium-2.4.4-arm64-v8a.apk) |
+| `osmium-2.4.4-armeabi-v7a.apk` | armeabi-v7a | Older 32-bit phones | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.4.4/osmium-2.4.4-armeabi-v7a.apk) |
+| `osmium-2.4.4-x86_64.apk` | x86_64 | Android emulators | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.4.4/osmium-2.4.4-x86_64.apk) |
 
 Installing an incompatible ABI may prevent the app from starting. All three APKs use the same signing certificate, SHA-256 fingerprint: `B65BB0131CAA22C45D99EA4E2C3E99B3980EAE0DC5647190F41A2878E6D88412`.
 
-APK SHA-256 checksums are listed in the [v2.4.3 release notes](release-notes-v2.4.3.md) and on the GitHub Release page.
+APK SHA-256 checksums are listed in the [v2.4.4 release notes](release-notes-v2.4.4.md) and on the GitHub Release page.
 
 ## Privacy & Terms
 
