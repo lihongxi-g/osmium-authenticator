@@ -22,7 +22,7 @@ The app itself fetches the latest Terms of Use and Privacy Policy from osmium.im
 - **Root detection (on-device)** — checked locally at launch; no network, no telemetry. When root is detected, the security features are forced on and five sensitive features (LAN transfer, WebDAV backup, auto backup, self-destruct setup, third-party import) are disabled until you lift the restriction in developer mode; a one-time notice explains what happened. Only matched signal names are logged — never secrets
 - **Developer mode (hidden; English / Simplified Chinese)** — unlock by tapping the About title seven times and passing verification. Adds a manual root report, Keystore encryption status, lifting root restrictions, plaintext export/import, forced re-encryption of the local database, hiding Settings entries, and 4/5/7-digit codes; dangerous actions require verification, a disclaimer and a typed confirmation phrase
 - **Clock calibration** — manually compensate for device-clock drift
-- **11 languages** — English, 简体中文, 繁體中文, Español, 日本語, 한국어, Deutsch, Русский, Français, हिन्दी
+- **10 languages** — English, 简体中文, 繁體中文, Español, 日本語, 한국어, Deutsch, Русский, Français, हिन्दी
 - **Built-in manual** — available offline; the **Terms of Use and Privacy Policy** are fetched from osmium.im each time the app opens (a website link is shown when they can't be fetched)
 
 ## ⚠ Steam Guard — read this first
