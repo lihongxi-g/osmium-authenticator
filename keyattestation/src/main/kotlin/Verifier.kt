@@ -1,0 +1,335 @@
+/*
+ * Copyright 2024 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.keyattestation.verifier
+
+import com.android.keyattestation.verifier.SoftwareRoot.isSoftwareRoot
+import com.android.keyattestation.verifier.provider.KeyAttestationCertPath
+import com.android.keyattestation.verifier.provider.KeyAttestationProvider
+import com.android.keyattestation.verifier.provider.ProvisioningMethod
+import com.android.keyattestation.verifier.provider.RevocationChecker
+import com.google.common.collect.ImmutableList
+import com.google.common.util.concurrent.ListenableFuture
+import com.google.errorprone.annotations.ThreadSafe
+import com.google.protobuf.ByteString
+import com.google.protobuf.kotlin.toByteString
+import java.security.PublicKey
+import java.security.Security
+import java.security.cert.CertPathValidator
+import java.security.cert.CertPathValidatorException
+import java.security.cert.CertificateException
+import java.security.cert.PKIXCertPathValidatorResult
+import java.security.cert.PKIXParameters
+import java.security.cert.TrustAnchor
+import java.security.cert.X509Certificate
+import java.util.Date
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.guava.await
+import kotlinx.coroutines.guava.future
+import kotlinx.coroutines.runBlocking
+
+/** The result of verifying an Android Key Attestation certificate chain. */
+sealed interface VerificationResult {
+  data class Success(
+    val publicKey: PublicKey,
+    val challenge: ByteString,
+    val securityLevel: SecurityLevel,
+    val verifiedBootState: VerifiedBootState,
+    val deviceLocked: Boolean,
+    val deviceInformation: ProvisioningInfoMap?,
+    val attestedDeviceIds: DeviceIdentity,
+  ) : VerificationResult
+
+  data object ChallengeMismatch : VerificationResult
+
+  data class PathValidationFailure(val cause: CertPathValidatorException) : VerificationResult
+
+  data class ChainParsingFailure(val cause: Exception) : VerificationResult
+
+  data class ExtensionParsingFailure(val cause: ExtensionParsingException) : VerificationResult
+
+  data class ConstraintViolation(val constraintLabel: String, val cause: String) :
+    VerificationResult
+
+  data object SoftwareAttestationUnsupported : VerificationResult
+}
+
+/**
+ * Interface for logging info level key attestation events and information.
+ *
+ * Uses of the log hook must be thread safe within a single verify call.
+ */
+@ThreadSafe
+interface LogHook {
+  fun createRequestLog(): VerifyRequestLog
+}
+
+interface VerifyRequestLog {
+  /**
+   * Logs the certificate chain which is being verified. Called for each call to [verify].
+   *
+   * @param inputChain The certificate chain which is being verified.
+   */
+  fun logInputChain(inputChain: List<ByteString>) {}
+
+  /**
+   * Logs the result of the verification. Called for each call to [verify].
+   *
+   * @param result The result of the verification.
+   */
+  fun logResult(result: VerificationResult) {}
+
+  /**
+   * Logs the key description of the leaf certificate. Called if [verify] reaches the point where
+   * the key description is parsed.
+   *
+   * @param keyDescription The key description of the leaf certificate.
+   */
+  fun logKeyDescription(keyDescription: KeyDescription) {}
+
+  /**
+   * Logs the provisioning info map extension of the attestation certificate. Called if [verify]
+   * reaches the point where the provisioning info map is parsed, if present in the attestation
+   * certificate.
+   *
+   * @param provisioningInfoMap The provisioning info map extension of the leaf certificate.
+   */
+  fun logProvisioningInfoMap(provisioningInfoMap: ProvisioningInfoMap) {}
+
+  /**
+   * Logs the serial numbers of the intermediate certificates in the certificate chain. Called if
+   * [verify] reaches the point where the certificate chain is parsed.
+   *
+   * @param certSerialNumbers The serial numbers of the intermediate certificates in the certificate
+   *   chain.
+   */
+  fun logCertSerialNumbers(certSerialNumbers: List<String>) {}
+
+  /**
+   * Logs the certificate signing algorithms of the intermediate certificates in the certificate
+   * chain. Called if [verify] reaches the point where the certificate chain is validated.
+   *
+   * @param certSigningAlgorithms The certificate signing algorithms in the chain.
+   */
+  fun logCertSigningAlgorithms(certSigningAlgorithms: Set<String>) {}
+
+  /**
+   * Logs an info level message. May be called throughout the verification process.
+   *
+   * @param infoMessage The info level message to log.
+   */
+  fun logInfoMessage(infoMessage: String) {}
+
+  /* Flushes any buffered logs. Called just before [verify] returns. */
+  fun flush() {}
+}
+
+/**
+ * Verifier for Android Key Attestation certificate chain.
+ *
+ * https://developer.android.com/privacy-and-security/security-key-attestation
+ *
+ * @param anchor a [TrustAnchor] to use for certificate path verification.
+ */
+@ThreadSafe
+open class Verifier
+@JvmOverloads
+constructor(
+  private val trustAnchorsSource: () -> Set<TrustAnchor>,
+  private val revokedSerialsSource: () -> Set<String>,
+  private val instantSource: InstantSource,
+  private val constraintConfig: ConstraintConfig = ConstraintConfig(),
+) {
+  init {
+    Security.addProvider(KeyAttestationProvider())
+    if (!constraintConfig.allowSoftwareRoot) {
+      for (anchor in trustAnchorsSource()) {
+        if (anchor.trustedCert?.isSoftwareRoot() == true) {
+          throw IllegalArgumentException(
+            "Software attestation root cannot be used as a trust anchor."
+          )
+        }
+      }
+    }
+  }
+
+  /**
+   * Verifies an Android Key Attestation certificate chain.
+   *
+   * This method blocks until [ChallengeChecker.checkChallenge] completes, so only use this function
+   * if you are certain the application can wait for the result.
+   *
+   * @param chain The attestation certificate chain to verify.
+   * @param challengeChecker The challenge checker to use for additional challenge validation.
+   * @param log The log hook to use for logging.
+   * @return [VerificationResult]
+   */
+  @JvmOverloads
+  fun verify(
+    chain: List<X509Certificate>,
+    challengeChecker: ChallengeChecker? = null,
+    log: LogHook? = null,
+  ): VerificationResult {
+    val requestLog = log?.createRequestLog()
+    val result =
+      try {
+        val certPath = KeyAttestationCertPath(chain)
+        runBlocking { internalVerify(certPath, challengeChecker, requestLog) }
+      } catch (e: CertificateException) {
+        requestLog?.logInputChain(chain.map { it.getEncoded().toByteString() })
+        VerificationResult.ChainParsingFailure(e)
+      }
+    requestLog?.logResult(result)
+    requestLog?.flush()
+    return result
+  }
+
+  /**
+   * Verifies an Android Key Attestation certificate chain asynchronously.
+   *
+   * @param chain The attestation certificate chain to verify.
+   * @param coroutineScope The coroutine scope from which to run the verification.
+   * @param challengeChecker The challenge checker to use for additional challenge validation.
+   * @param log The log hook to use for logging.
+   * @return A [ListenableFuture] containing the [VerificationResult].
+   */
+  @JvmOverloads
+  fun verifyAsync(
+    coroutineScope: CoroutineScope,
+    chain: List<X509Certificate>,
+    challengeChecker: ChallengeChecker? = null,
+    log: LogHook? = null,
+  ): ListenableFuture<VerificationResult> {
+    val immutableChain = ImmutableList.copyOf(chain)
+    return coroutineScope.future {
+      val requestLog = log?.createRequestLog()
+      val result =
+        try {
+          val certPath = KeyAttestationCertPath(immutableChain)
+          internalVerify(certPath, challengeChecker, requestLog)
+        } catch (e: CertificateException) {
+          requestLog?.logInputChain(immutableChain.map { it.getEncoded().toByteString() })
+          VerificationResult.ChainParsingFailure(e)
+        }
+      requestLog?.logResult(result)
+      requestLog?.flush()
+      result
+    }
+  }
+
+  private suspend fun internalVerify(
+    certPath: KeyAttestationCertPath,
+    challengeChecker: ChallengeChecker? = null,
+    log: VerifyRequestLog? = null,
+  ): VerificationResult {
+    log?.logInputChain(certPath.certificatesWithAnchor.map { it.getEncoded().toByteString() })
+    log?.logCertSerialNumbers(certPath.serialNumbers())
+    val certPathValidator = CertPathValidator.getInstance("KeyAttestation")
+    val certPathParameters =
+      PKIXParameters(trustAnchorsSource()).apply {
+        date = Date.from(instantSource.instant())
+        addCertPathChecker(RevocationChecker(revokedSerialsSource()))
+      }
+
+    val deviceInformation =
+      if (certPath.provisioningMethod() == ProvisioningMethod.REMOTELY_PROVISIONED) {
+        try {
+          certPath.attestationCert().provisioningInfo(constraintConfig.inputLimits)
+        } catch (e: Exception) {
+          log?.logInfoMessage("Failed to parse provisioning info map: ${e.message}")
+          null
+        }
+      } else {
+        null
+      }
+    deviceInformation?.let { log?.logProvisioningInfoMap(it) }
+    val pathValidationResult =
+      try {
+        certPathValidator.validate(certPath, certPathParameters) as PKIXCertPathValidatorResult
+      } catch (e: CertPathValidatorException) {
+        if (
+          e.message == "No matching trust anchor found" &&
+            certPath.certificatesWithAnchor.last().isSoftwareRoot()
+        ) {
+          return VerificationResult.PathValidationFailure(
+            CertPathValidatorException(
+              "Chain terminates in a software root and no matching trust anchor was found, so the chain was not validated.",
+              e,
+            )
+          )
+        }
+        return VerificationResult.PathValidationFailure(e)
+      }
+
+    log?.logCertSigningAlgorithms(certPath.signingAlgorithms())
+
+    val keyDescription =
+      try {
+        checkNotNull(
+          KeyDescription.parseFrom(
+            certPath.leafCert(),
+            { msg -> log?.logInfoMessage(msg) },
+            inputLimits = constraintConfig.inputLimits,
+          )
+        ) {
+          // Should never happen since the extension's presence is checked by validate().
+          "Key attestation extension not found"
+        }
+      } catch (e: ExtensionParsingException) {
+        return VerificationResult.ExtensionParsingFailure(e)
+      } catch (e: Exception) {
+        // TODO(google-internal bug): When experimental contracts aren't experimental,
+        // update the IllegalArgumentException and IllegalStateException cases to return
+        // ExtensionParsingException.
+        return VerificationResult.ExtensionParsingFailure(ExtensionParsingException(e.toString()))
+      }
+    log?.logKeyDescription(keyDescription)
+
+    if (challengeChecker != null) {
+      val checkResult = challengeChecker.checkChallenge(keyDescription.attestationChallenge).await()
+      if (!checkResult) {
+        return VerificationResult.ChallengeMismatch
+      }
+    }
+
+    for (constraint in constraintConfig.getConstraints()) {
+      val result = constraint.check(keyDescription, certPath)
+      when (result) {
+        is Constraint.Satisfied -> {}
+        is Constraint.Violated -> {
+          return VerificationResult.ConstraintViolation(constraint.label, result.failureMessage)
+        }
+      }
+    }
+
+    val securityLevel =
+      minOf(keyDescription.attestationSecurityLevel, keyDescription.keyMintSecurityLevel)
+
+    val rootOfTrust = keyDescription.hardwareEnforced.rootOfTrust
+    val verifiedBootState = rootOfTrust?.verifiedBootState ?: VerifiedBootState.UNVERIFIED
+    val deviceLocked = rootOfTrust?.deviceLocked ?: false
+
+    return VerificationResult.Success(
+      pathValidationResult.publicKey,
+      keyDescription.attestationChallenge,
+      securityLevel,
+      verifiedBootState,
+      deviceLocked,
+      deviceInformation,
+      DeviceIdentity.parseFrom(keyDescription),
+    )
+  }
+}

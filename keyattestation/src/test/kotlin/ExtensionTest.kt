@@ -1,0 +1,258 @@
+/*
+ * Copyright 2024 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.android.keyattestation.verifier
+
+import com.android.keyattestation.verifier.testing.Chains
+import com.android.keyattestation.verifier.testing.FakeLogHook
+import com.android.keyattestation.verifier.testing.TestUtils.TESTDATA_PATH
+import com.android.keyattestation.verifier.testing.TestUtils.getTestCases
+import com.android.keyattestation.verifier.testing.TestUtils.readCertPath
+import com.android.keyattestation.verifier.testing.V3Extensions
+import com.android.keyattestation.verifier.testing.toKeyDescription
+import com.google.common.truth.Truth.assertThat
+
+import com.google.protobuf.ByteString
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.google.testing.junit.testparameterinjector.TestParameters
+import com.google.testing.junit.testparameterinjector.TestParameters.TestParametersValues
+import com.google.testing.junit.testparameterinjector.TestParametersValuesProvider
+import com.google.testing.junit.testparameterinjector.TestParametersValuesProvider.Context
+import java.time.YearMonth
+import kotlin.io.path.Path
+import kotlin.io.path.inputStream
+import kotlin.io.path.listDirectoryEntries
+import kotlin.io.path.nameWithoutExtension
+import kotlin.io.path.readText
+import kotlin.io.path.reader
+import org.junit.Assert.assertThrows
+import org.junit.Test
+import org.junit.runner.RunWith
+
+@RunWith(TestParameterInjector::class)
+class ExtensionTest {
+  private val testData = Path("testdata")
+
+  @Test
+  fun parseFrom_provisioningInfoFromAttestationCert_success() {
+    // The provisioning info in `validRemotelyProvisioned` from CertLists.kt
+    val expectedProvisioningInfo =
+      ProvisioningInfoMap(
+        certificatesIssued = 1,
+      )
+    val provisioningInfo =
+      ProvisioningInfoMap.parseFrom(
+        Chains.validRemotelyProvisioned.attestationCert(),
+        InputLimits(),
+      )
+    assertThat(provisioningInfo).isEqualTo(expectedProvisioningInfo)
+  }
+
+  @Test
+  @TestParameters(valuesProvider = TestCaseProvider::class)
+  fun parseFrom_success(model: String, sdk: Int) {
+    val path = testData.resolve("${model}/sdk${sdk}")
+    val chainMap =
+      path.listDirectoryEntries("*.pem").map {
+        Pair(it, Path("${it.parent}/${it.nameWithoutExtension}.json"))
+      }
+    for ((pemPath, jsonPath) in chainMap) {
+      assertThat(KeyDescription.parseFrom(readCertPath(pemPath.reader()).leafCert()))
+        .isEqualTo(jsonPath.readText().toKeyDescription())
+    }
+  }
+
+  class TestCaseProvider : TestParametersValuesProvider() {
+    override fun provideValues(context: Context): List<TestParametersValues> =
+      getTestCases().map { testCase ->
+        TestParametersValues.builder()
+          .name("${testCase.model}_sdk${testCase.sdk}")
+          .addParameter("model", testCase.model)
+          .addParameter("sdk", testCase.sdk)
+          .build()
+      }
+  }
+
+  @Test
+  fun parseFrom_containsAllowWhileOnBody_success() {
+    val unused =
+      KeyDescription.parseFrom(
+        testData.resolve("allow_while_on_body.pem").inputStream().asX509Certificate()
+      )
+  }
+
+  @Test
+  fun parseFrom_malformedRotDeviceLocked_successfullyParsed() {
+    val keyDescription =
+      KeyDescription.parseFrom(
+        testData
+          .resolve("invalid/malformed_rot_device_locked.pem")
+          .inputStream()
+          .asX509Certificate()
+      )
+    assertThat(keyDescription?.hardwareEnforced?.rootOfTrust?.deviceLocked).isTrue()
+  }
+
+  @Test
+  fun parseFrom_invalidPatchLevel_returnsNull(
+    @TestParameter("202400", "00000000", "2000231") patchLevel: String
+  ) {
+    assertThat(PatchLevel.from(patchLevel)).isNull()
+  }
+
+  @Test
+  fun keyDescription_encodeToAsn1_expectedResult() {
+    val authorizationList =
+      AuthorizationList(
+        purposes = setOf(1.toBigInteger()),
+        algorithms = 1.toBigInteger(),
+        keySize = 2.toBigInteger(),
+        digests = setOf(1.toBigInteger()),
+        paddings = setOf(1.toBigInteger()),
+        ecCurve = 3.toBigInteger(),
+        mlDsaVariant = 2.toBigInteger(),
+        rsaPublicExponent = 4.toBigInteger(),
+        activeDateTime = 5.toBigInteger(),
+        originationExpireDateTime = 6.toBigInteger(),
+        usageExpireDateTime = 7.toBigInteger(),
+        usageCountLimit = 8.toBigInteger(),
+        noAuthRequired = true,
+        userAuthType = 1.toBigInteger(),
+        authTimeout = 9.toBigInteger(),
+        trustedUserPresenceRequired = true,
+        trustedConfirmationRequired = true,
+        creationDateTime = 10.toBigInteger(),
+        origin = Origin.GENERATED,
+        rollbackResistant = true,
+        rootOfTrust =
+          RootOfTrust(
+            verifiedBootKey = ByteString.copyFromUtf8("verifiedBootKey"),
+            deviceLocked = false,
+            verifiedBootState = VerifiedBootState.UNVERIFIED,
+            verifiedBootHash = ByteString.copyFromUtf8("verifiedBootHash"),
+          ),
+        osVersion = 11.toBigInteger(),
+        osPatchLevel = PatchLevel(yearMonth = YearMonth.of(2024, 4)),
+        attestationApplicationId =
+          AttestationApplicationId(
+            packages = setOf(AttestationPackageInfo(name = "name", version = 1.toBigInteger())),
+            signatures = setOf(ByteString.copyFromUtf8("signature")),
+          ),
+        attestationIdBrand = "brand",
+        attestationIdDevice = "device",
+        attestationIdProduct = "product",
+        attestationIdSerial = "serial",
+        attestationIdImei = "imei",
+        attestationIdMeid = "meid",
+        attestationIdManufacturer = "attestationIdManufacturer",
+        attestationIdModel = "model",
+        vendorPatchLevel = PatchLevel(YearMonth.of(2024, 4), 5),
+        bootPatchLevel = PatchLevel(YearMonth.of(2024, 4), 5),
+        attestationIdSecondImei = "secondImei",
+      )
+    val keyDescription =
+      KeyDescription(
+        attestationVersion = 1.toBigInteger(),
+        attestationSecurityLevel = SecurityLevel.SOFTWARE,
+        keyMintVersion = 1.toBigInteger(),
+        keyMintSecurityLevel = SecurityLevel.SOFTWARE,
+        attestationChallenge = ByteString.empty(),
+        uniqueId = ByteString.empty(),
+        softwareEnforced = authorizationList,
+        hardwareEnforced = authorizationList,
+      )
+    assertThat(KeyDescription.parseFrom(keyDescription.encodeToAsn1())).isEqualTo(keyDescription)
+  }
+
+  @Test
+  fun keyDescriptionParseFrom_partialAuthorizationListExtension_success() {
+    val authorizationList =
+      AuthorizationList(purposes = setOf(1.toBigInteger()), algorithms = 1.toBigInteger())
+    val keyDescription =
+      KeyDescription(
+        attestationVersion = 1.toBigInteger(),
+        attestationSecurityLevel = SecurityLevel.SOFTWARE,
+        keyMintVersion = 1.toBigInteger(),
+        keyMintSecurityLevel = SecurityLevel.SOFTWARE,
+        attestationChallenge = ByteString.empty(),
+        uniqueId = ByteString.empty(),
+        softwareEnforced = authorizationList,
+        hardwareEnforced = authorizationList,
+      )
+    assertThat(KeyDescription.parseFrom(keyDescription.encodeToAsn1())).isEqualTo(keyDescription)
+  }
+
+  @Test
+  fun keyDescriptionParseFrom_malformedAuthorizationListExtension_successAndLogs() {
+    val logHook = FakeLogHook()
+    assertThat(
+        KeyDescription.parseFrom(
+            V3Extensions.keyDescriptionWithMalformedSoftwareAuthorizations,
+            logFn = logHook.fakeVerifyRequestLog::logInfoMessage,
+          )
+          .softwareEnforced
+          .keySize
+      )
+      .isNull()
+    assertThat(logHook.fakeVerifyRequestLog.infoMessages)
+      .contains("Exception when parsing key_size: Must be an ASN1Integer, was DEROctetString")
+  }
+
+  @Test
+  fun attestationApplicationId_maxPackages_success() {
+    val limits = InputLimits()
+    val packages =
+      (1..limits.maxPackages)
+        .map { AttestationPackageInfo("com.example.pkg$it", it.toBigInteger()) }
+        .toSet()
+    val id = AttestationApplicationId(packages = packages, signatures = setOf(ByteString.empty()))
+    assertThat(id.packages).hasSize(limits.maxPackages)
+  }
+
+  @Test
+  fun attestationApplicationId_fromAsn1_exceedsMaxPackages_throws() {
+    val limits = InputLimits(maxPackages = 1)
+    val packages =
+      (1..2).map { AttestationPackageInfo("com.example.pkg$it", it.toBigInteger()) }.toSet()
+    val seq =
+      V3Extensions.buildAttestationApplicationIdExtension(packages, setOf(ByteString.empty()))
+    assertThrows(ExtensionParsingException::class.java) {
+      AttestationApplicationId.from(seq, inputLimits = limits)
+    }
+  }
+
+  @Test
+  fun attestationApplicationId_fromAsn1_maxSignatures_success() {
+    val limits = InputLimits()
+    val packages = setOf(AttestationPackageInfo("com.example.pkg", 1.toBigInteger()))
+    val signatures =
+      (1..limits.maxSignatures).map { ByteString.copyFrom(byteArrayOf(it.toByte())) }.toSet()
+    val seq = V3Extensions.buildAttestationApplicationIdExtension(packages, signatures)
+    val id = AttestationApplicationId.from(seq, inputLimits = limits)
+    assertThat(id.signatures).hasSize(limits.maxSignatures)
+  }
+
+  @Test
+  fun attestationApplicationId_fromAsn1_exceedsMaxSignatures_throws() {
+    val limits = InputLimits(maxSignatures = 1)
+    val packages = setOf(AttestationPackageInfo("com.example.pkg", 1.toBigInteger()))
+    val signatures = (1..2).map { ByteString.copyFrom(byteArrayOf(it.toByte())) }.toSet()
+    val seq = V3Extensions.buildAttestationApplicationIdExtension(packages, signatures)
+    assertThrows(ExtensionParsingException::class.java) {
+      AttestationApplicationId.from(seq, inputLimits = limits)
+    }
+  }
+}

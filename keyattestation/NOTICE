@@ -1,0 +1,52 @@
+keyattestation — vendored copy of the Android Key Attestation Verifier
+======================================================================
+
+Upstream project: https://github.com/android/keyattestation
+Pinned commit:    100dedaea2387d9705d29b2be3177466c33ae17b (2026-09-11)
+Upstream license: Apache License 2.0 — full text in LICENSE (kept from
+                  upstream, unmodified).
+
+This directory contains a source-level copy ("vendoring") of the upstream
+project, which is Google's official and actively maintained Android Key
+Attestation certificate-chain verifier. Upstream does not publish to Maven;
+embedding the sources is the intended usage pattern (see upstream README).
+
+Modifications in this copy
+--------------------------
+1. Removed the JVM command-line tools and their tests:
+     src/main/kotlin/VerifierCli.kt
+     src/main/kotlin/CertPrinter.kt
+     src/test/kotlin/VerifierCliTest.kt
+     src/test/kotlin/CertPrinterTest.kt
+2. Moved the `testing/` support package (cert factories, fakes) from the main
+   source set to the test source set, so it does not ship in the app:
+     src/main/kotlin/testing/ -> src/test/kotlin/testing/
+3. Replaced the upstream build-time source generation for `GoogleTrustAnchors`
+   (a Gradle task inlining roots.json as a Kotlin string constant) with a
+   hand-written runtime loader that reads the same roots.json from the
+   classpath: src/main/kotlin/GoogleTrustAnchors.kt.
+   The roots.json data file itself is vendored unmodified at the module root;
+   it is copied into the runtime classpath by `processResources`.
+4. Build script rewritten for the host project (build.gradle.kts):
+     - Kotlin 1.9.24 (upstream: 2.2.0), JVM target 17 (upstream: Java 21);
+     - dependency versions pinned to releases consumable by Kotlin 1.9;
+     - guava switched to the `-android` variant (upstream: `-jre`);
+     - dependency scopes adjusted to `api` where upstream public signatures
+       reference guava / protobuf types;
+     - the upstream `test-logger` Gradle plugin is not used.
+
+All vendored Kotlin sources and data files other than the changes above are
+byte-identical to the pinned upstream revision; this was verified by hash
+comparison when the copy was imported.
+
+Notices
+-------
+- The files in this directory originate from Google LLC and are used under
+  the Apache License, Version 2.0. The original copyright headers are kept
+  intact in every file.
+- This copy is maintained by the Osmium project for its own integration. It
+  is not endorsed by, sponsored by, or affiliated with Google LLC. "Android"
+  and "Google" are trademarks of Google LLC.
+- Per Apache-2.0 section 4(b), nothing in this copy grants permission to use
+  the name of the upstream copyright holder to endorse or promote this
+  product.

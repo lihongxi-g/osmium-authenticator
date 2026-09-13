@@ -14,3 +14,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "SafeKey"
 include(":app")
+include(":keyattestation")

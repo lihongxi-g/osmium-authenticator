@@ -1,0 +1,166 @@
+/*
+ * Copyright 2024 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.keyattestation.verifier.testing
+
+import com.android.keyattestation.verifier.ChallengeChecker
+import com.android.keyattestation.verifier.KeyDescription
+import com.android.keyattestation.verifier.PatchLevel
+import com.android.keyattestation.verifier.asX509Certificate
+import com.android.keyattestation.verifier.provider.KeyAttestationCertPath
+import com.google.common.util.concurrent.Futures
+import com.google.common.util.concurrent.ListenableFuture
+
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonDeserializationContext
+import com.google.gson.JsonDeserializer
+import com.google.gson.JsonElement
+import com.google.gson.JsonPrimitive
+import com.google.gson.JsonSerializationContext
+import com.google.gson.JsonSerializer
+import com.google.protobuf.ByteString
+import java.io.Reader
+import java.lang.reflect.Type
+import java.math.BigInteger
+import java.nio.file.Path
+import java.security.cert.TrustAnchor
+import java.security.cert.X509Certificate
+import java.util.Base64
+import kotlin.io.path.Path
+import kotlin.io.path.isDirectory
+import kotlin.io.path.listDirectoryEntries
+import kotlin.io.path.name
+import kotlin.io.path.reader
+import org.bouncycastle.cert.X509CertificateHolder
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter
+import org.bouncycastle.openssl.PEMParser
+
+object TestUtils {
+  private const val PROD_ROOT_PATH = "roots.json"
+  const val TESTDATA_PATH = "testdata"
+
+  fun readCertPath(subpath: String): KeyAttestationCertPath =
+    readCertPath(readFile(Path(base = TESTDATA_PATH, subpaths = arrayOf(subpath))))
+
+  fun readCertPath(reader: Reader): KeyAttestationCertPath {
+    return KeyAttestationCertPath(readCertList(reader))
+  }
+
+  fun readCertList(subpath: String): List<X509Certificate> =
+    readCertList(readFile(Path(base = TESTDATA_PATH, subpaths = arrayOf(subpath))))
+
+  fun readCertList(reader: Reader): List<X509Certificate> {
+    return PEMParser(reader)
+      .use {
+        buildList {
+          var obj = it.readObject()
+          while (obj != null) {
+            add(obj as X509CertificateHolder)
+            obj = it.readObject()
+          }
+        }
+      }
+      .map { JcaX509CertificateConverter().getCertificate(it) }
+  }
+
+  fun readJson(subpath: String) =
+    readFile(Path(base = TESTDATA_PATH, /* subpaths...= */ subpath)).readText().toKeyDescription()
+
+  val prodAnchors by lazy {
+    Gson()
+      .fromJson(readFile(PROD_ROOT_PATH), Array<String>::class.java)
+      .map { TrustAnchor(it.asX509Certificate(), null) }
+      .toSet()
+  }
+
+  val falseChecker =
+    object : ChallengeChecker {
+      override fun checkChallenge(challenge: ByteString): ListenableFuture<Boolean> =
+        Futures.immediateFuture(false)
+    }
+
+  val trueChecker =
+    object : ChallengeChecker {
+      override fun checkChallenge(challenge: ByteString): ListenableFuture<Boolean> =
+        Futures.immediateFuture(true)
+    }
+
+  private fun readFile(path: Path) = path.reader()
+  private fun readFile(path: String) = readFile(Path(path))
+
+  data class TestCaseInfo(val model: String, val sdk: Int)
+
+  fun getTestCases(): List<TestCaseInfo> {
+    val root = Path(TESTDATA_PATH)
+    val testCases =
+      root
+        .listDirectoryEntries()
+        .filter { it.isDirectory() }
+        .flatMap { modelDir ->
+          modelDir
+            .listDirectoryEntries("sdk*")
+            .filter { it.isDirectory() }
+            .mapNotNull { sdkDir ->
+              val sdkVersion = sdkDir.name.removePrefix("sdk").toIntOrNull()
+              if (sdkVersion == null) {
+                null
+              } else {
+                TestCaseInfo(modelDir.name, sdkVersion)
+              }
+            }
+        }
+    check(testCases.isNotEmpty()) { "No test cases found in $root" }
+    return testCases
+  }
+}
+
+object Base64ByteStringAdapter : JsonDeserializer<ByteString>, JsonSerializer<ByteString> {
+  override fun serialize(value: ByteString, typeOfSrc: Type, context: JsonSerializationContext) =
+    JsonPrimitive(Base64.getEncoder().encodeToString(value.toByteArray()))
+
+  override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext) =
+    ByteString.copyFrom(Base64.getDecoder().decode(json.asJsonPrimitive.asString))
+}
+
+object BigIntegerAdapter : JsonDeserializer<BigInteger>, JsonSerializer<BigInteger> {
+  override fun serialize(value: BigInteger, typeOfSrc: Type, context: JsonSerializationContext) =
+    JsonPrimitive(value.toString())
+
+  override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext) =
+    BigInteger(json.asJsonPrimitive.asString)
+}
+
+// Assumes everything is well formatted.
+object PatchLevelAdapter : JsonDeserializer<PatchLevel>, JsonSerializer<PatchLevel> {
+  override fun serialize(value: PatchLevel, typeOfSrc: Type, context: JsonSerializationContext) =
+    JsonPrimitive(value.toString())
+
+  override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext) =
+    PatchLevel.from(json.asJsonPrimitive.asString)
+}
+
+private val gson =
+  GsonBuilder()
+    .registerTypeAdapter(ByteString::class.java, Base64ByteStringAdapter)
+    .registerTypeAdapter(BigInteger::class.java, BigIntegerAdapter)
+    .registerTypeAdapter(PatchLevel::class.java, PatchLevelAdapter)
+    .disableHtmlEscaping()
+    .create()
+
+fun KeyDescription.toJson() = gson.toJson(this)
+
+fun String.toKeyDescription() = gson.fromJson(this, KeyDescription::class.java)

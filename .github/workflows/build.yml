@@ -38,7 +38,7 @@ jobs:
           SAFEKEY_KEY_PASS: ${{ secrets.SAFEKEY_KEY_PASS }}
         run: |
           chmod +x gradlew
-          ./gradlew testDebugUnitTest assembleRelease --stacktrace
+          ./gradlew testDebugUnitTest :keyattestation:test assembleRelease --stacktrace
 
       - name: Prepare release APKs
         run: |
