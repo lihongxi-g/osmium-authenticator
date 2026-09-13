@@ -519,4 +519,10 @@
     <string name="attributions_bundled_title">Bibliothèques intégrées</string>
     <string name="attributions_keyattestation_desc">© Google LLC (Apache-2.0). Copie intégrée et épinglée d\'android/keyattestation avec des modifications locales ; non approuvée par Google.</string>
     <string name="attributions_integrity_note">Les vérifications d\'intégrité s\'inspirent de recherches communautaires (par exemple le projet Duck Detector) ; aucun code de ces projets n\'est réutilisé.</string>
+
+    <!-- K2 consistency checks (2026-09) -->
+    <string name="check_mount_cross">Cohérence de la table des montages</string>
+    <string name="check_file_cross">Cohérence des chemins de fichiers</string>
+    <string name="check_state_drift">Dérive d\'état après le démarrage</string>
+    <string name="integrity_section_consistency">Vérifications de cohérence</string>
 </resources>

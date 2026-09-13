@@ -519,4 +519,10 @@
     <string name="attributions_bundled_title">Встроенные библиотеки</string>
     <string name="attributions_keyattestation_desc">© Google LLC (Apache-2.0). Встроенная копия android/keyattestation с фиксированным коммитом и локальными изменениями; не одобрено Google.</string>
     <string name="attributions_integrity_note">Проверки целостности вдохновлены исследованиями сообщества (например, проектом Duck Detector); код этих проектов не используется.</string>
+
+    <!-- K2 consistency checks (2026-09) -->
+    <string name="check_mount_cross">Согласованность таблицы монтирования</string>
+    <string name="check_file_cross">Согласованность путей файлов</string>
+    <string name="check_state_drift">Дрейф состояния после запуска</string>
+    <string name="integrity_section_consistency">Проверки согласованности</string>
 </resources>

@@ -73,7 +73,7 @@ Release 构建启用 R8 并按 ABI 分包。构建环境：Kotlin 1.9、Jetpack 
 
 ## 内置组件
 
-「设备完整性检测」内嵌了一个固定提交的 Google [android/keyattestation](https://github.com/android/keyattestation) 验证器源码副本（Apache-2.0，见 [keyattestation/NOTICE](keyattestation/NOTICE)），并附有明确的修改清单。其官方测试套件（`keyattestation/testdata/` 中的真机 attestation 证书链）会在 CI 中通过 `./gradlew :keyattestation:test` 运行。检测思路借鉴了社区研究（如 Duck Detector 项目）但未复用其代码；两者均在应用内「设置 → 关于 → 来源说明」中致谢。
+「设备完整性检测」内嵌了一个固定提交的 Google [android/keyattestation](https://github.com/android/keyattestation) 验证器源码副本（Apache-2.0，见 [keyattestation/NOTICE](keyattestation/NOTICE)），并附有明确的修改清单。其官方测试套件（`keyattestation/testdata/` 中的真机 attestation 证书链）会在 CI 中通过 `./gradlew :keyattestation:test` 运行。检测思路借鉴了社区研究（如 Duck Detector 项目）但未复用其代码；两者均在应用内「设置 → 关于 → 来源说明」中致谢。APK 内随包分发的构建期快照——`keyattestation/roots.json` 与 `app/src/main/assets/attestation_status.json`——来自 Google 公开的 attestation 端点（`android.googleapis.com/attestation/…`），由 `scripts/fetch_attestation_data.py` 在构建时尽力刷新；刷新失败时使用仓库内的上一份副本。
 
 ## 许可证
 

@@ -185,7 +185,7 @@ internal object AttestationProbe {
             }
     }
 
-    /** Constant comparison against the challenge generated for this run. */
+    /** Exact comparison against the challenge generated for this run. */
     private class ChallengeMatchChecker(private val expected: ByteArray) : ChallengeChecker {
         override fun checkChallenge(challenge: ByteString): ListenableFuture<Boolean> =
             Futures.immediateFuture(Arrays.equals(challenge.toByteArray(), expected))

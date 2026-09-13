@@ -519,4 +519,10 @@
     <string name="attributions_bundled_title">बंडल की गई लाइब्रेरी</string>
     <string name="attributions_keyattestation_desc">© Google LLC (Apache-2.0)। android/keyattestation की एम्बेडेड, पिन की गई प्रति स्थानीय संशोधनों सहित; Google द्वारा अनुमोदित नहीं।</string>
     <string name="attributions_integrity_note">डिवाइस अखंडता जाँचें समुदाय के शोध (जैसे Duck Detector प्रोजेक्ट) से प्रेरित हैं; उनका कोई कोड पुनः उपयोग नहीं किया गया।</string>
+
+    <!-- K2 consistency checks (2026-09) -->
+    <string name="check_mount_cross">माउंट तालिका सुसंगतता</string>
+    <string name="check_file_cross">फ़ाइल पथ सुसंगतता</string>
+    <string name="check_state_drift">शुरुआत के बाद स्थिति बदलाव</string>
+    <string name="integrity_section_consistency">सुसंगतता जाँच</string>
 </resources>

@@ -3,9 +3,9 @@ package com.safekey.authenticator.integrity
 /**
  * Device-integrity detection models (2026-09 layered engine).
  *
- * Layers: K1 = local static probes (this release), K2 = cross-source
- * consistency checks and K3 = Android Key Attestation arrive in later
- * slices. Probes never throw; a probe that cannot run is reported as a miss.
+ * Layers: K1 = local static probes, K2 = cross-source consistency checks,
+ * K3 = Android Key Attestation (hardware-proof certificate chains). Probes
+ * never throw; a probe that cannot run is reported as a miss.
  */
 
 /**

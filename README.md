@@ -73,7 +73,7 @@ Release builds are minified with R8 and split by ABI. Build environment: Kotlin 
 
 ## Embedded components
 
-The device-integrity feature embeds a pinned, source-level copy of Google's [android/keyattestation](https://github.com/android/keyattestation) verifier (Apache-2.0; see [keyattestation/NOTICE](keyattestation/NOTICE)) with a small set of documented modifications. Its upstream test suite — real-device attestation chains in `keyattestation/testdata/` — runs in CI via `./gradlew :keyattestation:test`. The detection heuristics take inspiration from community research (for example the Duck Detector project) without reusing any code; both are credited in the app under Settings → About → Attributions.
+The device-integrity feature embeds a pinned, source-level copy of Google's [android/keyattestation](https://github.com/android/keyattestation) verifier (Apache-2.0; see [keyattestation/NOTICE](keyattestation/NOTICE)) with a small set of documented modifications. Its upstream test suite — real-device attestation chains in `keyattestation/testdata/` — runs in CI via `./gradlew :keyattestation:test`. The detection heuristics take inspiration from community research (for example the Duck Detector project) without reusing any code; both are credited in the app under Settings → About → Attributions. Build-time snapshots shipped inside the APK — `keyattestation/roots.json` and `app/src/main/assets/attestation_status.json` — are sourced from Google's public attestation endpoints (`android.googleapis.com/attestation/…`) and refreshed best-effort by `scripts/fetch_attestation_data.py`; when the refresh fails, the repository copy is used.
 
 ## License
 

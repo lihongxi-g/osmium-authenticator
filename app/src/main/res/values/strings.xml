@@ -536,4 +536,10 @@
     <string name="attributions_bundled_title">Bundled libraries</string>
     <string name="attributions_keyattestation_desc">© Google LLC (Apache-2.0). An embedded, pinned copy of android/keyattestation with local modifications; not endorsed by Google.</string>
     <string name="attributions_integrity_note">The device-integrity checks take inspiration from community research (for example the Duck Detector project); no code from those projects is reused.</string>
+
+    <!-- K2 consistency checks (2026-09) -->
+    <string name="check_mount_cross">Mount table consistency</string>
+    <string name="check_file_cross">File path consistency</string>
+    <string name="check_state_drift">Startup state drift</string>
+    <string name="integrity_section_consistency">Consistency checks</string>
 </resources>

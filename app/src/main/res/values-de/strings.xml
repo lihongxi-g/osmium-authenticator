@@ -519,4 +519,10 @@
     <string name="attributions_bundled_title">Eingebundene Bibliotheken</string>
     <string name="attributions_keyattestation_desc">© Google LLC (Apache-2.0). Eingebettete, gepinnte Kopie von android/keyattestation mit lokalen Änderungen; keine Billigung durch Google.</string>
     <string name="attributions_integrity_note">Die Integritätsprüfungen sind von Community-Forschung inspiriert (z. B. das Duck-Detector-Projekt); es wird kein Code dieser Projekte wiederverwendet.</string>
+
+    <!-- K2 consistency checks (2026-09) -->
+    <string name="check_mount_cross">Konsistenz der Mount-Tabelle</string>
+    <string name="check_file_cross">Konsistenz der Dateipfade</string>
+    <string name="check_state_drift">Statusdrift nach dem Start</string>
+    <string name="integrity_section_consistency">Konsistenzprüfungen</string>
 </resources>

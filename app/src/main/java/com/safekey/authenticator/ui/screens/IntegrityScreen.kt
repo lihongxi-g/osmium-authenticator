@@ -55,6 +55,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+/** Engine check ids that belong to the K2 consistency group. */
+private val CONSISTENCY_IDS = setOf("mount_cross", "file_cross", "state_drift")
+
 /**
  * "Android device integrity report" — second-level page under
  * Settings → Security ("entry card -> subpage"). Shows the overall level
@@ -126,11 +129,19 @@ fun IntegrityScreen(
                     modifier = Modifier.padding(top = 16.dp)
                 )
             } else {
-                val (hardware, local) = current.checks.partition { it.id.startsWith("attestation") }
+                val (hardware, rest) = current.checks.partition { it.id.startsWith("attestation") }
+                val (consistency, local) = rest.partition { it.id in CONSISTENCY_IDS }
 
                 SectionHeader(stringResource(R.string.integrity_section_local))
                 CheckGroup(local, expandedIds) { id ->
                     expandedIds = if (id in expandedIds) expandedIds - id else expandedIds + id
+                }
+
+                if (consistency.isNotEmpty()) {
+                    SectionHeader(stringResource(R.string.integrity_section_consistency))
+                    CheckGroup(consistency, expandedIds) { id ->
+                        expandedIds = if (id in expandedIds) expandedIds - id else expandedIds + id
+                    }
                 }
 
                 SectionHeader(stringResource(R.string.integrity_section_attestation))

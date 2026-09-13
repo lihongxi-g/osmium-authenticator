@@ -29,6 +29,9 @@ fun integrityCheckTitleRes(id: String): Int? = when (id) {
     "su_runtime" -> R.string.check_su_runtime
     "attestation" -> R.string.check_attestation
     "attestation_boot_hash" -> R.string.check_attestation_boot_hash
+    "mount_cross" -> R.string.check_mount_cross
+    "file_cross" -> R.string.check_file_cross
+    "state_drift" -> R.string.check_state_drift
     else -> null
 }
 

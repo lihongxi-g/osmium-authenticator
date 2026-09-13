@@ -519,4 +519,10 @@
     <string name="attributions_bundled_title">同梱ライブラリ</string>
     <string name="attributions_keyattestation_desc">© Google LLC（Apache-2.0）。android/keyattestation の固定コミット版を同梱し、ローカル修正を加えています。Googleによる承認ではありません。</string>
     <string name="attributions_integrity_note">デバイス整合性チェックはコミュニティの研究成果（例：Duck Detector プロジェクト）に着想を得ていますが、コードは一切再利用していません。</string>
+
+    <!-- K2 consistency checks (2026-09) -->
+    <string name="check_mount_cross">マウントテーブルの整合性</string>
+    <string name="check_file_cross">ファイルパスの整合性</string>
+    <string name="check_state_drift">起動後の状態ドリフト</string>
+    <string name="integrity_section_consistency">整合性チェック</string>
 </resources>

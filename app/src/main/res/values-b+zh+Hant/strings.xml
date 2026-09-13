@@ -532,4 +532,10 @@
     <string name="attributions_bundled_title">內建開源庫</string>
     <string name="attributions_keyattestation_desc">© Google LLC（Apache-2.0）。內嵌 android/keyattestation 的固定版本副本並含本地修改；不代表 Google 認可。</string>
     <string name="attributions_integrity_note">裝置完整性檢測的思路借鑑自社群研究（如 Duck Detector 專案），未重用其任何程式碼。</string>
+
+    <!-- K2 consistency checks (2026-09) -->
+    <string name="check_mount_cross">掛載表一致性</string>
+    <string name="check_file_cross">檔案路徑一致性</string>
+    <string name="check_state_drift">啟動後狀態漂移</string>
+    <string name="integrity_section_consistency">一致性核驗</string>
 </resources>

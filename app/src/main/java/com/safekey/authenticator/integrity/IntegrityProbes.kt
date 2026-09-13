@@ -227,6 +227,89 @@ internal object IntegrityProbes {
         }
     }
 
+    // ------------------------------------------------------ K2 consistency
+
+    /**
+     * K2: the three proc mount views must agree on suspicious entries — a
+     * framework that hides mounts from one view usually misses another.
+     */
+    fun mountViewCross(): IntegrityCheck {
+        val mismatch = runCatching {
+            IntegrityConsistency.mountViewMismatch(
+                readTextQuietly("/proc/mounts"),
+                readTextQuietly("/proc/self/mounts"),
+                readTextQuietly("/proc/self/mountinfo")
+            )
+        }.getOrNull()
+        return IntegrityCheck(
+            "mount_cross", IntegritySeverity.WARN,
+            mismatch != null, mismatch.orEmpty()
+        )
+    }
+
+    /**
+     * K2: existence verdicts for su-related paths through three routes
+     * (File.exists, Os.stat, parent listing). Routes disagreeing on the same
+     * path mean at least one of those APIs is hooked.
+     */
+    fun fileViewCross(): IntegrityCheck {
+        val routes = runCatching { readFileRoutes() }.getOrDefault(emptyMap())
+        val mismatched = IntegrityConsistency.fileRouteMismatch(routes)
+        return IntegrityCheck(
+            "file_cross", IntegritySeverity.WARN,
+            mismatched.isNotEmpty(), mismatched.joinToString(", ")
+        )
+    }
+
+    private fun readFileRoutes(): Map<String, List<Boolean>> {
+        val candidates = (SU_PATHS + listOf("/data/adb", "/data/adb/magisk", "/sbin/.magisk")).distinct()
+        val out = LinkedHashMap<String, List<Boolean>>()
+        for (path in candidates) {
+            val exists = runCatching { File(path).exists() }.getOrDefault(false)
+            val statOk = runCatching {
+                Os.stat(path)
+                true
+            }.getOrDefault(false)
+            val listed = runCatching {
+                val file = File(path)
+                file.parentFile?.list()?.contains(file.name) ?: false
+            }.getOrDefault(false)
+            out[path] = listOf(exists, statOk, listed)
+        }
+        return out
+    }
+
+    /**
+     * K2: compares the K0 early snapshot (SafeKeyApp.onCreate) with the live
+     * state — late module activation or dynamic hiding shows up as drift.
+     */
+    fun stateDrift(): IntegrityCheck {
+        val beforeProps = IntegrityEarly.propsSnapshot()
+        val beforeBits = IntegrityEarly.bitsSnapshot()
+        val beforeMounts = IntegrityEarly.suspiciousMountsSnapshot()
+        if (beforeProps == null || beforeBits == null || beforeMounts == null) {
+            return IntegrityCheck("state_drift", IntegritySeverity.WARN, false, "")
+        }
+        val afterProps = readProps()
+        val afterBits = IntegrityEarly.BIT_PATHS.associateWith { path ->
+            runCatching { File(path).exists() }.getOrDefault(false)
+        }
+        val afterMounts = runCatching {
+            IntegrityConsistency.suspiciousMountPoints(
+                readTextQuietly("/proc/self/mounts"), mountinfo = false
+            )
+        }.getOrDefault(emptySet())
+        val changes = runCatching {
+            IntegrityConsistency.driftChanges(
+                beforeProps, afterProps, beforeBits, afterBits, beforeMounts, afterMounts
+            )
+        }.getOrDefault(emptyList())
+        return IntegrityCheck(
+            "state_drift", IntegritySeverity.WARN,
+            changes.isNotEmpty(), changes.joinToString("; ").take(200)
+        )
+    }
+
     // ------------------------------------------------------------ helpers
 
     private fun kernelString(): String {

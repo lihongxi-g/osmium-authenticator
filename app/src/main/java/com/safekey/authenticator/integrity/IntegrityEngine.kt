@@ -52,9 +52,9 @@ internal object IntegrityScoring {
 }
 
 /**
- * Runs every probe (K1 local checks + K3 key attestation) and produces a
- * scored report. Never throws; probe failures degrade to misses. Runs on the
- * IO dispatcher.
+ * Runs every probe (K1 local checks, K2 consistency cross-checks, K3 key
+ * attestation) and produces a scored report. Never throws; probe failures
+ * degrade to misses. Runs on the IO dispatcher.
  *
  * [force] re-runs the `su` runtime probe (used by the developer-driven
  * refresh); automatic scans reuse its per-process result.
@@ -77,6 +77,13 @@ object IntegrityEngine {
             checks += IntegrityProbes.selinuxState()
             checks += IntegrityProbes.systemRw()
             checks += IntegrityProbes.runtimeSu(rerun = force)
+
+            // K2: consistency cross-checks — mount views, file routes and
+            // early-state drift. Divergences are weak evidence (WARN only).
+            checks += IntegrityProbes.mountViewCross()
+            checks += IntegrityProbes.fileViewCross()
+            checks += IntegrityProbes.stateDrift()
+
             // K3: hardware-backed attestation proof (offline; never throws).
             checks += AttestationProbe.probe(appContext)
 
