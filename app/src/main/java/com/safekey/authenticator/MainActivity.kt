@@ -929,6 +929,7 @@ private fun IntegrityNoticeDialog(
                                 onError = { msg -> vm.showToast(msg) }
                             )
                         },
+                        onIntegrity = { vm.nav.push(Screen.Integrity) },
                         onLanguageChanged = { lang ->
                             LanguagePrefs.set(this@MainActivity, lang)
                             recreate()
