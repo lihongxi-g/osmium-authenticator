@@ -46,6 +46,7 @@ import com.safekey.authenticator.ui.components.AppIcons
 import com.safekey.authenticator.ui.components.SectionHeader
 import com.safekey.authenticator.ui.components.SettingRow
 import com.safekey.authenticator.ui.components.SimpleTopBar
+import com.safekey.authenticator.ui.components.integrityCheckTitle
 import com.safekey.authenticator.ui.dev.DevStrings
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -342,9 +343,12 @@ fun DeveloperScreen(
                                     modifier = Modifier.width(64.dp)
                                 )
                                 Column {
-                                    val severity = s.severity.name
+                                    // A quiet check reads PASS — the severity
+                                    // classes are firing weights, not verdicts
+                                    // for checks that did not fire.
+                                    val status = if (s.hit) s.severity.name else "PASS"
                                     Text(
-                                        text = "${s.id}  [$severity]",
+                                        text = "${integrityCheckTitle(s.id)}  [$status]",
                                         style = MaterialTheme.typography.bodyMedium
                                     )
                                     if (s.detail.isNotBlank()) {
@@ -369,8 +373,9 @@ fun DeveloperScreen(
                                 appendLine("Osmium root report")
                                 appendLine("checkedAt=${report.checkedAt}")
                                 report.checks.forEach { s ->
+                                    val status = if (s.hit) s.severity.name else "PASS"
                                     appendLine(
-                                        "${s.id} sev=${s.severity.name} hit=${s.hit}" +
+                                        "${s.id} $status" +
                                             if (s.detail.isNotBlank()) " detail=${s.detail}" else ""
                                     )
                                 }

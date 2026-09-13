@@ -216,6 +216,11 @@ private fun LevelCard(report: IntegrityReport?, rescanning: Boolean) {
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
+                text = stringResource(R.string.integrity_final_rating),
+                style = MaterialTheme.typography.labelMedium,
+                color = onContainer
+            )
+            Text(
                 text = integrityLevelLabel(level),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Medium,
