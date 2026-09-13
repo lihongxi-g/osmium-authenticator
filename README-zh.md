@@ -71,6 +71,10 @@ APK 的 SHA-256 校验和见 [v2.4.2 发布说明](release-notes-v2.4.2.md) 及 
 
 Release 构建启用 R8 并按 ABI 分包。构建环境：Kotlin 1.9、Jetpack Compose BOM 2024.09.03、`compileSdk 35`、`minSdk 26`、`targetSdk 34`。GitHub Actions 会运行单元测试并构建 Release APK；正式发布资产固定命名为 `osmium-版本号-架构.apk`。
 
+## 内置组件
+
+「设备完整性检测」内嵌了一个固定提交的 Google [android/keyattestation](https://github.com/android/keyattestation) 验证器源码副本（Apache-2.0，见 [keyattestation/NOTICE](keyattestation/NOTICE)），并附有明确的修改清单。其官方测试套件（`keyattestation/testdata/` 中的真机 attestation 证书链）会在 CI 中通过 `./gradlew :keyattestation:test` 运行。检测思路借鉴了社区研究（如 Duck Detector 项目）但未复用其代码；两者均在应用内「设置 → 关于 → 来源说明」中致谢。
+
 ## 许可证
 
 GPL-3.0-or-later，详见 [LICENSE](LICENSE) 或 [COPYING](COPYING)。

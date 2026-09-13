@@ -286,6 +286,14 @@ fun DeveloperScreen(
                 onClick = { vm.setDevExtraDigits(!settings.devExtraDigits) }
             )
 
+            SettingRow(
+                icon = AppIcons.Info,
+                title = dev.detailedLogging,
+                description = dev.detailedLoggingDesc,
+                trailing = { DevStateText(settings.devDetailedLogging, dev) },
+                onClick = { vm.setDevDetailedLogging(!settings.devDetailedLogging) }
+            )
+
             Spacer(Modifier.height(24.dp))
 
             SettingRow(
@@ -615,6 +623,7 @@ private val HIDEABLE_ITEMS: List<Pair<String, Int>> = listOf(
     "screenshots" to R.string.allow_screenshots,
     "hideCodes" to R.string.hide_codes,
     "timeOffset" to R.string.time_offset,
+    "integrity" to R.string.integrity_entry_title,
     "pin" to R.string.settings_pin,
     "destroy" to R.string.settings_destroy,
     "thirdparty" to R.string.thirdparty_import_title,

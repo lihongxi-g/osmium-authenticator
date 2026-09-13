@@ -61,12 +61,14 @@ import androidx.lifecycle.lifecycleScope
 import com.safekey.authenticator.backup.AutoBackupScheduler
 import com.safekey.authenticator.data.AppSettings
 import com.safekey.authenticator.data.LanguagePrefs
+import com.safekey.authenticator.integrity.IntegrityLevel
 import com.safekey.authenticator.legal.LegalDocsRepository
 import com.safekey.authenticator.security.AppLog
 import com.safekey.authenticator.security.IntegrityCheck
 import com.safekey.authenticator.security.RootState
 import com.safekey.authenticator.totp.OtpUriParser
 import com.safekey.authenticator.ui.components.SwipeBackContainer
+import com.safekey.authenticator.ui.components.integrityCheckTitle
 import com.safekey.authenticator.ui.navigation.Screen
 import com.safekey.authenticator.ui.navigation.isRootBlocked
 import com.safekey.authenticator.ui.screens.AboutScreen
@@ -80,6 +82,7 @@ import com.safekey.authenticator.ui.screens.ExportScreen
 import com.safekey.authenticator.ui.screens.FileImportScreen
 import com.safekey.authenticator.ui.screens.GoogleImportScreen
 import com.safekey.authenticator.ui.screens.ImportScreen
+import com.safekey.authenticator.ui.screens.IntegrityScreen
 import com.safekey.authenticator.ui.screens.LanTransferScreen
 import com.safekey.authenticator.ui.screens.LockScreen
 import com.safekey.authenticator.ui.screens.PinSetupScreen
@@ -143,7 +146,7 @@ class MainActivity : FragmentActivity() {
             val pinRequired by vm.pinRequired.collectAsState()
             val destroyed by vm.destroyed.collectAsState()
             val toast by vm.toast.collectAsState()
-            val rootReport by vm.rootReport.collectAsState()
+            val integrityNotice by vm.integrityNotice.collectAsState()
             val context = LocalContext.current
             // Keep these UI holders above the lock gate and AnimatedContent.
             // Navigating to a child route, or briefly showing the lock screen,
@@ -202,12 +205,18 @@ class MainActivity : FragmentActivity() {
                     ) {
                         UpdateDialog(tag = updateTag)
                     }
-                    // One-time root warning over the unlocked main UI.
-                    val root = rootReport
-                    if (root?.compromised == true && !settings.rootWarningAcked &&
-                        !locked && !pinRequired && !destroyed && !tampered
-                    ) {
-                        RootWarningDialog(onConfirm = { vm.acknowledgeRootWarning() })
+                    // Enter-app integrity reminder (L2/L3), debounced in the
+                    // ViewModel; suppressed while the restriction is lifted.
+                    val notice = integrityNotice
+                    if (notice != null && !locked && !pinRequired && !destroyed && !tampered) {
+                        IntegrityNoticeDialog(
+                            notice = notice,
+                            onViewReport = {
+                                vm.dismissIntegrityNotice()
+                                vm.nav.push(Screen.Integrity)
+                            },
+                            onDismiss = { vm.dismissIntegrityNotice() }
+                        )
                     }
                 }
             }
@@ -690,14 +699,49 @@ class MainActivity : FragmentActivity() {
 }
 
 @Composable
-private fun RootWarningDialog(onConfirm: () -> Unit) {
+private fun IntegrityNoticeDialog(
+    notice: IntegrityNotice,
+    onViewReport: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    val compromised = notice.level == IntegrityLevel.COMPROMISED
+    val reasons = notice.hitIds.map { integrityCheckTitle(it) }.take(3).joinToString(", ")
     AlertDialog(
-        onDismissRequest = { /* not acknowledged — will be shown again */ },
-        title = { Text(stringResource(R.string.root_detected_title)) },
-        text = { Text(stringResource(R.string.root_detected_body)) },
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                stringResource(
+                    if (compromised) R.string.integrity_dialog_title_alert
+                    else R.string.integrity_dialog_title_warn
+                )
+            )
+        },
+        text = {
+            Column {
+                Text(
+                    stringResource(
+                        if (compromised) R.string.integrity_dialog_body_alert
+                        else R.string.integrity_dialog_body_warn
+                    )
+                )
+                if (reasons.isNotEmpty()) {
+                    Text(
+                        text = stringResource(R.string.integrity_dialog_reasons, reasons),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 12.dp)
+                    )
+                }
+            }
+        },
         confirmButton = {
-            TextButton(onClick = onConfirm) {
-                Text(stringResource(R.string.root_detected_ok))
+            TextButton(onClick = onViewReport) {
+                Text(stringResource(R.string.integrity_dialog_view_report))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.integrity_dialog_dismiss))
             }
         }
     )
@@ -906,6 +950,11 @@ private fun RootWarningDialog(onConfirm: () -> Unit) {
                     is Screen.Import -> ImportScreen(
                         vm = vm,
                         onDone = { vm.nav.pop() },
+                        onBack = { vm.nav.pop() }
+                    )
+
+                    is Screen.Integrity -> IntegrityScreen(
+                        vm = vm,
                         onBack = { vm.nav.pop() }
                     )
 

@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.safekey.authenticator.data.AppSettings
 import com.safekey.authenticator.data.WebDavServerConfig
+import com.safekey.authenticator.integrity.IntegrityLevel
 import com.safekey.authenticator.integrity.IntegrityReport
 import com.safekey.authenticator.model.Account
 import com.safekey.authenticator.model.VaultAccount
@@ -43,6 +44,12 @@ data class AccountUi(
 ) {
     val isHotp: Boolean get() = account.isHotp
 }
+
+/** Enter-app integrity reminder (SUSPICIOUS/COMPROMISED levels only). */
+data class IntegrityNotice(
+    val level: IntegrityLevel,
+    val hitIds: List<String>
+)
 
 class MainViewModel(app: Application) : AndroidViewModel(app) {
 
@@ -194,9 +201,48 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         if (!enabled) clearTagFilter()
     }
 
-    /** One-time root warning acknowledged — never show it again. */
-    fun acknowledgeRootWarning() {
-        viewModelScope.launch { settingsRepo.setRootWarningAcked(true) }
+    // ------------------------------------------------ integrity reminder
+
+    /** Latest enter-app integrity reminder (see [maybeShowIntegrityNotice]). */
+    private val _integrityNotice = MutableStateFlow<IntegrityNotice?>(null)
+    val integrityNotice: StateFlow<IntegrityNotice?> = _integrityNotice
+
+    /** Set on every app foreground; the reminder fires once a report lands. */
+    private var pendingEnterNotice = false
+
+    /** Debounce: at most one reminder per minute. */
+    private var lastNoticeAt = 0L
+
+    fun dismissIntegrityNotice() {
+        _integrityNotice.value = null
+    }
+
+    /**
+     * Enter-app integrity reminder: shown once per app-open when the level
+     * is SUSPICIOUS or COMPROMISED, debounced to one per minute, and fully
+     * suppressed while developer mode has lifted the root restriction.
+     */
+    private fun maybeShowIntegrityNotice() {
+        if (!pendingEnterNotice) return
+        val s = settings.value
+        if (s.devDisableRootSecurity) {
+            pendingEnterNotice = false
+            return
+        }
+        val report = rootReport.value ?: return
+        val level = report.level
+        if (level != IntegrityLevel.SUSPICIOUS && level != IntegrityLevel.COMPROMISED) {
+            pendingEnterNotice = false
+            return
+        }
+        val now = System.currentTimeMillis()
+        if (now - lastNoticeAt < 60_000L) {
+            pendingEnterNotice = false
+            return
+        }
+        lastNoticeAt = now
+        pendingEnterNotice = false
+        _integrityNotice.value = IntegrityNotice(level, report.hits.map { it.id })
     }
 
     // ---------------------------------------------------- developer mode
@@ -320,6 +366,10 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                 AppLog.detectionLoggingEnabled = s.devDetailedLogging
             }
         }
+        // The enter-app reminder waits for the first scan of this session.
+        viewModelScope.launch {
+            rootReport.collect { maybeShowIntegrityNotice() }
+        }
     }
 
     /**
@@ -329,6 +379,8 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
      */
     fun onAppForeground() {
         appInForeground = true
+        pendingEnterNotice = true
+        maybeShowIntegrityNotice()
         AppLog.d("foreground: biometric=$biometricAvailable pin=${pinManager.hasPin()} gate=${settings.value.gateOnOpen}")
         if (_destroyed.value) return
         _pinError.value = null

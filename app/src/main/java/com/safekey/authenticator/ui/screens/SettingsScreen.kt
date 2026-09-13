@@ -53,6 +53,7 @@ import com.safekey.authenticator.ui.components.AppIcons
 import com.safekey.authenticator.ui.components.SectionHeader
 import com.safekey.authenticator.ui.components.SettingRow
 import com.safekey.authenticator.ui.components.SimpleTopBar
+import com.safekey.authenticator.ui.components.integrityLevelLabel
 import com.safekey.authenticator.ui.dev.DevStrings
 import com.safekey.authenticator.ui.navigation.Screen
 
@@ -66,6 +67,7 @@ fun SettingsScreen(
     onImport: () -> Unit,
     onWebDav: () -> Unit,
     onAutoBackup: () -> Unit,
+    onIntegrity: () -> Unit,
     onOpenPinSetup: () -> Unit,
     onOpenPinVerify: (String) -> Unit,
     onRequireBiometric: ((onSuccess: () -> Unit) -> Unit)? = null,
@@ -78,6 +80,7 @@ fun SettingsScreen(
     val hasPin = vm.hasLocalPin()
     val hasDestroyPin = vm.pinManager.hasDestroyPin()
     val rootRestricted by vm.rootRestricted.collectAsState()
+    val rootReport by vm.rootReport.collectAsState()
     val dev = DevStrings.forContext(context)
     // Developer-mode "hide entries" set (ids match DeveloperScreen.HIDEABLE_ITEMS)
     val hiddenFeatures = settings.devHiddenFeatures
@@ -285,6 +288,21 @@ fun SettingsScreen(
                     offsetInput = settings.timeOffsetSeconds.toString()
                     showOffsetDialog = true
                 }
+            )
+
+            if ("integrity" !in hiddenFeatures) SettingRow(
+                icon = AppIcons.Security,
+                title = stringResource(R.string.integrity_entry_title),
+                description = stringResource(R.string.integrity_entry_desc),
+                trailing = {
+                    Text(
+                        text = rootReport?.let { integrityLevelLabel(it.level) }
+                            ?: stringResource(R.string.loading),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
+                onClick = onIntegrity
             )
 
             // -------------------------------------------------------- PIN
@@ -771,7 +789,7 @@ fun SettingsScreen(
             },
             confirmButton = {
                 TextButton(onClick = { rootDialogTarget = null }) {
-                    Text(stringResource(R.string.root_detected_ok))
+                    Text(stringResource(R.string.close))
                 }
             }
         )

@@ -35,7 +35,8 @@ def refresh_roots() -> None:
     try:
         payload = fetch(ROOTS_URL)
         roots = json.loads(payload)
-        if not isinstance(roots, list) or len(roots) < 5:
+        # The live endpoint ships a small set (currently 2 roots: RSA + ECDSA).
+        if not isinstance(roots, list) or not roots or len(roots) > 100:
             raise ValueError(f"unexpected roots payload shape (count={len(roots) if isinstance(roots, list) else 'n/a'})")
         if not all(isinstance(c, str) and "BEGIN CERTIFICATE" in c for c in roots):
             raise ValueError("roots payload contains non-certificate entries")

@@ -71,6 +71,10 @@ Automatic backups run through the Android system scheduler. The app wakes briefl
 
 Release builds are minified with R8 and split by ABI. Build environment: Kotlin 1.9, Jetpack Compose BOM 2024.09.03, `compileSdk 35`, `minSdk 26`, `targetSdk 34`. GitHub Actions runs unit tests and builds Release APKs. Official release assets always use the format `osmium-version-architecture.apk`.
 
+## Embedded components
+
+The device-integrity feature embeds a pinned, source-level copy of Google's [android/keyattestation](https://github.com/android/keyattestation) verifier (Apache-2.0; see [keyattestation/NOTICE](keyattestation/NOTICE)) with a small set of documented modifications. Its upstream test suite — real-device attestation chains in `keyattestation/testdata/` — runs in CI via `./gradlew :keyattestation:test`. The detection heuristics take inspiration from community research (for example the Duck Detector project) without reusing any code; both are credited in the app under Settings → About → Attributions.
+
 ## License
 
 GPL-3.0-or-later. See [LICENSE](LICENSE) or [COPYING](COPYING).

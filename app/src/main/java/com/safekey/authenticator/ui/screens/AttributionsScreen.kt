@@ -95,6 +95,24 @@ fun AttributionsScreen(
             )
 
             Text(
+                text = stringResource(R.string.attributions_bundled_title),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(top = 20.dp, bottom = 4.dp)
+            )
+            AttributionCard(
+                title = "Android Key Attestation Verifier (Apache-2.0)",
+                description = stringResource(R.string.attributions_keyattestation_desc),
+                onClick = { open("https://github.com/android/keyattestation") }
+            )
+            Text(
+                text = stringResource(R.string.attributions_integrity_note),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+
+            Text(
                 text = stringResource(R.string.attributions_note),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
