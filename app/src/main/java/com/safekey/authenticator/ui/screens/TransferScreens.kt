@@ -123,7 +123,12 @@ fun ExportScreen(vm: MainViewModel, onDone: () -> Unit, onBack: () -> Unit) {
 fun ImportScreen(vm: MainViewModel, onDone: () -> Unit, onBack: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val dev = DevStrings.forContext(context)
+    val settings by vm.settings.collectAsState()
+    val devMode = settings.devModeEnabled
     var password by remember { mutableStateOf("") }
+    // Developer-mode plaintext import: skip the backup password entirely.
+    var plaintextImport by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var working by remember { mutableStateOf(false) }
     var vault by remember { mutableStateOf<VaultFile?>(null) }
@@ -131,22 +136,46 @@ fun ImportScreen(vm: MainViewModel, onDone: () -> Unit, onBack: () -> Unit) {
         vm.setTransferPickerActive(false)
         if (uri != null) scope.launch {
             working = true
+            var bytes: ByteArray? = null
             try {
-                val bytes = withContext(Dispatchers.IO) { context.contentResolver.openInputStream(uri)?.use { it.readBytes() } ?: error("Cannot read") }
-                vault = withContext(Dispatchers.Default) { VaultIO.decrypt(bytes, password.toCharArray()) }
+                val payload = withContext(Dispatchers.IO) { context.contentResolver.openInputStream(uri)?.use { it.readBytes() } ?: error("Cannot read") }
+                bytes = payload
+                vault = withContext(Dispatchers.Default) {
+                    if (plaintextImport) VaultIO.decodePlain(payload)
+                    else VaultIO.decrypt(payload, password.toCharArray())
+                }
                 error = null
-            } catch (e: VaultFormatException) { error = context.getString(if (e.wrongPassword) R.string.error_import_wrong_password else R.string.error_import_format) }
-            catch (_: Exception) { error = context.getString(R.string.error_import_format) }
+            } catch (e: VaultFormatException) {
+                val looksPlain = !plaintextImport && devMode && bytes?.let { VaultIO.isPlainVault(it) } == true
+                error = when {
+                    plaintextImport -> dev.plainImportError
+                    looksPlain -> dev.plainImportDetected
+                    e.wrongPassword -> context.getString(R.string.error_import_wrong_password)
+                    else -> context.getString(R.string.error_import_format)
+                }
+            } catch (_: Exception) {
+                error = if (plaintextImport) dev.plainImportError else context.getString(R.string.error_import_format)
+            }
             working = false
         }
     }
     Scaffold(topBar = { SimpleTopBar(stringResource(R.string.import_vault), onBack) }) { padding ->
         val parsed = vault
         if (parsed == null) Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text(stringResource(R.string.import_password_desc), color = MaterialTheme.colorScheme.onSurfaceVariant)
-            OutlinedTextField(password, { password = it }, label = { Text(stringResource(R.string.export_password_hint)) }, visualTransformation = PasswordVisualTransformation(), singleLine = true, isError = error != null, modifier = Modifier.fillMaxWidth())
+            if (devMode) {
+                // Developer-mode-only: import a file produced by plaintext export.
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { plaintextImport = !plaintextImport; error = null }) {
+                    Checkbox(checked = plaintextImport, onCheckedChange = { plaintextImport = it; error = null })
+                    Text(dev.plainImportLabel)
+                }
+                if (plaintextImport) Text(dev.plainImportHint, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            if (!plaintextImport) {
+                Text(stringResource(R.string.import_password_desc), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                OutlinedTextField(password, { password = it }, label = { Text(stringResource(R.string.export_password_hint)) }, visualTransformation = PasswordVisualTransformation(), singleLine = true, isError = error != null, modifier = Modifier.fillMaxWidth())
+            }
             error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-            Button(enabled = !working && password.isNotEmpty(), onClick = {
+            Button(enabled = !working && (plaintextImport || password.isNotEmpty()), onClick = {
                 vm.setTransferPickerActive(true)
                 try { launcher.launch(arrayOf("*/*")) }
                 catch (e: Exception) { vm.setTransferPickerActive(false); vm.showToast(e.message ?: "Error") }
