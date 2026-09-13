@@ -113,7 +113,16 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     val accountTagIds: StateFlow<Map<String, Set<String>>> = tagRepo.accountTagIds
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap())
 
+    /** True once the account feed has delivered its first decrypted batch.
+     *  The main screen keeps a loading placeholder until then instead of
+     *  flashing the empty state during cold-start decryption. */
+    private val _accountsLoaded = MutableStateFlow(false)
+    val accountsLoaded: StateFlow<Boolean> = _accountsLoaded
+
     private val decryptedAccounts: StateFlow<List<Account>> = repo.accounts
+        // Must sit upstream of stateIn: a StateFlow's initial value cannot be
+        // told apart from a real emission, so the flag may only flip here.
+        .onEach { _accountsLoaded.value = true }
         .flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 

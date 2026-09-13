@@ -77,6 +77,7 @@ fun AccountsScreen(
 ) {
     val uiList by vm.filteredSortedAccountUiList.collectAsState()
     val allUiList by vm.sortedAccountUiList.collectAsState()
+    val accountsLoaded by vm.accountsLoaded.collectAsState()
     val tags by vm.tags.collectAsState()
     val selectedTagIds by vm.selectedTagIds.collectAsState()
     val uncategorized by vm.uncategorizedSelected.collectAsState()
@@ -136,6 +137,9 @@ fun AccountsScreen(
                     .weight(1f)
             ) {
             when {
+                !accountsLoaded -> LoadingState(
+                    modifier = Modifier.align(Alignment.Center)
+                )
                 allUiList.isEmpty() -> EmptyState(
                     onAdd = { showAddSheet = true },
                     modifier = Modifier.align(Alignment.Center)
@@ -245,6 +249,28 @@ private fun EmptyState(onAdd: () -> Unit, modifier: Modifier = Modifier) {
             contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
             icon = { Icon(AppIcons.Add, contentDescription = null) },
             text = { Text(stringResource(R.string.empty_action)) }
+        )
+    }
+}
+
+/** Shown while the account feed is still loading and decrypting (cold
+ *  start). Replaces the empty-state flash; the real empty state only
+ *  renders after the feed has actually delivered a batch. */
+@Composable
+private fun LoadingState(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier.padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        CircularProgressIndicator(
+            modifier = Modifier.size(20.dp),
+            strokeWidth = 2.dp
+        )
+        Spacer(Modifier.height(14.dp))
+        Text(
+            text = stringResource(R.string.loading),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
