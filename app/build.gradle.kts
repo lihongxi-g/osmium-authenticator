@@ -32,8 +32,8 @@ android {
         abi {
             isEnable = true
             reset()
-            // x86_64 dropped (2026-09): emulator-only ABI, no longer shipped.
-            include("arm64-v8a", "armeabi-v7a")
+            // x86_64 included for Android emulator builds (restored 2026-09-13).
+            include("arm64-v8a", "armeabi-v7a", "x86_64")
             isUniversalApk = false
         }
     }

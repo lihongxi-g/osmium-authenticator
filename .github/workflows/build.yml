@@ -63,7 +63,7 @@ jobs:
           version=$(grep -oP 'versionName\s*=\s*"\K[^"]+' app/build.gradle.kts)
           test "$version" = "2.4.3"
           mkdir -p dist
-          for abi in arm64-v8a armeabi-v7a; do
+          for abi in arm64-v8a armeabi-v7a x86_64; do
             source="app/build/outputs/apk/release/app-${abi}-release.apk"
             target="dist/osmium-${version}-${abi}.apk"
             test -s "$source"
