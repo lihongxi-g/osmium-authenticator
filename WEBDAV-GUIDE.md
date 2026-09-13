@@ -1,6 +1,6 @@
 # Osmium / WebDAV Backup Guide
 
-These documents describe WebDAV backup and restore in Osmium v2.3.9. WebDAV backup and LAN quick transfer are separate features: WebDAV connects to a backup server you configure; LAN transfer connects to another device on the same Wi‑Fi.
+These documents describe WebDAV backup and restore in Osmium v2.4.2. WebDAV backup and LAN quick transfer are separate features: WebDAV connects to a backup server you configure; LAN transfer connects to another device on the same Wi‑Fi.
 
 ## What the Osmium WebDAV client needs
 

@@ -83,7 +83,25 @@ class OtpUriParserTest {
 
     @Test
     fun `unsupported digits throws`() {
+        expectThrow("otpauth://totp/A:B?secret=$baseSecret&digits=4")
         expectThrow("otpauth://totp/A:B?secret=$baseSecret&digits=7")
+        expectThrow("otpauth://totp/A:B?secret=$baseSecret&digits=9")
+    }
+
+    @Test
+    fun `extra digits are accepted only when developer mode enables them`() {
+        listOf(4, 5, 7).forEach { d ->
+            val p = OtpUriParser.parse(
+                "otpauth://totp/A:B?secret=$baseSecret&digits=$d",
+                allowExtraDigits = true
+            )
+            assertEquals(d, p.digits)
+            expectThrow("otpauth://totp/A:B?secret=$baseSecret&digits=$d")
+        }
+        // lengths outside the supported set stay rejected even when enabled
+        expectThrow("otpauth://totp/A:B?secret=$baseSecret&digits=3", allowExtraDigits = true)
+        expectThrow("otpauth://totp/A:B?secret=$baseSecret&digits=9", allowExtraDigits = true)
+        expectThrow("otpauth://totp/A:B?secret=$baseSecret&digits=10", allowExtraDigits = true)
     }
 
     @Test
@@ -113,10 +131,10 @@ class OtpUriParserTest {
         expectThrow("")
     }
 
-    private fun expectThrow(uri: String) {
+    private fun expectThrow(uri: String, allowExtraDigits: Boolean = false) {
         var threw = false
         try {
-            OtpUriParser.parse(uri)
+            OtpUriParser.parse(uri, allowExtraDigits)
         } catch (e: IllegalArgumentException) {
             threw = true
             assertTrue(e.message?.isNotBlank() == true)

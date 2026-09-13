@@ -2,7 +2,7 @@
 
 Osmium is a privacy-first Android TOTP/HOTP authenticator, released under the GNU GPL v3 or later. Codes are computed on-device; account data is encrypted before it is written using a non-exportable Android Keystore key. No account is required and no telemetry is collected.
 
-Network features are optional: user-configured WebDAV backup, GitHub update checks, and user-initiated encrypted transfer between two devices on the same Wi-Fi network. External links such as GitHub and the verification lab are opened by the system browser or another app.
+The app itself fetches the latest Terms of Use and Privacy Policy from osmium.im each time it opens, so you always see the current versions (no user data is sent). All other network features are optional: user-configured WebDAV backup, GitHub update checks, and user-initiated encrypted transfer between two devices on the same Wi-Fi network. External links such as GitHub and the verification lab are opened by the system browser or another app.
 
 ## Features
 
@@ -19,9 +19,11 @@ Network features are optional: user-configured WebDAV backup, GitHub update chec
 - **Sort and search** — random, alphabetical, date-added or copy-count order; search by account name or issuer
 - **Optional tags** — enable under Settings → Appearance → Tags; create multiple tags, filter accounts, and choose palette or custom `#RRGGBB` colors. When no tags exist, `Uncategorized` is not shown on the home screen
 - **Security gate** — optional verification on open (biometrics / device credential / app PIN), self-destruct PIN, and screenshots blocked by default
+- **Root detection (on-device)** — checked locally at launch; no network, no telemetry. When root is detected, the security features are forced on and five sensitive features (LAN transfer, WebDAV backup, auto backup, self-destruct setup, third-party import) are disabled until you lift the restriction in developer mode; a one-time notice explains what happened. Only matched signal names are logged — never secrets
+- **Developer mode (hidden; English / Simplified Chinese)** — unlock by tapping the About title seven times and passing verification. Adds a manual root report, Keystore encryption status, lifting root restrictions, plaintext export/import, forced re-encryption of the local database, hiding Settings entries, and 4/5/7-digit codes; dangerous actions require verification, a disclaimer and a typed confirmation phrase
 - **Clock calibration** — manually compensate for device-clock drift
 - **11 languages** — English, 简体中文, 繁體中文, Español, 日本語, 한국어, Deutsch, Русский, Français, हिन्दी
-- **Built-in manual, Terms of Use and Privacy Policy** — available offline
+- **Built-in manual** — available offline; the **Terms of Use and Privacy Policy** are fetched from osmium.im each time the app opens (a website link is shown when they can't be fetched)
 
 ## ⚠ Steam Guard — read this first
 
@@ -33,24 +35,24 @@ The live test page at **https://otp.osmium.im** supports TOTP, HOTP and Steam Gu
 
 ## Download
 
-Latest stable release: **Osmium v2.3.9** (`versionCode 46`). Choose the ABI matching your device:
+Latest stable release: **Osmium v2.4.2** (`versionCode 52`). Choose the ABI matching your device:
 
 | File | Architecture | Devices | Download |
 |---|---|---|---|
-| `osmium-2.3.9-arm64-v8a.apk` | arm64-v8a | Virtually all modern phones (recommended) | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.3.9/osmium-2.3.9-arm64-v8a.apk) |
-| `osmium-2.3.9-armeabi-v7a.apk` | armeabi-v7a | Older 32-bit phones | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.3.9/osmium-2.3.9-armeabi-v7a.apk) |
-| `osmium-2.3.9-x86_64.apk` | x86_64 | Android emulators | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.3.9/osmium-2.3.9-x86_64.apk) |
+| `osmium-2.4.2-arm64-v8a.apk` | arm64-v8a | Virtually all modern phones (recommended) | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.4.2/osmium-2.4.2-arm64-v8a.apk) |
+| `osmium-2.4.2-armeabi-v7a.apk` | armeabi-v7a | Older 32-bit phones | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.4.2/osmium-2.4.2-armeabi-v7a.apk) |
+| `osmium-2.4.2-x86_64.apk` | x86_64 | Android emulators | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.4.2/osmium-2.4.2-x86_64.apk) |
 
 Installing an incompatible ABI may prevent the app from starting. All three APKs use the same signing certificate, SHA-256 fingerprint: `B65BB0131CAA22C45D99EA4E2C3E99B3980EAE0DC5647190F41A2878E6D88412`.
 
-APK SHA-256 checksums are listed in the [v2.3.9 release notes](release-notes-v2.3.9.md) and on the GitHub Release page.
+APK SHA-256 checksums are listed in the [v2.4.2 release notes](release-notes-v2.4.2.md) and on the GitHub Release page.
 
 ## Privacy & Terms
 
-- [Privacy Policy](PRIVACY.md) ([中文](PRIVACY-zh.md))
-- [Terms of Use](TERMS.md) ([中文](TERMS-zh.md))
+- [Privacy Policy](PRIVACY.md) ([中文](PRIVACY-zh.md)) — also on the website: [osmium.im/privacypolicy](https://osmium.im/privacypolicy/)
+- [Terms of Use](TERMS.md) ([中文](TERMS-zh.md)) — also on the website: [osmium.im/useragreement](https://osmium.im/useragreement/)
 
-Both are also available in the app: Settings → About. LAN transfer and WebDAV backup are user-initiated; LAN transfer uses pairing-code-derived end-to-end encryption and does not pass through an Osmium server.
+The app shows the current version under Settings → About; it fetches both documents from the website each time it opens. LAN transfer and WebDAV backup are user-initiated; LAN transfer uses pairing-code-derived end-to-end encryption and does not pass through an Osmium server.
 
 ## WebDAV backup guide
 

@@ -13,6 +13,8 @@ import com.safekey.authenticator.repository.ImportPlan
 import com.safekey.authenticator.repository.TagImportPlanner
 import com.safekey.authenticator.security.AppLog
 import com.safekey.authenticator.security.PinManager
+import com.safekey.authenticator.security.RootReport
+import com.safekey.authenticator.security.RootState
 import com.safekey.authenticator.security.SelfDestructManager
 import com.safekey.authenticator.tags.TagFilter
 import com.safekey.authenticator.totp.Base32
@@ -52,8 +54,30 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     val nav = NavigationState()
 
-    val settings: StateFlow<AppSettings> = settingsRepo.settings
-        .stateIn(viewModelScope, SharingStarted.Eagerly, AppSettings())
+    /** Latest root-detection report (null until the first scan lands). */
+    val rootReport: StateFlow<RootReport?> = RootState.report
+
+    /**
+     * True while the root security restriction is active: the device is
+     * rooted and developer mode has not disabled the restriction. Security
+     * features are then forced on and risky features are blocked.
+     */
+    val rootRestricted: StateFlow<Boolean> =
+        combine(settingsRepo.settings, RootState.report) { s, report ->
+            report?.rooted == true && !s.devDisableRootSecurity
+        }.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    val settings: StateFlow<AppSettings> =
+        combine(settingsRepo.settings, rootRestricted) { s, restricted ->
+            if (restricted) {
+                // Hardening overlay: force the protective settings on without
+                // touching the user's stored preferences — their own values
+                // restore as-is once the restriction is lifted.
+                s.copy(gateOnOpen = true, allowScreenshots = false, hideCodes = true)
+            } else {
+                s
+            }
+        }.stateIn(viewModelScope, SharingStarted.Eagerly, AppSettings())
 
     /** Saved WebDAV backup server (null until the user configures one). */
     val webDavConfig: StateFlow<WebDavServerConfig?> = settingsRepo.webDavConfig
@@ -168,6 +192,42 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     fun setTagsEnabled(enabled: Boolean) = viewModelScope.launch {
         settingsRepo.setTagsEnabled(enabled)
         if (!enabled) clearTagFilter()
+    }
+
+    /** One-time root warning acknowledged — never show it again. */
+    fun acknowledgeRootWarning() {
+        viewModelScope.launch { settingsRepo.setRootWarningAcked(true) }
+    }
+
+    // ---------------------------------------------------- developer mode
+
+    fun setDevModeEnabled(enabled: Boolean) {
+        viewModelScope.launch { settingsRepo.setDevModeEnabled(enabled) }
+    }
+
+    fun setDevDisableRootSecurity(enabled: Boolean) {
+        viewModelScope.launch { settingsRepo.setDevDisableRootSecurity(enabled) }
+    }
+
+    fun setDevPlaintextExport(enabled: Boolean) {
+        viewModelScope.launch { settingsRepo.setDevPlaintextExport(enabled) }
+    }
+
+    fun setDevExtraDigits(enabled: Boolean) {
+        viewModelScope.launch { settingsRepo.setDevExtraDigits(enabled) }
+    }
+
+    fun setDevHiddenFeatures(ids: Set<String>) {
+        viewModelScope.launch { settingsRepo.setDevHiddenFeatures(ids) }
+    }
+
+    /** Turning developer mode off also resets the dangerous toggles. */
+    fun disableDeveloperMode() {
+        viewModelScope.launch {
+            settingsRepo.setDevModeEnabled(false)
+            settingsRepo.setDevDisableRootSecurity(false)
+            settingsRepo.setDevPlaintextExport(false)
+        }
     }
 
     /** Random-order shuffle, computed once per app launch (see sortMode). */

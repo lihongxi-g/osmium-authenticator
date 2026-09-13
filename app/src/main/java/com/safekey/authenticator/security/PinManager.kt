@@ -83,6 +83,23 @@ class PinManager(context: Context) {
         prefs.edit().remove(KEY_DESTROY_PIN_BLOB).apply()
     }
 
+    /** Developer-mode maintenance: re-encrypt both stored blobs with fresh IVs.
+     *  Returns the number of blobs re-encrypted. Throws on decrypt failure
+     *  (nothing is written for that blob). */
+    fun reencryptBlobs(): Int {
+        var count = 0
+        for (key in listOf(KEY_PIN_BLOB, KEY_DESTROY_PIN_BLOB)) {
+            val blob = prefs.getString(key, null) ?: continue
+            val parts = blob.split(".", limit = 2)
+            if (parts.size != 2) continue
+            val plain = crypto.decrypt(CryptoManager.EncryptedField(parts[0], parts[1]))
+            val fresh = crypto.encrypt(plain)
+            prefs.edit().putString(key, "${fresh.iv}.${fresh.ciphertext}").apply()
+            count++
+        }
+        return count
+    }
+
     fun wipeAll() {
         prefs.edit().clear().apply()
     }

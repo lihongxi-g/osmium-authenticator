@@ -7,10 +7,11 @@ import com.safekey.authenticator.totp.Base32
 /**
  * Importability rules shared by every source format and the import UI.
  *
- * Osmium's generator can only reproduce TOTP/HOTP with SHA1/SHA256/SHA512 and
- * 6/8 digits (see TotpGenerator.pow10 — any other length silently produces
- * wrong codes, so such entries must be surfaced as unsupported, never
- * imported with mangled parameters). Steam accounts are the exception: their
+ * Osmium's generator reproduces TOTP/HOTP with SHA1/SHA256/SHA512 and
+ * 6/8 digits — plus 4/5/7 digits when developer mode enables them (pass
+ * [issue]'s `allowExtraDigits`). Lengths outside that set cannot be
+ * reproduced faithfully, so such entries are surfaced as unsupported, never
+ * imported with mangled parameters. Steam accounts are the exception: their
  * code is always 5 Steam-alphabet chars and the digits field is ignored.
  */
 object ImportSupport {
@@ -25,7 +26,7 @@ object ImportSupport {
      * Returns the [EntryIssue] that prevents [account] from being imported,
      * or null when the entry can be reproduced faithfully by Osmium.
      */
-    fun issue(account: VaultAccount): EntryIssue? {
+    fun issue(account: VaultAccount, allowExtraDigits: Boolean = false): EntryIssue? {
         if (account.secret.isBlank()) return EntryIssue.INVALID_SECRET
         val decoded = try {
             Base32.decode(account.secret)
@@ -40,7 +41,7 @@ object ImportSupport {
         if (account.algorithm.uppercase() !in Account.SUPPORTED_ALGORITHMS) {
             return EntryIssue.UNSUPPORTED_ALGORITHM
         }
-        if (!isSteamAccount(account.issuer) && account.digits !in Account.SUPPORTED_DIGITS) {
+        if (!isSteamAccount(account.issuer) && account.digits !in Account.digitsSupported(allowExtraDigits)) {
             return EntryIssue.UNSUPPORTED_DIGITS
         }
         return null

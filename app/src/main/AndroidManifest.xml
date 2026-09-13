@@ -26,6 +26,32 @@
          Request at runtime before WebDAV use once targetSdk is raised. -->
     <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
 
+    <!-- Android 11+ package-visibility: root detection checks for well-known
+         root-manager packages by name. Keep in sync with
+         RootDetector.ROOT_PACKAGES (com.safekey.authenticator.security). -->
+    <queries>
+        <package android:name="com.topjohnwu.magisk" />
+        <package android:name="io.github.vvb2060.magisk" />
+        <package android:name="io.github.huskydg.magisk" />
+        <package android:name="me.weishu.kernelsu" />
+        <package android:name="com.rifsxd.ksunext" />
+        <package android:name="com.sukisu.ultra" />
+        <package android:name="me.bmax.apatch" />
+        <package android:name="org.lsposed.manager" />
+        <package android:name="com.tsng.hidemyapplist" />
+        <package android:name="eu.chainfire.supersu" />
+        <package android:name="com.noshufou.android.su" />
+        <package android:name="com.koushikdutta.superuser" />
+        <package android:name="com.thirdparty.superuser" />
+        <package android:name="com.yellowes.su" />
+        <package android:name="com.kingroot.kinguser" />
+        <package android:name="com.kingo.root" />
+        <package android:name="com.zhiqupk.root.global" />
+        <package android:name="com.alephzain.framaroot" />
+        <package android:name="com.geohot.towelroot" />
+        <package android:name="de.robv.android.xposed.installer" />
+    </queries>
+
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />

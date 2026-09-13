@@ -55,6 +55,15 @@ class TotpGeneratorTest {
     }
 
     @Test
+    fun `4 5 and 7 digit lengths use the correct modulus`() {
+        // Same RFC 6238 vector at t=59s: the full 8-digit code is 94287082.
+        val base32Secret = Base32.decode("GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ")
+        assertEquals("7082", TotpGenerator.hotp(base32Secret, 59 / 30, 4, "SHA1"))
+        assertEquals("87082", TotpGenerator.hotp(base32Secret, 59 / 30, 5, "SHA1"))
+        assertEquals("4287082", TotpGenerator.hotp(base32Secret, 59 / 30, 7, "SHA1"))
+    }
+
+    @Test
     fun `6-digit codes are zero padded`() {
         val base32Secret = Base32.decode("GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ")
         val code = TotpGenerator.hotp(base32Secret, 59 / 30, 6, "SHA1")

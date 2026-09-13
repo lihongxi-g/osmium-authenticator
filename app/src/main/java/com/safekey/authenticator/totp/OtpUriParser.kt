@@ -39,7 +39,7 @@ fun Account.toOtpUri(): String {
  */
 object OtpUriParser {
 
-    fun parse(rawUri: String): ParsedOtpUri {
+    fun parse(rawUri: String, allowExtraDigits: Boolean = false): ParsedOtpUri {
         val trimmed = rawUri.trim()
         if (!trimmed.startsWith("otpauth://", ignoreCase = true)) {
             throw IllegalArgumentException("Not an otpauth:// URI")
@@ -88,7 +88,9 @@ object OtpUriParser {
             val rawLabel = urlDecode(uri.rawPath.removePrefix("/"))
             val steamByLabel = rawLabel.equals("Steam", ignoreCase = true) ||
                 rawLabel.startsWith("Steam:", ignoreCase = true)
-            if (d != 6 && d != 8 && !(d == 5 && (steamByQuery || steamByLabel))) {
+            val accepted = d in Account.digitsSupported(allowExtraDigits) ||
+                (d == 5 && (steamByQuery || steamByLabel))
+            if (!accepted) {
                 throw IllegalArgumentException("Unsupported digits: $d")
             }
             d

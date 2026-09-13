@@ -61,12 +61,16 @@ import androidx.lifecycle.lifecycleScope
 import com.safekey.authenticator.backup.AutoBackupScheduler
 import com.safekey.authenticator.data.AppSettings
 import com.safekey.authenticator.data.LanguagePrefs
+import com.safekey.authenticator.legal.LegalDocsRepository
 import com.safekey.authenticator.security.AppLog
 import com.safekey.authenticator.security.IntegrityCheck
+import com.safekey.authenticator.security.RootState
 import com.safekey.authenticator.totp.OtpUriParser
 import com.safekey.authenticator.ui.components.SwipeBackContainer
 import com.safekey.authenticator.ui.navigation.Screen
+import com.safekey.authenticator.ui.navigation.isRootBlocked
 import com.safekey.authenticator.ui.screens.AboutScreen
+import com.safekey.authenticator.ui.screens.DeveloperScreen
 import com.safekey.authenticator.ui.screens.AccountFormScreen
 import com.safekey.authenticator.ui.screens.AccountsScreen
 import com.safekey.authenticator.ui.screens.AttributionsScreen
@@ -139,6 +143,7 @@ class MainActivity : FragmentActivity() {
             val pinRequired by vm.pinRequired.collectAsState()
             val destroyed by vm.destroyed.collectAsState()
             val toast by vm.toast.collectAsState()
+            val rootReport by vm.rootReport.collectAsState()
             val context = LocalContext.current
             // Keep these UI holders above the lock gate and AnimatedContent.
             // Navigating to a child route, or briefly showing the lock screen,
@@ -197,6 +202,13 @@ class MainActivity : FragmentActivity() {
                     ) {
                         UpdateDialog(tag = updateTag)
                     }
+                    // One-time root warning over the unlocked main UI.
+                    val root = rootReport
+                    if (root?.rooted == true && !settings.rootWarningAcked &&
+                        !locked && !pinRequired && !destroyed && !tampered
+                    ) {
+                        RootWarningDialog(onConfirm = { vm.acknowledgeRootWarning() })
+                    }
                 }
             }
 
@@ -232,6 +244,8 @@ class MainActivity : FragmentActivity() {
         vm.setBiometricAvailable(canAuthenticateBiometric())
         vm.onAppForeground()
         maybeCheckForUpdate()
+        maybeRefreshLegalDocs()
+        lifecycleScope.launch { RootState.refresh(applicationContext) }
     }
 
     override fun onStop() {
@@ -620,6 +634,21 @@ class MainActivity : FragmentActivity() {
         }
     }
 
+    // --------------------------------------------------------- legal docs
+
+    /**
+     * Reads the latest Terms of Use / Privacy Policy from osmium.im in the
+     * background when the app opens. Throttling lives inside
+     * [LegalDocsRepository]; failures stay silent here — the About dialogs
+     * show a failure notice with retry and a link to the website.
+     */
+    private fun maybeRefreshLegalDocs() {
+        if (tampered || vm.destroyed.value) return
+        lifecycleScope.launch {
+            LegalDocsRepository.refreshIfDue(applicationContext)
+        }
+    }
+
     @Composable
     private fun UpdateDialog(tag: String) {
         val context = LocalContext.current
@@ -655,10 +684,24 @@ class MainActivity : FragmentActivity() {
             dismissButton = {
                 TextButton(onClick = { pendingUpdateTag = null }) {
                     Text(stringResource(R.string.update_later))
-                }
             }
-        )
-    }
+        }
+    )
+}
+
+@Composable
+private fun RootWarningDialog(onConfirm: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = { /* not acknowledged — will be shown again */ },
+        title = { Text(stringResource(R.string.root_detected_title)) },
+        text = { Text(stringResource(R.string.root_detected_body)) },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text(stringResource(R.string.root_detected_ok))
+            }
+        }
+    )
+}
 
     // ------------------------------------------------------------ nav host
 
@@ -705,6 +748,17 @@ class MainActivity : FragmentActivity() {
         val context = LocalContext.current
         val direction = vm.nav.direction
         val current = vm.nav.current
+        val rootRestricted by vm.rootRestricted.collectAsState()
+
+        // Defense in depth: if the restriction becomes active while a blocked
+        // screen is open (e.g. restored after a config change), leave it
+        // instead of exposing the feature.
+        LaunchedEffect(current, rootRestricted) {
+            if (rootRestricted && current.isRootBlocked()) {
+                vm.nav.popToRoot()
+                vm.showToast(context.getString(R.string.root_feature_blocked))
+            }
+        }
 
         BackHandler(enabled = vm.nav.canGoBack) { vm.nav.pop() }
         Box(Modifier.fillMaxSize()) {
@@ -741,7 +795,7 @@ class MainActivity : FragmentActivity() {
                                 ?.toString()
                                 .orEmpty()
                             val parsed = try {
-                                OtpUriParser.parse(clipText)
+                                OtpUriParser.parse(clipText, vm.settings.value.devExtraDigits)
                             } catch (_: Exception) {
                                 null
                             }
@@ -907,7 +961,44 @@ class MainActivity : FragmentActivity() {
 
                     is Screen.About -> AboutScreen(
                         vm = vm,
-                        onBack = { vm.nav.pop() }
+                        onBack = { vm.nav.pop() },
+                        onRequireBiometric = if (canAuthenticateBiometric()) {
+                            { onSuccess ->
+                                launchBiometric(
+                                    onSuccess = onSuccess,
+                                    onCancelled = { vm.showToast(context.getString(R.string.lock_cancelled)) },
+                                    onError = { msg -> vm.showToast(msg) }
+                                )
+                            }
+                        } else null,
+                        onRequireCredential = { onSuccess ->
+                            launchCredential(
+                                onSuccess = onSuccess,
+                                onCancelled = { vm.showToast(context.getString(R.string.lock_cancelled)) },
+                                onError = { msg -> vm.showToast(msg) }
+                            )
+                        }
+                    )
+
+                    is Screen.Developer -> DeveloperScreen(
+                        vm = vm,
+                        onBack = { vm.nav.pop() },
+                        onRequireBiometric = if (canAuthenticateBiometric()) {
+                            { onSuccess ->
+                                launchBiometric(
+                                    onSuccess = onSuccess,
+                                    onCancelled = { vm.showToast(context.getString(R.string.lock_cancelled)) },
+                                    onError = { msg -> vm.showToast(msg) }
+                                )
+                            }
+                        } else null,
+                        onRequireCredential = { onSuccess ->
+                            launchCredential(
+                                onSuccess = onSuccess,
+                                onCancelled = { vm.showToast(context.getString(R.string.lock_cancelled)) },
+                                onError = { msg -> vm.showToast(msg) }
+                            )
+                        }
                     )
 
                     is Screen.Manual -> ManualScreen(
