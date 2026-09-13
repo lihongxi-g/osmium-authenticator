@@ -215,7 +215,7 @@ fun AccountFormScreen(
                 )
             } else {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Account.SUPPORTED_DIGITS.forEach { d ->
+                    Account.digitsSupported(settings.devExtraDigits).forEach { d ->
                         FilterChip(
                             selected = digits == d,
                             onClick = { digits = d },

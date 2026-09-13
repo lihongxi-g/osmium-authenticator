@@ -3,6 +3,7 @@ package com.safekey.authenticator.ui.screens
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,6 +43,7 @@ import com.safekey.authenticator.repository.ImportPlan
 import com.safekey.authenticator.security.VaultFormatException
 import com.safekey.authenticator.security.VaultIO
 import com.safekey.authenticator.ui.components.SimpleTopBar
+import com.safekey.authenticator.ui.dev.DevStrings
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -50,41 +53,63 @@ import kotlinx.coroutines.withContext
 fun ExportScreen(vm: MainViewModel, onDone: () -> Unit, onBack: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val settings by vm.settings.collectAsState()
+    val dev = DevStrings.forContext(context)
+    val plaintextMode = settings.devPlaintextExport
     var password by remember { mutableStateOf("") }
     var confirm by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
     var exporting by remember { mutableStateOf(false) }
     var pendingJson by remember { mutableStateOf<String?>(null) }
+    var plainAccepted by remember { mutableStateOf(false) }
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/octet-stream")) { uri: Uri? ->
         vm.setTransferPickerActive(false)
         scope.launch {
             try {
                 val payload = pendingJson ?: error("No export payload")
                 if (uri != null) withContext(Dispatchers.IO) { context.contentResolver.openOutputStream(uri)?.use { it.write(payload.toByteArray()) } ?: error("Cannot open output") }
-                if (uri != null) { vm.showToast(context.getString(R.string.export_done)); onDone() }
+                if (uri != null) {
+                    vm.showToast(if (plaintextMode) dev.plainExportToast else context.getString(R.string.export_done))
+                    onDone()
+                }
             } catch (e: Exception) { error = context.getString(R.string.export_failed, e.message ?: "IOException") }
             exporting = false
         }
     }
     Scaffold(topBar = { SimpleTopBar(stringResource(R.string.export_vault), onBack) }) { padding ->
         Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text(stringResource(R.string.export_password_desc), color = MaterialTheme.colorScheme.onSurfaceVariant)
-            OutlinedTextField(password, { password = it }, label = { Text(stringResource(R.string.export_password_hint)) }, visualTransformation = PasswordVisualTransformation(), singleLine = true, modifier = Modifier.fillMaxWidth())
-            OutlinedTextField(confirm, { confirm = it }, label = { Text(stringResource(R.string.export_confirm_hint)) }, visualTransformation = PasswordVisualTransformation(), singleLine = true, isError = error != null, modifier = Modifier.fillMaxWidth())
-            error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-            Button(enabled = !exporting, onClick = {
-                error = when { password.isEmpty() -> context.getString(R.string.error_password_empty); password.length < 8 -> context.getString(R.string.error_password_weak); password != confirm -> context.getString(R.string.error_password_mismatch); else -> null }
-                if (error == null) scope.launch {
+            if (plaintextMode) {
+                // Developer-mode plaintext export — warn on EVERY export.
+                Text(dev.plainExportWarningTitle, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.error)
+                Text(dev.plainExportWarningBody, color = MaterialTheme.colorScheme.error)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth().clickable { plainAccepted = !plainAccepted }
+                ) {
+                    Checkbox(checked = plainAccepted, onCheckedChange = { plainAccepted = it })
+                    Text(dev.plainExportAccept)
+                }
+            } else {
+                Text(stringResource(R.string.export_password_desc), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                OutlinedTextField(password, { password = it }, label = { Text(stringResource(R.string.export_password_hint)) }, visualTransformation = PasswordVisualTransformation(), singleLine = true, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(confirm, { confirm = it }, label = { Text(stringResource(R.string.export_confirm_hint)) }, visualTransformation = PasswordVisualTransformation(), singleLine = true, isError = error != null, modifier = Modifier.fillMaxWidth())
+                error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+            }
+            Button(enabled = !exporting && (!plaintextMode || plainAccepted), onClick = {
+                val pwError = if (plaintextMode) null else when { password.isEmpty() -> context.getString(R.string.error_password_empty); password.length < 8 -> context.getString(R.string.error_password_weak); password != confirm -> context.getString(R.string.error_password_mismatch); else -> null }
+                error = pwError
+                if (pwError == null) scope.launch {
                     exporting = true
                     try {
                         val json = withContext(Dispatchers.IO) {
                             val app = context.applicationContext as com.safekey.authenticator.SafeKeyApp
                             val pin = vm.pinManager.getPinHashForExport()
-                            VaultIO.encrypt(app.accountRepository.exportVault(pin?.first ?: "", pin?.second ?: ""), password.toCharArray())
+                            val vault = app.accountRepository.exportVault(pin?.first ?: "", pin?.second ?: "")
+                            if (plaintextMode) VaultIO.encodePlain(vault) else VaultIO.encrypt(vault, password.toCharArray())
                         }
                         pendingJson = json
                         vm.setTransferPickerActive(true)
-                        try { launcher.launch("osmium-backup.json") }
+                        try { launcher.launch(if (plaintextMode) "osmium-vault-plain.json" else "osmium-backup.json") }
                         catch (e: Exception) { vm.setTransferPickerActive(false); error = context.getString(R.string.export_failed, e.message ?: "Error") }
                     } catch (e: Exception) { error = context.getString(R.string.export_failed, e.message ?: "Error"); exporting = false }
                 }

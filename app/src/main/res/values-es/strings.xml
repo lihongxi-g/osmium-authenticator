@@ -282,6 +282,12 @@
     <string name="verify_biometric">Usar biometría</string>
     <string name="verify_credential">Usar contraseña del sistema</string>
     <string name="verify_pin">Usar PIN de Osmium</string>
+    <string name="root_detected_title">Dispositivo con root</string>
+    <string name="root_detected_body">Este dispositivo tiene root, lo que puede reducir la seguridad — otras aplicaciones podrían leer los datos de esta aplicación. Para proteger tu cuenta, las funciones de seguridad se han activado y bloqueado forzosamente.</string>
+    <string name="root_detected_ok">Entendido</string>
+    <string name="root_feature_blocked">El dispositivo tiene root, por lo que esta función no se puede activar. Esta restricción se puede levantar en el modo desarrollador.</string>
+    <string name="root_setting_locked">Este ajuste está bloqueado por la detección de root. Esta restricción se puede levantar en el modo desarrollador.</string>
+    <string name="root_section_locked">Activado y bloqueado forzosamente por la detección de root</string>
     <string name="use_pin">Usar PIN de Osmium</string>
     <string name="pin_not_set">No hay ningún PIN de Osmium configurado. Establécelo primero en Ajustes → PIN.</string>
     <string name="destroy_pin_clear_hint">Borrar PIN de destrucción</string>

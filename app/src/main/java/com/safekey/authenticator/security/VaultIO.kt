@@ -35,6 +35,12 @@ object VaultIO {
     }
 
     /**
+     * Serialize a vault WITHOUT encryption — developer-mode "plaintext
+     * export" only. Every call site must warn the user first.
+     */
+    fun encodePlain(vault: VaultFile): String = json.encodeToString(vault)
+
+    /**
      * Decrypt + parse a backup payload (the raw bytes of an exported file).
      *
      * @throws VaultFormatException with wrongPassword=true when decryption

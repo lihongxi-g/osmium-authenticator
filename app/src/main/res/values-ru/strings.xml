@@ -282,6 +282,12 @@
     <string name="verify_biometric">Использовать биометрию</string>
     <string name="verify_credential">Использовать системный пароль</string>
     <string name="verify_pin">Использовать PIN Osmium</string>
+    <string name="root_detected_title">Обнаружен Root</string>
+    <string name="root_detected_body">На этом устройстве есть Root, что может снизить безопасность — другие приложения могут прочитать данные этого приложения. Для защиты вашего аккаунта функции безопасности принудительно включены и заблокированы.</string>
+    <string name="root_detected_ok">Понятно</string>
+    <string name="root_feature_blocked">На устройстве есть Root, поэтому эту функцию нельзя включить. Это ограничение можно снять в режиме разработчика.</string>
+    <string name="root_setting_locked">Эта настройка заблокирована обнаружением Root. Это ограничение можно снять в режиме разработчика.</string>
+    <string name="root_section_locked">Принудительно включено и заблокировано обнаружением Root</string>
     <string name="use_pin">Использовать PIN Osmium</string>
     <string name="pin_not_set">PIN Osmium не задан. Сначала задайте его в Настройки → PIN.</string>
     <string name="destroy_pin_clear_hint">Удалить PIN уничтожения</string>

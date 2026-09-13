@@ -94,7 +94,11 @@ object TotpGenerator {
     }
 
     private fun pow10(digits: Int): Int = when (digits) {
+        4 -> 10_000
+        5 -> 100_000
+        7 -> 10_000_000
         8 -> 100_000_000
+        // 6 and any legacy value: the original default
         else -> 1_000_000
     }
 }

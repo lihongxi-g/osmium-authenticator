@@ -3,6 +3,7 @@ package com.safekey.authenticator.ui.screens
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -33,6 +34,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.hapticfeedback.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -47,6 +50,7 @@ import com.safekey.authenticator.security.AppLog
 import com.safekey.authenticator.security.ClipboardHelper
 import com.safekey.authenticator.ui.components.AppIcons
 import com.safekey.authenticator.ui.components.SimpleTopBar
+import com.safekey.authenticator.ui.dev.DevStrings
 import com.safekey.authenticator.ui.navigation.Screen
 import kotlinx.coroutines.launch
 
@@ -54,13 +58,28 @@ import kotlinx.coroutines.launch
 @Composable
 fun AboutScreen(
     vm: MainViewModel,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onRequireBiometric: ((onSuccess: () -> Unit) -> Unit)? = null,
+    onRequireCredential: ((onSuccess: () -> Unit) -> Unit)? = null
 ) {
     val context = LocalContext.current
     var showTerms by remember { mutableStateOf(false) }
     var showPrivacy by remember { mutableStateOf(false) }
     val legalStates by LegalDocsRepository.states.collectAsState()
     val scope = rememberCoroutineScope()
+    val dev = DevStrings.forContext(context)
+    val haptics = LocalHapticFeedback.current
+
+    // Hidden entry: seven taps on the app name unlock developer mode.
+    var devTapCount by remember { mutableStateOf(0) }
+    var showDevAuthDialog by remember { mutableStateOf(false) }
+    var showDevPinEntry by remember { mutableStateOf(false) }
+    var devPinError by remember { mutableStateOf<String?>(null) }
+
+    fun enableDeveloperMode() {
+        vm.setDevModeEnabled(true)
+        vm.showToast(dev.devEnabled)
+    }
 
     Scaffold(
         topBar = { SimpleTopBar(title = stringResource(R.string.settings_about), onBack = onBack) }
@@ -77,7 +96,20 @@ fun AboutScreen(
             Text(
                 text = "Osmium",
                 style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) {
+                    devTapCount++
+                    if (devTapCount >= 3) {
+                        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    }
+                    if (devTapCount >= 7) {
+                        devTapCount = 0
+                        showDevAuthDialog = true
+                    }
+                }
             )
             Text(
                 text = stringResource(R.string.about_version, BuildConfig.VERSION_NAME),
@@ -189,6 +221,90 @@ fun AboutScreen(
             },
             onRetry = { scope.launch { LegalDocsRepository.refreshNow(context.applicationContext) } },
             onDismiss = { showPrivacy = false }
+        )
+    }
+
+    // ---- hidden developer-mode entry (seven taps on the app name) ----
+
+    if (showDevAuthDialog) {
+        AlertDialog(
+            onDismissRequest = { showDevAuthDialog = false },
+            title = { Text(dev.verifyTitle) },
+            text = {
+                Column {
+                    if (onRequireBiometric != null) {
+                        DevVerifyOptionRow(AppIcons.Fingerprint, stringResource(R.string.verify_biometric)) {
+                            showDevAuthDialog = false
+                            onRequireBiometric { enableDeveloperMode() }
+                        }
+                    }
+                    if (onRequireCredential != null) {
+                        DevVerifyOptionRow(AppIcons.Security, stringResource(R.string.verify_credential)) {
+                            showDevAuthDialog = false
+                            onRequireCredential { enableDeveloperMode() }
+                        }
+                    }
+                    if (vm.hasLocalPin()) {
+                        DevVerifyOptionRow(AppIcons.Keyboard, stringResource(R.string.verify_pin)) {
+                            showDevAuthDialog = false
+                            devPinError = null
+                            showDevPinEntry = true
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showDevAuthDialog = false }) {
+                    Text(dev.cancel)
+                }
+            }
+        )
+    }
+
+    if (showDevPinEntry) {
+        PinVerifyScreen(
+            title = stringResource(R.string.pin_verify_title),
+            subtitle = stringResource(R.string.pin_verify_subtitle),
+            error = devPinError,
+            remainingAttempts = vm.remainingAttempts(),
+            onVerify = { pin ->
+                if (vm.onPinEntered(pin)) {
+                    showDevPinEntry = false
+                    devPinError = null
+                    enableDeveloperMode()
+                } else {
+                    devPinError = context.getString(R.string.pin_wrong)
+                    vm.checkSelfDestructPin(pin)
+                }
+            },
+            onCancel = {
+                showDevPinEntry = false
+                devPinError = null
+            }
+        )
+    }
+}
+
+@Composable
+private fun DevVerifyOptionRow(icon: ImageVector, label: String, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier = Modifier.size(20.dp),
+            tint = MaterialTheme.colorScheme.onSurface
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(start = 12.dp)
         )
     }
 }

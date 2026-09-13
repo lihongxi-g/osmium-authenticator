@@ -38,5 +38,12 @@ data class Account(
         const val ALGO_SHA512 = "SHA512"
         val SUPPORTED_ALGORITHMS = listOf(ALGO_SHA1, ALGO_SHA256, ALGO_SHA512)
         val SUPPORTED_DIGITS = listOf(6, 8)
+
+        /** Extra code lengths unlocked by developer mode (some services use them). */
+        val DEV_EXTRA_DIGITS = listOf(4, 5, 7)
+
+        /** Code lengths accepted for entry; [devExtra] adds the developer-mode set. */
+        fun digitsSupported(devExtra: Boolean): List<Int> =
+            if (devExtra) listOf(4, 5, 6, 7, 8) else SUPPORTED_DIGITS
     }
 }

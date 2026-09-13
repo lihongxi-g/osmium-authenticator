@@ -297,6 +297,12 @@
     <string name="verify_biometric">Use biometrics</string>
     <string name="verify_credential">Use system password</string>
     <string name="verify_pin">Use Osmium PIN</string>
+    <string name="root_detected_title">Device rooted</string>
+    <string name="root_detected_body">This device is rooted, which may reduce security — other apps may be able to read this app\'s data. To protect your account, security features have been forced on and locked.</string>
+    <string name="root_detected_ok">Got it</string>
+    <string name="root_feature_blocked">The device is rooted, so this feature can\'t be enabled. This restriction can be lifted in Developer mode.</string>
+    <string name="root_setting_locked">This setting is locked by root detection. This restriction can be lifted in Developer mode.</string>
+    <string name="root_section_locked">Forced on and locked by root detection</string>
 
     <string name="use_pin">Use Osmium PIN</string>
     <string name="pin_not_set">No Osmium PIN set. Set one in Settings → PIN first.</string>

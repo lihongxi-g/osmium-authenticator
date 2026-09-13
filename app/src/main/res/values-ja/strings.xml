@@ -282,6 +282,12 @@
     <string name="verify_biometric">生体認証を使用</string>
     <string name="verify_credential">システムパスワードを使用</string>
     <string name="verify_pin">Osmium PINを使用</string>
+    <string name="root_detected_title">端末がroot化されています</string>
+    <string name="root_detected_body">この端末はroot化されているため、セキュリティが低下し、他のアプリにこのアプリのデータを読み取られる恐れがあります。アカウントを保護するため、セキュリティ機能が強制的に有効化され、ロックされました。</string>
+    <string name="root_detected_ok">わかりました</string>
+    <string name="root_feature_blocked">端末がroot化されているため、この機能は有効にできません。この制限は開発者モードで解除できます。</string>
+    <string name="root_setting_locked">この設定はroot検出によりロックされています。この制限は開発者モードで解除できます。</string>
+    <string name="root_section_locked">root検出により強制的に有効化され、ロックされています</string>
     <string name="use_pin">Osmium PINを使用</string>
     <string name="pin_not_set">Osmium PINが設定されていません。設定 → PIN で先に設定してください。</string>
     <string name="destroy_pin_clear_hint">自爆PINを消去</string>

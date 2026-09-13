@@ -103,7 +103,7 @@ fun FileImportScreen(
                     importer.parse(text)
                 }
                 val issueMap = parsed.mapIndexedNotNull { index, account ->
-                    ImportSupport.issue(account)?.let { index to it }
+                    ImportSupport.issue(account, vm.settings.value.devExtraDigits)?.let { index to it }
                 }.toMap()
                 val importable = parsed.filterIndexed { index, _ -> index !in issueMap }
                 accounts = parsed

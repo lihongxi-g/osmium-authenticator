@@ -10,7 +10,10 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.safekey.authenticator.SafeKeyApp
 import com.safekey.authenticator.data.AppSettings
+import com.safekey.authenticator.security.AppLog
 import com.safekey.authenticator.security.PinManager
+import com.safekey.authenticator.security.RootDetector
+import com.safekey.authenticator.security.RootState
 import com.safekey.authenticator.security.VaultIO
 import com.safekey.authenticator.network.WebDavClient
 import kotlinx.coroutines.flow.first
@@ -44,6 +47,16 @@ class AutoBackupWorker(
         val settingsRepo = app.settingsRepository
         val settings = settingsRepo.settings.first()
         if (!settings.autoBackupEnabled) {
+            AutoBackupScheduler.schedule(applicationContext, settings)
+            return Result.success()
+        }
+        // Root hardening: while the root security restriction is active,
+        // automatic backups stay suspended (developer mode can lift it).
+        // Re-schedule so the loop keeps running and resumes automatically.
+        val rootReport = RootState.report.value
+            ?: runCatching { RootDetector.scan(applicationContext) }.getOrNull()
+        if (!settings.devDisableRootSecurity && rootReport?.rooted == true) {
+            AppLog.d("auto-backup skipped: root restriction active")
             AutoBackupScheduler.schedule(applicationContext, settings)
             return Result.success()
         }

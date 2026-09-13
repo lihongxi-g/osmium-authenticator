@@ -89,7 +89,7 @@ fun ScanScreen(
                             val raw = barcodes.firstOrNull()?.rawValue
                             if (raw != null) {
                                 val parsed = try {
-                                    OtpUriParser.parse(raw)
+                                    OtpUriParser.parse(raw, vm.settings.value.devExtraDigits)
                                 } catch (_: Exception) {
                                     null
                                 }
@@ -128,7 +128,7 @@ fun ScanScreen(
                         enabled = confirm == null,
                         onRawCode = { raw ->
                             val parsed = try {
-                                OtpUriParser.parse(raw)
+                                OtpUriParser.parse(raw, vm.settings.value.devExtraDigits)
                             } catch (_: Exception) {
                                 null
                             }

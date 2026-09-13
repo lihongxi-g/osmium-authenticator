@@ -282,6 +282,12 @@
     <string name="verify_biometric">बायोमेट्रिक उपयोग करें</string>
     <string name="verify_credential">सिस्टम पासवर्ड उपयोग करें</string>
     <string name="verify_pin">Osmium PIN उपयोग करें</string>
+    <string name="root_detected_title">डिवाइस रूट किया गया है</string>
+    <string name="root_detected_body">यह डिवाइस रूट किया गया है, जिससे सुरक्षा कम हो सकती है — अन्य ऐप इस ऐप का डेटा पढ़ पा सकते हैं। आपके खाते को सुरक्षित रखने के लिए सुरक्षा सुविधाएँ ज़बरदस्ती चालू करके लॉक कर दी गई हैं।</string>
+    <string name="root_detected_ok">समझ गया</string>
+    <string name="root_feature_blocked">यह डिवाइस रूट किया गया है, इसलिए यह सुविधा चालू नहीं की जा सकती। यह प्रतिबंध डेवलपर मोड में हटाया जा सकता है।</string>
+    <string name="root_setting_locked">यह सेटिंग रूट डिटेक्शन द्वारा लॉक है। यह प्रतिबंध डेवलपर मोड में हटाया जा सकता है।</string>
+    <string name="root_section_locked">रूट डिटेक्शन द्वारा ज़बरदस्ती चालू करके लॉक किया गया</string>
     <string name="use_pin">Osmium PIN उपयोग करें</string>
     <string name="pin_not_set">Osmium PIN सेट नहीं है। पहले सेटिंग्स → PIN में सेट करें।</string>
     <string name="destroy_pin_clear_hint">विनाश PIN साफ़ करें</string>

@@ -44,6 +44,8 @@ sealed class Screen {
     /** Open-source attributions and format-source references. */
     object Attributions : Screen()
     object Tags : Screen()
+    /** Hidden developer-mode panel (English / Simplified Chinese only). */
+    object Developer : Screen()
 }
 
 /**
@@ -78,4 +80,11 @@ class NavigationState(initial: Screen = Screen.Accounts) {
         direction = -1
         while (stack.size > 1) stack.removeAt(stack.lastIndex)
     }
+}
+
+/** Screens that are unavailable while the root security restriction is active. */
+fun Screen.isRootBlocked(): Boolean = when (this) {
+    is Screen.WebDav, is Screen.AutoBackup, is Screen.LanTransfer,
+    is Screen.ThirdPartyImport, is Screen.GoogleImport, is Screen.FileImport -> true
+    else -> false
 }

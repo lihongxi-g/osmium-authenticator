@@ -294,6 +294,12 @@
     <string name="verify_biometric">使用生物辨識</string>
     <string name="verify_credential">使用系統密碼</string>
     <string name="verify_pin">使用 Osmium PIN</string>
+    <string name="root_detected_title">偵測到裝置已 Root</string>
+    <string name="root_detected_body">此裝置已 Root，安全性可能降低：其他應用程式可能讀取本應用程式的資料。為保護你的帳戶，安全功能已強制開啟並鎖定。</string>
+    <string name="root_detected_ok">我知道了</string>
+    <string name="root_feature_blocked">偵測到裝置已 Root，此功能無法開啟；可在開發者模式中關閉此限制。</string>
+    <string name="root_setting_locked">此設定已由 Root 偵測鎖定；可在開發者模式中關閉此限制。</string>
+    <string name="root_section_locked">已由 Root 偵測強制開啟並鎖定</string>
 
     <string name="use_pin">使用 Osmium PIN</string>
     <string name="pin_not_set">尚未設定應用 PIN，請先在設定 → PIN 中設定。</string>

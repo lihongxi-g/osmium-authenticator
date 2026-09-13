@@ -282,6 +282,12 @@
     <string name="verify_biometric">Biometrie verwenden</string>
     <string name="verify_credential">Systempasswort verwenden</string>
     <string name="verify_pin">Osmium-PIN verwenden</string>
+    <string name="root_detected_title">Gerät ist gerootet</string>
+    <string name="root_detected_body">Dieses Gerät ist gerootet, was die Sicherheit beeinträchtigen kann — andere Apps können möglicherweise die Daten dieser App lesen. Zum Schutz deines Kontos wurden die Sicherheitsfunktionen zwangsweise aktiviert und gesperrt.</string>
+    <string name="root_detected_ok">Verstanden</string>
+    <string name="root_feature_blocked">Das Gerät ist gerootet, daher kann diese Funktion nicht aktiviert werden. Diese Einschränkung kann im Entwicklermodus aufgehoben werden.</string>
+    <string name="root_setting_locked">Diese Einstellung ist durch die Root-Erkennung gesperrt. Diese Einschränkung kann im Entwicklermodus aufgehoben werden.</string>
+    <string name="root_section_locked">Durch die Root-Erkennung zwangsweise aktiviert und gesperrt</string>
     <string name="use_pin">Osmium-PIN verwenden</string>
     <string name="pin_not_set">Kein Osmium-PIN festgelegt. Lege zuerst einen unter Einstellungen → PIN fest.</string>
     <string name="destroy_pin_clear_hint">Zerstörungs-PIN löschen</string>

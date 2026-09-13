@@ -68,7 +68,9 @@ class CryptoManager {
 
     companion object {
         private const val ANDROID_KEYSTORE = "AndroidKeyStore"
-        private const val KEY_ALIAS = "safekey_master_key_v1"
+        /** Exposed for read-only inspection (developer-mode Keystore tools). */
+        const val KEY_ALIAS_NAME = "safekey_master_key_v1"
+        private const val KEY_ALIAS = KEY_ALIAS_NAME
         private const val TRANSFORMATION = "AES/GCM/NoPadding"
     }
 }

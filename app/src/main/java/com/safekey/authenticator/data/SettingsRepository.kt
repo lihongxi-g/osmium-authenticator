@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.safekey.authenticator.security.CryptoManager
 import kotlinx.coroutines.flow.Flow
@@ -36,7 +37,14 @@ data class AppSettings(
     val autoBackupLastTime: Long = 0L,
     val autoBackupLastError: String = "",
     val autoCheckUpdates: Boolean = true,
-    val tagsEnabled: Boolean = true
+    val tagsEnabled: Boolean = true,
+    // ---- root hardening / developer mode (2.4.2) ----
+    val rootWarningAcked: Boolean = false,
+    val devModeEnabled: Boolean = false,
+    val devDisableRootSecurity: Boolean = false,
+    val devPlaintextExport: Boolean = false,
+    val devExtraDigits: Boolean = false,
+    val devHiddenFeatures: Set<String> = emptySet()
 ) {
     companion object {
         const val THEME_SYSTEM = "system"
@@ -93,6 +101,12 @@ class SettingsRepository(
         val AUTO_BACKUP_LAST_ERROR = stringPreferencesKey("auto_backup_last_error")
         val AUTO_CHECK_UPDATES = booleanPreferencesKey("auto_check_updates")
         val TAGS_ENABLED = booleanPreferencesKey("tags_enabled")
+        val ROOT_WARNING_ACKED = booleanPreferencesKey("root_warning_acked")
+        val DEV_MODE_ENABLED = booleanPreferencesKey("dev_mode_enabled")
+        val DEV_DISABLE_ROOT_SECURITY = booleanPreferencesKey("dev_disable_root_security")
+        val DEV_PLAINTEXT_EXPORT = booleanPreferencesKey("dev_plaintext_export")
+        val DEV_EXTRA_DIGITS = booleanPreferencesKey("dev_extra_digits")
+        val DEV_HIDDEN_FEATURES = stringSetPreferencesKey("dev_hidden_features")
     }
 
     val settings: Flow<AppSettings> = context.dataStore.data.map { prefs ->
@@ -118,7 +132,13 @@ class SettingsRepository(
             autoBackupLastTime = prefs[Keys.AUTO_BACKUP_LAST_TIME] ?: 0L,
             autoBackupLastError = prefs[Keys.AUTO_BACKUP_LAST_ERROR] ?: "",
             autoCheckUpdates = prefs[Keys.AUTO_CHECK_UPDATES] ?: true,
-            tagsEnabled = prefs[Keys.TAGS_ENABLED] ?: true
+            tagsEnabled = prefs[Keys.TAGS_ENABLED] ?: true,
+            rootWarningAcked = prefs[Keys.ROOT_WARNING_ACKED] ?: false,
+            devModeEnabled = prefs[Keys.DEV_MODE_ENABLED] ?: false,
+            devDisableRootSecurity = prefs[Keys.DEV_DISABLE_ROOT_SECURITY] ?: false,
+            devPlaintextExport = prefs[Keys.DEV_PLAINTEXT_EXPORT] ?: false,
+            devExtraDigits = prefs[Keys.DEV_EXTRA_DIGITS] ?: false,
+            devHiddenFeatures = prefs[Keys.DEV_HIDDEN_FEATURES] ?: emptySet()
         )
     }
 
@@ -243,6 +263,32 @@ class SettingsRepository(
         context.dataStore.edit { it[Keys.TAGS_ENABLED] = enabled }
     }
 
+    // -------------------------------------- root hardening / developer mode (2.4.2)
+
+    suspend fun setRootWarningAcked(acked: Boolean) {
+        context.dataStore.edit { it[Keys.ROOT_WARNING_ACKED] = acked }
+    }
+
+    suspend fun setDevModeEnabled(enabled: Boolean) {
+        context.dataStore.edit { it[Keys.DEV_MODE_ENABLED] = enabled }
+    }
+
+    suspend fun setDevDisableRootSecurity(enabled: Boolean) {
+        context.dataStore.edit { it[Keys.DEV_DISABLE_ROOT_SECURITY] = enabled }
+    }
+
+    suspend fun setDevPlaintextExport(enabled: Boolean) {
+        context.dataStore.edit { it[Keys.DEV_PLAINTEXT_EXPORT] = enabled }
+    }
+
+    suspend fun setDevExtraDigits(enabled: Boolean) {
+        context.dataStore.edit { it[Keys.DEV_EXTRA_DIGITS] = enabled }
+    }
+
+    suspend fun setDevHiddenFeatures(ids: Set<String>) {
+        context.dataStore.edit { it[Keys.DEV_HIDDEN_FEATURES] = ids }
+    }
+
     // ------------------------------------------------------ WebDAV backup
 
     /** The saved WebDAV server, with the password decrypted on read; null when
@@ -285,6 +331,30 @@ class SettingsRepository(
                 }
             }
         }
+    }
+
+    /**
+     * Developer-mode maintenance: re-encrypt the stored WebDAV / auto-backup
+     * passwords with fresh IVs. The DataStore edit is atomic — on failure
+     * nothing is written. Returns the number of fields re-encrypted.
+     */
+    suspend fun reencryptSecretFields(): Int {
+        var touched = 0
+        context.dataStore.edit { prefs ->
+            for ((ivKey, ctKey) in listOf(
+                Keys.WEBDAV_PASS_IV to Keys.WEBDAV_PASS_CT,
+                Keys.AUTO_BACKUP_PASS_IV to Keys.AUTO_BACKUP_PASS_CT
+            )) {
+                val iv = prefs[ivKey] ?: continue
+                val ct = prefs[ctKey] ?: continue
+                val plain = crypto.decrypt(CryptoManager.EncryptedField(iv, ct))
+                val fresh = crypto.encrypt(plain)
+                prefs[ivKey] = fresh.iv
+                prefs[ctKey] = fresh.ciphertext
+                touched++
+            }
+        }
+        return touched
     }
 
     suspend fun wipeSettings() {

@@ -53,6 +53,7 @@ import com.safekey.authenticator.ui.components.AppIcons
 import com.safekey.authenticator.ui.components.SectionHeader
 import com.safekey.authenticator.ui.components.SettingRow
 import com.safekey.authenticator.ui.components.SimpleTopBar
+import com.safekey.authenticator.ui.dev.DevStrings
 import com.safekey.authenticator.ui.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -76,6 +77,10 @@ fun SettingsScreen(
     val context = LocalContext.current
     val hasPin = vm.hasLocalPin()
     val hasDestroyPin = vm.pinManager.hasDestroyPin()
+    val rootRestricted by vm.rootRestricted.collectAsState()
+    val dev = DevStrings.forContext(context)
+    // Developer-mode "hide entries" set (ids match DeveloperScreen.HIDEABLE_ITEMS)
+    val hiddenFeatures = settings.devHiddenFeatures
 
     var showThemeDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
@@ -90,6 +95,8 @@ fun SettingsScreen(
     var showVerifyDialog by remember { mutableStateOf(false) }
     var pinMode by remember { mutableStateOf(false) }
     var pinError by remember { mutableStateOf<String?>(null) }
+    // "feature" / "setting" while the root-blocked notice dialog is showing
+    var rootDialogTarget by remember { mutableStateOf<String?>(null) }
 
     fun executeToggle() {
         // pendingToggle survives until verification completes — clearing it
@@ -115,6 +122,16 @@ fun SettingsScreen(
         executeToggle()
     }
 
+    /**
+     * True when [kind] ("feature" / "setting") is blocked by the active root
+     * restriction — shows the notice dialog instead of running the action.
+     */
+    fun rootBlocked(kind: String): Boolean {
+        if (!rootRestricted) return false
+        rootDialogTarget = kind
+        return true
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
     Scaffold(
         topBar = { SimpleTopBar(title = stringResource(R.string.settings_title), onBack = onBack) }
@@ -127,7 +144,7 @@ fun SettingsScreen(
         ) {
             SectionHeader(stringResource(R.string.settings_appearance))
 
-            SettingRow(
+            if ("theme" !in hiddenFeatures) SettingRow(
                 icon = if (settings.themeMode == AppSettings.THEME_DARK) AppIcons.DarkMode else AppIcons.LightMode,
                 title = stringResource(R.string.theme_mode),
                 trailing = {
@@ -144,7 +161,7 @@ fun SettingsScreen(
                 onClick = { showThemeDialog = true }
             )
 
-            SettingRow(
+            if ("dynamicColor" !in hiddenFeatures) SettingRow(
                 icon = AppIcons.Palette,
                 title = stringResource(R.string.dynamic_color),
                 description = stringResource(R.string.dynamic_color_desc),
@@ -156,21 +173,21 @@ fun SettingsScreen(
                 }
             )
 
-            SettingRow(
+            if ("sort" !in hiddenFeatures) SettingRow(
                 icon = AppIcons.SwapVert,
                 title = stringResource(R.string.sort_mode),
                 description = stringResource(R.string.sort_mode_desc),
                 onClick = { vm.nav.push(Screen.SortOrder) }
             )
 
-            SettingRow(
+            if ("tags" !in hiddenFeatures) SettingRow(
                 icon = AppIcons.Palette,
                 title = stringResource(R.string.tags_title),
                 description = stringResource(R.string.tags_settings_desc),
                 onClick = { vm.nav.push(Screen.TagSettings) }
             )
 
-            SettingRow(
+            if ("language" !in hiddenFeatures) SettingRow(
                 icon = AppIcons.Language,
                 title = stringResource(R.string.language),
                 trailing = {
@@ -197,7 +214,16 @@ fun SettingsScreen(
 
             SectionHeader(stringResource(R.string.settings_security))
 
-            SettingRow(
+            if (rootRestricted) {
+                Text(
+                    text = stringResource(R.string.root_section_locked),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                )
+            }
+
+            if ("gate" !in hiddenFeatures) SettingRow(
                 icon = AppIcons.Fingerprint,
                 title = stringResource(R.string.gate_on_open),
                 description = stringResource(R.string.gate_on_open_desc),
@@ -205,14 +231,16 @@ fun SettingsScreen(
                     Switch(
                         checked = settings.gateOnOpen,
                         onCheckedChange = { target ->
-                            pendingToggle = "gate" to target
-                            showVerifyDialog = true
+                            if (!rootBlocked("setting")) {
+                                pendingToggle = "gate" to target
+                                showVerifyDialog = true
+                            }
                         }
                     )
                 }
             )
 
-            SettingRow(
+            if ("screenshots" !in hiddenFeatures) SettingRow(
                 icon = AppIcons.Visibility,
                 title = stringResource(R.string.allow_screenshots),
                 description = stringResource(R.string.allow_screenshots_desc),
@@ -220,14 +248,16 @@ fun SettingsScreen(
                     Switch(
                         checked = settings.allowScreenshots,
                         onCheckedChange = { target ->
-                            pendingToggle = "screenshot" to target
-                            showVerifyDialog = true
+                            if (!rootBlocked("setting")) {
+                                pendingToggle = "screenshot" to target
+                                showVerifyDialog = true
+                            }
                         }
                     )
                 }
             )
 
-            SettingRow(
+            if ("hideCodes" !in hiddenFeatures) SettingRow(
                 icon = AppIcons.Visibility,
                 title = stringResource(R.string.hide_codes),
                 description = stringResource(R.string.hide_codes_desc),
@@ -235,14 +265,16 @@ fun SettingsScreen(
                     Switch(
                         checked = settings.hideCodes,
                         onCheckedChange = { target ->
-                            pendingToggle = "hideCodes" to target
-                            showVerifyDialog = true
+                            if (!rootBlocked("setting")) {
+                                pendingToggle = "hideCodes" to target
+                                showVerifyDialog = true
+                            }
                         }
                     )
                 }
             )
 
-            SettingRow(
+            if ("timeOffset" !in hiddenFeatures) SettingRow(
                 icon = AppIcons.Timer,
                 title = stringResource(R.string.time_offset),
                 description = stringResource(
@@ -257,9 +289,9 @@ fun SettingsScreen(
 
             // -------------------------------------------------------- PIN
 
-            SectionHeader(stringResource(R.string.settings_pin))
+            if ("pin" !in hiddenFeatures) SectionHeader(stringResource(R.string.settings_pin))
 
-            SettingRow(
+            if ("pin" !in hiddenFeatures) SettingRow(
                 icon = AppIcons.Keyboard,
                 title = if (hasPin) stringResource(R.string.app_pin_manage) else stringResource(R.string.app_pin_setup),
                 description = stringResource(R.string.app_pin_desc),
@@ -270,9 +302,9 @@ fun SettingsScreen(
 
             // ------------------------------------------------- self-destruct
 
-            SectionHeader(stringResource(R.string.settings_destroy))
+            if ("destroy" !in hiddenFeatures) SectionHeader(stringResource(R.string.settings_destroy))
 
-            SettingRow(
+            if ("destroy" !in hiddenFeatures) SettingRow(
                 icon = AppIcons.Warning,
                 title = stringResource(R.string.destroy_mode),
                 description = stringResource(R.string.destroy_mode_desc),
@@ -287,20 +319,22 @@ fun SettingsScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 },
-                onClick = { showDestroyModeDialog = true }
+                onClick = { if (!rootBlocked("feature")) showDestroyModeDialog = true }
             )
 
-            if (settings.destroyMode == AppSettings.DESTROY_PIN) {
+            if ("destroy" !in hiddenFeatures && settings.destroyMode == AppSettings.DESTROY_PIN) {
                 SettingRow(
                     icon = AppIcons.VpnKey,
                     title = if (hasDestroyPin) stringResource(R.string.destroy_pin_manage)
                     else stringResource(R.string.destroy_pin_setup),
                     description = stringResource(R.string.destroy_pin_desc),
                     onClick = {
-                        if (hasPin) {
-                            onOpenPinVerify(if (hasDestroyPin) "change_destroy_pin" else "set_destroy_pin")
-                        } else {
-                            vm.nav.push(Screen.PinSetup("destroy_pin"))
+                        if (!rootBlocked("feature")) {
+                            if (hasPin) {
+                                onOpenPinVerify(if (hasDestroyPin) "change_destroy_pin" else "set_destroy_pin")
+                            } else {
+                                vm.nav.push(Screen.PinSetup("destroy_pin"))
+                            }
                         }
                     }
                 )
@@ -310,13 +344,13 @@ fun SettingsScreen(
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier
-                            .clickable { onOpenPinVerify("clear_destroy_pin") }
+                            .clickable { if (!rootBlocked("feature")) onOpenPinVerify("clear_destroy_pin") }
                             .padding(horizontal = 16.dp, vertical = 6.dp)
                     )
                 }
             }
 
-            if (settings.destroyMode == AppSettings.DESTROY_FAIL_COUNT) {
+            if ("destroy" !in hiddenFeatures && settings.destroyMode == AppSettings.DESTROY_FAIL_COUNT) {
                 SettingRow(
                     icon = AppIcons.Refresh,
                     title = stringResource(R.string.fail_threshold),
@@ -328,11 +362,11 @@ fun SettingsScreen(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     },
-                    onClick = { showThresholdDialog = true }
+                    onClick = { if (!rootBlocked("feature")) showThresholdDialog = true }
                 )
             }
 
-            if (hasPin) {
+            if (hasPin && "pin" !in hiddenFeatures) {
                 Text(
                     text = stringResource(R.string.pin_clear_hint),
                     style = MaterialTheme.typography.labelSmall,
@@ -345,55 +379,61 @@ fun SettingsScreen(
 
             SectionHeader(stringResource(R.string.settings_data))
 
-            SettingRow(
+            if ("thirdparty" !in hiddenFeatures) SettingRow(
                 icon = AppIcons.ImportExport,
                 title = stringResource(R.string.thirdparty_import_title),
                 description = stringResource(R.string.thirdparty_import_desc),
-                onClick = { vm.nav.push(Screen.ThirdPartyImport) }
+                onClick = { if (!rootBlocked("feature")) vm.nav.push(Screen.ThirdPartyImport) }
             )
 
-            SettingRow(
+            if ("export" !in hiddenFeatures) SettingRow(
                 icon = AppIcons.FileUpload,
                 title = stringResource(R.string.export_vault),
                 description = stringResource(R.string.export_vault_desc),
                 onClick = onExport
             )
 
-            SettingRow(
+            if ("import" !in hiddenFeatures) SettingRow(
                 icon = AppIcons.FileDownload,
                 title = stringResource(R.string.import_vault),
                 description = stringResource(R.string.import_vault_desc),
                 onClick = onImport
             )
 
-            SettingRow(
+            if ("lan" !in hiddenFeatures) SettingRow(
                 icon = AppIcons.Wifi,
                 title = stringResource(R.string.lan_transfer_title),
                 description = stringResource(R.string.lan_transfer_desc),
                 onClick = {
-                    pendingNav = { vm.nav.push(Screen.LanTransfer) }
-                    showVerifyDialog = true
+                    if (!rootBlocked("feature")) {
+                        pendingNav = { vm.nav.push(Screen.LanTransfer) }
+                        showVerifyDialog = true
+                    }
                 }
             )
 
-            SettingRow(
+            if ("webdav" !in hiddenFeatures) SettingRow(
                 icon = AppIcons.Dns,
                 title = stringResource(R.string.webdav_title),
                 description = stringResource(R.string.webdav_desc),
                 onClick = {
-                    // Entering the WebDAV screen requires identity verification
-                    pendingNav = { onWebDav() }
-                    showVerifyDialog = true
+                    if (!rootBlocked("feature")) {
+                        // Entering the WebDAV screen requires identity verification
+                        pendingNav = { onWebDav() }
+                        showVerifyDialog = true
+                    }
                 }
             )
 
-            SettingRow(
+            if ("autobackup" !in hiddenFeatures) SettingRow(
                 icon = AppIcons.Timer,
                 title = stringResource(R.string.auto_backup_title),
                 description = stringResource(R.string.auto_backup_desc),
                 onClick = {
-                    pendingNav = { onAutoBackup() }
-                    showVerifyDialog = true
+                    if (!rootBlocked("feature")) {
+                        pendingNav = { onAutoBackup() }
+                        showVerifyDialog = true
+                    }
                 }
             )
 
@@ -404,7 +444,7 @@ fun SettingsScreen(
 
             SectionHeader(stringResource(R.string.settings_about))
 
-            SettingRow(
+            if ("log" !in hiddenFeatures) SettingRow(
                 icon = AppIcons.BugReport,
                 title = stringResource(R.string.export_log),
                 description = stringResource(R.string.export_log_desc),
@@ -416,7 +456,7 @@ fun SettingsScreen(
                 }
             )
 
-            SettingRow(
+            if ("manual" !in hiddenFeatures) SettingRow(
                 icon = AppIcons.MenuBook,
                 title = stringResource(R.string.manual_title),
                 description = stringResource(R.string.manual_entry_desc),
@@ -437,7 +477,7 @@ fun SettingsScreen(
                 onClick = { vm.nav.push(Screen.About) }
             )
 
-            SettingRow(
+            if ("updates" !in hiddenFeatures) SettingRow(
                 icon = AppIcons.Refresh,
                 title = stringResource(R.string.update_check_label),
                 description = stringResource(R.string.update_check_desc),
@@ -448,6 +488,23 @@ fun SettingsScreen(
                     )
                 }
             )
+
+            // ------------------------------------------ developer mode (2.4.2)
+
+            if (settings.devModeEnabled) {
+                SectionHeader(dev.sectionTitle)
+
+                SettingRow(
+                    icon = AppIcons.Security,
+                    title = dev.sectionTitle,
+                    description = dev.entryDesc,
+                    onClick = {
+                        // Identity verification is required on EVERY entry.
+                        pendingNav = { vm.nav.push(Screen.Developer) }
+                        showVerifyDialog = true
+                    }
+                )
+            }
         }
     }
 
@@ -696,6 +753,26 @@ fun SettingsScreen(
             },
             confirmButton = {
                 TextButton(onClick = { showThresholdDialog = false }) { Text(stringResource(R.string.close)) }
+            }
+        )
+    }
+
+    val dialogKind = rootDialogTarget
+    if (dialogKind != null) {
+        AlertDialog(
+            onDismissRequest = { rootDialogTarget = null },
+            text = {
+                Text(
+                    stringResource(
+                        if (dialogKind == "setting") R.string.root_setting_locked
+                        else R.string.root_feature_blocked
+                    )
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = { rootDialogTarget = null }) {
+                    Text(stringResource(R.string.root_detected_ok))
+                }
             }
         )
     }
