@@ -17,7 +17,7 @@ class IntegrityScoringTest {
     fun `a silent scan without hardware proof is unknown, not clean`() {
         val checks =
             listOf(
-                check("manager_packages", IntegritySeverity.FAIL, false),
+                check("su_binaries", IntegritySeverity.FAIL, false),
                 check("selinux_state", IntegritySeverity.WARN, false),
                 check("attestation", IntegritySeverity.INFO, false)
             )
@@ -28,7 +28,7 @@ class IntegrityScoringTest {
     fun `verified attestation alone scores clean`() {
         val checks =
             listOf(
-                check("manager_packages", IntegritySeverity.FAIL, false),
+                check("su_binaries", IntegritySeverity.FAIL, false),
                 attestation(IntegritySeverity.PASS)
             )
         assertEquals(IntegrityLevel.CLEAN, IntegrityScoring.levelOf(checks))
@@ -38,17 +38,25 @@ class IntegrityScoringTest {
     fun `hard evidence scores compromised`() {
         val checks =
             listOf(
-                check("manager_packages", IntegritySeverity.FAIL, true),
+                check("su_binaries", IntegritySeverity.FAIL, true),
                 check("boot_props", IntegritySeverity.INFO, true)
             )
         assertEquals(IntegrityLevel.COMPROMISED, IntegrityScoring.levelOf(checks))
     }
 
     @Test
+    fun `a manager app alone is doubt, not compromise`() {
+        // Installed root-manager packages are a weak indicator: having a
+        // manager app does not prove the device is rooted.
+        val checks = listOf(check("manager_packages", IntegritySeverity.WARN, true))
+        assertEquals(IntegrityLevel.SUSPICIOUS, IntegrityScoring.levelOf(checks))
+    }
+
+    @Test
     fun `weak evidence scores suspicious`() {
         val checks =
             listOf(
-                check("manager_packages", IntegritySeverity.FAIL, false),
+                check("su_binaries", IntegritySeverity.FAIL, false),
                 check("selinux_state", IntegritySeverity.WARN, true)
             )
         assertEquals(IntegrityLevel.SUSPICIOUS, IntegrityScoring.levelOf(checks))
@@ -108,7 +116,7 @@ class IntegrityScoringTest {
         val compromised =
             IntegrityReport(
                 0L,
-                listOf(check("manager_packages", IntegritySeverity.FAIL, true)),
+                listOf(check("su_binaries", IntegritySeverity.FAIL, true)),
                 IntegrityLevel.COMPROMISED
             )
         assertTrue(compromised.compromised)
@@ -130,13 +138,13 @@ class IntegrityScoringTest {
                 listOf(
                     check("boot_props", IntegritySeverity.INFO, true),
                     check("selinux_state", IntegritySeverity.WARN, true),
-                    check("manager_packages", IntegritySeverity.FAIL, true),
-                    check("su_binaries", IntegritySeverity.FAIL, false)
+                    check("su_binaries", IntegritySeverity.FAIL, true),
+                    check("su_runtime", IntegritySeverity.FAIL, false)
                 ),
                 IntegrityLevel.COMPROMISED
             )
         assertEquals(
-            listOf("manager_packages", "selinux_state", "boot_props"),
+            listOf("su_binaries", "selinux_state", "boot_props"),
             report.hits.map { it.id }
         )
     }

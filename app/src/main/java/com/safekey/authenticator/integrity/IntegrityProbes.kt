@@ -79,10 +79,16 @@ internal object IntegrityProbes {
         )
     }
 
+    /**
+     * Installed root-manager apps (Magisk, KernelSU, LSPosed, …) — a weak
+     * indicator only. Having a manager app installed does not prove the
+     * device is rooted (leftovers, companion setups, hidden root), so this
+     * is a WARN: doubt, never a hard verdict.
+     */
     fun managerPackages(context: Context): IntegrityCheck {
         val found = checkManagerPackages(context)
         return IntegrityCheck(
-            "manager_packages", IntegritySeverity.FAIL,
+            "manager_packages", IntegritySeverity.WARN,
             found.isNotEmpty(), found.joinToString(", ")
         )
     }
