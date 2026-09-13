@@ -2,7 +2,9 @@ package com.safekey.authenticator.integrity
 
 import android.content.Context
 import android.os.Build
+import android.system.ErrnoException
 import android.system.Os
+import android.system.OsConstants
 import java.io.File
 import java.util.concurrent.TimeUnit
 
@@ -249,32 +251,66 @@ internal object IntegrityProbes {
 
     /**
      * K2: existence verdicts for su-related paths through three routes
-     * (File.exists, Os.stat, parent listing). Routes disagreeing on the same
-     * path mean at least one of those APIs is hooked.
+     * (File.exists, Os.stat, parent listing). Each route is tri-state; a
+     * route that cannot look at all reports UNKNOWN and never counts as
+     * evidence. Only a real contradiction — some route sees the path while
+     * another positively does not — is a mismatch.
+     *
+     * /data/adb is an existing folder on modern Android used by the adb
+     * infrastructure (SELinux label adb_data_file); Magisk picked it
+     * precisely because its presence alone is not a root indicator, and no
+     * app can list /data — so this check must never fire on it.
+     * (Real-device finding, v2.4.3 test round: false warning on an unrooted
+     * phone because the listing route is blind for everyone.)
      */
     fun fileViewCross(): IntegrityCheck {
         val routes = runCatching { readFileRoutes() }.getOrDefault(emptyMap())
         val mismatched = IntegrityConsistency.fileRouteMismatch(routes)
+        val detail = mismatched.joinToString(", ") { path ->
+            "$path (${IntegrityConsistency.routeSummary(routes[path].orEmpty())})"
+        }
         return IntegrityCheck(
             "file_cross", IntegritySeverity.WARN,
-            mismatched.isNotEmpty(), mismatched.joinToString(", ")
+            mismatched.isNotEmpty(), detail
         )
     }
 
-    private fun readFileRoutes(): Map<String, List<Boolean>> {
+    private fun readFileRoutes(): Map<String, List<RouteVerdict>> {
         val candidates = (SU_PATHS + listOf("/data/adb", "/data/adb/magisk", "/sbin/.magisk")).distinct()
-        val out = LinkedHashMap<String, List<Boolean>>()
+        val out = LinkedHashMap<String, List<RouteVerdict>>()
         for (path in candidates) {
-            val exists = runCatching { File(path).exists() }.getOrDefault(false)
-            val statOk = runCatching {
+            val statVerdict = runCatching {
                 Os.stat(path)
-                true
-            }.getOrDefault(false)
-            val listed = runCatching {
-                val file = File(path)
-                file.parentFile?.list()?.contains(file.name) ?: false
-            }.getOrDefault(false)
-            out[path] = listOf(exists, statOk, listed)
+                RouteVerdict.SEEN
+            }.getOrElse { error ->
+                val errno = (error as? ErrnoException)?.errno
+                if (errno == OsConstants.ENOENT || errno == OsConstants.ENOTDIR) {
+                    RouteVerdict.NOT_SEEN
+                } else {
+                    RouteVerdict.UNKNOWN
+                }
+            }
+            // File.exists() cannot tell ENOENT from EACCES; when the precise
+            // stat above is blind too, this route must stay blind instead of
+            // claiming absence.
+            val exists = runCatching { File(path).exists() }.getOrDefault(false)
+            val fileVerdict = when {
+                exists -> RouteVerdict.SEEN
+                statVerdict == RouteVerdict.UNKNOWN -> RouteVerdict.UNKNOWN
+                else -> RouteVerdict.NOT_SEEN
+            }
+            // An unlistable parent (no app can list /data) leaves this route
+            // blind — a structural miss, not a contradiction.
+            val listingVerdict = runCatching {
+                val entry = File(path)
+                val entries = entry.parentFile?.list()
+                when {
+                    entries == null -> RouteVerdict.UNKNOWN
+                    entries.contains(entry.name) -> RouteVerdict.SEEN
+                    else -> RouteVerdict.NOT_SEEN
+                }
+            }.getOrDefault(RouteVerdict.UNKNOWN)
+            out[path] = listOf(fileVerdict, statVerdict, listingVerdict)
         }
         return out
     }

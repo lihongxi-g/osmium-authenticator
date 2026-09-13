@@ -1,6 +1,17 @@
 package com.safekey.authenticator.integrity
 
 /**
+ * Tri-state verdict of one access route for a path (K2 file-route check).
+ *
+ * UNKNOWN means the route could not produce a verdict at all: a
+ * permission-denied stat (SELinux), or a parent directory that no regular
+ * app can ever list — the listing route for /data/adb is blind for every
+ * app because /data itself cannot be listed. A blind route is a miss,
+ * never evidence.
+ */
+internal enum class RouteVerdict { SEEN, NOT_SEEN, UNKNOWN }
+
+/**
  * K2 consistency analysis — pure functions over probe snapshots (no Android
  * dependencies), unit-tested on the JVM in IntegrityConsistencyTest.
  *
@@ -74,13 +85,26 @@ internal object IntegrityConsistency {
 
     /**
      * Tri-state file route check: for every candidate path the three routes
-     * (File.exists, Os.stat, parent directory listing) must agree. A split
-     * verdict means at least one of those APIs is hooked.
+     * (File.exists, Os.stat, parent directory listing) are compared. Only a
+     * real contradiction — one route positively seeing the path while
+     * another positively does not — is a mismatch; UNKNOWN routes are
+     * excluded from the comparison.
      */
-    fun fileRouteMismatch(routes: Map<String, List<Boolean>>): List<String> =
-        routes.filterValues { verdicts -> verdicts.distinct().size > 1 }
-            .keys
-            .sorted()
+    fun fileRouteMismatch(routes: Map<String, List<RouteVerdict>>): List<String> =
+        routes.filterValues { verdicts ->
+            verdicts.any { it == RouteVerdict.SEEN } &&
+                verdicts.any { it == RouteVerdict.NOT_SEEN }
+        }.keys.sorted()
+
+    /** Compact tri-state summary for reports, e.g. "seen,seen,unknown". */
+    fun routeSummary(verdicts: List<RouteVerdict>): String =
+        verdicts.joinToString(",") { verdict ->
+            when (verdict) {
+                RouteVerdict.SEEN -> "seen"
+                RouteVerdict.NOT_SEEN -> "absent"
+                RouteVerdict.UNKNOWN -> "unknown"
+            }
+        }
 
     /**
      * Compares the early (K0) snapshot with the live re-read. Only entries

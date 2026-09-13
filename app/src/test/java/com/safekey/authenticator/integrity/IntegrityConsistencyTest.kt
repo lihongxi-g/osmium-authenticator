@@ -86,24 +86,99 @@ class IntegrityConsistencyTest {
     // -------------------------------------------------------- file routes
 
     @Test
-    fun `file routes agreeing produce no mismatch`() {
+    fun `file routes agreeing on absence produce no mismatch`() {
         assertEquals(
             emptyList<String>(),
             IntegrityConsistency.fileRouteMismatch(
-                mapOf("/system/bin/su" to listOf(false, false, false))
+                mapOf(
+                    "/system/bin/su" to listOf(
+                        RouteVerdict.NOT_SEEN, RouteVerdict.NOT_SEEN, RouteVerdict.NOT_SEEN
+                    )
+                )
             )
         )
     }
 
     @Test
-    fun `file routes disagreeing are reported`() {
+    fun `a blind route never counts as evidence`() {
+        // Regression: /data/adb exists on modern Android (adb infrastructure),
+        // but no app can ever list /data — the listing route stays UNKNOWN and
+        // must not turn "exists" into a mismatch warning.
+        // (v2.4.3 test round: false warning on an unrooted phone.)
+        assertEquals(
+            emptyList<String>(),
+            IntegrityConsistency.fileRouteMismatch(
+                mapOf(
+                    "/data/adb" to listOf(
+                        RouteVerdict.SEEN, RouteVerdict.SEEN, RouteVerdict.UNKNOWN
+                    ),
+                    "/data/adb/magisk" to listOf(
+                        RouteVerdict.NOT_SEEN, RouteVerdict.NOT_SEEN, RouteVerdict.UNKNOWN
+                    )
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `all routes blind is a miss, not a mismatch`() {
+        assertEquals(
+            emptyList<String>(),
+            IntegrityConsistency.fileRouteMismatch(
+                mapOf(
+                    "/data/adb" to listOf(
+                        RouteVerdict.UNKNOWN, RouteVerdict.UNKNOWN, RouteVerdict.UNKNOWN
+                    )
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `a route seeing what another denies is reported`() {
         assertEquals(
             listOf("/system/bin/su"),
             IntegrityConsistency.fileRouteMismatch(
                 mapOf(
-                    "/system/bin/su" to listOf(true, true, false),
-                    "/data/adb" to listOf(false, false, false)
+                    "/system/bin/su" to listOf(
+                        RouteVerdict.SEEN, RouteVerdict.SEEN, RouteVerdict.NOT_SEEN
+                    ),
+                    "/data/adb" to listOf(
+                        RouteVerdict.NOT_SEEN, RouteVerdict.NOT_SEEN, RouteVerdict.NOT_SEEN
+                    )
                 )
+            )
+        )
+    }
+
+    @Test
+    fun `a java-level hide caught by the stat route is reported`() {
+        // A hook that fakes "absent" through java.io.File while the native
+        // stat still sees the path: that contradiction is the signal.
+        assertEquals(
+            listOf("/system/bin/su"),
+            IntegrityConsistency.fileRouteMismatch(
+                mapOf(
+                    "/system/bin/su" to listOf(
+                        RouteVerdict.NOT_SEEN, RouteVerdict.SEEN, RouteVerdict.SEEN
+                    )
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `route summary renders tri-state verdicts`() {
+        assertEquals(
+            "seen,seen,unknown",
+            IntegrityConsistency.routeSummary(
+                listOf(RouteVerdict.SEEN, RouteVerdict.SEEN, RouteVerdict.UNKNOWN)
+            )
+        )
+        assertEquals(
+            "absent,unknown,seen",
+            IntegrityConsistency.routeSummary(
+                listOf(RouteVerdict.NOT_SEEN, RouteVerdict.UNKNOWN, RouteVerdict.SEEN)
             )
         )
     }
