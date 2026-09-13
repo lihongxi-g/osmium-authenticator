@@ -1,11 +1,11 @@
-package com.safekey.authenticator.security
+package com.safekey.authenticator.integrity
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-class RootDetectTest {
+class IntegrityAnalysisTest {
 
     // ------------------------------------------------------------- mounts
 
@@ -16,7 +16,7 @@ class RootDetectTest {
             magisk /system/etc/hosts tmpfs rw,seclabel,relatime 0 0
             tmpfs /sbin tmpfs rw,seclabel,relatime,mode=755 0 0
         """.trimIndent()
-        assertEquals(setOf("magisk"), RootAnalysis.mountsTokens(mounts))
+        assertEquals(setOf("magisk"), IntegrityAnalysis.mountsTokens(mounts))
     }
 
     @Test
@@ -27,7 +27,7 @@ class RootDetectTest {
             /dev/block/dm-3 /data f2fs rw,seclabel,nosuid,nodev,noatime 0 0
             /dev/block/loop4 /apex/com.android.art ext4 ro,seclabel,nodev,noatime 0 0
         """.trimIndent()
-        assertTrue(RootAnalysis.mountsTokens(mounts).isEmpty())
+        assertTrue(IntegrityAnalysis.mountsTokens(mounts).isEmpty())
     }
 
     @Test
@@ -36,17 +36,57 @@ class RootDetectTest {
             KernelSU /data/adb/modules tmpfs rw,seclabel 0 0
             susfs /system/etc/hosts tmpfs rw 0 0
         """.trimIndent()
-        val tokens = RootAnalysis.mountsTokens(mounts)
+        val tokens = IntegrityAnalysis.mountsTokens(mounts)
         assertTrue(tokens.contains("kernelsu"))
         assertTrue(tokens.contains("susfs"))
     }
 
     @Test
     fun `empty mounts text yields no tokens`() {
-        assertTrue(RootAnalysis.mountsTokens("").isEmpty())
+        assertTrue(IntegrityAnalysis.mountsTokens("").isEmpty())
     }
 
-    // -------------------------------------------------------------- maps
+    // ------------------------------------------- read-write system mounts
+
+    @Test
+    fun `read-write system mount is flagged`() {
+        val mounts = "/dev/block/dm-0 /system ext4 rw,seclabel,relatime 0 0"
+        assertEquals(listOf("/system"), IntegrityAnalysis.rwSystemMounts(mounts))
+    }
+
+    @Test
+    fun `read-write system_ext and vendor mounts are flagged`() {
+        val mounts = """
+            /dev/block/dm-1 /system_ext ext4 rw,seclabel 0 0
+            /dev/block/dm-2 /vendor ext4 rw,seclabel 0 0
+        """.trimIndent()
+        assertEquals(listOf("/system_ext", "/vendor"), IntegrityAnalysis.rwSystemMounts(mounts))
+    }
+
+    @Test
+    fun `stock read-only system mounts produce no findings`() {
+        val mounts = """
+            /dev/block/dm-0 /system ext4 ro,seclabel,relatime 0 0
+            /dev/block/dm-1 /vendor ext4 ro,seclabel,relatime 0 0
+            /dev/block/dm-2 /product ext4 ro,seclabel,relatime 0 0
+            /dev/block/dm-3 /data f2fs rw,seclabel,nosuid,nodev,noatime 0 0
+        """.trimIndent()
+        assertTrue(IntegrityAnalysis.rwSystemMounts(mounts).isEmpty())
+    }
+
+    @Test
+    fun `subdirectory binds are not flagged`() {
+        val mounts = "tmpfs /system/etc/hosts tmpfs rw,seclabel,relatime 0 0"
+        assertTrue(IntegrityAnalysis.rwSystemMounts(mounts).isEmpty())
+    }
+
+    @Test
+    fun `only exact rw mount tokens match`() {
+        val mounts = "/dev/block/dm-0 /system ext4 rwx,seclabel 0 0"
+        assertTrue(IntegrityAnalysis.rwSystemMounts(mounts).isEmpty())
+    }
+
+    // --------------------------------------------------------------- maps
 
     @Test
     fun `injected zygisk and lsposed libs are detected`() {
@@ -54,7 +94,7 @@ class RootDetectTest {
             7f0000000000-7f0000001000 r-xp 00000000 00:00 0 /data/adb/magisk/libzygisk.so
             7f0000100000-7f0000101000 r-xp 00000000 00:00 0 /dev/lsposed/libdexposed.so
         """.trimIndent()
-        val tokens = RootAnalysis.mapsTokens(maps)
+        val tokens = IntegrityAnalysis.mapsTokens(maps)
         assertTrue(tokens.contains("zygisk"))
         assertTrue(tokens.contains("lsposed"))
     }
@@ -66,30 +106,30 @@ class RootDetectTest {
             7b0000200000-7b0000800000 r-xp 00000000 fd:05 102 /data/app/~~abc/com.safekey.authenticator/base.apk
             7b0001000000-7b0001010000 r--p 00000000 00:00 0 [anon:libc_malloc]
         """.trimIndent()
-        assertTrue(RootAnalysis.mapsTokens(maps).isEmpty())
+        assertTrue(IntegrityAnalysis.mapsTokens(maps).isEmpty())
     }
 
-    // ------------------------------------------------------------ kernel
+    // ------------------------------------------------------------- kernel
 
     @Test
     fun `kernelsu kernel string is detected`() {
         val kernel = "6.1.75-android14-g16c5f6cd5e9b-ab12268718-KernelSU #1 SMP PREEMPT"
-        assertTrue(RootAnalysis.kernelTokens(kernel).contains("kernelsu"))
+        assertTrue(IntegrityAnalysis.kernelTokens(kernel).contains("kernelsu"))
     }
 
     @Test
     fun `stock kernel string is clean`() {
         val kernel = "5.15.149-android13-8-31753739-ohpiy1hb #1 SMP PREEMPT Fri Mar 8"
-        assertTrue(RootAnalysis.kernelTokens(kernel).isEmpty())
+        assertTrue(IntegrityAnalysis.kernelTokens(kernel).isEmpty())
     }
 
     @Test
     fun `susfs kernel string is detected`() {
         val kernel = "6.1.57-android14-o-cctv18-SUSFS"
-        assertTrue(RootAnalysis.kernelTokens(kernel).contains("susfs"))
+        assertTrue(IntegrityAnalysis.kernelTokens(kernel).contains("susfs"))
     }
 
-    // ------------------------------------------------------------- props
+    // -------------------------------------------------------------- props
 
     @Test
     fun `unlocked boot props produce findings`() {
@@ -100,7 +140,7 @@ class RootDetectTest {
             "ro.debuggable" to "0",
             "ro.secure" to "1"
         )
-        val findings = RootAnalysis.propFindings(props)
+        val findings = IntegrityAnalysis.propFindings(props)
         assertEquals(3, findings.size)
         assertTrue(findings.contains("verifiedbootstate=orange"))
         assertTrue(findings.contains("vbmeta.device_state=unlocked"))
@@ -116,7 +156,7 @@ class RootDetectTest {
             "ro.debuggable" to "0",
             "ro.secure" to "1"
         )
-        assertTrue(RootAnalysis.propFindings(props).isEmpty())
+        assertTrue(IntegrityAnalysis.propFindings(props).isEmpty())
     }
 
     @Test
@@ -125,69 +165,44 @@ class RootDetectTest {
             "ro.boot.verifiedbootstate" to "green",
             "ro.debuggable" to "1"
         )
-        assertEquals(listOf("ro.debuggable=1"), RootAnalysis.propFindings(props))
+        assertEquals(listOf("ro.debuggable=1"), IntegrityAnalysis.propFindings(props))
     }
 
     @Test
     fun `missing props are never treated as findings`() {
-        assertTrue(RootAnalysis.propFindings(emptyMap()).isEmpty())
+        assertTrue(IntegrityAnalysis.propFindings(emptyMap()).isEmpty())
     }
 
-    // -------------------------------------------------------- build tags
+    // --------------------------------------------------------- build tags
 
     @Test
     fun `test-keys build is flagged`() {
-        assertTrue(RootAnalysis.buildTagFindings("test-keys", "user").contains("build.tags=test-keys"))
+        assertTrue(IntegrityAnalysis.buildTagFindings("test-keys", "user").contains("build.tags=test-keys"))
     }
 
     @Test
     fun `userdebug build type is flagged`() {
-        assertTrue(RootAnalysis.buildTagFindings("release-keys", "userdebug").contains("build.type=userdebug"))
+        assertTrue(IntegrityAnalysis.buildTagFindings("release-keys", "userdebug").contains("build.type=userdebug"))
     }
 
     @Test
     fun `release build has no findings`() {
-        assertTrue(RootAnalysis.buildTagFindings("release-keys", "user").isEmpty())
+        assertTrue(IntegrityAnalysis.buildTagFindings("release-keys", "user").isEmpty())
     }
 
-    // ------------------------------------------------------------ verdict
+    // ------------------------------------------------------------ selinux
 
     @Test
-    fun `strong hit marks the device as rooted`() {
-        val report = RootReport(
-            0L,
-            listOf(
-                RootSignal("manager_packages", RootTier.STRONG, hit = true, detail = "Magisk"),
-                RootSignal("boot_props", RootTier.INFO, hit = true, detail = "verifiedbootstate=orange")
-            )
-        )
-        assertTrue(report.rooted)
-        assertEquals(1, report.strongHits.size)
-        assertEquals(1, report.infoHits.size)
+    fun `permissive selinux is flagged`() {
+        assertTrue(IntegrityAnalysis.selinuxPermissive("0"))
+        assertTrue(IntegrityAnalysis.selinuxPermissive("0\n"))
     }
 
     @Test
-    fun `info-only hits never mark the device as rooted`() {
-        val report = RootReport(
-            0L,
-            listOf(
-                RootSignal("manager_packages", RootTier.STRONG, hit = false),
-                RootSignal("boot_props", RootTier.INFO, hit = true, detail = "verifiedbootstate=orange")
-            )
-        )
-        assertFalse(report.rooted)
-        assertTrue(report.strongHits.isEmpty())
-    }
-
-    @Test
-    fun `clean report is not rooted`() {
-        val report = RootReport(
-            0L,
-            listOf(
-                RootSignal("manager_packages", RootTier.STRONG, hit = false),
-                RootSignal("boot_props", RootTier.INFO, hit = false)
-            )
-        )
-        assertFalse(report.rooted)
+    fun `enforcing or unreadable selinux is never flagged`() {
+        assertFalse(IntegrityAnalysis.selinuxPermissive("1"))
+        assertFalse(IntegrityAnalysis.selinuxPermissive(""))
+        assertFalse(IntegrityAnalysis.selinuxPermissive(null))
+        assertFalse(IntegrityAnalysis.selinuxPermissive("bad"))
     }
 }

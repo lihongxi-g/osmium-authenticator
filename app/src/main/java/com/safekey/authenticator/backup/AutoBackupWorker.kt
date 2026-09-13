@@ -12,7 +12,7 @@ import com.safekey.authenticator.SafeKeyApp
 import com.safekey.authenticator.data.AppSettings
 import com.safekey.authenticator.security.AppLog
 import com.safekey.authenticator.security.PinManager
-import com.safekey.authenticator.security.RootDetector
+import com.safekey.authenticator.integrity.IntegrityEngine
 import com.safekey.authenticator.security.RootState
 import com.safekey.authenticator.security.VaultIO
 import com.safekey.authenticator.network.WebDavClient
@@ -54,8 +54,8 @@ class AutoBackupWorker(
         // automatic backups stay suspended (developer mode can lift it).
         // Re-schedule so the loop keeps running and resumes automatically.
         val rootReport = RootState.report.value
-            ?: runCatching { RootDetector.scan(applicationContext) }.getOrNull()
-        if (!settings.devDisableRootSecurity && rootReport?.rooted == true) {
+            ?: runCatching { IntegrityEngine.scan(applicationContext) }.getOrNull()
+        if (!settings.devDisableRootSecurity && rootReport?.compromised == true) {
             AppLog.d("auto-backup skipped: root restriction active")
             AutoBackupScheduler.schedule(applicationContext, settings)
             return Result.success()

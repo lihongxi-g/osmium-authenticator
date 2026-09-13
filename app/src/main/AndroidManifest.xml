@@ -28,7 +28,7 @@
 
     <!-- Android 11+ package-visibility: root detection checks for well-known
          root-manager packages by name. Keep in sync with
-         RootDetector.ROOT_PACKAGES (com.safekey.authenticator.security). -->
+         IntegrityProbes.ROOT_PACKAGES (com.safekey.authenticator.integrity). -->
     <queries>
         <package android:name="com.topjohnwu.magisk" />
         <package android:name="io.github.vvb2060.magisk" />

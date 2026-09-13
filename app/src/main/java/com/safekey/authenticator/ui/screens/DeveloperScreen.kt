@@ -42,7 +42,6 @@ import com.safekey.authenticator.MainViewModel
 import com.safekey.authenticator.R
 import com.safekey.authenticator.security.KeystoreTools
 import com.safekey.authenticator.security.RootState
-import com.safekey.authenticator.security.RootTier
 import com.safekey.authenticator.ui.components.AppIcons
 import com.safekey.authenticator.ui.components.SectionHeader
 import com.safekey.authenticator.ui.components.SettingRow
@@ -165,11 +164,11 @@ fun DeveloperScreen(
                 Text(
                     text = when {
                         report == null -> dev.rootStatusUnknown
-                        report.rooted -> dev.rootStatusDetected
+                        report.compromised -> dev.rootStatusDetected
                         else -> dev.rootStatusClean
                     },
                     style = MaterialTheme.typography.titleMedium,
-                    color = if (report?.rooted == true) {
+                    color = if (report?.compromised == true) {
                         MaterialTheme.colorScheme.error
                     } else {
                         MaterialTheme.colorScheme.onSurface
@@ -187,7 +186,7 @@ fun DeveloperScreen(
                         modifier = Modifier.padding(top = 2.dp)
                     )
                 }
-                if (report?.rooted == true) {
+                if (report?.compromised == true) {
                     Text(
                         text = if (settings.devDisableRootSecurity) {
                             dev.restrictionLifted
@@ -322,7 +321,7 @@ fun DeveloperScreen(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Spacer(Modifier.height(8.dp))
-                        report.signals.forEach { s ->
+                        report.checks.forEach { s ->
                             Row(modifier = Modifier.padding(vertical = 3.dp)) {
                                 Text(
                                     text = if (s.hit) dev.hitLabel else dev.missLabel,
@@ -335,9 +334,9 @@ fun DeveloperScreen(
                                     modifier = Modifier.width(64.dp)
                                 )
                                 Column {
-                                    val tier = if (s.tier == RootTier.STRONG) dev.tierStrong else dev.tierInfo
+                                    val severity = s.severity.name
                                     Text(
-                                        text = "${s.id}  [$tier]",
+                                        text = "${s.id}  [$severity]",
                                         style = MaterialTheme.typography.bodyMedium
                                     )
                                     if (s.detail.isNotBlank()) {
@@ -361,9 +360,9 @@ fun DeveloperScreen(
                             val text = buildString {
                                 appendLine("Osmium root report")
                                 appendLine("checkedAt=${report.checkedAt}")
-                                report.signals.forEach { s ->
+                                report.checks.forEach { s ->
                                     appendLine(
-                                        "${s.id} tier=${s.tier.name} hit=${s.hit}" +
+                                        "${s.id} sev=${s.severity.name} hit=${s.hit}" +
                                             if (s.detail.isNotBlank()) " detail=${s.detail}" else ""
                                     )
                                 }

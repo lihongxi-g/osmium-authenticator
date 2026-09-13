@@ -204,7 +204,7 @@ class MainActivity : FragmentActivity() {
                     }
                     // One-time root warning over the unlocked main UI.
                     val root = rootReport
-                    if (root?.rooted == true && !settings.rootWarningAcked &&
+                    if (root?.compromised == true && !settings.rootWarningAcked &&
                         !locked && !pinRequired && !destroyed && !tampered
                     ) {
                         RootWarningDialog(onConfirm = { vm.acknowledgeRootWarning() })

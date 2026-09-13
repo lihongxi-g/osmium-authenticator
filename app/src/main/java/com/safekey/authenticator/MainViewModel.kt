@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.safekey.authenticator.data.AppSettings
 import com.safekey.authenticator.data.WebDavServerConfig
+import com.safekey.authenticator.integrity.IntegrityReport
 import com.safekey.authenticator.model.Account
 import com.safekey.authenticator.model.VaultAccount
 import com.safekey.authenticator.model.VaultTag
@@ -13,7 +14,6 @@ import com.safekey.authenticator.repository.ImportPlan
 import com.safekey.authenticator.repository.TagImportPlanner
 import com.safekey.authenticator.security.AppLog
 import com.safekey.authenticator.security.PinManager
-import com.safekey.authenticator.security.RootReport
 import com.safekey.authenticator.security.RootState
 import com.safekey.authenticator.security.SelfDestructManager
 import com.safekey.authenticator.tags.TagFilter
@@ -54,8 +54,8 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     val nav = NavigationState()
 
-    /** Latest root-detection report (null until the first scan lands). */
-    val rootReport: StateFlow<RootReport?> = RootState.report
+    /** Latest device-integrity report (null until the first scan lands). */
+    val rootReport: StateFlow<IntegrityReport?> = RootState.report
 
     /**
      * True while the root security restriction is active: the device is
@@ -64,7 +64,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
      */
     val rootRestricted: StateFlow<Boolean> =
         combine(settingsRepo.settings, RootState.report) { s, report ->
-            report?.rooted == true && !s.devDisableRootSecurity
+            report?.compromised == true && !s.devDisableRootSecurity
         }.stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     val settings: StateFlow<AppSettings> =
@@ -221,6 +221,10 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch { settingsRepo.setDevHiddenFeatures(ids) }
     }
 
+    fun setDevDetailedLogging(enabled: Boolean) {
+        viewModelScope.launch { settingsRepo.setDevDetailedLogging(enabled) }
+    }
+
     /** Turning developer mode off also resets the dangerous toggles. */
     fun disableDeveloperMode() {
         viewModelScope.launch {
@@ -307,6 +311,13 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                     _locked.value = false
                     _pinRequired.value = false
                 }
+            }
+        }
+        // Detection logs stay off by default; the developer-mode "detailed
+        // logging" switch flips this gate (see AppLog.detection).
+        viewModelScope.launch {
+            settingsRepo.settings.collect { s ->
+                AppLog.detectionLoggingEnabled = s.devDetailedLogging
             }
         }
     }
