@@ -22,8 +22,10 @@ enum class IntegritySeverity { PASS, INFO, WARN, FAIL }
  *  - [SUSPICIOUS]: weak indicators fired (WARN-class check) — reminder only.
  *  - [UNVERIFIED]: boot/build signals show a modified system but no root
  *    evidence (boot state not green/locked, test-keys, userdebug).
- *  - [CLEAN]: nothing fired.
- *  - [UNKNOWN]: reserved for the K3 era (no hardware attestation available).
+ *  - [CLEAN]: hardware attestation verified (boot state verified) and no
+ *    other signals fired.
+ *  - [UNKNOWN]: nothing fired and no hardware proof is available (no
+ *    attestation support, or the probe could not run) — neutral.
  */
 enum class IntegrityLevel { CLEAN, UNVERIFIED, SUSPICIOUS, COMPROMISED, UNKNOWN }
 

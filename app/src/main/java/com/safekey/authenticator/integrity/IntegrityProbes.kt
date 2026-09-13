@@ -54,7 +54,9 @@ internal object IntegrityProbes {
 
     private val BOOT_PROP_KEYS = listOf(
         "ro.boot.verifiedbootstate", "ro.boot.vbmeta.device_state",
-        "ro.boot.flash.locked", "ro.debuggable", "ro.secure"
+        "ro.boot.flash.locked", "ro.debuggable", "ro.secure",
+        // Read by the K3 probe for the attestation boot-hash cross-check.
+        "ro.boot.vbmeta.digest"
     )
 
     // ------------------------------------------------------------- probes
@@ -249,8 +251,11 @@ internal object IntegrityProbes {
         ""
     }
 
+    /** Single boot property lookup for the other probes (batched getprop). */
+    internal fun bootProp(key: String): String? = readProps()[key]
+
     /** One batched `/system/bin/getprop` call; empty map when unavailable. */
-    private fun readProps(): Map<String, String> {
+    internal fun readProps(): Map<String, String> {
         val out = mutableMapOf<String, String>()
         val text = try {
             val process = ProcessBuilder("/system/bin/getprop")

@@ -29,6 +29,9 @@ jobs:
           $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager "platforms;android-35" "build-tools;34.0.0"
           echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
 
+      - name: Refresh attestation data snapshots (best effort)
+        run: python3 scripts/fetch_attestation_data.py
+
       - name: Unit tests and release build
         env:
           ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
