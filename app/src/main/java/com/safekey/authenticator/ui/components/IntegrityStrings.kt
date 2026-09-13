@@ -51,20 +51,24 @@ fun integrityStatusRes(check: IntegrityCheck): Int = when {
     else -> R.string.integrity_status_fail
 }
 
-/**
- * Semantic status colors for integrity results: clear/pass reads green and
- * only findings (WARN/FAIL) use the error (red) tone — red is reserved for
- * "something was detected". Informational results stay neutral. Material 3
- * has no built-in success color, so a fixed green pair is picked by surface
- * luminance to stay readable in both light and dark themes.
- */
+/** The adaptive "clear/pass" green used across the integrity UI (M3 has no success color). */
 @Composable
-fun integrityStatusColor(hit: Boolean, severity: IntegritySeverity): Color {
-    val clear = if (MaterialTheme.colorScheme.surface.luminance() < 0.5f) {
+fun integrityClearColor(): Color =
+    if (MaterialTheme.colorScheme.surface.luminance() < 0.5f) {
         Color(0xFF81C784)
     } else {
         Color(0xFF2E7D32)
     }
+
+/**
+ * Semantic status colors for integrity results: clear/pass reads green and
+ * only findings (WARN/FAIL) use the error (red) tone — red is reserved for
+ * "something was detected". Informational results stay neutral. The green
+ * pair adapts to the surface luminance so it works in light and dark themes.
+ */
+@Composable
+fun integrityStatusColor(hit: Boolean, severity: IntegritySeverity): Color {
+    val clear = integrityClearColor()
     return when {
         !hit -> clear
         severity == IntegritySeverity.PASS -> clear

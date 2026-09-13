@@ -41,6 +41,7 @@ import com.safekey.authenticator.integrity.IntegrityLevel
 import com.safekey.authenticator.integrity.IntegrityReport
 import com.safekey.authenticator.integrity.attestation.RevocationData
 import com.safekey.authenticator.security.RootState
+import com.safekey.authenticator.ui.components.IntegrityVerdictGlyph
 import com.safekey.authenticator.ui.components.SectionHeader
 import com.safekey.authenticator.ui.components.SimpleTopBar
 import com.safekey.authenticator.ui.components.integrityCheckTitle
@@ -87,6 +88,7 @@ fun IntegrityScreen(
             SimpleTopBar(
                 title = stringResource(R.string.integrity_title),
                 onBack = onBack,
+                titleStyle = MaterialTheme.typography.titleMedium,
                 actions = {
                     TextButton(
                         enabled = !rescanning,
@@ -214,45 +216,57 @@ private fun LevelCard(report: IntegrityReport?, rescanning: Boolean) {
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = stringResource(R.string.integrity_final_rating),
-                style = MaterialTheme.typography.labelMedium,
-                color = onContainer
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.integrity_final_rating),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = onContainer
+                )
+                Text(
+                    text = integrityLevelLabel(level),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Medium,
+                    color = onContainer
+                )
+                val descLevel = level
+                if (descLevel != null) {
+                    Text(
+                        text = integrityLevelDesc(descLevel),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = onContainer,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
+                if (report != null) {
+                    val checked = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+                        .format(Date(report.checkedAt))
+                    Text(
+                        text = stringResource(R.string.integrity_checked_at, checked),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = onContainer,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                }
+                if (rescanning) {
+                    Text(
+                        text = stringResource(R.string.integrity_scanning),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = onContainer,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
+            }
+            IntegrityVerdictGlyph(
+                level = level,
+                replayKey = report?.checkedAt ?: 0L,
+                modifier = Modifier.padding(start = 12.dp)
             )
-            Text(
-                text = integrityLevelLabel(level),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Medium,
-                color = onContainer
-            )
-            val descLevel = level
-            if (descLevel != null) {
-                Text(
-                    text = integrityLevelDesc(descLevel),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = onContainer,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
-            }
-            if (report != null) {
-                val checked = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
-                    .format(Date(report.checkedAt))
-                Text(
-                    text = stringResource(R.string.integrity_checked_at, checked),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = onContainer,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
-            }
-            if (rescanning) {
-                Text(
-                    text = stringResource(R.string.integrity_scanning),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = onContainer,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
-            }
         }
     }
 }
