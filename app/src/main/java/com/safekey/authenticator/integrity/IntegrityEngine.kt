@@ -49,6 +49,28 @@ internal object IntegrityScoring {
         // No signals and no hardware proof: neutral, not a verdict.
         return IntegrityLevel.UNKNOWN
     }
+
+    /**
+     * Hardware-authority override: when K3 positively verified the boot
+     * chain (attestation PASS + hit), weak WARN-class signals are demoted to
+     * INFO and therefore no longer score — a hardware proof outranks
+     * userspace heuristics, which from then on only inform, never alarm.
+     * FAIL-class evidence is never demoted: confirmed tamper stays visible
+     * even next to a passing (possibly forged) attestation.
+     */
+    fun applyHardwareOverride(checks: List<IntegrityCheck>): List<IntegrityCheck> {
+        val hardwareVerified = checks.any {
+            it.id == ATTESTATION_ID && it.hit && it.severity == IntegritySeverity.PASS
+        }
+        if (!hardwareVerified) return checks
+        return checks.map { check ->
+            if (check.severity == IntegritySeverity.WARN) {
+                check.copy(severity = IntegritySeverity.INFO)
+            } else {
+                check
+            }
+        }
+    }
 }
 
 /**
@@ -87,13 +109,17 @@ object IntegrityEngine {
             // K3: hardware-backed attestation proof (offline; never throws).
             checks += AttestationProbe.probe(appContext)
 
-            val level = IntegrityScoring.levelOf(checks)
+            // Hardware-authority override: a positive K3 verdict demotes weak
+            // WARN-class signals to INFO so they no longer score or alarm
+            // (see IntegrityScoring.applyHardwareOverride).
+            val scoredChecks = IntegrityScoring.applyHardwareOverride(checks)
+            val level = IntegrityScoring.levelOf(scoredChecks)
             // Gated: only reaches the in-app log when the developer-mode
             // "detailed logging" switch is on (see AppLog.detection).
             AppLog.detection(
                 "integrity scan: level=$level fired=" +
-                    checks.filter { it.hit }.joinToString(",") { it.id }
+                    scoredChecks.filter { it.hit }.joinToString(",") { it.id }
             )
-            IntegrityReport(System.currentTimeMillis(), checks, level)
+            IntegrityReport(System.currentTimeMillis(), scoredChecks, level)
         }
 }

@@ -14,7 +14,9 @@ internal object IntegrityEarly {
 
     /** Paths probed at both ends of the session. */
     internal val BIT_PATHS = listOf(
-        "/data/adb", "/system/bin/su", "/system/xbin/su", "/sbin/.magisk"
+        // Root-manager specific paths only — never the bare /data/adb folder,
+        // which exists on stock Android (shared with the adb infrastructure).
+        "/data/adb/magisk", "/system/bin/su", "/system/xbin/su", "/sbin/.magisk"
     )
 
     @Volatile private var captured = false

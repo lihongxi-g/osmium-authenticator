@@ -140,4 +140,39 @@ class IntegrityScoringTest {
             report.hits.map { it.id }
         )
     }
+
+    // ------------------------------------------- hardware-authority override
+
+    @Test
+    fun `hardware verification demotes weak signals and keeps the score clean`() {
+        val checks =
+            listOf(
+                attestation(IntegritySeverity.PASS),
+                check("selinux_state", IntegritySeverity.WARN, true),
+                check("file_cross", IntegritySeverity.WARN, true)
+            )
+        val scored = IntegrityScoring.applyHardwareOverride(checks)
+        assertEquals(IntegritySeverity.INFO, scored.first { it.id == "file_cross" }.severity)
+        assertEquals(IntegrityLevel.CLEAN, IntegrityScoring.levelOf(scored))
+    }
+
+    @Test
+    fun `without hardware proof weak signals still score suspicious`() {
+        val checks = listOf(check("file_cross", IntegritySeverity.WARN, true))
+        val scored = IntegrityScoring.applyHardwareOverride(checks)
+        assertEquals(IntegritySeverity.WARN, scored.first { it.id == "file_cross" }.severity)
+        assertEquals(IntegrityLevel.SUSPICIOUS, IntegrityScoring.levelOf(scored))
+    }
+
+    @Test
+    fun `hard evidence is never demoted by hardware verification`() {
+        val checks =
+            listOf(
+                attestation(IntegritySeverity.PASS),
+                check("su_runtime", IntegritySeverity.FAIL, true)
+            )
+        val scored = IntegrityScoring.applyHardwareOverride(checks)
+        assertEquals(IntegritySeverity.FAIL, scored.first { it.id == "su_runtime" }.severity)
+        assertEquals(IntegrityLevel.COMPROMISED, IntegrityScoring.levelOf(scored))
+    }
 }

@@ -20,6 +20,9 @@ enum class IntegritySeverity { PASS, INFO, WARN, FAIL }
  *  - [COMPROMISED]: hard root evidence fired (FAIL-class check). Drives the
  *    same forced-security behaviour 2.4.2 applied to "rooted".
  *  - [SUSPICIOUS]: weak indicators fired (WARN-class check) — reminder only.
+ *    When K3 positively verified the boot chain, WARN-class signals are
+ *    demoted to INFO before scoring (hardware outranks heuristics; see
+ *    [IntegrityScoring.applyHardwareOverride]).
  *  - [UNVERIFIED]: boot/build signals show a modified system but no root
  *    evidence (boot state not green/locked, test-keys, userdebug).
  *  - [CLEAN]: hardware attestation verified (boot state verified) and no

@@ -192,8 +192,8 @@ class IntegrityConsistencyTest {
             IntegrityConsistency.driftChanges(
                 mapOf("ro.boot.flash.locked" to "1"),
                 mapOf("ro.boot.flash.locked" to "1"),
-                mapOf("/data/adb" to false),
-                mapOf("/data/adb" to false),
+                mapOf("/data/adb/magisk" to false),
+                mapOf("/data/adb/magisk" to false),
                 emptySet(),
                 emptySet()
             )
@@ -205,14 +205,14 @@ class IntegrityConsistencyTest {
         val changes = IntegrityConsistency.driftChanges(
             mapOf("ro.boot.flash.locked" to "1", "ro.secure" to "1"),
             mapOf("ro.boot.flash.locked" to "0", "ro.secure" to "1"),
-            mapOf("/data/adb" to false),
-            mapOf("/data/adb" to true),
+            mapOf("/data/adb/magisk" to false),
+            mapOf("/data/adb/magisk" to true),
             emptySet(),
             setOf("/data/adb/modules")
         )
         assertEquals(3, changes.size)
         assertTrue(changes.any { it.contains("ro.boot.flash.locked") })
-        assertTrue(changes.any { it.contains("/data/adb") })
+        assertTrue(changes.any { it.contains("/data/adb/magisk") })
         assertTrue(changes.any { it.contains("mounts") })
     }
 
@@ -223,7 +223,7 @@ class IntegrityConsistencyTest {
             IntegrityConsistency.driftChanges(
                 mapOf("ro.boot.flash.locked" to "1"),
                 emptyMap(),
-                mapOf("/data/adb" to false),
+                mapOf("/data/adb/magisk" to false),
                 emptyMap(),
                 emptySet(),
                 emptySet()

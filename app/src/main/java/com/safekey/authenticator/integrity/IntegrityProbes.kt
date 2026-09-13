@@ -256,12 +256,15 @@ internal object IntegrityProbes {
      * evidence. Only a real contradiction — some route sees the path while
      * another positively does not — is a mismatch.
      *
-     * /data/adb is an existing folder on modern Android used by the adb
-     * infrastructure (SELinux label adb_data_file); Magisk picked it
-     * precisely because its presence alone is not a root indicator, and no
-     * app can list /data — so this check must never fire on it.
+     * /data/adb is an existing folder on modern Android shared with the
+     * platform adb infrastructure (SELinux label adb_data_file) — Magisk
+     * picked it precisely because its presence is not a root indicator.
+     * It is therefore never a candidate here; only root-manager-specific
+     * subpaths are cross-checked. And since no app can ever list /data, the
+     * listing route for those is structurally blind and reports UNKNOWN —
+     * a miss, never a contradiction.
      * (Real-device finding, v2.4.3 test round: false warning on an unrooted
-     * phone because the listing route is blind for everyone.)
+     * phone caused by the blind listing route.)
      */
     fun fileViewCross(): IntegrityCheck {
         val routes = runCatching { readFileRoutes() }.getOrDefault(emptyMap())
@@ -276,7 +279,7 @@ internal object IntegrityProbes {
     }
 
     private fun readFileRoutes(): Map<String, List<RouteVerdict>> {
-        val candidates = (SU_PATHS + listOf("/data/adb", "/data/adb/magisk", "/sbin/.magisk")).distinct()
+        val candidates = (SU_PATHS + listOf("/data/adb/magisk", "/sbin/.magisk")).distinct()
         val out = LinkedHashMap<String, List<RouteVerdict>>()
         for (path in candidates) {
             val statVerdict = runCatching {
