@@ -69,6 +69,16 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            // Vendored crypto jars (bcprov/bcpkix/bcutil) carry per-jar
+            // multi-release and JAR-signature metadata that collides when the
+            // release resources are merged; Android never reads these entries.
+            excludes += "/META-INF/versions/9/OSGI-INF/MANIFEST.MF"
+            excludes += "/META-INF/versions/11/OSGI-INF/MANIFEST.MF"
+            excludes += "/META-INF/versions/15/OSGI-INF/MANIFEST.MF"
+            excludes += "/META-INF/versions/21/OSGI-INF/MANIFEST.MF"
+            excludes += "/META-INF/versions/9/module-info.class"
+            excludes += "/META-INF/BC2048KE.SF"
+            excludes += "/META-INF/BC2048KE.DSA"
         }
     }
 }
