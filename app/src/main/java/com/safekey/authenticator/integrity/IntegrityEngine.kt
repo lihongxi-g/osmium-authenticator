@@ -41,6 +41,7 @@ object IntegrityEngine {
         withContext(Dispatchers.IO) {
             val appContext = context.applicationContext
             val checks = mutableListOf<IntegrityCheck>()
+            checks += IntegrityProbes.apkSignature(appContext)
             checks += IntegrityProbes.managerPackages(appContext)
             checks += IntegrityProbes.suBinaries()
             checks += IntegrityProbes.rootDirs()

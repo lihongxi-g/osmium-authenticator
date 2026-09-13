@@ -59,6 +59,22 @@ internal object IntegrityProbes {
 
     // ------------------------------------------------------------- probes
 
+    /**
+     * Anti-repackaging: the app's own signing certificate must match the
+     * official fingerprint baked into the build. The startup check already
+     * refuses to run a re-signed APK; surfacing it here keeps the integrity
+     * report complete. Fails closed, like the startup check.
+     */
+    fun apkSignature(context: Context): IntegrityCheck {
+        val tampered = runCatching {
+            com.safekey.authenticator.security.IntegrityCheck.isTampered(context)
+        }.getOrDefault(true)
+        return IntegrityCheck(
+            "apk_signature", IntegritySeverity.FAIL,
+            tampered, if (tampered) "signing certificate mismatch" else ""
+        )
+    }
+
     fun managerPackages(context: Context): IntegrityCheck {
         val found = checkManagerPackages(context)
         return IntegrityCheck(
