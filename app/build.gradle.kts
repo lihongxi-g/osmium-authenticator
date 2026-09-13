@@ -13,8 +13,8 @@ android {
         applicationId = "com.safekey.authenticator"
         minSdk = 26
         targetSdk = 34
-        versionCode = 53
-        versionName = "2.4.2"
+        versionCode = 54
+        versionName = "2.4.3"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
     }
@@ -32,7 +32,8 @@ android {
         abi {
             isEnable = true
             reset()
-            include("arm64-v8a", "armeabi-v7a", "x86_64")
+            // x86_64 dropped (2026-09): emulator-only ABI, no longer shipped.
+            include("arm64-v8a", "armeabi-v7a")
             isUniversalApk = false
         }
     }
