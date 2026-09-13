@@ -1,12 +1,14 @@
 # Privacy Policy
 
-*Effective date: September 13, 2026 · Osmium v2.4.1*
+*Effective date: September 13, 2026 · Osmium v2.4.2*
 
 *Current version, published at osmium.im and fetched by the app on launch (About → Privacy Policy).*
 
 Osmium does not collect, sell or use personal data for advertising or analytics. There is no account system, no registration, no advertising SDK and no crash reporter, and no Osmium cloud account or synchronization server.
 
-Storage: authenticator secrets, account names, issuers, tags and tag colors are stored on this device only, encrypted with AES-256-GCM using a non-exportable Android Keystore key. Exported backups are encrypted with your password (PBKDF2-HMAC-SHA256 with 120,000 iterations, then AES-256-GCM). The WebDAV login and the automatic-backup password are stored locally, encrypted with the Keystore key.
+Storage: authenticator secrets, account names, issuers, tags and tag colors are stored on this device only, encrypted with AES-256-GCM using a non-exportable Android Keystore key. Exported backups are encrypted with your password (PBKDF2-HMAC-SHA256 with 120,000 iterations, then AES-256-GCM). The WebDAV login and the automatic-backup password are stored locally, encrypted with the Keystore key. If you enable developer mode's plaintext export, the exported file is not encrypted: it contains all secrets in readable form and is protected only by where you keep it.
+
+Root detection: when the device is rooted, Osmium runs local, best-effort checks (root-manager packages, mount, kernel and memory traces, boot-state properties) to decide whether to harden the app. These checks run entirely on this device, make no network requests, and their results are never stored or transmitted; a one-time on-screen notice appears when rooting is first detected.
 
 Import: importing from Google Authenticator QR codes and from Aegis, 2FAS and Raivo OTP export files happens entirely on this device. The selected file is read into memory to build the import preview; it is not copied, uploaded or sent anywhere. Only the entries you confirm are saved into the encrypted vault; everything else is discarded.
 

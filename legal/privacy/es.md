@@ -1,12 +1,14 @@
 # Política de privacidad
 
-*Fecha de entrada en vigor: 13 de septiembre de 2026 · Osmium v2.4.1*
+*Fecha de entrada en vigor: 13 de septiembre de 2026 · Osmium v2.4.2*
 
 *Versión actual, publicada en osmium.im y obtenida por la aplicación cada vez que se abre (Acerca de → Política de privacidad).*
 
 Osmium no recopila, vende ni usa datos personales para publicidad o analítica. No hay sistema de cuentas, ni registro, ni SDK de publicidad, ni informes de fallos, ni cuenta en la nube de Osmium ni servidor de sincronización.
 
-Almacenamiento: los secretos de autenticación, los nombres de cuenta, los emisores, las etiquetas y sus colores se guardan solo en este dispositivo, cifrados con AES-256-GCM mediante una clave no exportable de Android Keystore. Las copias exportadas se cifran con tu contraseña (PBKDF2-HMAC-SHA256 con 120 000 iteraciones y después AES-256-GCM). El inicio de sesión de WebDAV y la contraseña de la copia automática se guardan localmente, cifrados con la clave de Keystore.
+Almacenamiento: los secretos de autenticación, los nombres de cuenta, los emisores, las etiquetas y sus colores se guardan solo en este dispositivo, cifrados con AES-256-GCM mediante una clave no exportable de Android Keystore. Las copias exportadas se cifran con tu contraseña (PBKDF2-HMAC-SHA256 con 120 000 iteraciones y después AES-256-GCM). El inicio de sesión de WebDAV y la contraseña de la copia automática se guardan localmente, cifrados con la clave de Keystore. Si activas la exportación en texto plano del modo desarrollador, el archivo exportado no está cifrado: contiene todos los secretos en forma legible y solo está protegido por el lugar donde lo guardes.
+
+Detección de root: cuando el dispositivo tiene root, Osmium realiza comprobaciones locales de mejor esfuerzo (paquetes de gestores de root, puntos de montaje, rastros del kernel y de la memoria, propiedades del estado de arranque) para decidir si refuerza la protección de la aplicación. Estas comprobaciones se ejecutan íntegramente en este dispositivo, no hacen ninguna solicitud de red y sus resultados nunca se almacenan ni se transmiten; la primera vez que se detecta root aparece un aviso en pantalla que solo se muestra una vez.
 
 Importación: importar desde códigos QR de Google Authenticator y desde archivos de exportación de Aegis, 2FAS y Raivo OTP ocurre íntegramente en este dispositivo. El archivo seleccionado se lee en memoria para construir la vista previa de importación; no se copia, sube ni envía a ningún sitio. Solo las entradas que confirmas se guardan en la bóveda cifrada; todo lo demás se descarta.
 

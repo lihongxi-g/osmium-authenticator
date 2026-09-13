@@ -1,12 +1,14 @@
 # Datenschutzerklärung
 
-*Gültig ab: 13. September 2026 · Osmium v2.4.1*
+*Gültig ab: 13. September 2026 · Osmium v2.4.2*
 
 *Aktuelle Fassung, veröffentlicht auf osmium.im und beim Start der App abgerufen (Über → Datenschutzerklärung).*
 
 Osmium erhebt, verkauft oder nutzt keine personenbezogenen Daten für Werbung oder Analysen. Es gibt kein Kontosystem, keine Registrierung, kein Werbe-SDK und keinen Absturzmelder sowie kein Osmium-Cloud-Konto und keinen Synchronisierungsserver.
 
-Speicherung: Authenticator-Geheimnisse, Kontonamen, Aussteller, Tags und Tag-Farben werden nur auf diesem Gerät gespeichert, verschlüsselt mit AES-256-GCM und einem nicht exportierbaren Android-Keystore-Schlüssel. Exportierte Backups werden mit deinem Passwort verschlüsselt (PBKDF2-HMAC-SHA256 mit 120.000 Iterationen, danach AES-256-GCM). Die WebDAV-Anmeldung und das Passwort für automatische Backups werden lokal gespeichert, verschlüsselt mit dem Keystore-Schlüssel.
+Speicherung: Authenticator-Geheimnisse, Kontonamen, Aussteller, Tags und Tag-Farben werden nur auf diesem Gerät gespeichert, verschlüsselt mit AES-256-GCM und einem nicht exportierbaren Android-Keystore-Schlüssel. Exportierte Backups werden mit deinem Passwort verschlüsselt (PBKDF2-HMAC-SHA256 mit 120.000 Iterationen, danach AES-256-GCM). Die WebDAV-Anmeldung und das Passwort für automatische Backups werden lokal gespeichert, verschlüsselt mit dem Keystore-Schlüssel. Wenn du den Klartext-Export des Entwicklermodus aktivierst, ist die exportierte Datei nicht verschlüsselt: Sie enthält alle Geheimnisse in lesbarer Form und ist nur durch den Ort geschützt, an dem du sie aufbewahrst.
+
+Root-Erkennung: Wenn das Gerät gerootet ist, führt Osmium lokale Prüfungen nach bestem Bemühen durch (Root-Manager-Pakete, Mount-Punkte, Kernel- und Speicherspuren, Boot-Status-Eigenschaften), um zu entscheiden, ob die App gehärtet wird. Diese Prüfungen laufen vollständig auf diesem Gerät, senden keine Netzwerkanfragen, und ihre Ergebnisse werden weder gespeichert noch übertragen; wenn Root erstmals erkannt wird, erscheint ein einmaliger Hinweis auf dem Bildschirm.
 
 Import: Das Importieren von Google-Authenticator-QR-Codes und von Exportdateien aus Aegis, 2FAS und Raivo OTP erfolgt vollständig auf diesem Gerät. Die ausgewählte Datei wird zum Erstellen der Importvorschau in den Speicher gelesen; sie wird nicht kopiert, hochgeladen oder irgendwohin gesendet. Nur die Einträge, die du bestätigst, werden im verschlüsselten Tresor gespeichert; alles andere wird verworfen.
 

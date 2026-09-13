@@ -1,6 +1,6 @@
 # Términos de uso
 
-*Fecha de entrada en vigor: 13 de septiembre de 2026 · Osmium v2.4.1*
+*Fecha de entrada en vigor: 13 de septiembre de 2026 · Osmium v2.4.2*
 
 *Versión actual, publicada en osmium.im y obtenida por la aplicación cada vez que se abre (Acerca de → Términos de uso).*
 
@@ -17,6 +17,8 @@ El software se proporciona «tal cual», sin garantía de ningún tipo. En la m�
 - Importa solo archivos de confianza. Osmium importa desde códigos QR de transferencia de Google Authenticator y desde archivos de exportación de Aegis, 2FAS y Raivo OTP. Revisa cada entrada en la vista previa antes de importar, confirma que el archivo procede realmente del autenticador que piensas dejar y elimina los archivos de exportación después de usarlos — contienen tus secretos en texto plano.
 - Revisa los datos recibidos. La transferencia LAN rápida requiere la misma red Wi-Fi y un código de emparejamiento de 6 dígitos; selecciona las cuentas en la vista previa de importación y comparte el código solo con el receptor previsto.
 - El PIN de autodestrucción es irreversible. Mantén precisa la hora del dispositivo y cumple la legislación aplicable y las normas de red de los servidores y dispositivos que configures.
+- Dispositivos con root. Cuando Osmium detecta que el dispositivo tiene root, activa forzosamente sus protecciones (verificación al abrir la aplicación, bloqueo de capturas de pantalla, códigos ocultos) y desactiva la transferencia LAN rápida, las copias de seguridad por WebDAV, las copias automáticas, la configuración de autodestrucción y la importación desde terceros. Estas restricciones solo pueden levantarse en el modo desarrollador. La detección de root se ejecuta localmente en el dispositivo y es de mejor esfuerzo.
+- Modo desarrollador. Oculto detrás de siete toques sobre el nombre de la aplicación en Acerca de y protegido por verificación de identidad, puede levantar las restricciones de root, ocultar entradas de ajustes, permitir códigos de 4, 5 y 7 dígitos, exportar tu bóveda en texto plano y forzar el recifrado de la base de datos local. Una exportación en texto plano contiene todos tus secretos sin cifrar — cualquiera que obtenga el archivo puede leer todas las cuentas. Usas el modo desarrollador bajo tu propio riesgo; el desarrollador no responde de las pérdidas causadas por su uso o por las exportaciones en texto plano.
 
 Puedes usar Osmium para tu propia autenticación de dos factores y en los dispositivos que controlas o que estás autorizado a usar.
 

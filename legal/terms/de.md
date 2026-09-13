@@ -1,6 +1,6 @@
 # Nutzungsbedingungen
 
-*Gültig ab: 13. September 2026 · Osmium v2.4.1*
+*Gültig ab: 13. September 2026 · Osmium v2.4.2*
 
 *Aktuelle Fassung, veröffentlicht auf osmium.im und beim Start der App abgerufen (Über → Nutzungsbedingungen).*
 
@@ -17,6 +17,8 @@ Die Software wird „as is“, ohne jegliche Garantie, bereitgestellt. Soweit ge
 - Importiere nur Dateien, denen du vertraust. Osmium importiert Google-Authenticator-Übertragungs-QR-Codes und Exportdateien von Aegis, 2FAS und Raivo OTP. Prüfe jeden Eintrag in der Vorschau, bevor du importierst, vergewissere dich, dass die Datei wirklich von der Authenticator-App stammt, die du verlassen möchtest, und lösche Exportdateien nach der Verwendung — sie enthalten deine Geheimnisse im Klartext.
 - Prüfe empfangene Daten. Die LAN-Übertragung erfordert dasselbe WLAN und einen 6-stelligen Kopplungscode; wähle die Konten in der Importvorschau aus und teile den Code nur dem vorgesehenen Empfänger mit.
 - Die Selbstzerstörungs-PIN ist unumkehrbar. Halte die Geräteuhr korrekt eingestellt und beachte geltendes Recht sowie die Netzwerkregeln für die Server und Geräte, die du konfigurierst.
+- Gerootete Geräte. Wenn Osmium erkennt, dass das Gerät gerootet ist, aktiviert es seine Sicherheitsfunktionen zwangsweise (Prüfung beim Öffnen, Screenshot-Sperre, ausgeblendete Codes) und deaktiviert die LAN-Übertragung, WebDAV-Backup, automatische Backups, Selbstzerstörungs-Konfiguration und den Import von Drittanbieter-Apps. Diese Einschränkungen können nur im Entwicklermodus aufgehoben werden. Die Root-Erkennung läuft lokal auf dem Gerät und ist eine Prüfung nach bestem Bemühen.
+- Entwicklermodus. Er ist hinter siebenmaligem Tippen auf den App-Namen unter „Über“ verborgen und durch eine Identitätsprüfung geschützt; er kann die Root-Einschränkungen aufheben, Einstellungseinträge ausblenden, 4/5/7-stellige Codes erlauben, deinen Tresor im Klartext exportieren und die erneute Verschlüsselung der lokalen Datenbank erzwingen. Ein Klartext-Export enthält alle deine Geheimnisse unverschlüsselt — wer die Datei erhält, kann jedes Konto lesen. Du verwendest den Entwicklermodus auf eigenes Risiko; der Entwickler haftet nicht für Verluste, die durch den Entwicklermodus oder durch Klartext-Exporte entstehen.
 
 Du darfst Osmium für deine eigene Zwei-Faktor-Authentifizierung und für Geräte verwenden, die du kontrollierst oder zu deren Nutzung du berechtigt bist.
 

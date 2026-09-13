@@ -1,6 +1,6 @@
 # Terms of Use
 
-*Effective date: September 13, 2026 · Osmium v2.4.1*
+*Effective date: September 13, 2026 · Osmium v2.4.2*
 
 *Current version, published at osmium.im and fetched by the app on launch (About → Terms of Use).*
 
@@ -17,6 +17,8 @@ The software is provided "as is", without warranty of any kind. To the maximum e
 - Import only files you trust. Osmium imports from Google Authenticator transfer QR codes and from export files of Aegis, 2FAS and Raivo OTP. Review every entry in the preview before importing, confirm the file really came from the authenticator you intend to leave, and delete export files after use - they contain your secrets in plaintext.
 - Review received data. LAN quick transfer requires the same Wi-Fi network and a 6-digit pairing code; select accounts from the import preview and share the code only with the intended receiver.
 - The self-destruct PIN is irreversible. Keep your device clock accurate and follow applicable law and network rules for the servers and devices you configure.
+- Rooted devices. When Osmium detects that the device is rooted, it forces on its protections (verification on open, screenshot blocking, hidden codes) and disables LAN quick transfer, WebDAV backup, automatic backups, self-destruct configuration and third-party import. These restrictions can only be lifted in Developer mode. Root detection runs locally on the device and is best-effort.
+- Developer mode. Hidden behind seven taps on the app name in About and protected by identity verification, it can lift the root restrictions, hide settings entries, allow 4/5/7-digit codes, export your vault as plaintext, and force re-encryption of the local database. A plaintext export contains all of your secrets without encryption — anyone who obtains the file can read every account. You use developer mode at your own risk; the developer is not liable for losses caused by it or by plaintext exports.
 
 You may use Osmium for your own two-factor authentication and for devices you control or are authorized to use.
 
