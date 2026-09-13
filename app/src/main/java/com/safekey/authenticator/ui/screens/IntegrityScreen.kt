@@ -39,7 +39,6 @@ import com.safekey.authenticator.R
 import com.safekey.authenticator.integrity.IntegrityCheck
 import com.safekey.authenticator.integrity.IntegrityLevel
 import com.safekey.authenticator.integrity.IntegrityReport
-import com.safekey.authenticator.integrity.IntegritySeverity
 import com.safekey.authenticator.integrity.attestation.RevocationData
 import com.safekey.authenticator.security.RootState
 import com.safekey.authenticator.ui.components.SectionHeader
@@ -47,6 +46,7 @@ import com.safekey.authenticator.ui.components.SimpleTopBar
 import com.safekey.authenticator.ui.components.integrityCheckTitle
 import com.safekey.authenticator.ui.components.integrityLevelDesc
 import com.safekey.authenticator.ui.components.integrityLevelLabel
+import com.safekey.authenticator.ui.components.integrityStatusColor
 import com.safekey.authenticator.ui.components.integrityStatusRes
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -283,13 +283,7 @@ private fun CheckRow(
     expanded: Boolean,
     onToggle: () -> Unit
 ) {
-    val statusColor = when {
-        !check.hit -> MaterialTheme.colorScheme.onSurfaceVariant
-        check.severity == IntegritySeverity.PASS -> MaterialTheme.colorScheme.primary
-        check.severity == IntegritySeverity.FAIL -> MaterialTheme.colorScheme.error
-        check.severity == IntegritySeverity.WARN -> MaterialTheme.colorScheme.error
-        else -> MaterialTheme.colorScheme.onSurfaceVariant
-    }
+    val statusColor = integrityStatusColor(check.hit, check.severity)
     Column(
         modifier = Modifier
             .fillMaxWidth()

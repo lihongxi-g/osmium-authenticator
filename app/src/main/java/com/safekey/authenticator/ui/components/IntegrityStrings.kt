@@ -1,6 +1,9 @@
 package com.safekey.authenticator.ui.components
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.res.stringResource
 import com.safekey.authenticator.R
 import com.safekey.authenticator.integrity.IntegrityCheck
@@ -46,6 +49,28 @@ fun integrityStatusRes(check: IntegrityCheck): Int = when {
     check.severity == IntegritySeverity.INFO -> R.string.integrity_status_info
     check.severity == IntegritySeverity.WARN -> R.string.integrity_status_warn
     else -> R.string.integrity_status_fail
+}
+
+/**
+ * Semantic status colors for integrity results: clear/pass reads green and
+ * only findings (WARN/FAIL) use the error (red) tone — red is reserved for
+ * "something was detected". Informational results stay neutral. Material 3
+ * has no built-in success color, so a fixed green pair is picked by surface
+ * luminance to stay readable in both light and dark themes.
+ */
+@Composable
+fun integrityStatusColor(hit: Boolean, severity: IntegritySeverity): Color {
+    val clear = if (MaterialTheme.colorScheme.surface.luminance() < 0.5f) {
+        Color(0xFF81C784)
+    } else {
+        Color(0xFF2E7D32)
+    }
+    return when {
+        !hit -> clear
+        severity == IntegritySeverity.PASS -> clear
+        severity == IntegritySeverity.INFO -> MaterialTheme.colorScheme.onSurfaceVariant
+        else -> MaterialTheme.colorScheme.error
+    }
 }
 
 @Composable

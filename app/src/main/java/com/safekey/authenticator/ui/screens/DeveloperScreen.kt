@@ -47,6 +47,7 @@ import com.safekey.authenticator.ui.components.SectionHeader
 import com.safekey.authenticator.ui.components.SettingRow
 import com.safekey.authenticator.ui.components.SimpleTopBar
 import com.safekey.authenticator.ui.components.integrityCheckTitle
+import com.safekey.authenticator.ui.components.integrityStatusColor
 import com.safekey.authenticator.ui.dev.DevStrings
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -335,11 +336,7 @@ fun DeveloperScreen(
                                 Text(
                                     text = if (s.hit) dev.hitLabel else dev.missLabel,
                                     style = MaterialTheme.typography.labelMedium,
-                                    color = if (s.hit) {
-                                        MaterialTheme.colorScheme.error
-                                    } else {
-                                        MaterialTheme.colorScheme.onSurfaceVariant
-                                    },
+                                    color = integrityStatusColor(s.hit, s.severity),
                                     modifier = Modifier.width(64.dp)
                                 )
                                 Column {
@@ -349,7 +346,8 @@ fun DeveloperScreen(
                                     val status = if (s.hit) s.severity.name else "PASS"
                                     Text(
                                         text = "${integrityCheckTitle(s.id)}  [$status]",
-                                        style = MaterialTheme.typography.bodyMedium
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = integrityStatusColor(s.hit, s.severity)
                                     )
                                     if (s.detail.isNotBlank()) {
                                         Text(
