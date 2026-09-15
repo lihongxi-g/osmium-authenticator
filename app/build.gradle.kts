@@ -13,8 +13,8 @@ android {
         applicationId = "com.safekey.authenticator"
         minSdk = 26
         targetSdk = 34
-        versionCode = 59
-        versionName = "2.4.4"
+        versionCode = 60
+        versionName = "2.5.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
     }
@@ -36,6 +36,14 @@ android {
             include("arm64-v8a", "armeabi-v7a", "x86_64")
             isUniversalApk = false
         }
+    }
+
+    // The dependency-info block that AGP injects into release APKs is
+    // rejected by F-Droid ("found extra signing block") and is the only
+    // non-reproducible part of our build output; keep it off.
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
     }
 
     buildTypes {
@@ -109,7 +117,7 @@ dependencies {
     implementation("androidx.room:room-ktx:2.6.1")
     ksp("androidx.room:room-compiler:2.6.1")
 
-    // QR generation for account sharing (core only, no camera bloat)
+    // QR generation + scanning for account sharing / imports (core only, no camera bloat)
     implementation("com.google.zxing:core:3.5.2")
     implementation("androidx.datastore:datastore-preferences:1.0.0")
 
@@ -125,7 +133,6 @@ dependencies {
     implementation("androidx.camera:camera-camera2:$cameraxVersion")
     implementation("androidx.camera:camera-lifecycle:$cameraxVersion")
     implementation("androidx.camera:camera-view:$cameraxVersion")
-    implementation("com.google.mlkit:barcode-scanning:17.2.0")
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
 

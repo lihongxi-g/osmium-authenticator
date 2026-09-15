@@ -37,13 +37,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
-import com.google.mlkit.vision.barcode.BarcodeScanning
-import com.google.mlkit.vision.common.InputImage
 import com.safekey.authenticator.MainViewModel
 import com.safekey.authenticator.R
 import com.safekey.authenticator.totp.OtpUriParser
 import com.safekey.authenticator.totp.ParsedOtpUri
 import com.safekey.authenticator.ui.components.QrCameraPreview
+import com.safekey.authenticator.ui.components.QrDecode
 import com.safekey.authenticator.ui.components.SimpleTopBar
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -82,29 +81,22 @@ fun ScanScreen(
                     BitmapFactory.decodeStream(input)
                 }
                 if (bitmap != null) {
-                    val image = InputImage.fromBitmap(bitmap, 0)
-                    BarcodeScanning.getClient()
-                        .process(image)
-                        .addOnSuccessListener { barcodes ->
-                            val raw = barcodes.firstOrNull()?.rawValue
-                            if (raw != null) {
-                                val parsed = try {
-                                    OtpUriParser.parse(raw, vm.settings.value.devExtraDigits)
-                                } catch (_: Exception) {
-                                    null
-                                }
-                                if (parsed != null) {
-                                    confirm = parsed
-                                } else {
-                                    vm.showToast(context.getString(R.string.scan_no_uri))
-                                }
-                            } else {
-                                vm.showToast(context.getString(R.string.scan_no_qr))
+                    QrDecode.decodeAsync(bitmap) { raw ->
+                        if (raw != null) {
+                            val parsed = try {
+                                OtpUriParser.parse(raw, vm.settings.value.devExtraDigits)
+                            } catch (_: Exception) {
+                                null
                             }
+                            if (parsed != null) {
+                                confirm = parsed
+                            } else {
+                                vm.showToast(context.getString(R.string.scan_no_uri))
+                            }
+                        } else {
+                            vm.showToast(context.getString(R.string.scan_no_qr))
                         }
-                        .addOnFailureListener {
-                            vm.showToast(context.getString(R.string.scan_gallery_failed))
-                        }
+                    }
                 } else {
                     vm.showToast(context.getString(R.string.scan_gallery_failed))
                 }

@@ -32,12 +32,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.google.mlkit.vision.barcode.BarcodeScanning
-import com.google.mlkit.vision.common.InputImage
 import com.safekey.authenticator.MainViewModel
 import com.safekey.authenticator.R
 import com.safekey.authenticator.totp.GoogleMigrationParser
 import com.safekey.authenticator.ui.components.QrCameraPreview
+import com.safekey.authenticator.ui.components.QrDecode
 import com.safekey.authenticator.ui.components.SimpleTopBar
 
 /**
@@ -83,20 +82,13 @@ fun GoogleImportScreen(
                     BitmapFactory.decodeStream(input)
                 }
                 if (bitmap != null) {
-                    val image = InputImage.fromBitmap(bitmap, 0)
-                    BarcodeScanning.getClient()
-                        .process(image)
-                        .addOnSuccessListener { barcodes ->
-                            val raw = barcodes.firstOrNull()?.rawValue
-                            if (raw == null) {
-                                errorText = context.getString(R.string.scan_no_qr)
-                            } else {
-                                onRawMigrationCode(raw)
-                            }
+                    QrDecode.decodeAsync(bitmap) { raw ->
+                        if (raw == null) {
+                            errorText = context.getString(R.string.scan_no_qr)
+                        } else {
+                            onRawMigrationCode(raw)
                         }
-                        .addOnFailureListener {
-                            errorText = context.getString(R.string.scan_gallery_failed)
-                        }
+                    }
                 } else {
                     errorText = context.getString(R.string.scan_gallery_failed)
                 }

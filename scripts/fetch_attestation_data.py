@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Refresh the attestation data snapshots used by the Android build.
 
-Best effort by design: CI runs this before `./gradlew`, but a network failure
-(Google unreachable) or a suspicious payload must never fail the build — the
-previous snapshots stay in place. The app runtime is offline-first and
-degrades gracefully, so stale data is acceptable; broken data is not, hence
+Run MANUALLY to refresh the committed snapshots (this is deliberately NOT
+part of the release build: the APK must be reproducible from the tagged
+source alone, so the build only consumes the committed files). A network
+failure (Google unreachable) or a suspicious payload must never fail
+anything — the previous snapshots stay in place. The app runtime is
+offline-first and degrades gracefully, so stale data is acceptable; broken data is not, hence
 the shape validation before anything is written.
 
 Usage: python3 scripts/fetch_attestation_data.py
