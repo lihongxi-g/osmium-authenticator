@@ -38,6 +38,27 @@ android {
         }
     }
 
+    // Per-ABI version codes for the F-Droid build recipe (its convention for
+    // split architectures): base * 10 + digit, ordered armeabi-v7a (1) <
+    // arm64-v8a (2) < x86_64 (3) so clients pick the best installable APK.
+    // Keep `versionCode = 60` a plain literal in defaultConfig — the
+    // fdroidserver update checker scans the file for it.
+    val baseVersionCode = defaultConfig.versionCode
+    applicationVariants.all { variant ->
+        variant.outputs.forEach { output ->
+            val apkOutput = output as? com.android.build.gradle.api.ApkVariantOutput ?: return@forEach
+            val digit = when (apkOutput.getFilter(com.android.build.VariantOutput.FilterType.ABI)) {
+                "armeabi-v7a" -> 1
+                "arm64-v8a" -> 2
+                "x86_64" -> 3
+                else -> 0
+            }
+            if (digit != 0) {
+                apkOutput.versionCodeOverride = baseVersionCode * 10 + digit
+            }
+        }
+    }
+
     // The dependency-info block that AGP injects into release APKs is
     // rejected by F-Droid ("found extra signing block") and is the only
     // non-reproducible part of our build output; keep it off.

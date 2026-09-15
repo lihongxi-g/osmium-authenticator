@@ -35,7 +35,7 @@ The live test page at **https://otp.osmium.im** supports TOTP, HOTP and Steam Gu
 
 ## Download
 
-Latest stable release: **Osmium v2.5.0** (`versionCode 60`). Choose the ABI matching your device:
+Latest stable release: **Osmium v2.5.0** (`versionCode 601-603, per ABI`). Choose the ABI matching your device:
 
 | File | Architecture | Devices | Download |
 |---|---|---|---|
