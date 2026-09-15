@@ -43,10 +43,12 @@ android {
     // arm64-v8a (2) < x86_64 (3) so clients pick the best installable APK.
     // Keep `versionCode = 60` a plain literal in defaultConfig — the
     // fdroidserver update checker scans the file for it.
-    val baseVersionCode = defaultConfig.versionCode
-    applicationVariants.all { variant ->
-        variant.outputs.forEach { output ->
-            val apkOutput = output as? com.android.build.gradle.api.ApkVariantOutput ?: return@forEach
+    // NOTE: configureEach + a plain for loop on purpose — in .kts files the
+    // stdlib Iterable.all((T) -> Boolean) shadows Gradle's DomainObjectCollection.all(Action).
+    val baseVersionCode = defaultConfig.versionCode!!
+    applicationVariants.configureEach { variant ->
+        for (output in variant.outputs) {
+            val apkOutput = output as? com.android.build.gradle.api.ApkVariantOutput ?: continue
             val digit = when (apkOutput.getFilter(com.android.build.VariantOutput.FilterType.ABI)) {
                 "armeabi-v7a" -> 1
                 "arm64-v8a" -> 2
