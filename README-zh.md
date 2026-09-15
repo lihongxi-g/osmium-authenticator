@@ -35,17 +35,17 @@ Osmium 是一款隐私优先的 Android TOTP/HOTP 验证器。本项目基于 GN
 
 ## 下载
 
-最新正式版：**Osmium v2.4.4**（versionCode 59）。请选择与设备匹配的架构：
+最新正式版：**Osmium v2.5.0**（versionCode 60）。请选择与设备匹配的架构：
 
 | 文件 | 架构 | 适用设备 | 下载 |
 |---|---|---|---|
-| `osmium-2.4.4-arm64-v8a.apk` | arm64-v8a | 几乎所有现代手机（推荐） | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.4.4/osmium-2.4.4-arm64-v8a.apk) |
-| `osmium-2.4.4-armeabi-v7a.apk` | armeabi-v7a | 老款 32 位手机 | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.4.4/osmium-2.4.4-armeabi-v7a.apk) |
-| `osmium-2.4.4-x86_64.apk` | x86_64 | Android 模拟器 | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.4.4/osmium-2.4.4-x86_64.apk) |
+| `osmium-2.5.0-arm64-v8a.apk` | arm64-v8a | 几乎所有现代手机（推荐） | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.5.0/osmium-2.5.0-arm64-v8a.apk) |
+| `osmium-2.5.0-armeabi-v7a.apk` | armeabi-v7a | 老款 32 位手机 | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.5.0/osmium-2.5.0-armeabi-v7a.apk) |
+| `osmium-2.5.0-x86_64.apk` | x86_64 | Android 模拟器 | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.5.0/osmium-2.5.0-x86_64.apk) |
 
 安装与设备架构不符的包可能无法启动。三个架构使用同一签名证书，SHA-256 指纹为：`B65BB0131CAA22C45D99EA4E2C3E99B3980EAE0DC5647190F41A2878E6D88412`。
 
-APK 的 SHA-256 校验和见 [v2.4.4 发布说明](release-notes-v2.4.4.md) 及 GitHub Release 页面。
+APK 的 SHA-256 校验和见 [v2.5.0 发布说明](release-notes-v2.5.0.md) 及 GitHub Release 页面。
 
 ## 隐私与条款
 
