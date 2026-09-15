@@ -42,6 +42,14 @@ tasks.processResources {
     from("roots.json")
 }
 
+// Mirror the app module's Java 17 compile settings here so every module
+// targets the same JVM (this also keeps the build working when run on
+// JDK 21, where the Java default would otherwise be 21).
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
     kotlinOptions { jvmTarget = "17" }
 }
