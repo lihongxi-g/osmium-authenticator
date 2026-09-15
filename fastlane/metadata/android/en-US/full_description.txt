@@ -1,0 +1,15 @@
+Osmium is a privacy-first, fully offline authenticator for two-factor codes (TOTP/HOTP).
+
+• Codes are computed entirely on-device — no account, no sign-up, and no telemetry.
+• Secrets are encrypted with a non-exportable key in the Android Keystore before they are written to disk.
+• TOTP and HOTP: 6/7/8 digits, SHA-1/SHA-256/SHA-512; Steam Guard codes supported.
+• Organize accounts with tags and search.
+• Import from other apps: Google Authenticator (QR migration), Aegis, 2FAS and other common backup formats.
+• Encrypted export & restore to a local file or your own WebDAV server; encrypted quick transfer between two devices on the same Wi-Fi.
+• Modern Material 3 design with light/dark themes and Material You colours.
+• Fully open source (GPL-3.0-or-later); release builds are reproducible — anyone can verify that the published APK matches the source code.
+
+No ads, no trackers, no analytics.
+
+Website: https://osmium.im
+Source code: https://github.com/lihongxi-g/osmium-authenticator

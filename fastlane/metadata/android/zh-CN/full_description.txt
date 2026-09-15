@@ -1,0 +1,15 @@
+Osmium 是一款隐私优先、完全离线的两步验证（TOTP/HOTP）应用。
+
+• 验证码完全在设备本地计算，无需账号、无遥测。
+• 密钥在写入磁盘前，使用 Android Keystore 中不可导出的密钥加密。
+• 支持 TOTP 与 HOTP（6/7/8 位，SHA-1/SHA-256/SHA-512），以及 Steam Guard。
+• 标签整理与搜索。
+• 从其他应用导入：Google Authenticator（扫码迁移）、Aegis、2FAS 及常见备份格式。
+• 加密备份与恢复：本地文件或你自己的 WebDAV 服务器；同 Wi-Fi 两台设备间加密快捷传输。
+• 现代 Material 3 设计，支持浅色/深色主题与 Material You 取色。
+• 完全开源（GPL-3.0-or-later）；发布包可复现构建——任何人都能验证应用包与源代码一致。
+
+无广告、无跟踪、无分析统计。
+
+官网：https://osmium.im
+源代码：https://github.com/lihongxi-g/osmium-authenticator

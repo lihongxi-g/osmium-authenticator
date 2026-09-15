@@ -1,0 +1,1 @@
+v2.5.0: the QR scanner is now fully open source (zxing) — no more closed-source components; the APK is about half the size and builds are reproducible. Per-ABI version codes (601/602/603). Same signing key as previous releases.
