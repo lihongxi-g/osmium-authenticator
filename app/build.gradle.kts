@@ -44,10 +44,11 @@ android {
     // Keep `versionCode = 60` a plain literal in defaultConfig — the
     // fdroidserver update checker scans the file for it.
     // NOTE: configureEach + a plain for loop on purpose — in .kts files the
-    // stdlib Iterable.all((T) -> Boolean) shadows Gradle's DomainObjectCollection.all(Action).
+    // stdlib Iterable.all((T) -> Boolean) shadows all(Action), and Gradle's
+    // DSL wrappers take receiver lambdas (T.() -> Unit), not (T) -> Unit.
     val baseVersionCode = defaultConfig.versionCode!!
-    applicationVariants.configureEach { variant ->
-        for (output in variant.outputs) {
+    applicationVariants.configureEach {
+        for (output in outputs) {
             val apkOutput = output as? com.android.build.gradle.api.ApkVariantOutput ?: continue
             val digit = when (apkOutput.getFilter(com.android.build.VariantOutput.FilterType.ABI)) {
                 "armeabi-v7a" -> 1
