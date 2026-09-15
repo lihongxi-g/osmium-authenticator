@@ -1,0 +1,1 @@
+v2.5.1: maintenance rebuild — no functional changes (same app as 2.5.0); built with the default JDK 21.

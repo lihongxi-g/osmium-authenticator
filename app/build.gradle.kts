@@ -13,8 +13,8 @@ android {
         applicationId = "com.safekey.authenticator"
         minSdk = 26
         targetSdk = 34
-        versionCode = 60
-        versionName = "2.5.0"
+        versionCode = 61
+        versionName = "2.5.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
     }
@@ -41,7 +41,7 @@ android {
     // Per-ABI version codes for the F-Droid build recipe (its convention for
     // split architectures): base * 10 + digit, ordered armeabi-v7a (1) <
     // arm64-v8a (2) < x86_64 (3) so clients pick the best installable APK.
-    // Keep `versionCode = 60` a plain literal in defaultConfig — the
+    // Keep the versionCode a plain literal in defaultConfig — the
     // fdroidserver update checker scans the file for it.
     // NOTE: configureEach + a plain for loop on purpose — in .kts files the
     // stdlib Iterable.all((T) -> Boolean) shadows all(Action), and Gradle's
