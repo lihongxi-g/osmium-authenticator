@@ -1,6 +1,6 @@
 # Terms of Use
 
-*Effective date: September 13, 2026 · Osmium v2.4.2*
+*Effective date: September 16, 2026 · Applies to Osmium v2.5.1 and later*
 
 *Current version, published at osmium.im and fetched by the app on launch (About → Terms of Use).*
 
@@ -18,11 +18,12 @@ The software is provided "as is", without warranty of any kind. To the maximum e
 - Review received data. LAN quick transfer requires the same Wi-Fi network and a 6-digit pairing code; select accounts from the import preview and share the code only with the intended receiver.
 - The self-destruct PIN is irreversible. Keep your device clock accurate and follow applicable law and network rules for the servers and devices you configure.
 - Rooted devices. When Osmium detects that the device is rooted, it forces on its protections (verification on open, screenshot blocking, hidden codes) and disables LAN quick transfer, WebDAV backup, automatic backups, self-destruct configuration and third-party import. These restrictions can only be lifted in Developer mode. Root detection runs locally on the device and is best-effort.
-- Developer mode. Hidden behind seven taps on the app name in About and protected by identity verification, it can lift the root restrictions, hide settings entries, allow 4/5/7-digit codes, export your vault as plaintext, and force re-encryption of the local database. A plaintext export contains all of your secrets without encryption — anyone who obtains the file can read every account. You use developer mode at your own risk; the developer is not liable for losses caused by it or by plaintext exports.
+- Device integrity report. At launch Osmium also checks device integrity locally: system, mount, kernel, boot-state and app-signature checks, cross-checks between them, and hardware-backed key attestation (TEE certificate chain, verified-boot chain and boot hash) verified on this device with Google's official verifier. The report is shown on your device only; when the result is suspicious or compromised, the app reminds you once per app open. A root-manager app being installed is treated as a hint, not as proof. No software check is perfectly accurate, so read the report as guidance about your device rather than a guarantee.
+- Developer mode. Hidden behind seven taps on the app name in About and protected by identity verification, it can lift the root restrictions, hide settings entries, allow 4/5/7-digit codes, export your vault as plaintext, and force re-encryption of the local database. It also offers an optional detailed detection log - integrity checks write no log unless you enable it. A plaintext export contains all of your secrets without encryption — anyone who obtains the file can read every account. You use developer mode at your own risk; the developer is not liable for losses caused by it or by plaintext exports.
 
 You may use Osmium for your own two-factor authentication and for devices you control or are authorized to use.
 
-Osmium has no account system and no cloud synchronization; all import features run entirely on this device. The app may connect to the WebDAV server you configure, the GitHub Releases API for optional version checks, the osmium.im website to fetch the latest versions of these Terms of Use and of the Privacy Policy, or the other device during a LAN transfer. LAN transfer uses AES-256-GCM encryption derived from the pairing code and does not pass through an Osmium cloud server.
+Osmium has no account system and no cloud synchronization; all import features run entirely on this device. The app may connect to the WebDAV server you configure, the GitHub Releases API for version checks (enabled by default, switchable in Settings), the osmium.im website to fetch the latest versions of these Terms of Use and of the Privacy Policy, Google's public attestation status list when you refresh the revocation data on the integrity screen, or the other device during a LAN transfer. LAN transfer uses AES-256-GCM encryption derived from the pairing code and does not pass through an Osmium cloud server.
 
 The current versions of these Terms of Use and of the Privacy Policy are published on the osmium.im website. The app fetches both each time it opens so that you can read the version currently in effect; if a fetch fails, the app shows a failure notice with a link to the website. The versions published on osmium.im are the ones that apply.
 
