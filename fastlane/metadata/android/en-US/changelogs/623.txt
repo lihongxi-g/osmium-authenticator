@@ -1,0 +1,1 @@
+v2.5.2: maintenance release — the listing icon now matches the launcher icon. The app itself is unchanged from 2.5.1.
