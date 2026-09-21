@@ -310,6 +310,12 @@ class MainActivity : FragmentActivity() {
                 if (!vm.onPinEntered(pin)) {
                     // Wrong PIN — the self-destruct PIN destroys all data
                     vm.checkSelfDestructPin(pin)
+                } else {
+                    // A correct PIN is a complete unlock here. Without this the
+                    // `locked` flag stayed true (it starts true and every
+                    // background sets it), so the biometric LockGate appeared
+                    // right after the PIN and asked for a second verification.
+                    vm.unlock()
                 }
             },
             onCancel = null // periodic verification cannot be skipped while required
@@ -341,7 +347,12 @@ class MainActivity : FragmentActivity() {
     @Composable
     private fun LockGate() {
         var errorMessage by remember { mutableStateOf<String?>(null) }
-        var pinMode by remember { mutableStateOf(false) }
+        // No biometrics on this device: the only way through is the app PIN, so
+        // open straight on the PIN pad instead of the "unlock" button screen,
+        // whose biometric call can only fail ("biometric unavailable").
+        var pinMode by remember {
+            mutableStateOf(!canAuthenticateBiometric() && vm.hasLocalPin())
+        }
         val context = LocalContext.current
 
         if (pinMode) {
