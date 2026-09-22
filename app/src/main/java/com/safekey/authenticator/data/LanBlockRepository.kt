@@ -150,6 +150,19 @@ class LanBlockRepository(
         context.lanGuardStore.edit { it.clear() }
     }
 
+    /**
+     * Stable per-install identity shared with peers during a transfer. It is a
+     * random UUID, never derived from hardware, and is what the block list falls
+     * back to when the LAN address changed (DHCP) or was not observable.
+     */
+    suspend fun deviceId(): String {
+        val stored = context.lanGuardStore.data.first()[KEY_DEVICE_ID]
+        if (!stored.isNullOrBlank()) return stored
+        val created = java.util.UUID.randomUUID().toString()
+        context.lanGuardStore.edit { it[KEY_DEVICE_ID] = created }
+        return created
+    }
+
     /** Block entry matching a peer, if any (used by the transfer handshake). */
     suspend fun findActive(ip: String?, mac: String?, deviceId: String?): LanBlock? =
         LanBlockRules.find(
@@ -182,5 +195,6 @@ class LanBlockRepository(
 
     private companion object {
         val KEY_BLOCKS = stringPreferencesKey("block_list")
+        val KEY_DEVICE_ID = stringPreferencesKey("device_id")
     }
 }

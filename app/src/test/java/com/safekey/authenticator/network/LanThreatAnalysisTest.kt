@@ -143,14 +143,15 @@ class LanThreatAnalysisTest {
     }
 
     @Test
-    fun `mac conflict detail lists the ips sorted`() {
+    fun `mac conflict detail lists the ips sorted and deduplicated`() {
         val entries = listOf(
-            entry("192.168.1.50", "aa:bb:cc:dd:ee:ff"),
-            entry("192.168.1.7", "aa:bb:cc:dd:ee:ff"),
-            entry("192.168.1.50", "aa:bb:cc:dd:ee:ff")
+            entry("10.0.0.7", "aa:bb:cc:dd:ee:ff"),
+            entry("10.0.0.2", "aa:bb:cc:dd:ee:ff"),
+            entry("10.0.0.7", "aa:bb:cc:dd:ee:ff")
         )
         val threat = LanThreatAnalysis.spoofingThreats(entries).single()
-        assertTrue(threat.detail.contains("192.168.1.7, 192.168.1.50"))
+        assertTrue(threat.detail.contains("10.0.0.2, 10.0.0.7"))
+        assertTrue(threat.detail.contains("2 IPs"))
     }
 
     @Test

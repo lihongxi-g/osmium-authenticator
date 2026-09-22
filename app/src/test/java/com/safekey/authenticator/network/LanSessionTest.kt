@@ -234,6 +234,25 @@ class LanSessionTest {
     }
 
     @Test
+    fun `transcript fields cannot be shifted into each other`() {
+        val sender = LanSession.newEphemeral()
+        val receiver = LanSession.newEphemeral()
+        val clientNonce = LanSession.newNonce()
+        val serverNonce = LanSession.newNonce()
+        // Same total text, different split between the two identity fields: the
+        // length prefixes must keep the two transcripts apart.
+        val one = LanSession.transcript(
+            sender.publicKeyBytes, receiver.publicKeyBytes, clientNonce, serverNonce,
+            emptyList(), emptyList(), "ab", "c"
+        )
+        val two = LanSession.transcript(
+            sender.publicKeyBytes, receiver.publicKeyBytes, clientNonce, serverNonce,
+            emptyList(), emptyList(), "a", "bc"
+        )
+        assertFalse(java.util.Arrays.equals(one, two))
+    }
+
+    @Test
     fun `deny markers are distinct`() {
         assertNotEquals(LanSession.DENY, LanSession.DENY_BLOCKED)
         assertNotEquals(LanSession.ACK, LanSession.DENY_PEER_BLOCKED)

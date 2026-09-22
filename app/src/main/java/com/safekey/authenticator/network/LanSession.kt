@@ -1,6 +1,6 @@
 package com.safekey.authenticator.network
 
-import java.security.KeyAgreement
+import javax.crypto.KeyAgreement
 import java.security.KeyFactory
 import java.security.KeyPairGenerator
 import java.security.MessageDigest
@@ -140,20 +140,38 @@ internal object LanSession {
         receiverDeviceId: String
     ): ByteArray {
         val out = java.io.ByteArrayOutputStream()
-        out.write(MAGIC.toByteArray(Charsets.UTF_8))
-        out.write(senderPublic)
-        out.write(receiverPublic)
-        out.write(clientNonce)
-        out.write(serverNonce)
-        out.write(canonical(senderThreatCodes).toByteArray(Charsets.UTF_8))
-        out.write(canonical(receiverThreatCodes).toByteArray(Charsets.UTF_8))
-        out.write(senderDeviceId.toByteArray(Charsets.UTF_8))
-        out.write(receiverDeviceId.toByteArray(Charsets.UTF_8))
+        field(out, MAGIC)
+        field(out, senderPublic)
+        field(out, receiverPublic)
+        field(out, clientNonce)
+        field(out, serverNonce)
+        field(out, canonical(senderThreatCodes))
+        field(out, canonical(receiverThreatCodes))
+        field(out, senderDeviceId)
+        field(out, receiverDeviceId)
         return out.toByteArray()
     }
 
     private fun canonical(codes: List<String>): String =
         codes.filter { it.isNotBlank() }.distinct().sorted().joinToString(",")
+
+    /**
+     * Appends one length-prefixed field.
+     *
+     * The prefix is what makes the transcript unambiguous: with plain
+     * concatenation a peer could move a byte from one field into the next and
+     * produce the same byte string for a different set of identities.
+     */
+    private fun field(out: java.io.ByteArrayOutputStream, text: String) =
+        field(out, text.toByteArray(Charsets.UTF_8))
+
+    private fun field(out: java.io.ByteArrayOutputStream, bytes: ByteArray) {
+        out.write(bytes.size ushr 24)
+        out.write((bytes.size ushr 16) and 0xFF)
+        out.write((bytes.size ushr 8) and 0xFF)
+        out.write(bytes.size and 0xFF)
+        out.write(bytes)
+    }
 
     /**
      * Session key for one handshake: ECDH with the peer's ephemeral key, then

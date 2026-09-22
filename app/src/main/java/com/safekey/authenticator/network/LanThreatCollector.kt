@@ -103,27 +103,29 @@ internal object LanThreatCollector {
         null
     }
 
-    private fun wifiSecurity(context: Context): LanLinkSecurity = try {
-        val wifiManager =
-            context.applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
-                ?: return LanLinkSecurity.UNKNOWN
-        @Suppress("DEPRECATION")
-        val info = wifiManager.connectionInfo ?: return LanLinkSecurity.UNKNOWN
-        if (Build.VERSION.SDK_INT >= 31) {
-            when (info.currentSecurityType) {
-                0 -> LanLinkSecurity.OPEN                        // SECURITY_TYPE_OPEN
-                1 -> LanLinkSecurity.WEP                         // SECURITY_TYPE_WEP
-                2 -> LanLinkSecurity.WPA2                        // SECURITY_TYPE_PSK
-                3 -> LanLinkSecurity.ENTERPRISE                  // SECURITY_TYPE_EAP
-                4 -> LanLinkSecurity.WPA3                        // SECURITY_TYPE_SAE
-                5 -> LanLinkSecurity.UNKNOWN                     // SECURITY_TYPE_OWE (encrypted)
-                else -> LanLinkSecurity.UNKNOWN
+    private fun wifiSecurity(context: Context): LanLinkSecurity {
+        return try {
+            val wifiManager =
+                context.applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
+                    ?: return LanLinkSecurity.UNKNOWN
+            @Suppress("DEPRECATION")
+            val info = wifiManager.connectionInfo ?: return LanLinkSecurity.UNKNOWN
+            if (Build.VERSION.SDK_INT >= 31) {
+                when (info.currentSecurityType) {
+                    0 -> LanLinkSecurity.OPEN                    // SECURITY_TYPE_OPEN
+                    1 -> LanLinkSecurity.WEP                     // SECURITY_TYPE_WEP
+                    2 -> LanLinkSecurity.WPA2                    // SECURITY_TYPE_PSK
+                    3 -> LanLinkSecurity.ENTERPRISE              // SECURITY_TYPE_EAP
+                    4 -> LanLinkSecurity.WPA3                    // SECURITY_TYPE_SAE
+                    5 -> LanLinkSecurity.UNKNOWN                 // SECURITY_TYPE_OWE (encrypted)
+                    else -> LanLinkSecurity.UNKNOWN
+                }
+            } else {
+                securityFromScanResult(wifiManager)
             }
-        } else {
-            securityFromScanResult(wifiManager)
+        } catch (_: Exception) {
+            LanLinkSecurity.UNKNOWN
         }
-    } catch (_: Exception) {
-        LanLinkSecurity.UNKNOWN
     }
 
     @Suppress("DEPRECATION")
@@ -144,11 +146,12 @@ internal object LanThreatCollector {
         }
     }
 
-    private fun proxyHost(context: Context): String? = try {
-        val link = activeLink(context) ?: return null
-        link.httpProxy?.host
-    } catch (_: Exception) {
-        null
+    private fun proxyHost(context: Context): String? {
+        return try {
+            activeLink(context)?.httpProxy?.host
+        } catch (_: Exception) {
+            null
+        }
     }
 
     private fun vpnActive(context: Context): Boolean = try {
@@ -170,13 +173,14 @@ internal object LanThreatCollector {
         null
     }
 
-    private fun activeLink(context: Context): android.net.LinkProperties? = try {
-        val connectivity = context.applicationContext
-            .getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
-        val network = connectivity?.activeNetwork ?: return null
-        connectivity.getLinkProperties(network)
-    } catch (_: Exception) {
-        null
+    private fun activeLink(context: Context): android.net.LinkProperties? {
+        return try {
+            val connectivity = context.applicationContext
+                .getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+            connectivity?.activeNetwork?.let { connectivity.getLinkProperties(it) }
+        } catch (_: Exception) {
+            null
+        }
     }
 }
 

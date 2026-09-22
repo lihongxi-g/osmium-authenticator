@@ -608,7 +608,10 @@ private fun ReceiveTabContent(
                     isTransferring = false
                     isDone = true
                     peer = sender
-                    statusText = context.getString(R.string.lan_status_done_send, vault.accounts.size)
+                    // Receiver wording: the accounts came *in* on this device.
+                    statusText = context.getString(
+                        R.string.lan_status_done_receive, vault.accounts.size
+                    )
                     // Both ends are alerted: warn here and let the user refuse
                     // this device for the next 24 hours.
                     if (sender.threatCodes.isNotEmpty() ||
