@@ -188,13 +188,30 @@ class LanTransferClient(private val context: Context) {
             val dos = DataOutputStream(socket.getOutputStream())
             val dis = DataInputStream(socket.getInputStream())
 
-            // Send magic header
-            dos.writeUTF(LanTransferServer.MAGIC_HEADER)
+            // Send the protocol version marker
+            dos.writeUTF(LanHandshake.MAGIC)
             dos.flush()
 
-            // Read ACK
+            // v2 handshake: answer the session nonce with a proof derived from
+            // the pairing code. The sender releases nothing until the proof
+            // checks out, so a wrong code fails online (and costs one of the
+            // session's attempts) instead of being brute-forceable offline.
+            val nonceLength = dis.readInt()
+            if (nonceLength != LanHandshake.NONCE_BYTES) {
+                return@withContext Result.failure(Exception("Incompatible protocol handshake"))
+            }
+            val nonce = ByteArray(nonceLength)
+            dis.readFully(nonce)
+            dos.write(LanHandshake.proof(pairingCode.toCharArray(), nonce))
+            dos.flush()
+
+            // Read the ACK — or the sender's rejection of our proof
             val ack = dis.readUTF()
-            if (ack != LanTransferServer.MAGIC_ACK) {
+            if (ack == LanHandshake.DENY) {
+                // Maps onto the "wrong pairing code" message in the UI.
+                return@withContext Result.failure(VaultFormatException(true))
+            }
+            if (ack != LanHandshake.ACK) {
                 return@withContext Result.failure(Exception("Incompatible protocol response: $ack"))
             }
 

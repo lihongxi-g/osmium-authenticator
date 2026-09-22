@@ -33,8 +33,9 @@ class LanTransferServer(
     companion object {
         const val TAG = "LanTransferServer"
         const val SERVICE_TYPE = "_osmium-transfer._tcp."
-        const val MAGIC_HEADER = "OSMIUM_TRANSFER_V1"
-        const val MAGIC_ACK = "OSMIUM_TRANSFER_ACK"
+        /** Protocol v2: proof of knowledge before any payload (LanHandshake). */
+        const val MAGIC_HEADER = LanHandshake.MAGIC
+        const val MAGIC_ACK = LanHandshake.ACK
         const val ERR_TOO_MANY_FAILED_ATTEMPTS = "TOO_MANY_FAILED_ATTEMPTS"
 
         /** A stalled/rogue peer must not pin a handler coroutine forever. */
@@ -51,6 +52,7 @@ class LanTransferServer(
 
     var localIp: String = ""
         private set
+    @Volatile
     var port: Int = 0
         private set
     var pairingCode: String = ""
@@ -89,6 +91,13 @@ class LanTransferServer(
                     val socket = try {
                         server.accept()
                     } catch (e: Exception) {
+                        // stop()/the attempt limit closes the socket to break
+                        // this loop — anything else is a real failure.
+                        if (running.get()) {
+                            withContext(Dispatchers.Main) {
+                                onError(e.message ?: "Server error")
+                            }
+                        }
                         break
                     }
 
@@ -106,8 +115,32 @@ class LanTransferServer(
                             val dis = DataInputStream(socket.getInputStream())
                             val dos = DataOutputStream(socket.getOutputStream())
 
+                            // v2 handshake: the peer has to prove it knows the
+                            // pairing code for THIS session before a single byte
+                            // of the vault goes out. v1 handed the encrypted
+                            // payload to anyone who sent the magic string, which
+                            // made the 6-digit code an offline secret: capture
+                            // the payload, brute-force 10^6 candidates at home.
                             val magic = dis.readUTF()
-                            if (magic != MAGIC_HEADER) {
+                            if (magic != LanHandshake.MAGIC) {
+                                failed = true
+                                return@launch
+                            }
+                            val nonce = LanHandshake.newNonce()
+                            dos.writeInt(nonce.size)
+                            dos.write(nonce)
+                            dos.flush()
+
+                            val received = ByteArray(LanHandshake.PROOF_BYTES)
+                            dis.readFully(received)
+                            val expected = LanHandshake.proof(pairingCode.toCharArray(), nonce)
+                            if (!LanHandshake.matches(expected, received)) {
+                                // Wrong code: an online guess that costs one of
+                                // the session's attempts and reveals nothing.
+                                runCatching {
+                                    dos.writeUTF(LanHandshake.DENY)
+                                    dos.flush()
+                                }
                                 failed = true
                                 return@launch
                             }
@@ -142,6 +175,10 @@ class LanTransferServer(
                                     }
                                 }
                                 runCatching { serverSocket?.close() }
+                                // Drop the mDNS advertisement too: leaving it
+                                // published would keep sending peers to a dead
+                                // port for the rest of the session.
+                                unregisterNsd()
                             }
                             runCatching { socket.close() }
                         }
@@ -191,7 +228,15 @@ class LanTransferServer(
         running.set(false)
         serverJob?.cancel()
         serverJob = null
+        unregisterNsd()
+        try {
+            serverSocket?.close()
+        } catch (_: Exception) {}
+        serverSocket = null
+    }
 
+    /** Withdraws the mDNS advertisement; safe to call more than once. */
+    private fun unregisterNsd() {
         nsdRegistrationListener?.let { listener ->
             try {
                 val nsdManager = context.getSystemService(Context.NSD_SERVICE) as? NsdManager
@@ -199,11 +244,6 @@ class LanTransferServer(
             } catch (_: Exception) {}
             nsdRegistrationListener = null
         }
-
-        try {
-            serverSocket?.close()
-        } catch (_: Exception) {}
-        serverSocket = null
     }
 
     private fun generatePairingCode(): String {

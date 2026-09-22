@@ -5,6 +5,7 @@ import com.safekey.authenticator.security.AppLog
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserFactory
 import java.io.IOException
+import java.io.InputStream
 import java.net.ConnectException
 import java.net.HttpURLConnection
 import java.net.ProtocolException
@@ -55,8 +56,12 @@ object WebDavClient {
 
     private const val CONNECT_TIMEOUT_MS = 8_000
     private const val READ_TIMEOUT_MS = 20_000
-    private const val MAX_LIST_BYTES = 1_048_576            // 1 MiB
+    private const val MAX_LIST_BYTES = 1_048_576L           // 1 MiB
     private const val MAX_DOWNLOAD_BYTES = 64L * 1024 * 1024 // 64 MiB
+    private const val MAX_REDIRECTS = 3
+
+    /** Followed manually so credentials never reach a third host. */
+    private val REDIRECT_CODES = setOf(301, 302, 307, 308)
 
     private val PROPFIND_BODY = (
         "<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
@@ -78,10 +83,8 @@ object WebDavClient {
     fun listBackups(config: WebDavServerConfig): List<WebDavFile> {
         val dirUrl = url(dir(config))
         val body = execute("PROPFIND", dirUrl, config, requestBody = PROPFIND_BODY,
-            extraHeaders = mapOf("Depth" to "1"), allowStatus = 200..299)
-        if (body.size > MAX_LIST_BYTES) {
-            throw WebDavException("Server response too large")
-        }
+            extraHeaders = mapOf("Depth" to "1"), allowStatus = 200..299,
+            maxBytes = MAX_LIST_BYTES)
         return parseMultistatus(body)
             .filter { it.name.endsWith(".json", ignoreCase = true) }
             .sortedByDescending { it.name } // timestamped names sort chronologically
@@ -103,11 +106,8 @@ object WebDavClient {
     /** Download one backup file. Returns the raw encrypted envelope bytes. */
     fun download(config: WebDavServerConfig, href: String): ByteArray {
         val absolute = absoluteHref(base(config), href)
-        val bytes = execute("GET", url(absolute), config, allowStatus = 200..299)
-        if (bytes.size > MAX_DOWNLOAD_BYTES) {
-            throw WebDavException("Server response too large")
-        }
-        return bytes
+        return execute("GET", url(absolute), config, allowStatus = 200..299,
+            maxBytes = MAX_DOWNLOAD_BYTES)
     }
 
     /** Delete one backup file from the server (204/200 expected). */
@@ -137,11 +137,46 @@ object WebDavClient {
     }
 
     private fun absoluteHref(baseUrl: String, href: String): String {
-        if (href.startsWith("http://") || href.startsWith("https://")) return href
+        if (href.startsWith("http://") || href.startsWith("https://")) {
+            // A server-supplied absolute URL used to be fetched as-is, with the
+            // Basic auth header attached — a hostile or compromised server (or
+            // anyone MITM-ing the plain-http LAN setup this client supports)
+            // could name its own host in <href> and collect the NAS password.
+            val absolute = url(href)
+            if (!sameHost(absolute, baseUrl)) {
+                throw WebDavException(
+                    "The server returned a link to another host — refusing to send the backup credentials"
+                )
+            }
+            return absolute.toExternalForm()
+        }
         val base = URL(baseUrl)
         val root = "${base.protocol}://${base.authority}"
         return if (href.startsWith("/")) root + href
         else "$baseUrl/$href"
+    }
+
+    /** True when [url] points at the same host as the configured [baseUrl]. */
+    private fun sameHost(url: URL, baseUrl: String): Boolean =
+        try {
+            url.host.equals(URL(baseUrl).host, ignoreCase = true)
+        } catch (_: Exception) {
+            false
+        }
+
+    /** Reads a response body with a hard cap, counted while streaming. */
+    private fun readCapped(stream: InputStream, maxBytes: Long): ByteArray {
+        val out = java.io.ByteArrayOutputStream()
+        val buffer = ByteArray(16 * 1024)
+        while (true) {
+            val read = stream.read(buffer)
+            if (read < 0) break
+            out.write(buffer, 0, read)
+            if (out.size().toLong() > maxBytes) {
+                throw WebDavException("Server response too large")
+            }
+        }
+        return out.toByteArray()
     }
 
     /** Run a request and return the response body (empty on errors that still
@@ -153,16 +188,25 @@ object WebDavClient {
         config: WebDavServerConfig,
         requestBody: ByteArray? = null,
         extraHeaders: Map<String, String> = emptyMap(),
-        allowStatus: IntRange
+        allowStatus: IntRange,
+        maxBytes: Long = MAX_DOWNLOAD_BYTES
     ): ByteArray {
-        AppLog.d("webdav: $method ${url.host}:${url.port}${url.path}")
+        var target = url
+        var hops = 0
+        while (true) {
+        AppLog.d("webdav: $method ${target.host}:${target.port}${target.path}")
+        val trusted = sameHost(target, base(config))
         val conn = try {
-            (url.openConnection() as HttpURLConnection).apply {
+            (target.openConnection() as HttpURLConnection).apply {
                 connectTimeout = CONNECT_TIMEOUT_MS
                 readTimeout = READ_TIMEOUT_MS
-                instanceFollowRedirects = true
+                // Redirects are resolved below: HttpURLConnection re-sends every
+                // request property (Authorization included) to whatever host a
+                // Location names, and it cannot retry a fixed-length streamed
+                // body at all.
+                instanceFollowRedirects = false
                 setMethod(this, method)
-                if (config.username.isNotBlank()) {
+                if (trusted && config.username.isNotBlank()) {
                     val token = Base64.getEncoder()
                         .encodeToString("${config.username}:${config.password}".toByteArray(Charsets.UTF_8))
                     setRequestProperty("Authorization", "Basic $token")
@@ -183,11 +227,35 @@ object WebDavClient {
                 conn.outputStream.use { it.write(requestBody) }
             }
             val status = conn.responseCode
+            if (status in REDIRECT_CODES && hops < MAX_REDIRECTS) {
+                val location = conn.getHeaderField("Location")
+                if (location.isNullOrBlank()) {
+                    throw WebDavException("The server redirected without a target")
+                }
+                val next = try {
+                    URL(target, location)
+                } catch (e: Exception) {
+                    throw WebDavException("The server sent an unusable redirect", e)
+                }
+                if (next.protocol != "http" && next.protocol != "https") {
+                    throw WebDavException("The server redirected to an unsupported address")
+                }
+                if (!sameHost(next, base(config))) {
+                    throw WebDavException(
+                        "The server redirected to another host — refusing to send the backup credentials"
+                    )
+                }
+                hops++
+                target = next
+                continue
+            }
             if (status !in allowStatus) {
                 throw WebDavException(httpError(status))
             }
+            val declared = conn.contentLengthLong
+            if (declared > maxBytes) throw WebDavException("Server response too large")
             val stream = if (status >= 400) conn.errorStream else conn.inputStream
-            return if (stream == null) ByteArray(0) else stream.use { it.readBytes() }
+            return if (stream == null) ByteArray(0) else stream.use { readCapped(it, maxBytes) }
         } catch (e: WebDavException) {
             throw e
         } catch (e: SocketTimeoutException) {
@@ -212,6 +280,7 @@ object WebDavClient {
             throw WebDavException("Connection failed: $msg", e)
         } finally {
             conn.disconnect()
+        }
         }
     }
 
