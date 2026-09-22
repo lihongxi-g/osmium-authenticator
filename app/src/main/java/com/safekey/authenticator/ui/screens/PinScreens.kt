@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,6 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
 import com.safekey.authenticator.R
 import com.safekey.authenticator.ui.components.AppIcons
 
@@ -38,17 +40,25 @@ private const val PIN_LENGTH = 6
 /**
  * Shared numeric pad. When [pinLength] digits are entered, [onPinEntered]
  * fires (the parent validates and either completes or shows an error).
+ *
+ * [onPinEntered] is a suspend lambda and runs in the composition's coroutine
+ * scope: PIN verification derives a key with 100k PBKDF2 rounds plus a
+ * Keystore decrypt, which must never block the UI thread. The pad ignores key
+ * presses until the parent's callback returns.
  */
 @Composable
 fun PinPadScreen(
     title: String,
     subtitle: String? = null,
     error: String? = null,
-    onPinEntered: (String) -> Unit,
+    onPinEntered: suspend (String) -> Unit,
     onCancel: (() -> Unit)? = null,
+    cancelLabel: String? = null,
     modifier: Modifier = Modifier
 ) {
     var pin by remember { mutableStateOf("") }
+    var verifying by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     Column(
         modifier = modifier
@@ -112,17 +122,25 @@ fun PinPadScreen(
                             "del" -> PinKey(
                                 label = "",
                                 icon = true,
-                                onClick = { pin = pin.dropLast(1) }
+                                onClick = { if (!verifying) pin = pin.dropLast(1) }
                             )
                             else -> PinKey(
                                 label = key,
                                 icon = false,
                                 onClick = {
-                                    if (pin.length < PIN_LENGTH) {
+                                    if (!verifying && pin.length < PIN_LENGTH) {
                                         pin += key
                                         if (pin.length == PIN_LENGTH) {
-                                            onPinEntered(pin)
+                                            val entered = pin
                                             pin = ""
+                                            verifying = true
+                                            scope.launch {
+                                                try {
+                                                    onPinEntered(entered)
+                                                } finally {
+                                                    verifying = false
+                                                }
+                                            }
                                         }
                                     }
                                 }
@@ -136,11 +154,11 @@ fun PinPadScreen(
         if (onCancel != null) {
             Spacer(Modifier.height(20.dp))
             Text(
-                text = stringResource(R.string.cancel),
+                text = cancelLabel ?: stringResource(R.string.cancel),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier
-                    .clickable { onCancel() }
+                    .clickable(enabled = !verifying) { onCancel() }
                     .padding(12.dp)
             )
         }
@@ -182,8 +200,9 @@ fun PinVerifyScreen(
     subtitle: String?,
     error: String?,
     remainingAttempts: Int?,
-    onVerify: (String) -> Unit,
-    onCancel: (() -> Unit)? = null
+    onVerify: suspend (String) -> Unit,
+    onCancel: (() -> Unit)? = null,
+    cancelLabel: String? = null
 ) {
     Box(
         modifier = Modifier
@@ -195,7 +214,8 @@ fun PinVerifyScreen(
             subtitle = subtitle,
             error = error,
             onPinEntered = onVerify,
-            onCancel = onCancel
+            onCancel = onCancel,
+            cancelLabel = cancelLabel
         )
         if (remainingAttempts != null) {
             Text(
@@ -216,10 +236,11 @@ fun PinVerifyScreen(
 fun PinSetupScreen(
     title: String,
     description: String,
-    onDone: (String) -> Unit,
+    onDone: suspend (String) -> Unit,
     onCancel: () -> Unit,
-    onValidate: ((String) -> Boolean)? = null,
-    validateError: String? = null
+    onValidate: (suspend (String) -> Boolean)? = null,
+    validateError: String? = null,
+    cancelLabel: String? = null
 ) {
     var step by remember { mutableStateOf(0) }
     var firstPin by remember { mutableStateOf("") }
@@ -238,7 +259,8 @@ fun PinSetupScreen(
                 step = 1
                 error = null
             },
-            onCancel = onCancel
+            onCancel = onCancel,
+            cancelLabel = cancelLabel
         )
     } else {
         PinPadScreen(
@@ -260,7 +282,8 @@ fun PinSetupScreen(
                     firstPin = ""
                 }
             },
-            onCancel = onCancel
+            onCancel = onCancel,
+            cancelLabel = cancelLabel
         )
     }
 }

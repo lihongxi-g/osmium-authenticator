@@ -46,6 +46,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -147,6 +148,9 @@ class MainActivity : FragmentActivity() {
             val destroyed by vm.destroyed.collectAsState()
             val toast by vm.toast.collectAsState()
             val integrityNotice by vm.integrityNotice.collectAsState()
+            val rootRestricted by vm.rootRestricted.collectAsState()
+            val biometricReady by vm.biometricAvailable.collectAsState()
+            val pinSet by vm.localPinSet.collectAsState()
             val context = LocalContext.current
             // Keep these UI holders above the lock gate and AnimatedContent.
             // Navigating to a child route, or briefly showing the lock screen,
@@ -154,6 +158,10 @@ class MainActivity : FragmentActivity() {
             val accountsListState = rememberLazyListState()
             val accountTagRowState = rememberScrollState()
             val settingsScrollState = rememberScrollState()
+            // Per-screen state (e.g. a half-filled manual-add form) survives the
+            // gate overlay: the lock gate replaces the whole nav host, which
+            // used to wipe everything the user had typed.
+            val screenStateHolder = rememberSaveableStateHolder()
 
             SafeKeyTheme(
                 themeMode = settings.themeMode,
@@ -191,11 +199,17 @@ class MainActivity : FragmentActivity() {
                         tampered -> TamperedScreen()
                         destroyed -> DestroyedScreen()
                         pinRequired -> PinGate()
+                        // Root hardening without any credential: the forced
+                        // "verify on open" cannot be satisfied on a device with
+                        // neither a fingerprint nor an app PIN, so one has to be
+                        // set before any account data is shown.
+                        rootRestricted && !biometricReady && !pinSet -> RootPinGate()
                         locked -> LockGate()
                         else -> MainNavHost(
                             accountsListState = accountsListState,
                             accountTagRowState = accountTagRowState,
-                            settingsScrollState = settingsScrollState
+                            settingsScrollState = settingsScrollState,
+                            screenStateHolder = screenStateHolder
                         )
                     }
                     // Update notification only over the unlocked main UI.
@@ -319,6 +333,28 @@ class MainActivity : FragmentActivity() {
                 }
             },
             onCancel = null // periodic verification cannot be skipped while required
+        )
+    }
+
+    /**
+     * Root hardening with nothing to verify against: no fingerprint/face is
+     * enrolled and no app PIN is set, so the forced "verify on open" would
+     * silently do nothing. Ask for a PIN before showing any account data;
+     * exiting is the only alternative (the restriction itself stays liftable
+     * from developer mode afterwards).
+     */
+    @Composable
+    private fun RootPinGate() {
+        PinSetupScreen(
+            title = stringResource(R.string.pin_setup_title),
+            description = stringResource(R.string.root_section_locked) +
+                "\n\n" + stringResource(R.string.pin_setup_desc),
+            onDone = { pin ->
+                vm.setAppPin(pin)
+                vm.unlock()
+            },
+            onCancel = { finishAffinity() },
+            cancelLabel = stringResource(R.string.tampered_exit)
         )
     }
 
@@ -769,7 +805,9 @@ private fun IntegrityNoticeDialog(
             error = error,
             remainingAttempts = null,
             onVerify = { pin ->
-                if (vm.verifyLocalPin(pin)) {
+                // onPinEntered (not verifyLocalPin) so wrong attempts count
+                // toward the self-destruct threshold here too.
+                if (vm.onPinEntered(pin)) {
                     vm.nav.pop()
                     when (next) {
                         "change_pin" -> vm.nav.push(Screen.PinSetup("pin"))
@@ -798,7 +836,8 @@ private fun IntegrityNoticeDialog(
     private fun MainNavHost(
         accountsListState: LazyListState,
         accountTagRowState: ScrollState,
-        settingsScrollState: ScrollState
+        settingsScrollState: ScrollState,
+        screenStateHolder: androidx.compose.runtime.saveable.SaveableStateHolder
     ) {
         val context = LocalContext.current
         val direction = vm.nav.direction
@@ -834,6 +873,7 @@ private fun IntegrityNoticeDialog(
                 },
                 label = "nav"
             ) { screen ->
+                screenStateHolder.SaveableStateProvider(screen.toString()) {
                 when (screen) {
                     is Screen.Accounts -> AccountsScreen(
                         vm = vm,
@@ -872,8 +912,17 @@ private fun IntegrityNoticeDialog(
                         vm = vm,
                         accountId = screen.accountId,
                         prefillUri = screen.prefill,
-                        onDone = { vm.nav.pop() },
-                        onBack = { vm.nav.pop() }
+                        // Leaving the form on purpose drops its draft, so
+                        // returning to edit the same account shows the stored
+                        // values rather than the previous typing.
+                        onDone = {
+                            screenStateHolder.removeState(screen.toString())
+                            vm.nav.pop()
+                        },
+                        onBack = {
+                            screenStateHolder.removeState(screen.toString())
+                            vm.nav.pop()
+                        }
                     )
 
                     is Screen.Detail -> DetailScreen(
@@ -1097,6 +1146,7 @@ private fun IntegrityNoticeDialog(
                         vm = vm,
                         onBack = { vm.nav.pop() }
                     )
+                }
                 }
             }
         }

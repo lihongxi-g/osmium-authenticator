@@ -335,6 +335,9 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     /** True while the app is in the foreground. */
     private var appInForeground = false
 
+    /** True once the gate was passed during the current foreground session. */
+    private var verifiedThisSession = false
+
     /**
      * True while a system file picker (backup export/import) is covering the
      * activity. The gate must not re-lock while one is open: locking disposes
@@ -349,11 +352,16 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     /** Set by the activity: does this device have a usable fingerprint/face? */
-    private var biometricAvailable = false
+    private val _biometricAvailable = MutableStateFlow(false)
+    val biometricAvailable: StateFlow<Boolean> = _biometricAvailable
 
     fun setBiometricAvailable(available: Boolean) {
-        biometricAvailable = available
+        _biometricAvailable.value = available
     }
+
+    /** Reactive app-PIN presence — the root gate needs to know it changes. */
+    private val _localPinSet = MutableStateFlow(pinManager.hasPin())
+    val localPinSet: StateFlow<Boolean> = _localPinSet
 
     init {
         // Re-evaluate the gate whenever settings load/change — e.g. the user
@@ -365,7 +373,17 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                 if (!s.gateOnOpen) {
                     _locked.value = false
                     _pinRequired.value = false
+                    return@collect
                 }
+                // The gate can also turn ON *after* the foreground callback ran:
+                // the root-hardening overlay forces it on when the integrity
+                // scan lands a second into a cold start (RootState.refresh runs
+                // after onAppForeground in onStart). Without this branch the
+                // forced setting never engaged on the first open of a process —
+                // the app kept showing codes, and only a background round-trip
+                // produced the gate.
+                if (!appInForeground || verifiedThisSession || transferPickerActive) return@collect
+                engageGate()
             }
         }
         // Detection logs stay off by default; the developer-mode "detailed
@@ -388,9 +406,10 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
      */
     fun onAppForeground() {
         appInForeground = true
+        verifiedThisSession = false
         pendingEnterNotice = true
         maybeShowIntegrityNotice()
-        AppLog.d("foreground: biometric=$biometricAvailable pin=${pinManager.hasPin()} gate=${settings.value.gateOnOpen}")
+        AppLog.d("foreground: biometric=${_biometricAvailable.value} pin=${pinManager.hasPin()} gate=${settings.value.gateOnOpen}")
         if (_destroyed.value) return
         _pinError.value = null
         // A system file picker (backup export/import) is still on top — do
@@ -401,14 +420,26 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
             _pinRequired.value = false
             return
         }
-        if (biometricAvailable) {
+        if (!_biometricAvailable.value && !pinManager.hasPin()) {
+            // No credential at all: nothing to verify with. While the root
+            // restriction is active the UI asks the user to set a PIN instead
+            // (MainActivity root gate).
+            _locked.value = false
+            _pinRequired.value = false
+            return
+        }
+        engageGate()
+    }
+
+    /**
+     * Engages the gate with whatever credential the device has: the biometric
+     * lock when a fingerprint/face is enrolled, otherwise the app PIN.
+     */
+    private fun engageGate() {
+        if (_biometricAvailable.value) {
             _locked.value = true
         } else if (pinManager.hasPin()) {
             _pinRequired.value = true
-        } else {
-            // no fingerprint and no PIN on this device — nothing to verify with
-            _locked.value = false
-            _pinRequired.value = false
         }
     }
 
@@ -423,6 +454,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     fun unlock() {
         AppLog.d("unlocked")
+        verifiedThisSession = true
         _locked.value = false
         _pinRequired.value = false
     }
@@ -442,8 +474,8 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
      * Validate an entered PIN.
      * @return true when correct.
      */
-    fun onPinEntered(pin: String): Boolean {
-        if (pinManager.verifyPin(pin)) {
+    suspend fun onPinEntered(pin: String): Boolean {
+        if (withContext(Dispatchers.Default) { pinManager.verifyPin(pin) }) {
             AppLog.d("pin verified")
             _pinRequired.value = false
             _pinError.value = null
@@ -493,10 +525,11 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
      * ANYWHERE a PIN is entered: if the self-destruct PIN is armed and the
      * entered PIN matches it, destroy all data. Returns true when destroyed.
      */
-    fun checkSelfDestructPin(pin: String): Boolean {
+    suspend fun checkSelfDestructPin(pin: String): Boolean {
         if (settings.value.destroyMode != AppSettings.DESTROY_PIN) return false
         if (!pinManager.hasDestroyPin()) return false
-        if (pinManager.verifyDestroyPin(pin)) {
+        // 100k PBKDF2 rounds + a Keystore decrypt: never on the main thread.
+        if (withContext(Dispatchers.Default) { pinManager.verifyDestroyPin(pin) }) {
             selfDestruct()
             return true
         }
@@ -533,6 +566,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                 selfDestruct.destroyMasterKey()
                 safeKeyApp.accountDao.deleteAll()
                 pinManager.wipeAll()
+                _localPinSet.value = false
                 settingsRepo.wipeSettings()
                 _pinRequired.value = false
                 _locked.value = false
@@ -547,12 +581,15 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     /** Check whether the current PIN matches the one baked into an import file. */
-    fun verifyImportPin(pin: String, salt: String, hash: String): Boolean =
-        com.safekey.authenticator.security.PinHasher.verify(pin, salt, hash)
+    suspend fun verifyImportPin(pin: String, salt: String, hash: String): Boolean =
+        withContext(Dispatchers.Default) {
+            com.safekey.authenticator.security.PinHasher.verify(pin, salt, hash)
+        }
 
     fun hasLocalPin(): Boolean = pinManager.hasPin()
 
-    fun verifyLocalPin(pin: String): Boolean = pinManager.verifyPin(pin)
+    suspend fun verifyLocalPin(pin: String): Boolean =
+        withContext(Dispatchers.Default) { pinManager.verifyPin(pin) }
 
     // ------------------------------------------------------------ toasts
 
@@ -712,21 +749,23 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     fun setAutoBackupPassword(password: String) = viewModelScope.launch { settingsRepo.setAutoBackupPassword(password) }
     fun setAutoBackupKeepCount(count: Int) = viewModelScope.launch { settingsRepo.setAutoBackupKeepCount(count) }
 
-    fun setAppPin(pin: String) {
-        pinManager.setPin(pin)
+    suspend fun setAppPin(pin: String) {
+        withContext(Dispatchers.Default) { pinManager.setPin(pin) }
+        _localPinSet.value = true
         viewModelScope.launch { settingsRepo.setPinFailCount(0) }
     }
 
     fun clearAppPin() {
         pinManager.clearPin()
+        _localPinSet.value = false
         AppLog.d("app pin cleared")
         viewModelScope.launch {
             settingsRepo.setPinFailCount(0)
         }
     }
 
-    fun setSelfDestructPin(pin: String) {
-        pinManager.setDestroyPin(pin)
+    suspend fun setSelfDestructPin(pin: String) {
+        withContext(Dispatchers.Default) { pinManager.setDestroyPin(pin) }
     }
 
     fun clearDestroyPin() {
