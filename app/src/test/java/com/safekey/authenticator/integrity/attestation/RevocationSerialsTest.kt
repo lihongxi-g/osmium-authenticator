@@ -37,7 +37,7 @@ class RevocationSerialsTest {
 
     @Test
     fun `unpaddedHex strips leading zeros only`() {
-        assertEquals("ab12", RevocationSerials.unpaddedHex("AB1200"))
+        assertEquals("ab1200", RevocationSerials.unpaddedHex("AB1200"))
         assertEquals("ab12", RevocationSerials.unpaddedHex("0000ab12"))
         assertEquals("0", RevocationSerials.unpaddedHex("0000"))
         assertNull(RevocationSerials.unpaddedHex(""))
@@ -46,7 +46,7 @@ class RevocationSerialsTest {
 
     @Test
     fun `decimalToHex ignores non decimal input`() {
-        assertEquals("5cb8f0c40ded6f45", RevocationSerials.decimalToHex("6681152659205225093"))
+        assertEquals("5cb838f1fe157a85", RevocationSerials.decimalToHex("6681152659205225093"))
         assertNull(RevocationSerials.decimalToHex("12ab"))
         assertNull(RevocationSerials.decimalToHex(""))
     }
