@@ -65,18 +65,34 @@ internal object IntegrityProbes {
 
     /**
      * Anti-repackaging: the app's own signing certificate must match the
-     * official fingerprint baked into the build. The startup check already
-     * refuses to run a re-signed APK; surfacing it here keeps the integrity
-     * report complete. Fails closed, like the startup check.
+     * official fingerprint baked into the build.
+     *
+     * Only a real digest mismatch is hard evidence. A check that could not run
+     * (PackageManager hiccup, provider unavailable) is a miss here — the
+     * start-up gate in MainActivity already fails closed for that case, and
+     * turning it into FAIL made the report claim "compromised device" for a
+     * transient lookup failure.
      */
     fun apkSignature(context: Context): IntegrityCheck {
-        val tampered = runCatching {
-            com.safekey.authenticator.security.IntegrityCheck.isTampered(context)
-        }.getOrDefault(true)
-        return IntegrityCheck(
-            "apk_signature", IntegritySeverity.FAIL,
-            tampered, if (tampered) "signing certificate mismatch" else ""
+        val verdict = runCatching {
+            com.safekey.authenticator.security.IntegrityCheck.signatureVerdict(context)
+        }.getOrDefault(
+            com.safekey.authenticator.security.IntegrityCheck.SignatureVerdict.UNAVAILABLE
         )
+        return when (verdict) {
+            com.safekey.authenticator.security.IntegrityCheck.SignatureVerdict.MATCH ->
+                IntegrityCheck("apk_signature", IntegritySeverity.INFO, false, "")
+            com.safekey.authenticator.security.IntegrityCheck.SignatureVerdict.MISMATCH ->
+                IntegrityCheck(
+                    "apk_signature", IntegritySeverity.FAIL, true,
+                    "signing certificate mismatch"
+                )
+            com.safekey.authenticator.security.IntegrityCheck.SignatureVerdict.UNAVAILABLE ->
+                IntegrityCheck(
+                    "apk_signature", IntegritySeverity.INFO, false,
+                    "signature check unavailable"
+                )
+        }
     }
 
     /**
@@ -108,24 +124,46 @@ internal object IntegrityProbes {
         emptyList()
     }
 
-    fun suBinaries(): IntegrityCheck {
-        val found = runCatching {
-            SU_PATHS.filter { File(it).exists() }
-        }.getOrDefault(emptyList())
-        return IntegrityCheck(
-            "su_binaries", IntegritySeverity.FAIL,
-            found.isNotEmpty(), found.joinToString(", ")
-        )
+    fun suBinaries(): IntegrityCheck = existenceCheck("su_binaries", SU_PATHS)
+
+    fun rootDirs(): IntegrityCheck = existenceCheck("root_dirs", ROOT_DIRS)
+
+    /**
+     * FAIL-class existence check over candidate paths.
+     *
+     * Uses the tri-state [pathVerdict] rather than `File.exists()`: exists()
+     * reports EACCES as "absent", and every /data/adb entry is unreadable for an
+     * untrusted app (the directory is 0700 root:root), so the root-manager paths
+     * this probe exists for could never fire. Unobservable paths are listed for
+     * the record — a miss, never a verdict.
+     */
+    private fun existenceCheck(id: String, paths: List<String>): IntegrityCheck {
+        val verdicts = runCatching {
+            paths.distinct().associateWith { pathVerdict(it) }
+        }.getOrDefault(emptyMap())
+        val found = verdicts.filterValues { it == RouteVerdict.SEEN }.keys.toList()
+        val blind = verdicts.filterValues { it == RouteVerdict.UNKNOWN }.keys.toList()
+        val detail = buildString {
+            append(found.joinToString(", "))
+            if (blind.isNotEmpty()) {
+                if (isNotEmpty()) append(" · ")
+                append("unobservable: ").append(blind.joinToString(", "))
+            }
+        }
+        return IntegrityCheck(id, IntegritySeverity.FAIL, found.isNotEmpty(), detail)
     }
 
-    fun rootDirs(): IntegrityCheck {
-        val found = runCatching {
-            ROOT_DIRS.filter { File(it).exists() }
-        }.getOrDefault(emptyList())
-        return IntegrityCheck(
-            "root_dirs", IntegritySeverity.FAIL,
-            found.isNotEmpty(), found.joinToString(", ")
-        )
+    /** Tri-state existence verdict for one path (see [RouteVerdict]). */
+    private fun pathVerdict(path: String): RouteVerdict = try {
+        Os.stat(path)
+        RouteVerdict.SEEN
+    } catch (error: Exception) {
+        val errno = (error as? ErrnoException)?.errno
+        if (errno == OsConstants.ENOENT || errno == OsConstants.ENOTDIR) {
+            RouteVerdict.NOT_SEEN
+        } else {
+            RouteVerdict.UNKNOWN
+        }
     }
 
     fun mountTraces(): IntegrityCheck {
@@ -288,17 +326,7 @@ internal object IntegrityProbes {
         val candidates = (SU_PATHS + listOf("/data/adb/magisk", "/sbin/.magisk")).distinct()
         val out = LinkedHashMap<String, List<RouteVerdict>>()
         for (path in candidates) {
-            val statVerdict = runCatching {
-                Os.stat(path)
-                RouteVerdict.SEEN
-            }.getOrElse { error ->
-                val errno = (error as? ErrnoException)?.errno
-                if (errno == OsConstants.ENOENT || errno == OsConstants.ENOTDIR) {
-                    RouteVerdict.NOT_SEEN
-                } else {
-                    RouteVerdict.UNKNOWN
-                }
-            }
+            val statVerdict = pathVerdict(path)
             // File.exists() cannot tell ENOENT from EACCES; when the precise
             // stat above is blind too, this route must stay blind instead of
             // claiming absence.
@@ -328,7 +356,11 @@ internal object IntegrityProbes {
      * K2: compares the K0 early snapshot (SafeKeyApp.onCreate) with the live
      * state — late module activation or dynamic hiding shows up as drift.
      */
-    fun stateDrift(): IntegrityCheck {
+    suspend fun stateDrift(): IntegrityCheck {
+        // The K0 snapshot is captured on a background thread at process start;
+        // wait for it (bounded) so a scan that wins the race does not silently
+        // skip the whole drift layer.
+        IntegrityEarly.awaitCaptured()
         val beforeProps = IntegrityEarly.propsSnapshot()
         val beforeBits = IntegrityEarly.bitsSnapshot()
         val beforeMounts = IntegrityEarly.suspiciousMountsSnapshot()

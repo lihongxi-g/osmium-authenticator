@@ -41,7 +41,12 @@ internal object RevocationData {
     /** Full revoked-serial set (refreshed cache file if present, else the bundled asset). */
     fun current(context: Context): Set<String> {
         cached?.let { return it }
-        val loaded = load(context)
+        // Normalized once per process: the snapshot mixes decimal and
+        // zero-padded hex renderings of the same serials while the verifier
+        // looks up serialNumber.toString(16) — without this, more than half of
+        // the revoked keys could never match a certificate (see
+        // RevocationSerials).
+        val loaded = RevocationSerials.normalize(load(context))
         cached = loaded
         return loaded
     }

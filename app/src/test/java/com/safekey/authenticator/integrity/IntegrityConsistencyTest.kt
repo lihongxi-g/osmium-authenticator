@@ -71,11 +71,25 @@ class IntegrityConsistencyTest {
     }
 
     @Test
-    fun `an unreadable view is a mismatch when others read fine`() {
+    fun `an unreadable view is a miss, never a mismatch`() {
+        // Reporting it as a hit made every scan on such a device "SUSPICIOUS"
+        // although no divergence had been observed. It is listed informationally.
         val view = "tmpfs /tmp tmpfs rw 0 0\n"
-        val detail = IntegrityConsistency.mountViewMismatch(view, view, "")
-        assertNotNull(detail)
-        assertTrue(detail!!.contains("unreadable"))
+        assertNull(IntegrityConsistency.mountViewMismatch(view, view, ""))
+        assertEquals(
+            listOf("mountinfo"),
+            IntegrityConsistency.unreadableMountViews(view, view, "")
+        )
+        assertEquals(
+            listOf("mounts", "self/mounts", "mountinfo"),
+            IntegrityConsistency.unreadableMountViews("", "", "")
+        )
+    }
+
+    @Test
+    fun `one readable view cannot disagree with itself`() {
+        val view = "magisk /sbin/.magisk/mirror tmpfs rw 0 0\n"
+        assertNull(IntegrityConsistency.mountViewMismatch(view, "", ""))
     }
 
     @Test
