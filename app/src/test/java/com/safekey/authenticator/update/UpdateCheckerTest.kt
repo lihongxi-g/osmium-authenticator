@@ -46,6 +46,16 @@ class UpdateCheckerTest {
     }
 
     @Test
+    fun suffixedSegmentsKeepTheirPosition() {
+        // The fix/build suffix must not shift the remaining segments: dropping
+        // it turned 2.5.3-fix1 into [2,5], which never ranked as newer.
+        assertTrue(UpdateChecker.isNewer("2.5.3-fix1", "2.5.2"))
+        assertFalse(UpdateChecker.isNewer("2.5.2-fix1", "2.5.2"))
+        assertTrue(UpdateChecker.isNewer("2.6.0-beta1", "2.5.9"))
+        assertFalse(UpdateChecker.isNewer("2.5.1-fix3", "2.5.2"))
+    }
+
+    @Test
     fun garbageNeverWins() {
         assertFalse(UpdateChecker.isNewer("abc", "2.3.2"))
         assertFalse(UpdateChecker.isNewer("", "2.3.2"))

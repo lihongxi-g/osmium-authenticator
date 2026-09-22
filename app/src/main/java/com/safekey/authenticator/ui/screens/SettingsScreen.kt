@@ -408,14 +408,27 @@ fun SettingsScreen(
                 icon = AppIcons.FileUpload,
                 title = stringResource(R.string.export_vault),
                 description = stringResource(R.string.export_vault_desc),
-                onClick = onExport
+                onClick = {
+                    // Exporting writes every secret to a file (plaintext when the
+                    // developer-mode export is armed): same identity check as the
+                    // other sensitive entries on this screen.
+                    if (!rootBlocked("feature")) {
+                        pendingNav = { onExport() }
+                        showVerifyDialog = true
+                    }
+                }
             )
 
             if ("import" !in hiddenFeatures) SettingRow(
                 icon = AppIcons.FileDownload,
                 title = stringResource(R.string.import_vault),
                 description = stringResource(R.string.import_vault_desc),
-                onClick = onImport
+                onClick = {
+                    if (!rootBlocked("feature")) {
+                        pendingNav = { onImport() }
+                        showVerifyDialog = true
+                    }
+                }
             )
 
             if ("lan" !in hiddenFeatures) SettingRow(

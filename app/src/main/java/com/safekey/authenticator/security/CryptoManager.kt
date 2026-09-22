@@ -26,10 +26,9 @@ class CryptoManager {
      * crashed batch imports (N concurrent addAccount coroutines on a fresh
      * install). Serialize key access — cipher instances stay per-call.
      */
-    @Synchronized
-    private fun getOrCreateKey(): SecretKey {
+    private fun getOrCreateKey(): SecretKey = synchronized(KEY_LOCK) {
         val existing = (keyStore.getEntry(KEY_ALIAS, null) as? KeyStore.SecretKeyEntry)?.secretKey
-        if (existing != null) return existing
+        if (existing != null) return@synchronized existing
 
         val generator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, ANDROID_KEYSTORE)
         generator.init(
@@ -42,7 +41,14 @@ class CryptoManager {
                 .setKeySize(256)
                 .build()
         )
-        return generator.generateKey()
+        return@synchronized try {
+            generator.generateKey()
+        } catch (e: Exception) {
+            // Another instance created the alias in between (the lock is per
+            // process, but the alias can also be created by a sibling process
+            // such as the auto-backup worker). Re-read before giving up.
+            (keyStore.getEntry(KEY_ALIAS, null) as? KeyStore.SecretKeyEntry)?.secretKey ?: throw e
+        }
     }
 
     fun encrypt(plaintext: String): EncryptedField {
@@ -67,6 +73,14 @@ class CryptoManager {
     data class EncryptedField(val iv: String, val ciphertext: String)
 
     companion object {
+        /**
+         * Process-wide lock for the keystore alias: several CryptoManager
+         * instances exist (repository, PinManager, developer tools), so an
+         * instance-level lock still let two of them race to create
+         * safekey_master_key_v1 at the same time.
+         */
+        private val KEY_LOCK = Any()
+
         private const val ANDROID_KEYSTORE = "AndroidKeyStore"
         /** Exposed for read-only inspection (developer-mode Keystore tools). */
         const val KEY_ALIAS_NAME = "safekey_master_key_v1"

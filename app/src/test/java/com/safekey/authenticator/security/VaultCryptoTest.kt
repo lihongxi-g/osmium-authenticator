@@ -63,6 +63,36 @@ class VaultCryptoTest {
     }
 
     @Test
+    fun `absurd iteration counts are rejected instead of burning CPU`() {
+        val envelope = VaultCrypto.encrypt(sampleVault(), "pw".toCharArray())
+        val huge = Regex("\"iterations\"\\s*:\\s*\\d+")
+            .replace(envelope, "\"iterations\":2000000000")
+        val started = System.currentTimeMillis()
+        try {
+            VaultCrypto.decrypt(huge, "pw".toCharArray())
+            org.junit.Assert.fail("expected the envelope to be rejected")
+        } catch (e: IllegalArgumentException) {
+            assertTrue(e.message!!.contains("iterations"))
+        }
+        assertTrue(
+            "must fail fast, not derive a key with 2e9 rounds",
+            System.currentTimeMillis() - started < 2_000
+        )
+    }
+
+    @Test
+    fun `an iteration count below the floor is rejected`() {
+        val envelope = VaultCrypto.encrypt(sampleVault(), "pw".toCharArray())
+        val weak = Regex("\"iterations\"\\s*:\\s*\\d+").replace(envelope, "\"iterations\":1")
+        try {
+            VaultCrypto.decrypt(weak, "pw".toCharArray())
+            org.junit.Assert.fail("expected the envelope to be rejected")
+        } catch (e: IllegalArgumentException) {
+            assertTrue(e.message!!.contains("iterations"))
+        }
+    }
+
+    @Test
     fun `two encryptions of same input differ`() {
         val plain = sampleVault()
         val e1 = VaultCrypto.encrypt(plain, "pw".toCharArray())

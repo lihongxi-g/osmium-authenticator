@@ -26,6 +26,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,6 +39,9 @@ import com.safekey.authenticator.totp.GoogleMigrationParser
 import com.safekey.authenticator.ui.components.QrCameraPreview
 import com.safekey.authenticator.ui.components.QrDecode
 import com.safekey.authenticator.ui.components.SimpleTopBar
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Import accounts from a Google Authenticator "Transfer accounts" QR code
@@ -73,27 +77,37 @@ fun GoogleImportScreen(
         }
     }
 
+    val scope = rememberCoroutineScope()
+
     val galleryLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.GetContent()
     ) { uri ->
         if (uri != null) {
-            try {
-                val bitmap = context.contentResolver.openInputStream(uri)?.use { input ->
-                    BitmapFactory.decodeStream(input)
-                }
-                if (bitmap != null) {
-                    QrDecode.decodeAsync(bitmap) { raw ->
-                        if (raw == null) {
-                            errorText = context.getString(R.string.scan_no_qr)
-                        } else {
-                            onRawMigrationCode(raw)
-                        }
+            // Gallery photos are large: read and decode off the UI thread (only
+            // the zxing pass used to be offloaded).
+            scope.launch {
+                try {
+                    val bitmap = withContext(Dispatchers.IO) {
+                        runCatching {
+                            context.contentResolver.openInputStream(uri)?.use { input ->
+                                BitmapFactory.decodeStream(input)
+                            }
+                        }.getOrNull()
                     }
-                } else {
+                    if (bitmap != null) {
+                        QrDecode.decodeAsync(bitmap) { raw ->
+                            if (raw == null) {
+                                errorText = context.getString(R.string.scan_no_qr)
+                            } else {
+                                onRawMigrationCode(raw)
+                            }
+                        }
+                    } else {
+                        errorText = context.getString(R.string.scan_gallery_failed)
+                    }
+                } catch (_: Exception) {
                     errorText = context.getString(R.string.scan_gallery_failed)
                 }
-            } catch (_: Exception) {
-                errorText = context.getString(R.string.scan_gallery_failed)
             }
         }
     }

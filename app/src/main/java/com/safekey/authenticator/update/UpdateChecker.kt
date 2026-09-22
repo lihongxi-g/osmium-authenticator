@@ -62,8 +62,11 @@ object UpdateChecker {
      * garbage never ranks as an update.
      */
     fun isNewer(candidate: String, current: String): Boolean {
-        val a = candidate.split('.').mapNotNull { it.toIntOrNull() }
-        val b = current.split('.').mapNotNull { it.toIntOrNull() }
+        // One comparable entry per dot-separated segment, in position: dropping
+        // non-numeric parts (mapNotNull) shifted every later segment, so
+        // "2.5.3-fix1" parsed as [2,5] and never ranked as newer than 2.5.2.
+        val a = candidate.split('.').map { leadingNumber(it) }
+        val b = current.split('.').map { leadingNumber(it) }
         if (a.isEmpty() || b.isEmpty()) return false
         val length = maxOf(a.size, b.size)
         for (i in 0 until length) {
@@ -72,5 +75,11 @@ object UpdateChecker {
             if (av != bv) return av > bv
         }
         return false
+    }
+
+    /** Leading digits of a segment ("3-fix1" → 3); no digits counts as 0. */
+    private fun leadingNumber(segment: String): Int {
+        val digits = segment.trim().takeWhile { it.isDigit() }
+        return digits.toIntOrNull() ?: 0
     }
 }

@@ -21,6 +21,14 @@ import javax.crypto.spec.SecretKeySpec
 object VaultCrypto {
 
     private const val ITERATIONS = 120_000
+
+    /**
+     * Accepted iteration range for imported envelopes. The count comes from the
+     * file itself, so without a bound a malformed or hostile backup could pin a
+     * core for hours inside an uninterruptible PBKDF2 run.
+     */
+    private const val MIN_ITERATIONS = 10_000
+    private const val MAX_ITERATIONS = 1_000_000
     private const val SALT_BYTES = 16
     private const val IV_BYTES = 12
     private const val KEY_BITS = 256
@@ -62,6 +70,11 @@ object VaultCrypto {
         val salt = Base64.getDecoder().decode(envelope.salt)
         val iv = Base64.getDecoder().decode(envelope.iv)
         val ct = Base64.getDecoder().decode(envelope.ciphertext)
+        if (envelope.iterations !in MIN_ITERATIONS..MAX_ITERATIONS) {
+            throw IllegalArgumentException(
+                "Unsupported key derivation parameters (${envelope.iterations} iterations)"
+            )
+        }
         val key = deriveKey(password, salt, envelope.iterations)
         val cipher = Cipher.getInstance(TRANSFORMATION)
         cipher.init(Cipher.DECRYPT_MODE, key, GCMParameterSpec(128, iv))
