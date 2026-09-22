@@ -23,6 +23,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -55,22 +57,33 @@ fun AccountFormScreen(
     val editing = accountId != null
     val editingAccount = existing.firstOrNull { it.id == accountId }
 
-    var issuer by remember { mutableStateOf("") }
-    var label by remember { mutableStateOf("") }
-    var secret by remember { mutableStateOf("") }
-    var algorithm by remember { mutableStateOf(Account.ALGO_SHA1) }
-    var digits by remember { mutableStateOf(6) }
-    var period by remember { mutableStateOf("30") }
-    var type by remember { mutableStateOf(Account.TYPE_TOTP) }
+    // The draft is saveable on purpose: the lock gate (and the language
+    // recreate) disposes this screen, and a half-filled manual-add form used to
+    // come back completely blank — e.g. after switching to the browser for the
+    // setup key. SaveableStateHolder in MainActivity keeps it alive.
+    var issuer by rememberSaveable { mutableStateOf("") }
+    var label by rememberSaveable { mutableStateOf("") }
+    var secret by rememberSaveable { mutableStateOf("") }
+    var algorithm by rememberSaveable { mutableStateOf(Account.ALGO_SHA1) }
+    var digits by rememberSaveable { mutableStateOf(6) }
+    var period by rememberSaveable { mutableStateOf("30") }
+    var type by rememberSaveable { mutableStateOf(Account.TYPE_TOTP) }
     // HOTP starting counter, kept as text so the field can be cleared
     // (empty ⇒ 0). Digits-only, capped at 15 chars (Long.MAX is 19 digits).
-    var counterText by remember { mutableStateOf("0") }
-    var selectedTagIds by remember { mutableStateOf<Set<String>>(emptySet()) }
+    var counterText by rememberSaveable { mutableStateOf("0") }
+    var selectedTagIds by rememberSaveable(
+        stateSaver = Saver<Set<String>, String>(
+            restore = { value -> value.split(",").filter { it.isNotEmpty() }.toSet() },
+            save = { value -> value.joinToString(",") }
+        )
+    ) { mutableStateOf(emptySet()) }
     var error by remember { mutableStateOf<String?>(null) }
-    var initialized by remember { mutableStateOf(false) }
+    var initialized by rememberSaveable { mutableStateOf(false) }
 
-    // Initialize from the account being edited
+    // Initialize from the account being edited — only once per screen instance,
+    // otherwise a restored draft would be overwritten by the stored values.
     LaunchedEffect(accountId) {
+        if (initialized) return@LaunchedEffect
         if (accountId != null) {
             val account = existing.firstOrNull { it.id == accountId }
             if (account != null) {

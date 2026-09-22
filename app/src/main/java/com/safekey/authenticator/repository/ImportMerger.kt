@@ -21,17 +21,24 @@ object ImportMerger {
     fun plan(existing: List<Account>, incoming: List<VaultAccount>): ImportPlan {
         val toAdd = mutableListOf<VaultAccount>()
         val toUpdate = mutableListOf<Pair<Account, VaultAccount>>()
-        val incomingByKey = incoming.groupBy { keyOf(it.issuer, it.label) }
         var duplicates = 0
 
-        for ((key, items) in incomingByKey) {
-            val first = items.first()
-            val match = existing.firstOrNull { keyOf(it.issuer, it.label) == key }
+        // Every incoming entry is planned. Grouping by issuer+label and keeping
+        // only the first of each group silently dropped the rest: a backup with
+        // two accounts sharing issuer and label (e.g. two blank-labelled
+        // entries) restored one of them and reported a normal import.
+        val claimed = HashSet<String>()
+        for (entry in incoming) {
+            val key = keyOf(entry.issuer, entry.label)
+            val match = existing.firstOrNull {
+                keyOf(it.issuer, it.label) == key && it.id !in claimed
+            }
             if (match != null) {
-                toUpdate.add(match to first.withSafeHotpCounter(match.counter))
+                claimed += match.id
+                toUpdate.add(match to entry.withSafeHotpCounter(match.counter))
                 duplicates += 1
             } else {
-                toAdd.add(first)
+                toAdd.add(entry)
             }
         }
         return ImportPlan(toAdd, toUpdate, duplicates)

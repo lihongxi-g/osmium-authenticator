@@ -104,8 +104,13 @@ fun ExportScreen(vm: MainViewModel, onDone: () -> Unit, onBack: () -> Unit) {
                         val json = withContext(Dispatchers.IO) {
                             val app = context.applicationContext as com.safekey.authenticator.SafeKeyApp
                             val pin = vm.pinManager.getPinHashForExport()
-                            val vault = app.accountRepository.exportVault(pin?.first ?: "", pin?.second ?: "")
-                            if (plaintextMode) VaultIO.encodePlain(vault) else VaultIO.encrypt(vault, password.toCharArray())
+                            val export = app.accountRepository.exportVault(pin?.first ?: "", pin?.second ?: "")
+                            if (export.dropped > 0) {
+                                error(
+                                    "${export.dropped} accounts could not be decrypted — export aborted"
+                                )
+                            }
+                            if (plaintextMode) VaultIO.encodePlain(export.vault) else VaultIO.encrypt(export.vault, password.toCharArray())
                         }
                         pendingJson = json
                         vm.setTransferPickerActive(true)
@@ -201,12 +206,19 @@ fun VaultImportFlow(vm: MainViewModel, vault: VaultFile, onDone: () -> Unit, onB
 
     pinPending?.let { pending ->
         PinVerifyScreen(
-            title = stringResource(R.string.import_pin_title), subtitle = stringResource(R.string.import_pin_desc), error = pinError, remainingAttempts = null,
+            title = stringResource(R.string.import_pin_title), subtitle = stringResource(R.string.import_pin_desc), error = pinError, remainingAttempts = vm.remainingAttempts(),
             onVerify = { pin ->
                 // A foreign/corrupt file could carry malformed pin data —
                 // verification must degrade to "wrong PIN", never crash.
                 val ok = try {
-                    if (pending.pinSalt.isNotEmpty()) vm.verifyImportPin(pin, pending.pinSalt, pending.pinHash) else vm.verifyLocalPin(pin)
+                    if (pending.pinSalt.isNotEmpty()) {
+                        vm.verifyImportPin(pin, pending.pinSalt, pending.pinHash)
+                    } else {
+                        // Counting path (onPinEntered, not verifyLocalPin): the
+                        // app-PIN gate has to feed the failure counter, or the
+                        // self-destruct threshold can be bypassed by guessing here.
+                        vm.onPinEntered(pin)
+                    }
                 } catch (_: Exception) {
                     false
                 }

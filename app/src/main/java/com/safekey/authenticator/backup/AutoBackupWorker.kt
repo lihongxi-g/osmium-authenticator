@@ -55,8 +55,14 @@ class AutoBackupWorker(
         // Re-schedule so the loop keeps running and resumes automatically.
         val rootReport = RootState.report.value
             ?: runCatching { IntegrityEngine.scan(applicationContext) }.getOrNull()
-        if (!settings.devDisableRootSecurity && rootReport?.compromised == true) {
-            AppLog.d("auto-backup skipped: root restriction active")
+        if (!settings.devDisableRootSecurity && rootReport?.compromised != false) {
+            // Fails closed: when the integrity scan could not run at all (null
+            // report — exactly the case on instrumented devices) the backlog of
+            // an unknown state must not let the vault leave the device. The skip
+            // is recorded so the UI shows why nothing was backed up.
+            val reason = if (rootReport == null) "INTEGRITY_UNKNOWN" else "ROOT_RESTRICTED"
+            AppLog.d("auto-backup skipped: $reason")
+            settingsRepo.setAutoBackupResult(reason, System.currentTimeMillis())
             AutoBackupScheduler.schedule(applicationContext, settings)
             return Result.success()
         }
@@ -83,11 +89,20 @@ class AutoBackupWorker(
             return
         }
         val pin = PinManager(applicationContext).getPinHashForExport()
-        val vault = app.accountRepository.exportVault(
+        val export = app.accountRepository.exportVault(
             pinSalt = pin?.first ?: "",
             pinHash = pin?.second ?: ""
         )
-        val payload = VaultIO.encrypt(vault, password.toCharArray())
+        // A backup that silently omits accounts is worse than no backup: abort
+        // (and skip the pruning below) instead of letting an incomplete file
+        // overwrite the good ones kept by the retention rule.
+        if (export.dropped > 0) {
+            app.settingsRepository.setAutoBackupResult(
+                "EXPORT_INCOMPLETE:${export.dropped}", System.currentTimeMillis()
+            )
+            return
+        }
+        val payload = VaultIO.encrypt(export.vault, password.toCharArray())
             .toByteArray(Charsets.UTF_8)
         val fileName = "$FILE_PREFIX${
             SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US).format(Date())

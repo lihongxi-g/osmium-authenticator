@@ -34,8 +34,8 @@ class SafeKeyApp : Application() {
         val db = AppDatabase.get(this)
         accountDao = db.accountDao()
         val crypto = CryptoManager()
-        accountRepository = AccountRepository(accountDao, crypto, db.tagDao())
-        tagRepository = com.safekey.authenticator.repository.TagRepository(db.tagDao())
+        accountRepository = AccountRepository(accountDao, crypto, db.tagDao(), db)
+        tagRepository = com.safekey.authenticator.repository.TagRepository(db.tagDao(), db)
         settingsRepository = SettingsRepository(this, crypto)
     }
 

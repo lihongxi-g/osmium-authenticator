@@ -94,7 +94,9 @@ fun LanTransferScreen(
                     vm = vm,
                     vault = currentVault,
                     onDone = {
-                        vm.showToast(context.getString(R.string.import_done, currentVault.accounts.size))
+                        // The import flow already reports the real imported count
+                        // (import_done from applyImport) — the extra toast
+                        // repeated it with the file's account total instead.
                         onBack()
                     },
                     onBackToPassword = {
@@ -156,11 +158,15 @@ private fun SendTabContent(vm: MainViewModel) {
         scope.launch {
             val app = context.applicationContext as SafeKeyApp
             val pin = vm.pinManager.getPinHashForExport()
-            val vault = withContext(Dispatchers.IO) {
+            val export = withContext(Dispatchers.IO) {
                 app.accountRepository.exportVault(pin?.first ?: "", pin?.second ?: "")
             }
+            if (export.dropped > 0) {
+                errorText = "${export.dropped} accounts could not be decrypted — transfer aborted"
+                return@launch
+            }
             server.start(
-                vault = vault,
+                vault = export.vault,
                 onClientConnected = {
                     isTransferring = true
                     statusText = context.getString(R.string.lan_status_transferring)
