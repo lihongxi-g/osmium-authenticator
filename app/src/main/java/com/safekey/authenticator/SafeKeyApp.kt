@@ -18,6 +18,8 @@ class SafeKeyApp : Application() {
         private set
     lateinit var tagRepository: com.safekey.authenticator.repository.TagRepository
         private set
+    lateinit var lanBlockRepository: com.safekey.authenticator.data.LanBlockRepository
+        private set
 
     override fun onCreate() {
         super.onCreate()
@@ -37,6 +39,7 @@ class SafeKeyApp : Application() {
         accountRepository = AccountRepository(accountDao, crypto, db.tagDao(), db)
         tagRepository = com.safekey.authenticator.repository.TagRepository(db.tagDao(), db)
         settingsRepository = SettingsRepository(this, crypto)
+        lanBlockRepository = com.safekey.authenticator.data.LanBlockRepository(this, crypto)
     }
 
     private fun installCrashHandler() {

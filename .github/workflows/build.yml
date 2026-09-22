@@ -58,7 +58,7 @@ jobs:
         run: |
           set -euo pipefail
           version=$(grep -oP 'versionName\s*=\s*"\K[^"]+' app/build.gradle.kts)
-          test "$version" = "2.5.2"
+          test "$version" = "2.5.3"
           mkdir -p dist
           for abi in arm64-v8a armeabi-v7a x86_64; do
             source="app/build/outputs/apk/release/app-${abi}-release.apk"

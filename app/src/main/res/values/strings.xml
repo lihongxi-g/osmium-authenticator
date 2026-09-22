@@ -440,12 +440,12 @@
     <string name="refresh">Refresh</string>
     <string name="lan_transfer_title">LAN Transfer</string>
     <string name="lan_transfer_desc">Quickly transfer accounts with a nearby device over local Wi-Fi</string>
-    <string name="lan_transfer_send_desc">Keep this screen open on the sending device. The receiver can enter the pairing code to transfer accounts.</string>
-    <string name="lan_transfer_receive_desc">Connect to the same Wi-Fi network as the sending device and enter the 6-digit pairing code.</string>
+    <string name="lan_transfer_send_desc">Connect to the receiving device on the same Wi-Fi, then enter the 12-digit code shown on its screen.</string>
+    <string name="lan_transfer_receive_desc">Keep this screen open and show the code below to the sending device.</string>
     <string name="lan_send_tab">Send</string>
     <string name="lan_receive_tab">Receive</string>
     <string name="lan_pairing_code_label">Pairing Code</string>
-    <string name="lan_pairing_code_hint">Enter 6-digit code</string>
+    <string name="lan_pairing_code_hint">Enter the 12-digit code</string>
     <string name="lan_server_ip_label">Local Address</string>
     <string name="lan_status_waiting">Waiting for receiver to connect…</string>
     <string name="lan_status_transferring">Transferring data…</string>
@@ -460,11 +460,11 @@
     <string name="lan_error_no_wifi">Not connected to a Wi-Fi network. Please connect both devices to the same Wi-Fi.</string>
     <string name="lan_error_no_device_selected">Please select a device to connect</string>
     <string name="lan_error_invalid_ip">Please enter a valid IP:Port, e.g. 192.168.1.100:52026</string>
-    <string name="lan_error_invalid_code_length">Pairing code must be 6 digits</string>
+    <string name="lan_error_invalid_code_length">Pairing code must be 12 digits</string>
     <string name="lan_error_wrong_code">Wrong pairing code or decryption failed</string>
     <string name="lan_error_too_many_attempts">Too many failed connection attempts. Please stop and restart the transfer.</string>
     <string name="lan_error_connection">Connection failed: %1$s</string>
-    <string name="lan_security_tip">Protected with end-to-end AES-256-GCM encryption derived from the pairing code. Third parties on the local network cannot intercept your accounts.</string>
+    <string name="lan_security_tip">Ephemeral P-256 key exchange + AES-256-GCM. Both devices verify the 12-digit code before anything is sent, so third parties on the local network cannot read or impersonate the transfer.</string>
     <string name="filter_all">All</string>
     <string name="filter_uncategorized">Uncategorized</string>
     <string name="tags_settings_desc">Configure tag support and manage your tags.</string>
@@ -543,4 +543,7 @@
     <string name="check_file_cross">File path consistency</string>
     <string name="check_state_drift">Startup state drift</string>
     <string name="integrity_section_consistency">Consistency checks</string>
+    <string name="lan_status_done_receive">Received %1$d accounts</string>
+    <string name="pin_reminder_never">Don\'t remind me again</string>
+    <string name="pin_reminder_body">This device has no fingerprint or face unlock, so the app cannot verify who is opening it. Set an app PIN to protect your accounts.</string>
 </resources>

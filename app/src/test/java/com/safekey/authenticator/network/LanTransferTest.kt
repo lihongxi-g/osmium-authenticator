@@ -2,24 +2,33 @@ package com.safekey.authenticator.network
 
 import com.safekey.authenticator.model.VaultAccount
 import com.safekey.authenticator.model.VaultFile
-import com.safekey.authenticator.security.VaultFormatException
 import com.safekey.authenticator.security.VaultIO
+import java.io.DataInputStream
+import java.io.DataOutputStream
+import java.net.ServerSocket
+import java.net.Socket
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.io.DataInputStream
-import java.io.DataOutputStream
-import java.net.ServerSocket
-import java.net.Socket
 
+/**
+ * Wire-level tests of the v3 transfer handshake, mirroring the exact steps
+ * LanTransferServer (receiver) and LanTransferClient (sender) perform.
+ */
 class LanTransferTest {
 
+    private val code = "123456789012"
+    private val senderId = "sender-device-id"
+    private val receiverId = "receiver-device-id"
+
     private fun sampleVault() = VaultFile(
-        version = 1,
+        version = 2,
         format = "osmium-vault",
         exportedAt = System.currentTimeMillis(),
         accounts = listOf(
@@ -28,158 +37,291 @@ class LanTransferTest {
         )
     )
 
+    private fun hello(
+        out: DataOutputStream,
+        sender: LanSession.Ephemeral,
+        nonce: ByteArray
+    ) {
+        LanWire.writeText(out, LanSession.MAGIC)
+        LanWire.writeBytes(out, sender.publicKeyBytes)
+        LanWire.writeBytes(out, nonce)
+        LanWire.writeText(out, senderId)
+        LanWire.writeText(out, "sending phone")
+        LanWire.writeText(out, LanWire.codesToText(emptyList()))
+    }
+
     @Test
-    fun testDirectSocketTransferAndDecryption() = runBlocking {
-        val pairingCode = "849201"
+    fun `a full v3 transfer delivers the vault`() = runBlocking {
         val vault = sampleVault()
         val serverSocket = ServerSocket(0)
         val port = serverSocket.localPort
 
         val serverJob = async(Dispatchers.IO) {
-            val clientSocket = serverSocket.accept()
-            val dis = DataInputStream(clientSocket.getInputStream())
-            val dos = DataOutputStream(clientSocket.getOutputStream())
+            val socket = serverSocket.accept()
+            val input = DataInputStream(socket.getInputStream())
+            val output = DataOutputStream(socket.getOutputStream())
 
-            assertEquals(LanHandshake.MAGIC, dis.readUTF())
-            val nonce = LanHandshake.newNonce()
-            dos.writeInt(nonce.size)
-            dos.write(nonce)
-            dos.flush()
-            val proof = ByteArray(LanHandshake.PROOF_BYTES)
-            dis.readFully(proof)
-            assertTrue(
-                LanHandshake.matches(
-                    LanHandshake.proof(pairingCode.toCharArray(), nonce), proof
-                )
+            assertEquals(LanSession.MAGIC, LanWire.readText(input))
+            val senderPublic = LanWire.readKey(input)
+            val clientNonce = LanWire.readKey(input, LanWire.MAX_NONCE_BYTES)
+            val senderDeviceId = LanWire.readText(input)
+            val senderName = LanWire.readText(input)
+            val senderThreats = LanWire.codesFromText(LanWire.readText(input))
+            assertEquals(senderId, senderDeviceId)
+            assertEquals("sending phone", senderName)
+            assertTrue(senderThreats.isEmpty())
+
+            val receiver = LanSession.newEphemeral()
+            val serverNonce = LanSession.newNonce()
+            val receiverThreats = listOf("wifi_open")
+            val transcript = LanSession.transcript(
+                senderPublic, receiver.publicKeyBytes, clientNonce, serverNonce,
+                senderThreats, receiverThreats, senderDeviceId, receiverId
+            )
+            val sessionKey = LanSession.sessionKey(
+                receiver.privateKey, senderPublic, code, transcript
             )
 
-            val payload = VaultIO.encrypt(vault, pairingCode.toCharArray())
-                .toByteArray(Charsets.UTF_8)
-            dos.writeUTF(LanHandshake.ACK)
-            dos.writeInt(payload.size)
-            dos.write(payload)
-            dos.flush()
-            clientSocket.close()
+            LanWire.writeText(output, LanSession.ACK)
+            LanWire.writeBytes(output, receiver.publicKeyBytes)
+            LanWire.writeBytes(output, serverNonce)
+            LanWire.writeText(output, receiverId)
+            LanWire.writeText(output, "receiving phone")
+            LanWire.writeText(output, LanWire.codesToText(receiverThreats))
+            LanWire.writeBytes(output, LanSession.receiverTag(sessionKey, transcript))
+
+            val senderTag = LanWire.readKey(input, LanWire.MAX_TAG_BYTES)
+            assertTrue(
+                LanSession.matches(LanSession.senderTag(sessionKey, transcript), senderTag)
+            )
+
+            val sealed = LanWire.readPayload(input)
+            val plain = LanSession.open(sessionKey, transcript, sealed)
+            assertTrue(plain != null)
+            LanWire.writeText(output, LanSession.ACK)
+
+            val received = VaultIO.decodePlain(plain!!)
+            socket.close()
             serverSocket.close()
+            received
         }
 
         val clientJob = async(Dispatchers.IO) {
             val socket = Socket("127.0.0.1", port)
-            val dos = DataOutputStream(socket.getOutputStream())
-            val dis = DataInputStream(socket.getInputStream())
+            val output = DataOutputStream(socket.getOutputStream())
+            val input = DataInputStream(socket.getInputStream())
 
-            dos.writeUTF(LanHandshake.MAGIC)
-            dos.flush()
+            val sender = LanSession.newEphemeral()
+            val clientNonce = LanSession.newNonce()
+            hello(output, sender, clientNonce)
 
-            val nonceLength = dis.readInt()
-            assertEquals(LanHandshake.NONCE_BYTES, nonceLength)
-            val nonce = ByteArray(nonceLength)
-            dis.readFully(nonce)
-            dos.write(LanHandshake.proof(pairingCode.toCharArray(), nonce))
-            dos.flush()
+            assertEquals(LanSession.ACK, LanWire.readText(input))
+            val receiverPublic = LanWire.readKey(input)
+            val serverNonce = LanWire.readKey(input, LanWire.MAX_NONCE_BYTES)
+            val peerId = LanWire.readText(input)
+            assertEquals("receiving phone", LanWire.readText(input))
+            val peerThreats = LanWire.codesFromText(LanWire.readText(input))
+            val receiverTag = LanWire.readKey(input, LanWire.MAX_TAG_BYTES)
+            assertEquals(receiverId, peerId)
+            assertEquals(listOf("wifi_open"), peerThreats)
 
-            assertEquals(LanHandshake.ACK, dis.readUTF())
-            val payloadSize = dis.readInt()
-            val buffer = ByteArray(payloadSize)
-            dis.readFully(buffer)
+            val transcript = LanSession.transcript(
+                sender.publicKeyBytes, receiverPublic, clientNonce, serverNonce,
+                emptyList(), peerThreats, senderId, peerId
+            )
+            val sessionKey = LanSession.sessionKey(
+                sender.privateKey, receiverPublic, code, transcript
+            )
+            assertTrue(
+                "the receiver must prove the code",
+                LanSession.matches(LanSession.receiverTag(sessionKey, transcript), receiverTag)
+            )
+
+            val payload = VaultIO.encodePlain(vault).toByteArray(Charsets.UTF_8)
+            LanWire.writeBytes(output, LanSession.senderTag(sessionKey, transcript))
+            LanWire.writeBytes(output, LanSession.seal(sessionKey, transcript, payload))
+
+            val status = LanWire.readText(input)
             socket.close()
-
-            VaultIO.decrypt(buffer, pairingCode.toCharArray())
+            status
         }
 
-        serverJob.await()
-        val receivedVault = clientJob.await()
-
-        assertEquals(2, receivedVault.accounts.size)
-        assertEquals("GitHub", receivedVault.accounts[0].issuer)
-        assertEquals("Google", receivedVault.accounts[1].issuer)
+        val received = serverJob.await()
+        assertEquals(LanSession.ACK, clientJob.await())
+        assertEquals(2, received.accounts.size)
+        assertEquals("GitHub", received.accounts[0].issuer)
     }
 
-    /**
-     * Regression for the v1 hole: a peer that knows nothing but the protocol
-     * must not receive a payload it could brute-force offline.
-     */
     @Test
-    fun testWrongPairingCodeGetsNoPayload() = runBlocking {
+    fun `a wrong pairing code is rejected and no payload is accepted`() = runBlocking {
         val serverSocket = ServerSocket(0)
         val port = serverSocket.localPort
-        var payloadSent = false
+        val payloadsAccepted = java.util.concurrent.atomic.AtomicInteger(0)
 
         val serverJob = async(Dispatchers.IO) {
-            val clientSocket = serverSocket.accept()
-            val dis = DataInputStream(clientSocket.getInputStream())
-            val dos = DataOutputStream(clientSocket.getOutputStream())
+            val socket = serverSocket.accept()
+            val input = DataInputStream(socket.getInputStream())
+            val output = DataOutputStream(socket.getOutputStream())
 
-            assertEquals(LanHandshake.MAGIC, dis.readUTF())
-            val nonce = LanHandshake.newNonce()
-            dos.writeInt(nonce.size)
-            dos.write(nonce)
-            dos.flush()
+            assertEquals(LanSession.MAGIC, LanWire.readText(input))
+            val senderPublic = LanWire.readKey(input)
+            val clientNonce = LanWire.readKey(input, LanWire.MAX_NONCE_BYTES)
+            val senderDeviceId = LanWire.readText(input)
+            LanWire.readText(input)
+            val senderThreats = LanWire.codesFromText(LanWire.readText(input))
 
-            val received = ByteArray(LanHandshake.PROOF_BYTES)
-            dis.readFully(received)
-            // The attacker guessed a different code.
-            val expectedWrong = LanHandshake.proof("654321".toCharArray(), nonce)
-            val expectedRight = LanHandshake.proof("123456".toCharArray(), nonce)
-            assertFalse(LanHandshake.matches(expectedRight, expectedWrong))
-            if (!LanHandshake.matches(expectedRight, received)) {
-                payloadSent = true // only reached by the DENY path below
-                dos.writeUTF(LanHandshake.DENY)
-                dos.flush()
+            val receiver = LanSession.newEphemeral()
+            val serverNonce = LanSession.newNonce()
+            val transcript = LanSession.transcript(
+                senderPublic, receiver.publicKeyBytes, clientNonce, serverNonce,
+                senderThreats, emptyList(), senderDeviceId, receiverId
+            )
+            // The receiver knows its own code; the sender is guessing.
+            val sessionKey = LanSession.sessionKey(
+                receiver.privateKey, senderPublic, code, transcript
+            )
+
+            LanWire.writeText(output, LanSession.ACK)
+            LanWire.writeBytes(output, receiver.publicKeyBytes)
+            LanWire.writeBytes(output, serverNonce)
+            LanWire.writeText(output, receiverId)
+            LanWire.writeText(output, "receiving phone")
+            LanWire.writeText(output, LanWire.codesToText(emptyList()))
+            LanWire.writeBytes(output, LanSession.receiverTag(sessionKey, transcript))
+
+            val senderTag = LanWire.readKey(input, LanWire.MAX_TAG_BYTES)
+            val valid = LanSession.matches(
+                LanSession.senderTag(sessionKey, transcript), senderTag
+            )
+            if (!valid) {
+                LanWire.writeText(output, LanSession.DENY)
+            } else {
+                payloadsAccepted.incrementAndGet()
             }
-            clientSocket.close()
+            socket.close()
+            serverSocket.close()
+            valid
+        }
+
+        val clientJob = async(Dispatchers.IO) {
+            val socket = Socket("127.0.0.1", port)
+            val output = DataOutputStream(socket.getOutputStream())
+            val input = DataInputStream(socket.getInputStream())
+
+            val sender = LanSession.newEphemeral()
+            val clientNonce = LanSession.newNonce()
+            hello(output, sender, clientNonce)
+
+            assertEquals(LanSession.ACK, LanWire.readText(input))
+            val receiverPublic = LanWire.readKey(input)
+            val serverNonce = LanWire.readKey(input, LanWire.MAX_NONCE_BYTES)
+            val peerId = LanWire.readText(input)
+            LanWire.readText(input)
+            val peerThreats = LanWire.codesFromText(LanWire.readText(input))
+            val receiverTag = LanWire.readKey(input, LanWire.MAX_TAG_BYTES)
+
+            val transcript = LanSession.transcript(
+                sender.publicKeyBytes, receiverPublic, clientNonce, serverNonce,
+                emptyList(), peerThreats, senderId, peerId
+            )
+            // Guessed code: the receiver's own tag cannot match.
+            val wrongKey = LanSession.sessionKey(
+                sender.privateKey, receiverPublic, "999999999999", transcript
+            )
+            assertFalse(
+                LanSession.matches(LanSession.receiverTag(wrongKey, transcript), receiverTag)
+            )
+
+            val payload = VaultIO.encodePlain(sampleVault()).toByteArray(Charsets.UTF_8)
+            LanWire.writeBytes(output, LanSession.senderTag(wrongKey, transcript))
+            LanWire.writeBytes(output, LanSession.seal(wrongKey, transcript, payload))
+            val status = LanWire.readText(input)
+            socket.close()
+            status
+        }
+
+        assertFalse(serverJob.await())
+        assertEquals(LanSession.DENY, clientJob.await())
+        assertEquals(0, payloadsAccepted.get())
+    }
+
+    @Test
+    fun `a blocked peer is refused right after the hello`() = runBlocking {
+        val serverSocket = ServerSocket(0)
+        val port = serverSocket.localPort
+        val keyMaterialSent = java.util.concurrent.atomic.AtomicInteger(0)
+
+        val serverJob = async(Dispatchers.IO) {
+            val socket = serverSocket.accept()
+            val input = DataInputStream(socket.getInputStream())
+            val output = DataOutputStream(socket.getOutputStream())
+
+            assertEquals(LanSession.MAGIC, LanWire.readText(input))
+            LanWire.readKey(input)
+            LanWire.readKey(input, LanWire.MAX_NONCE_BYTES)
+            LanWire.readText(input)
+            LanWire.readText(input)
+            LanWire.readText(input)
+
+            // The sender's identity is on this device's block list.
+            LanWire.writeText(output, LanSession.DENY_BLOCKED)
+            socket.close()
             serverSocket.close()
         }
 
         val clientJob = async(Dispatchers.IO) {
             val socket = Socket("127.0.0.1", port)
-            val dos = DataOutputStream(socket.getOutputStream())
-            val dis = DataInputStream(socket.getInputStream())
-
-            dos.writeUTF(LanHandshake.MAGIC)
-            dos.flush()
-            val nonceLength = dis.readInt()
-            val nonce = ByteArray(nonceLength)
-            dis.readFully(nonce)
-            dos.write(LanHandshake.proof("999999".toCharArray(), nonce))
-            dos.flush()
-
-            val ack = dis.readUTF()
+            val output = DataOutputStream(socket.getOutputStream())
+            val input = DataInputStream(socket.getInputStream())
+            hello(output, LanSession.newEphemeral(), LanSession.newNonce())
+            val status = LanWire.readText(input)
             socket.close()
-            ack
+            status
         }
 
         serverJob.await()
-        assertEquals(LanHandshake.DENY, clientJob.await())
-        assertTrue(payloadSent)
-        // A rejected handshake surfaces as a wrong-password style failure so the
-        // UI shows the pairing-code message instead of a connection error.
-        val failure = VaultFormatException(true)
-        assertTrue(failure.wrongPassword)
+        assertEquals(LanSession.DENY_BLOCKED, clientJob.await())
+        assertEquals(0, keyMaterialSent.get())
     }
 
     @Test
-    fun testProofDependsOnTheSessionNonce() {
-        val code = "123456".toCharArray()
-        val first = LanHandshake.proof(code, ByteArray(LanHandshake.NONCE_BYTES) { 1 })
-        val second = LanHandshake.proof(code, ByteArray(LanHandshake.NONCE_BYTES) { 2 })
-        assertFalse(first.contentEquals(second))
-        // Same nonce and code reproduce the same proof (deterministic MAC).
-        assertTrue(first.contentEquals(LanHandshake.proof(code, ByteArray(LanHandshake.NONCE_BYTES) { 1 })))
-        assertEquals(LanHandshake.PROOF_BYTES, first.size)
-    }
-
-    @Test
-    fun testWrongPairingCodeRejection() {
-        val vault = sampleVault()
-        val encryptedJson = VaultIO.encrypt(vault, "123456".toCharArray())
-        val payloadBytes = encryptedJson.toByteArray(Charsets.UTF_8)
-
+    fun `an oversized handshake field is rejected before allocation`() {
+        val buffer = java.io.ByteArrayOutputStream()
+        val output = DataOutputStream(buffer)
+        // A hostile peer announces a 1 MiB identity string.
+        output.writeInt(1_048_576)
+        output.flush()
+        val input = DataInputStream(buffer.toByteArray().inputStream())
         try {
-            VaultIO.decrypt(payloadBytes, "654321".toCharArray())
-            org.junit.Assert.fail("Expected VaultFormatException with wrong password")
-        } catch (e: VaultFormatException) {
-            assertTrue(e.wrongPassword)
+            LanWire.readText(input)
+            org.junit.Assert.fail("expected the oversized field to be rejected")
+        } catch (e: Exception) {
+            assertTrue(e is java.io.IOException)
         }
+    }
+
+    @Test
+    fun `a truncated payload is rejected`() {
+        val buffer = java.io.ByteArrayOutputStream()
+        val output = DataOutputStream(buffer)
+        output.writeInt(64)
+        output.write(byteArrayOf(1, 2, 3))
+        output.flush()
+        val input = DataInputStream(buffer.toByteArray().inputStream())
+        assertNull(
+            try {
+                LanWire.readPayload(input)
+            } catch (_: Exception) {
+                null
+            }
+        )
+    }
+
+    @Test
+    fun `threat code lists are canonical on both sides`() {
+        assertEquals("vpn_active,wifi_open", LanWire.codesToText(listOf("wifi_open", "vpn_active", "wifi_open")))
+        assertEquals(listOf("wifi_open", "vpn_active"), LanWire.codesFromText("wifi_open,vpn_active"))
+        assertEquals(emptyList<String>(), LanWire.codesFromText(""))
+        assertNotEquals(LanWire.codesToText(listOf("a", "b")), LanWire.codesToText(listOf("b")))
     }
 }

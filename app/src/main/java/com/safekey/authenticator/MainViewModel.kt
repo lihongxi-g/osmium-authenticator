@@ -280,6 +280,11 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch { settingsRepo.setDevDetailedLogging(enabled) }
     }
 
+    /** "Don't remind me again" for the PIN suggestion on biometric-less devices. */
+    fun setPinReminderSilenced(silenced: Boolean) {
+        viewModelScope.launch { settingsRepo.setPinReminderSilenced(silenced) }
+    }
+
     /** Turning developer mode off also resets the dangerous toggles. */
     fun disableDeveloperMode() {
         viewModelScope.launch {
@@ -337,6 +342,10 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     /** True once the gate was passed during the current foreground session. */
     private var verifiedThisSession = false
+
+    /** Incremented on every foreground entry; UI prompts keyed on this repeat. */
+    private val _foregroundTick = MutableStateFlow(0)
+    val foregroundTick: StateFlow<Int> = _foregroundTick
 
     /**
      * True while a system file picker (backup export/import) is covering the
@@ -406,6 +415,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
      */
     fun onAppForeground() {
         appInForeground = true
+        _foregroundTick.value = _foregroundTick.value + 1
         verifiedThisSession = false
         pendingEnterNotice = true
         maybeShowIntegrityNotice()

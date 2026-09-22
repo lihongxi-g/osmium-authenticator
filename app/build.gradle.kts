@@ -13,8 +13,8 @@ android {
         applicationId = "com.safekey.authenticator"
         minSdk = 26
         targetSdk = 34
-        versionCode = 62
-        versionName = "2.5.2"
+        versionCode = 63
+        versionName = "2.5.3"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
     }
@@ -152,7 +152,10 @@ dependencies {
     // ColorOS 15; 1.4.0-alpha02 requires compileSdk 35 (a real release SDK).
     implementation("androidx.biometric:biometric:1.4.0-alpha02")
 
-    val cameraxVersion = "1.3.1"
+    // 1.4.x is the first line whose native libraries are 16 KB page-size aligned
+    // (1.3.x ships a 4 KB-aligned libimage_processing_util_jni.so, which Android
+    // flags as incompatible with 16 KB devices — Android 15+/17 hardware).
+    val cameraxVersion = "1.4.2"
     implementation("androidx.camera:camera-core:$cameraxVersion")
     implementation("androidx.camera:camera-camera2:$cameraxVersion")
     implementation("androidx.camera:camera-lifecycle:$cameraxVersion")

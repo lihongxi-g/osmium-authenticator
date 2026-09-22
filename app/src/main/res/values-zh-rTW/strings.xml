@@ -437,12 +437,12 @@
     <string name="refresh">重新整理</string>
     <string name="lan_transfer_title">區域網路快速傳輸</string>
     <string name="lan_transfer_desc">在同一 WiFi 區域網路內與另一台裝置快速遷移或同步帳戶</string>
-    <string name="lan_transfer_send_desc">請在傳送裝置上保持此頁面開啟，接收端輸入配對碼后即可開始傳輸。</string>
-    <string name="lan_transfer_receive_desc">請與發送端連線至同一 WiFi 網絡，並輸入發送端屏幕上顯示的 6 位配對碼。</string>
+    <string name="lan_transfer_send_desc">請與接收端裝置連線至同一 WiFi，並輸入接收端畫面上顯示的 12 位驗證碼。</string>
+    <string name="lan_transfer_receive_desc">請保持此頁面開啟，並把下方驗證碼出示給發送端裝置。</string>
     <string name="lan_send_tab">傳送帳戶</string>
     <string name="lan_receive_tab">接收帳戶</string>
     <string name="lan_pairing_code_label">配對碼</string>
-    <string name="lan_pairing_code_hint">輸入 6 位數字配對碼</string>
+    <string name="lan_pairing_code_hint">輸入 12 位數字驗證碼</string>
     <string name="lan_server_ip_label">本機位址</string>
     <string name="lan_status_waiting">等待接收端連線並輸入配對碼…</string>
     <string name="lan_status_transferring">正在傳輸数據…</string>
@@ -457,10 +457,10 @@
     <string name="lan_error_no_wifi">未連線 WiFi 區域網路，請先連線同一 WiFi</string>
     <string name="lan_error_no_device_selected">請選取要連線的傳送裝置</string>
     <string name="lan_error_invalid_ip">請輸入合法的 IP:連接埠，如 192.168.1.100:52026</string>
-    <string name="lan_error_invalid_code_length">配對碼必須為 6 位數字</string>
+    <string name="lan_error_invalid_code_length">驗證碼必須為 12 位數字</string>
     <string name="lan_error_wrong_code">配對碼錯誤或解密失敗</string>
     <string name="lan_error_connection">連線失敗：%1$s</string>
-    <string name="lan_security_tip">数據經 6 位配對碼端到端 AES-256-GCM 加密傳輸，區域網路內的第三方無法解密或竊聽。</string>
+    <string name="lan_security_tip">使用一次性 P-256 金鑰交換 + AES-256-GCM 加密：12 位驗證碼會在兩台裝置上互相驗證後才會傳輸資料，區域網路內的第三方無法讀取或冒充。</string>
     <string name="filter_all">全部</string>
     <string name="filter_uncategorized">未分類</string>
     <string name="tags_settings_desc">設定標籤功能並管理標籤。</string>
@@ -539,4 +539,7 @@
     <string name="check_file_cross">檔案路徑一致性</string>
     <string name="check_state_drift">啟動後狀態漂移</string>
     <string name="integrity_section_consistency">一致性核驗</string>
+    <string name="lan_status_done_receive">已接收 %1$d 個帳戶</string>
+    <string name="pin_reminder_never">之後不再提醒</string>
+    <string name="pin_reminder_body">此裝置沒有指紋或人臉辨識，開啟應用程式時無法驗證身分。建議設定應用程式 PIN 以保護帳戶。</string>
 </resources>

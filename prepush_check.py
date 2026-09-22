@@ -86,7 +86,8 @@ changed = subprocess.run(
     ["git", "-C", ROOT, "diff", "--name-only"], capture_output=True, text=True
 ).stdout.split()
 
-kt_files = [f for f in changed if f.endswith(".kt")]
+# Deleted files show up in the diff but cannot be read; skip them.
+kt_files = [f for f in changed if f.endswith(".kt") and os.path.exists(f"{ROOT}/{f}")]
 
 errors = 0
 for f in kt_files:

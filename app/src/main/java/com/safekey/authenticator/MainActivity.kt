@@ -26,16 +26,23 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -148,9 +155,18 @@ class MainActivity : FragmentActivity() {
             val destroyed by vm.destroyed.collectAsState()
             val toast by vm.toast.collectAsState()
             val integrityNotice by vm.integrityNotice.collectAsState()
-            val rootRestricted by vm.rootRestricted.collectAsState()
             val biometricReady by vm.biometricAvailable.collectAsState()
             val pinSet by vm.localPinSet.collectAsState()
+            val foregroundTick by vm.foregroundTick.collectAsState()
+            var pinReminderVisible by remember { mutableStateOf(false) }
+
+            // No fingerprint/face on this device: ask for an app PIN. The prompt
+            // repeats on every app open unless the user ticks "don't remind me".
+            LaunchedEffect(foregroundTick, biometricReady, pinSet, settings.pinReminderSilenced) {
+                if (!biometricReady && !pinSet && !settings.pinReminderSilenced) {
+                    pinReminderVisible = true
+                }
+            }
             val context = LocalContext.current
             // Keep these UI holders above the lock gate and AnimatedContent.
             // Navigating to a child route, or briefly showing the lock screen,
@@ -199,11 +215,6 @@ class MainActivity : FragmentActivity() {
                         tampered -> TamperedScreen()
                         destroyed -> DestroyedScreen()
                         pinRequired -> PinGate()
-                        // Root hardening without any credential: the forced
-                        // "verify on open" cannot be satisfied on a device with
-                        // neither a fingerprint nor an app PIN, so one has to be
-                        // set before any account data is shown.
-                        rootRestricted && !biometricReady && !pinSet -> RootPinGate()
                         locked -> LockGate()
                         else -> MainNavHost(
                             accountsListState = accountsListState,
@@ -218,6 +229,21 @@ class MainActivity : FragmentActivity() {
                         !destroyed && !tampered
                     ) {
                         UpdateDialog(tag = updateTag)
+                    }
+                    val showPinReminder = pinReminderVisible && !biometricReady && !pinSet &&
+                        !settings.pinReminderSilenced && !locked && !pinRequired &&
+                        !destroyed && !tampered
+                    if (showPinReminder) {
+                        PinReminderDialog(
+                            onSetup = {
+                                pinReminderVisible = false
+                                vm.nav.push(Screen.PinSetup("pin"))
+                            },
+                            onDismiss = { silence ->
+                                pinReminderVisible = false
+                                if (silence) vm.setPinReminderSilenced(true)
+                            }
+                        )
                     }
                     // Enter-app integrity reminder (L2/L3), debounced in the
                     // ViewModel; suppressed while the restriction is lifted.
@@ -336,27 +362,6 @@ class MainActivity : FragmentActivity() {
         )
     }
 
-    /**
-     * Root hardening with nothing to verify against: no fingerprint/face is
-     * enrolled and no app PIN is set, so the forced "verify on open" would
-     * silently do nothing. Ask for a PIN before showing any account data;
-     * exiting is the only alternative (the restriction itself stays liftable
-     * from developer mode afterwards).
-     */
-    @Composable
-    private fun RootPinGate() {
-        PinSetupScreen(
-            title = stringResource(R.string.pin_setup_title),
-            description = stringResource(R.string.root_section_locked) +
-                "\n\n" + stringResource(R.string.pin_setup_desc),
-            onDone = { pin ->
-                vm.setAppPin(pin)
-                vm.unlock()
-            },
-            onCancel = { finishAffinity() },
-            cancelLabel = stringResource(R.string.tampered_exit)
-        )
-    }
 
     @Composable
     private fun DestroyedScreen() {
@@ -745,6 +750,51 @@ class MainActivity : FragmentActivity() {
     )
 }
 
+/**
+ * Suggestion to set an app PIN on a device without fingerprint/face unlock.
+ * The reminder returns on the next app open unless the checkbox is ticked.
+ */
+@Composable
+private fun PinReminderDialog(
+    onSetup: () -> Unit,
+    onDismiss: (silence: Boolean) -> Unit
+) {
+    var silence by remember { mutableStateOf(false) }
+    AlertDialog(
+        onDismissRequest = { onDismiss(silence) },
+        title = { Text(stringResource(R.string.app_pin_setup)) },
+        text = {
+            Column {
+                Text(stringResource(R.string.pin_reminder_body))
+                Spacer(Modifier.height(8.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { silence = !silence }
+                ) {
+                    Checkbox(checked = silence, onCheckedChange = { silence = it })
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        text = stringResource(R.string.pin_reminder_never),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onSetup) {
+                Text(stringResource(R.string.pin_setup_title))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = { onDismiss(silence) }) {
+                Text(stringResource(R.string.update_later))
+            }
+        }
+    )
+}
+
 @Composable
 private fun IntegrityNoticeDialog(
     notice: IntegrityNotice,
@@ -1031,7 +1081,29 @@ private fun IntegrityNoticeDialog(
 
                     is Screen.LanTransfer -> LanTransferScreen(
                         vm = vm,
-                        onBack = { vm.nav.pop() }
+                        onBack = { vm.nav.pop() },
+                        // Blocking a peer device is a security decision: verify
+                        // identity first (same pattern as the settings toggles).
+                        onRequireBiometric = if (canAuthenticateBiometric()) {
+                            { onSuccess ->
+                                launchBiometric(
+                                    onSuccess = onSuccess,
+                                    onCancelled = {
+                                        vm.showToast(context.getString(R.string.lock_cancelled))
+                                    },
+                                    onError = { msg -> vm.showToast(msg) }
+                                )
+                            }
+                        } else null,
+                        onRequireCredential = { onSuccess ->
+                            launchCredential(
+                                onSuccess = onSuccess,
+                                onCancelled = {
+                                    vm.showToast(context.getString(R.string.lock_cancelled))
+                                },
+                                onError = { msg -> vm.showToast(msg) }
+                            )
+                        }
                     )
 
                     is Screen.PinSetup -> PinSetupScreen(
