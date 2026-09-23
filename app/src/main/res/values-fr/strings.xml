@@ -146,6 +146,7 @@
     <string name="fileimport_instructions">Choisissez un fichier d’export d’une autre application d’authentification. Osmium détecte automatiquement le format et affiche un aperçu avant l’import.\n\nSources prises en charge :\n• Aegis — export sans mot de passe (en clair)\n• 2FAS — sauvegarde .2fas exportée sans mot de passe\n• Raivo OTP — ancien export JSON en clair\n\nLes exports protégés par mot de passe ne sont pas encore pris en charge : veuillez ré-exporter sans mot de passe.</string>
     <string name="fileimport_security_note">Le fichier est lu uniquement sur cet appareil — rien n’est envoyé. Les fichiers d’export contiennent vos secrets : supprimez-les après l’import.</string>
     <string name="fileimport_pick_button">Choisir le fichier d’export</string>
+    <string name="fileimport_detected">Détecté : %1$s</string>
     <string name="fileimport_pick_another">Choisir un autre fichier</string>
     <string name="fileimport_empty_file">Le fichier sélectionné est vide.</string>
     <string name="fileimport_found">%1$d compte(s) importable(s) trouvé(s)</string>
@@ -165,10 +166,9 @@
     <string name="fileimport_reason_secret">Secret invalide — import impossible</string>
     <string name="thirdparty_import_title">Import depuis un autre authentificateur</string>
     <string name="thirdparty_import_desc">Migrer des comptes depuis Google Authenticator, Aegis, 2FAS ou Raivo OTP</string>
-    <string name="thirdparty_intro">Choisissez l’application depuis laquelle vous migrez. Osmium importe les QR codes de transfert de Google Authenticator et les fichiers d’export en clair des autres applications.</string>
-    <string name="thirdparty_row_aegis_desc">Fichier d’export en clair (.json, exporté sans mot de passe)</string>
-    <string name="thirdparty_row_2fas_desc">Sauvegarde exportée sans mot de passe (.2fas)</string>
-    <string name="thirdparty_row_raivo_desc">Ancien export JSON en clair</string>
+    <string name="thirdparty_file_row_title">Importer depuis un fichier de sauvegarde</string>
+    <string name="thirdparty_file_row_desc">Export Aegis, 2FAS ou Raivo OTP : la source est détectée automatiquement</string>
+    <string name="thirdparty_intro">Choisissez votre fichier de sauvegarde : Osmium reconnaît l\'authentificateur d\'origine et l\'importe. Google Authenticator se migre via ses QR codes de transfert.</string>
     <string name="thirdparty_notice">Nouvelle fonctionnalité — si un import échoue et que vous êtes certain d’avoir fait tout correctement, joignez le journal (Paramètres → À propos → Exporter le journal) et signalez le problème au développeur d’Osmium.</string>
     <string name="attributions_title">Attributions et sources</string>
     <string name="attributions_intro">La fonction d’import s’appuie sur des formats d’export publiquement documentés. Osmium ne réutilise aucun code des projets ci-dessous — ils sont cités comme documentation de format et comme source des échantillons d’export réels utilisés dans les tests d’import d’Osmium.</string>

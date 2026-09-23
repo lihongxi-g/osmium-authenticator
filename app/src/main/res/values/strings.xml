@@ -154,6 +154,7 @@
     <string name="fileimport_instructions">Choose an export file from another authenticator app. Osmium detects the format automatically and shows a preview before importing.\n\nSupported sources:\n• Aegis — export without a password (plaintext)\n• 2FAS — .2fas backup exported without a password\n• Raivo OTP — legacy plain JSON export\n\nPassword-encrypted exports are not supported yet: please re-export without a password.</string>
     <string name="fileimport_security_note">The file is read on this device only — nothing is uploaded. Export files contain your secrets: delete them after importing.</string>
     <string name="fileimport_pick_button">Choose export file</string>
+    <string name="fileimport_detected">Detected: %1$s</string>
     <string name="fileimport_pick_another">Choose another file</string>
     <string name="fileimport_empty_file">The selected file is empty.</string>
     <string name="fileimport_found">Found %1$d importable account(s)</string>
@@ -174,10 +175,9 @@
 
     <string name="thirdparty_import_title">Import from another authenticator</string>
     <string name="thirdparty_import_desc">Migrate accounts from Google Authenticator, Aegis, 2FAS or Raivo OTP</string>
-    <string name="thirdparty_intro">Pick the app you are migrating from. Osmium imports Google Authenticator transfer QR codes and plaintext export files from the other apps.</string>
-    <string name="thirdparty_row_aegis_desc">Plaintext export file (.json, exported without a password)</string>
-    <string name="thirdparty_row_2fas_desc">Backup exported without a password (.2fas)</string>
-    <string name="thirdparty_row_raivo_desc">Legacy plain JSON export</string>
+    <string name="thirdparty_file_row_title">Import from a backup file</string>
+    <string name="thirdparty_file_row_desc">Aegis, 2FAS or Raivo OTP export - the source is detected automatically</string>
+    <string name="thirdparty_intro">Choose your backup file - Osmium recognizes which authenticator it came from and imports it. Google Authenticator migrates with transfer QR codes.</string>
     <string name="thirdparty_notice">New feature - if an import fails and you are sure you did everything right, please attach the log (Settings → About → Export log) and report the issue to the Osmium developer.</string>
     <string name="attributions_title">Attributions &amp; sources</string>
     <string name="attributions_intro">The import feature is built from publicly documented export formats. Osmium reuses no code from the projects below - they are referenced as format documentation and as the source of the real export samples used in Osmium\'s import tests.</string>

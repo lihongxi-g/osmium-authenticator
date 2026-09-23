@@ -26,6 +26,7 @@ import com.safekey.authenticator.model.VaultAccount
 object RaivoImporter : AuthenticatorImporter {
 
     override val id = "raivo"
+    override val displayName = "Raivo OTP"
 
     override fun detect(content: String): Boolean {
         val c = content.cleanJsonText()

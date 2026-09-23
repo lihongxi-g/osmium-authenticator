@@ -146,6 +146,7 @@
     <string name="fileimport_instructions">किसी अन्य प्रमाणक ऐप से निर्यात फ़ाइल चुनें। Osmium फ़ॉर्मेट स्वतः पहचानता है और आयात से पहले पूर्वावलोकन दिखाता है।\n\nसमर्थित स्रोत:\n• Aegis — बिना पासवर्ड निर्यात (प्लेनटेक्स्ट)\n• 2FAS — बिना पासवर्ड निर्यात किया गया .2fas बैकअप\n• Raivo OTP — पुराना सादा JSON निर्यात\n\nपासवर्ड-एन्क्रिप्टेड निर्यात अभी समर्थित नहीं हैं: कृपया बिना पासवर्ड के फिर से निर्यात करें।</string>
     <string name="fileimport_security_note">फ़ाइल केवल इसी डिवाइस पर पढ़ी जाती है — कुछ भी अपलोड नहीं होता। निर्यात फ़ाइलों में आपके सीक्रेट होते हैं: आयात के बाद उन्हें हटा दें।</string>
     <string name="fileimport_pick_button">निर्यात फ़ाइल चुनें</string>
+    <string name="fileimport_detected">पहचाना गया: %1$s</string>
     <string name="fileimport_pick_another">दूसरी फ़ाइल चुनें</string>
     <string name="fileimport_empty_file">चुनी गई फ़ाइल खाली है।</string>
     <string name="fileimport_found">%1$d आयात योग्य खाते मिले</string>
@@ -165,10 +166,9 @@
     <string name="fileimport_reason_secret">अमान्य सीक्रेट — आयात नहीं हो सकता</string>
     <string name="thirdparty_import_title">दूसरे प्रमाणक ऐप से आयात</string>
     <string name="thirdparty_import_desc">Google Authenticator, Aegis, 2FAS या Raivo OTP से खाते माइग्रेट करें</string>
-    <string name="thirdparty_intro">जिस ऐप से आप माइग्रेट कर रहे हैं उसे चुनें। Osmium Google Authenticator के ट्रांसफ़र QR कोड और दूसरे ऐप्स की प्लेनटेक्स्ट निर्यात फ़ाइलें आयात करता है।</string>
-    <string name="thirdparty_row_aegis_desc">प्लेनटेक्स्ट निर्यात फ़ाइल (.json, बिना पासवर्ड निर्यात)</string>
-    <string name="thirdparty_row_2fas_desc">बिना पासवर्ड निर्यात किया गया बैकअप (.2fas)</string>
-    <string name="thirdparty_row_raivo_desc">पुराना सादा JSON निर्यात</string>
+    <string name="thirdparty_file_row_title">बैकअप फ़ाइल से आयात करें</string>
+    <string name="thirdparty_file_row_desc">Aegis, 2FAS या Raivo OTP एक्सपोर्ट - स्रोत अपने आप पहचाना जाता है</string>
+    <string name="thirdparty_intro">अपनी बैकअप फ़ाइल चुनें - Osmium पहचान लेता है कि यह किस ऑथेंटिकेटर की है और उसे आयात कर देता है। Google Authenticator ट्रांसफ़र QR कोड से माइग्रेट होता है।</string>
     <string name="thirdparty_notice">नई सुविधा - यदि आयात विफल हो जाए और आपको पूरा भरोसा हो कि आपने सब कुछ सही किया है, तो कृपया लॉग संलग्न करें (सेटिंग्स → जानकारी → लॉग निर्यात करें) और समस्या की रिपोर्ट Osmium डेवलपर को करें।</string>
     <string name="attributions_title">श्रेय और स्रोत</string>
     <string name="attributions_intro">आयात सुविधा सार्वजनिक रूप से प्रलेखित निर्यात फ़ॉर्मेटों पर आधारित है। Osmium नीचे दिए प्रोजेक्टों से कोई कोड उधार नहीं लेता - उन्हें फ़ॉर्मेट दस्तावेज़ीकरण और Osmium के आयात परीक्षणों में उपयोग किए गए वास्तविक निर्यात नमूनों के स्रोत के रूप में संदर्भित किया गया है।</string>

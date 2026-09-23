@@ -18,6 +18,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -75,6 +76,8 @@ fun FileImportScreen(
     var selected by remember { mutableStateOf<Set<Int>?>(null) }
     var errorText by remember { mutableStateOf<String?>(null) }
     var working by remember { mutableStateOf(false) }
+    /** Product name of the recognized source app, shown above the preview. */
+    var detectedSource by remember { mutableStateOf<String?>(null) }
 
     val fileLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocument()
@@ -87,6 +90,7 @@ fun FileImportScreen(
             issues = emptyMap()
             plan = null
             selected = null
+            detectedSource = null
             try {
                 val text = withContext(Dispatchers.IO) {
                     context.contentResolver.openInputStream(uri)?.use { input ->
@@ -97,11 +101,14 @@ fun FileImportScreen(
                     errorText = context.getString(R.string.fileimport_empty_file)
                     return@launch
                 }
+                var recognized: String? = null
                 val parsed = withContext(Dispatchers.Default) {
                     val importer = Importers.find(text)
                         ?: throw ImporterException(ImporterError.UNRECOGNIZED)
+                    recognized = importer.displayName
                     importer.parse(text)
                 }
+                detectedSource = recognized
                 val issueMap = parsed.mapIndexedNotNull { index, account ->
                     ImportSupport.issue(account, vm.settings.value.devExtraDigits)?.let { index to it }
                 }.toMap()
@@ -139,6 +146,31 @@ fun FileImportScreen(
         }
     }
 
+    /**
+     * The flow is "backup file in, accounts out", so this screen opens the
+     * system picker straight away instead of making the user tap through to it
+     * (the row that leads here is already the deliberate choice). The button
+     * below stays as the fallback when the picker is cancelled.
+     */
+    fun openPicker() {
+        errorText = null
+        vm.setTransferPickerActive(true)
+        try {
+            fileLauncher.launch(arrayOf("*/*"))
+        } catch (e: Exception) {
+            vm.setTransferPickerActive(false)
+            errorText = context.getString(R.string.fileimport_error_read, e.message ?: "Error")
+        }
+    }
+
+    var autoPickStarted by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        if (!autoPickStarted) {
+            autoPickStarted = true
+            openPicker()
+        }
+    }
+
     Scaffold(
         topBar = { SimpleTopBar(title = stringResource(R.string.fileimport_title), onBack = onBack) }
     ) { padding ->
@@ -166,14 +198,7 @@ fun FileImportScreen(
                     )
                 }
                 Button(
-                    onClick = {
-                        errorText = null
-                        vm.setTransferPickerActive(true)
-                        try { fileLauncher.launch(arrayOf("*/*")) } catch (e: Exception) {
-                            vm.setTransferPickerActive(false)
-                            errorText = context.getString(R.string.fileimport_error_read, e.message ?: "Error")
-                        }
-                    },
+                    onClick = { openPicker() },
                     enabled = !working,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -187,6 +212,14 @@ fun FileImportScreen(
                 )
             } else {
                 // ---------- preview / import stage ----------
+                detectedSource?.let { source ->
+                    Text(
+                        text = stringResource(R.string.fileimport_detected, source),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)
+                    )
+                }
                 val current = plan
                 val issueRows = parsed.mapIndexedNotNull { index, account ->
                     issues[index]?.let { issue -> account to issue }
@@ -271,6 +304,7 @@ fun FileImportScreen(
                             plan = null
                             selected = null
                             errorText = null
+                            detectedSource = null
                         },
                         modifier = Modifier.align(Alignment.CenterHorizontally)
                     ) { Text(stringResource(R.string.fileimport_pick_another)) }

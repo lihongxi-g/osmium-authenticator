@@ -23,6 +23,9 @@ interface AuthenticatorImporter {
     /** Stable identifier used for logs and diagnostics, e.g. "aegis". */
     val id: String
 
+    /** Product name shown in the import preview ("Detected: …"), e.g. "Raivo OTP". */
+    val displayName: String
+
     /**
      * True when [content] looks like this format. Sniffs structural markers
      * (root shape + distinctive keys); it must be cheap and must never throw.

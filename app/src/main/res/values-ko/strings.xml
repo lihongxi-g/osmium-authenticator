@@ -146,6 +146,7 @@
     <string name="fileimport_instructions">다른 인증 앱의 내보내기 파일을 선택하세요. Osmium이 형식을 자동으로 감지하여 가져오기 전에 미리보기를 보여줍니다.\n\n지원되는 소스:\n• Aegis — 비밀번호 없이 내보낸 파일(평문)\n• 2FAS — 비밀번호 없이 내보낸 .2fas 백업\n• Raivo OTP — 기존 형식의 평문 JSON 내보내기\n\n비밀번호로 암호화된 내보내기는 아직 지원되지 않으니, 비밀번호 없이 다시 내보내 주세요.</string>
     <string name="fileimport_security_note">파일은 이 기기에서만 읽히며 아무것도 업로드되지 않습니다. 내보내기 파일에는 비밀키가 들어 있으므로 가져온 뒤 삭제하세요.</string>
     <string name="fileimport_pick_button">내보내기 파일 선택</string>
+    <string name="fileimport_detected">인식됨: %1$s</string>
     <string name="fileimport_pick_another">다른 파일 선택</string>
     <string name="fileimport_empty_file">선택한 파일이 비어 있습니다.</string>
     <string name="fileimport_found">가져올 수 있는 계정 %1$d개를 찾았습니다</string>
@@ -165,10 +166,9 @@
     <string name="fileimport_reason_secret">잘못된 비밀키 — 가져올 수 없음</string>
     <string name="thirdparty_import_title">다른 인증 앱에서 가져오기</string>
     <string name="thirdparty_import_desc">Google Authenticator, Aegis, 2FAS 또는 Raivo OTP에서 계정 가져오기</string>
-    <string name="thirdparty_intro">마이그레이션할 앱을 선택하세요. Osmium은 Google Authenticator 전송 QR 코드와 다른 앱들의 평문 내보내기 파일을 가져올 수 있습니다.</string>
-    <string name="thirdparty_row_aegis_desc">평문 내보내기 파일(.json, 비밀번호 없이 내보냄)</string>
-    <string name="thirdparty_row_2fas_desc">비밀번호 없이 내보낸 백업(.2fas)</string>
-    <string name="thirdparty_row_raivo_desc">기존 형식의 평문 JSON 내보내기</string>
+    <string name="thirdparty_file_row_title">백업 파일에서 가져오기</string>
+    <string name="thirdparty_file_row_desc">Aegis, 2FAS, Raivo OTP 내보내기 - 출처를 자동으로 인식</string>
+    <string name="thirdparty_intro">백업 파일을 선택하면 Osmium이 어떤 인증 앱의 백업인지 자동으로 인식해 가져옵니다. Google Authenticator는 이전용 QR 코드로 옮깁니다.</string>
     <string name="thirdparty_notice">새로운 기능 — 가져오기가 실패했는데 모든 과정을 올바르게 진행했다고 생각되면 로그(설정 → 정보 → 로그 내보내기)를 첨부하여 Osmium 개발자에게 문제를 보고해 주세요.</string>
     <string name="attributions_title">저작자 표시 및 출처</string>
     <string name="attributions_intro">가져오기 기능은 공개적으로 문서화된 내보내기 형식을 바탕으로 만들어졌습니다. Osmium은 아래 프로젝트의 코드를 재사용하지 않습니다. 아래 프로젝트들은 형식 문서로서, 그리고 Osmium의 가져오기 테스트에 사용된 실제 내보내기 샘플의 출처로서 참조됩니다.</string>

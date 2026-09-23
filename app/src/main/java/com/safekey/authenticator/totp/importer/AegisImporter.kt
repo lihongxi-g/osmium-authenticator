@@ -26,6 +26,7 @@ import com.safekey.authenticator.model.VaultAccount
 object AegisImporter : AuthenticatorImporter {
 
     override val id = "aegis"
+    override val displayName = "Aegis"
 
     override fun detect(content: String): Boolean {
         val c = content.cleanJsonText()

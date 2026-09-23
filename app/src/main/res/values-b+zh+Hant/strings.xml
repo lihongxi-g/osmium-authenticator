@@ -153,6 +153,7 @@
     <string name="fileimport_instructions">從其他驗證器 App 選擇匯出檔案。Osmium 會自動偵測格式，並在匯入前顯示預覽。\n\n支援的來源：\n• Aegis——不使用密碼匯出（明文）\n• 2FAS——不使用密碼匯出的 .2fas 備份\n• Raivo OTP——舊版純 JSON 匯出\n\n尚不支援以密碼加密的匯出，請重新以無密碼方式匯出。</string>
     <string name="fileimport_security_note">此檔案僅在此裝置上讀取——不會上傳任何內容。匯出檔案含有你的金鑰，匯入後請刪除。</string>
     <string name="fileimport_pick_button">選擇匯出檔案</string>
+    <string name="fileimport_detected">已辨識：%1$s</string>
     <string name="fileimport_pick_another">選擇其他檔案</string>
     <string name="fileimport_empty_file">選取的檔案是空的。</string>
     <string name="fileimport_found">發現 %1$d 個可匯入的帳戶</string>
@@ -172,10 +173,9 @@
     <string name="fileimport_reason_secret">金鑰無效——無法匯入</string>
     <string name="thirdparty_import_title">從其他驗證器匯入</string>
     <string name="thirdparty_import_desc">從 Google Authenticator、Aegis、2FAS 或 Raivo OTP 遷移帳戶</string>
-    <string name="thirdparty_intro">選擇你要遷移的來源 App。Osmium 可匯入 Google Authenticator 的遷移二維碼，以及其他 App 的明文匯出檔案。</string>
-    <string name="thirdparty_row_aegis_desc">明文匯出檔案（.json，不使用密碼匯出）</string>
-    <string name="thirdparty_row_2fas_desc">不使用密碼匯出的備份（.2fas）</string>
-    <string name="thirdparty_row_raivo_desc">舊版純 JSON 匯出</string>
+    <string name="thirdparty_file_row_title">從備份檔案匯入</string>
+    <string name="thirdparty_file_row_desc">Aegis、2FAS、Raivo OTP 的匯出檔案——自動辨識來源</string>
+    <string name="thirdparty_intro">直接選擇你的備份檔案即可——Osmium 會自動辨識是哪個驗證器的備份，然後匯入。Google Authenticator 請使用移轉 QR 碼。</string>
     <string name="thirdparty_notice">新功能——若匯入失敗，且你確定操作步驟都正確，請附上日志（設定 → 關於 → 匯出日志）並向 Osmium 開發者回報問題。</string>
     <string name="attributions_title">致謝與來源</string>
     <string name="attributions_intro">匯入功能是根據公開文件所記載的匯出格式所建置。Osmium 沒有重用下列專案中的任何程式碼——它們僅作為格式參考文件，以及 Osmium 匯入測試中所用真實匯出樣本的來源。</string>

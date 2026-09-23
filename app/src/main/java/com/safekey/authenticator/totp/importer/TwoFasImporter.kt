@@ -31,6 +31,7 @@ object TwoFasImporter : AuthenticatorImporter {
     private const val MAX_SCHEMA_VERSION = 4
 
     override val id = "2fas"
+    override val displayName = "2FAS"
 
     override fun detect(content: String): Boolean {
         val c = content.cleanJsonText()
