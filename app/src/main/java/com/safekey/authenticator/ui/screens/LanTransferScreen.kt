@@ -53,9 +53,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -76,6 +78,7 @@ import com.safekey.authenticator.network.LanThreatSeverity
 import com.safekey.authenticator.network.LanTransferClient
 import com.safekey.authenticator.network.LanTransferServer
 import com.safekey.authenticator.ui.components.AppIcons
+import com.safekey.authenticator.ui.components.CodeField
 import com.safekey.authenticator.ui.components.IconButtonCompat
 import com.safekey.authenticator.ui.components.SimpleTopBar
 import kotlinx.coroutines.Dispatchers
@@ -242,7 +245,10 @@ private fun SendTabContent(
     var selectedDevice by remember { mutableStateOf<DiscoveredDevice?>(null) }
     var useManualIp by remember { mutableStateOf(false) }
     var manualIp by remember { mutableStateOf("") }
-    var codeInput by remember { mutableStateOf("") }
+    // Pairing code: digits are the source of truth, the TextFieldValue keeps
+    // text + caret so the grouping never moves the caret (see CodeField).
+    var codeField by remember { mutableStateOf(TextFieldValue("")) }
+    val codeInput = CodeField.digits(codeField.text, LanSession.PAIRING_CODE_DIGITS)
     var isSending by remember { mutableStateOf(false) }
     var statusText by remember { mutableStateOf("") }
     var errorText by remember { mutableStateOf<String?>(null) }
@@ -406,8 +412,17 @@ private fun SendTabContent(
         }
 
         OutlinedTextField(
-            value = LanSession.groupedCode(codeInput),
-            onValueChange = { codeInput = LanSession.normalizeCode(it).take(LanSession.PAIRING_CODE_DIGITS) },
+            value = codeField,
+            onValueChange = { incoming ->
+                val resolved = CodeField.resolve(
+                    previous = codeField.text,
+                    previousCaret = codeField.selection.max,
+                    incoming = incoming.text,
+                    caret = incoming.selection.max,
+                    maxDigits = LanSession.PAIRING_CODE_DIGITS
+                )
+                codeField = TextFieldValue(resolved.text, TextRange(resolved.caret))
+            },
             label = { Text(stringResource(R.string.lan_pairing_code_label)) },
             placeholder = { Text(stringResource(R.string.lan_pairing_code_label)) },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
