@@ -62,6 +62,14 @@ data class AppSettings(
         const val DESTROY_PIN = "destroy_pin"
         const val DESTROY_FAIL_COUNT = "fail_count"
 
+        /**
+         * Hidden-feature id (developer mode → hide settings entries) for the
+         * Android integrity detection entry. Hiding it hides the settings row
+         * AND keeps the automatic startup scan off — the user asked for the
+         * feature to be gone, not for it to keep running unseen.
+         */
+        const val HIDDEN_FEATURE_INTEGRITY = "integrity"
+
         const val AUTO_BACKUP_TARGET_WEBDAV = "webdav"
         const val AUTO_BACKUP_TARGET_LOCAL = "local"
 

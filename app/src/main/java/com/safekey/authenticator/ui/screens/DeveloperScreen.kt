@@ -40,6 +40,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.safekey.authenticator.MainViewModel
 import com.safekey.authenticator.R
+import com.safekey.authenticator.data.AppSettings
 import com.safekey.authenticator.security.KeystoreTools
 import com.safekey.authenticator.security.RootState
 import com.safekey.authenticator.ui.components.AppIcons
@@ -626,7 +627,7 @@ private val HIDEABLE_ITEMS: List<Pair<String, Int>> = listOf(
     "screenshots" to R.string.allow_screenshots,
     "hideCodes" to R.string.hide_codes,
     "timeOffset" to R.string.time_offset,
-    "integrity" to R.string.integrity_entry_title,
+    AppSettings.HIDDEN_FEATURE_INTEGRITY to R.string.integrity_entry_title,
     "pin" to R.string.settings_pin,
     "destroy" to R.string.settings_destroy,
     "thirdparty" to R.string.thirdparty_import_title,

@@ -234,6 +234,11 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     private fun maybeShowIntegrityNotice() {
         if (!pendingEnterNotice) return
         val s = settings.value
+        // Feature hidden in developer mode: no scan means no reminder either.
+        if (AppSettings.HIDDEN_FEATURE_INTEGRITY in s.devHiddenFeatures) {
+            pendingEnterNotice = false
+            return
+        }
         if (s.devDisableRootSecurity) {
             pendingEnterNotice = false
             return

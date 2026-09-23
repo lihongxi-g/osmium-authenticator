@@ -294,7 +294,13 @@ class MainActivity : FragmentActivity() {
         vm.onAppForeground()
         maybeCheckForUpdate()
         maybeRefreshLegalDocs()
-        lifecycleScope.launch { RootState.refresh(applicationContext) }
+        // The startup scan feeds the integrity screen, the enter-app reminder
+        // and the root-hardening overlay. With the feature hidden in developer
+        // mode it must not run behind the user's back either: it stays off
+        // until they run the check by hand (developer mode → run root check).
+        if (AppSettings.HIDDEN_FEATURE_INTEGRITY !in vm.settings.value.devHiddenFeatures) {
+            lifecycleScope.launch { RootState.refresh(applicationContext) }
+        }
     }
 
     override fun onStop() {

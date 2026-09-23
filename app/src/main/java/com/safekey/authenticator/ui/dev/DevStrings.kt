@@ -196,7 +196,7 @@ data class DevStrings(
             devEnabled = "Developer mode enabled",
             devDisabled = "Developer mode turned off",
             hideSaved = "Saved",
-            hideHint = "Checked entries won't appear in Settings. Uncheck to restore.",
+            hideHint = "Checked entries won't appear in Settings. Uncheck to restore. Hiding \"Android integrity detection\" also stops the automatic check when the app starts.",
             reencryptDonePrefix = "Re-encrypted fields: ",
             reencryptFailed = "Re-encryption failed — nothing was changed",
             reencryptRunning = "Re-encrypting…"
@@ -279,7 +279,7 @@ data class DevStrings(
             devEnabled = "开发者模式已开启",
             devDisabled = "开发者模式已关闭",
             hideSaved = "已保存",
-            hideHint = "勾选的条目将不在设置界面显示；取消勾选可恢复。",
+            hideHint = "勾选的条目将不在设置界面显示；取消勾选可恢复。隐藏「Android 完整性检测」后，App 启动时也不再自动检测。",
             reencryptDonePrefix = "已重新加密字段数：",
             reencryptFailed = "重新加密失败——数据未做任何改动",
             reencryptRunning = "重新加密中…"
