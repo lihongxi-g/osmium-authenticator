@@ -1,5 +1,6 @@
 package com.safekey.authenticator.update
 
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -60,5 +61,31 @@ class UpdateCheckerTest {
         assertFalse(UpdateChecker.isNewer("abc", "2.3.2"))
         assertFalse(UpdateChecker.isNewer("", "2.3.2"))
         assertFalse(UpdateChecker.isNewer("2.3.x", "2.3.2"))
+    }
+
+    // ------------------------------------------------- release notes (update dialog)
+
+    @Test
+    fun releaseNotes_dropTheMarkdownSyntax() {
+        assertEquals("Osmium v2.5.2", ReleaseNotes.clean("# Osmium v2.5.2"))
+        assertEquals("Fixed a bug", ReleaseNotes.clean("**Fixed** a bug"))
+        assertEquals("a link", ReleaseNotes.clean("[a link](https://example.com)"))
+        assertEquals("quoted", ReleaseNotes.clean("> quoted"))
+        assertEquals("• one\n• two", ReleaseNotes.clean("- one\n- two"))
+        assertEquals("code", ReleaseNotes.clean("`code`"))
+    }
+
+    @Test
+    fun releaseNotes_keepParagraphsAndDropBlankRuns() {
+        assertEquals("a\n\nb", ReleaseNotes.clean("a\r\n\r\n\r\nb"))
+        assertEquals("text", ReleaseNotes.clean("  \n\n text \n "))
+        assertEquals("", ReleaseNotes.clean("   "))
+    }
+
+    @Test
+    fun releaseNotes_capAbsurdLength() {
+        val cleaned = ReleaseNotes.clean("x".repeat(20_000))
+        assertTrue(cleaned.length < 5_000)
+        assertTrue(cleaned.endsWith("…"))
     }
 }

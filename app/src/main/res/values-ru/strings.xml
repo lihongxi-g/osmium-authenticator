@@ -255,12 +255,13 @@
     <string name="export_log_done">Журнал скопирован в буфер обмена</string>
     <string name="about_entry_desc">Версия, обновления и контакты</string>
     <string name="about_version">Версия %1$s</string>
-    <string name="check_updates">Проверить обновления (GitHub Releases)</string>
+    <string name="check_updates">Проверить обновления</string>
     <string name="about_follow">Подписаться на Osmium</string>
     <string name="social_telegram">Telegram</string>
     <string name="social_x">X</string>
     <string name="social_github">GitHub</string>
     <string name="social_mail">Email</string>
+    <string name="social_website">Сайт</string>
     <string name="no_browser">Нет приложения для открытия этой ссылки.</string>
     <string name="email_log_copied">Журнал добавлен в письмо, полный журнал скопирован в буфер обмена</string>
     <string name="share_account">Поделиться аккаунтом</string>
@@ -398,6 +399,9 @@
     <string name="update_check_desc">Тихо проверяет новые версии на GitHub при открытии</string>
     <string name="update_available_title">Доступна новая версия</string>
     <string name="update_available_body">Доступна версия %1$s (установлена: %2$s). Открыть GitHub?</string>
+    <string name="update_available_notes_title">Что нового</string>
+    <string name="update_up_to_date">У вас уже последняя версия (%1$s)</string>
+    <string name="update_check_failed">Не удалось проверить обновления - попробуйте позже</string>
     <string name="update_go_github">Открыть GitHub</string>
     <string name="update_later">Позже</string>
     <string name="webdav_http_warning_title">Предупреждение о незашифрованном соединении</string>

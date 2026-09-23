@@ -255,12 +255,13 @@
     <string name="export_log_done">Registro copiado al portapapeles</string>
     <string name="about_entry_desc">Versión, actualizaciones y contacto</string>
     <string name="about_version">Versión %1$s</string>
-    <string name="check_updates">Buscar actualizaciones (GitHub Releases)</string>
+    <string name="check_updates">Buscar actualizaciones</string>
     <string name="about_follow">Seguir a Osmium</string>
     <string name="social_telegram">Telegram</string>
     <string name="social_x">X</string>
     <string name="social_github">GitHub</string>
     <string name="social_mail">Correo</string>
+    <string name="social_website">Sitio web</string>
     <string name="no_browser">No hay ninguna aplicación disponible para abrir este enlace.</string>
     <string name="email_log_copied">Registro añadido al cuerpo del correo; el registro completo se copió al portapapeles</string>
     <string name="share_account">Compartir cuenta</string>
@@ -398,6 +399,9 @@
     <string name="update_check_desc">Comprueba GitHub en silencio al abrir la app</string>
     <string name="update_available_title">Nueva versión disponible</string>
     <string name="update_available_body">La versión %1$s está disponible (instalada: %2$s). ¿Abrir GitHub?</string>
+    <string name="update_available_notes_title">Novedades</string>
+    <string name="update_up_to_date">Ya tienes la última versión (%1$s)</string>
+    <string name="update_check_failed">No se pudo comprobar si hay actualizaciones; inténtalo más tarde</string>
     <string name="update_go_github">Abrir GitHub</string>
     <string name="update_later">Más tarde</string>
     <string name="webdav_http_warning_title">Aviso de conexión sin cifrar</string>

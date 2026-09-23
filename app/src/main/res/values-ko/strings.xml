@@ -255,12 +255,13 @@
     <string name="export_log_done">로그가 클립보드에 복사되었습니다</string>
     <string name="about_entry_desc">버전, 업데이트, 연락처</string>
     <string name="about_version">버전 %1$s</string>
-    <string name="check_updates">업데이트 확인 (GitHub Releases)</string>
+    <string name="check_updates">업데이트 확인</string>
     <string name="about_follow">Osmium 팔로우</string>
     <string name="social_telegram">Telegram</string>
     <string name="social_x">X</string>
     <string name="social_github">GitHub</string>
     <string name="social_mail">이메일</string>
+    <string name="social_website">웹사이트</string>
     <string name="no_browser">이 링크를 열 수 있는 앱이 없습니다.</string>
     <string name="email_log_copied">로그가 이메일 본문에 추가되고 전체 로그가 클립보드에 복사되었습니다</string>
     <string name="share_account">계정 공유</string>
@@ -398,6 +399,9 @@
     <string name="update_check_desc">앱을 열 때 GitHub의 새 버전을 조용히 확인</string>
     <string name="update_available_title">새 버전 사용 가능</string>
     <string name="update_available_body">버전 %1$s이(가) 출시되었습니다(현재: %2$s). GitHub에서 확인할까요?</string>
+    <string name="update_available_notes_title">업데이트 내용</string>
+    <string name="update_up_to_date">이미 최신 버전입니다(%1$s)</string>
+    <string name="update_check_failed">업데이트 확인에 실패했습니다 - 나중에 다시 시도하세요</string>
     <string name="update_go_github">GitHub 열기</string>
     <string name="update_later">나중에</string>
     <string name="webdav_http_warning_title">평문 연결 경고</string>

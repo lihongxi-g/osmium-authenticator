@@ -255,12 +255,13 @@
     <string name="export_log_done">Protokoll in die Zwischenablage kopiert</string>
     <string name="about_entry_desc">Version, Updates und Kontakt</string>
     <string name="about_version">Version %1$s</string>
-    <string name="check_updates">Nach Updates suchen (GitHub Releases)</string>
+    <string name="check_updates">Nach Updates suchen</string>
     <string name="about_follow">Osmium folgen</string>
     <string name="social_telegram">Telegram</string>
     <string name="social_x">X</string>
     <string name="social_github">GitHub</string>
     <string name="social_mail">E-Mail</string>
+    <string name="social_website">Website</string>
     <string name="no_browser">Keine App zum Öffnen dieses Links verfügbar.</string>
     <string name="email_log_copied">Protokoll zum E-Mail-Text hinzugefügt, vollständiges Protokoll in die Zwischenablage kopiert</string>
     <string name="share_account">Konto teilen</string>
@@ -398,6 +399,9 @@
     <string name="update_check_desc">Prüft beim Öffnen still auf GitHub nach neuen Versionen</string>
     <string name="update_available_title">Neue Version verfügbar</string>
     <string name="update_available_body">Version %1$s ist verfügbar (installiert: %2$s). Auf GitHub ansehen?</string>
+    <string name="update_available_notes_title">Neuerungen</string>
+    <string name="update_up_to_date">Du hast bereits die neueste Version (%1$s)</string>
+    <string name="update_check_failed">Update-Prüfung fehlgeschlagen - später erneut versuchen</string>
     <string name="update_go_github">GitHub öffnen</string>
     <string name="update_later">Später</string>
     <string name="webdav_http_warning_title">Warnung: unverschlüsselte Verbindung</string>

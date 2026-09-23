@@ -266,12 +266,13 @@
     <string name="export_log_done">日志已複製到剪貼簿</string>
     <string name="about_entry_desc">版本、更新和聯絡方式</string>
     <string name="about_version">版本 %1$s</string>
-    <string name="check_updates">檢查更新（GitHub Releases）</string>
+    <string name="check_updates">檢查更新</string>
     <string name="about_follow">關注 Osmium</string>
     <string name="social_telegram">Telegram</string>
     <string name="social_x">X</string>
     <string name="social_github">GitHub</string>
     <string name="social_mail">郵件</string>
+    <string name="social_website">網站</string>
     <string name="no_browser">沒有可打開此鏈接的應用。</string>
     <string name="email_log_copied">日志已填入郵件正文，完整日志已複製到剪貼簿</string>
     <string name="share_account">分享帳戶</string>
@@ -413,6 +414,9 @@
     <string name="update_check_desc">每次打開應用時靜默檢查 GitHub 上的新版本</string>
     <string name="update_available_title">發現新版本</string>
     <string name="update_available_body">新版本 %1$s 已發布（當前版本 %2$s）。前往 GitHub 查看？</string>
+    <string name="update_available_notes_title">更新內容</string>
+    <string name="update_up_to_date">目前已是最新版本（%1$s）</string>
+    <string name="update_check_failed">檢查更新失敗，請稍後再試</string>
     <string name="update_go_github">前往 GitHub</string>
     <string name="update_later">稍後</string>
     <string name="webdav_http_warning_title">明文連線警告</string>

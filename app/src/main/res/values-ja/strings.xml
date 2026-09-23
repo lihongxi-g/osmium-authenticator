@@ -255,12 +255,13 @@
     <string name="export_log_done">ログをクリップボードにコピーしました</string>
     <string name="about_entry_desc">バージョン、アップデート、連絡先</string>
     <string name="about_version">バージョン %1$s</string>
-    <string name="check_updates">アップデートを確認（GitHub Releases）</string>
+    <string name="check_updates">アップデートを確認</string>
     <string name="about_follow">Osmiumをフォロー</string>
     <string name="social_telegram">Telegram</string>
     <string name="social_x">X</string>
     <string name="social_github">GitHub</string>
     <string name="social_mail">メール</string>
+    <string name="social_website">ウェブサイト</string>
     <string name="no_browser">このリンクを開けるアプリがありません。</string>
     <string name="email_log_copied">ログをメール本文に追加し、全ログをクリップボードにコピーしました</string>
     <string name="share_account">アカウントを共有</string>
@@ -398,6 +399,9 @@
     <string name="update_check_desc">アプリ起動時にGitHubの新バージョンを静かに確認</string>
     <string name="update_available_title">新しいバージョンがあります</string>
     <string name="update_available_body">バージョン%1$sが公開されています（現在：%2$s）。GitHubで確認しますか？</string>
+    <string name="update_available_notes_title">更新内容</string>
+    <string name="update_up_to_date">すでに最新バージョンです（%1$s）</string>
+    <string name="update_check_failed">アップデートの確認に失敗しました。しばらくしてからお試しください</string>
     <string name="update_go_github">GitHubを開く</string>
     <string name="update_later">後で</string>
     <string name="webdav_http_warning_title">平文接続の警告</string>

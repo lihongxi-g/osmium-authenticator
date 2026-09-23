@@ -76,6 +76,7 @@ import com.safekey.authenticator.security.IntegrityCheck
 import com.safekey.authenticator.security.RootState
 import com.safekey.authenticator.totp.OtpUriParser
 import com.safekey.authenticator.ui.components.SwipeBackContainer
+import com.safekey.authenticator.ui.components.UpdateAvailableDialog
 import com.safekey.authenticator.ui.components.integrityCheckTitle
 import com.safekey.authenticator.ui.navigation.Screen
 import com.safekey.authenticator.ui.navigation.isRootBlocked
@@ -106,6 +107,8 @@ import com.safekey.authenticator.ui.screens.ManualScreen
 import com.safekey.authenticator.ui.screens.WebDavScreen
 import com.safekey.authenticator.ui.theme.SafeKeyTheme
 import com.safekey.authenticator.update.UpdateChecker
+import com.safekey.authenticator.update.UpdateInfo
+import com.safekey.authenticator.update.UpdateResult
 import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -117,8 +120,9 @@ class MainActivity : FragmentActivity() {
     private val vm: MainViewModel by viewModels()
     private var tampered = false
 
-    // Update-check state: silent once-per-day GitHub query, one dialog.
-    private var pendingUpdateTag by mutableStateOf<String?>(null)
+    // Update-check state: silent GitHub query on open, one dialog. The dialog
+    // also carries the release notes the same request returns.
+    private var pendingUpdate by mutableStateOf<UpdateInfo?>(null)
     private var updateCheckInFlight = false
 
     // ------------------------------------------------------------ lifecycle
@@ -224,11 +228,26 @@ class MainActivity : FragmentActivity() {
                         )
                     }
                     // Update notification only over the unlocked main UI.
-                    val updateTag = pendingUpdateTag
-                    if (updateTag != null && !locked && !pinRequired &&
+                    val update = pendingUpdate
+                    if (update != null && !locked && !pinRequired &&
                         !destroyed && !tampered
                     ) {
-                        UpdateDialog(tag = updateTag)
+                        UpdateAvailableDialog(
+                            tag = update.tag,
+                            notes = update.notes,
+                            url = update.url,
+                            onOpenReleasePage = { url ->
+                                pendingUpdate = null
+                                try {
+                                    startActivity(
+                                        Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                                    )
+                                } catch (_: Exception) {
+                                    vm.showToast(getString(R.string.no_browser))
+                                }
+                            },
+                            onDismiss = { pendingUpdate = null }
+                        )
                     }
                     val showPinReminder = pinReminderVisible && !biometricReady && !pinSet &&
                         !settings.pinReminderSilenced && !locked && !pinRequired &&
@@ -679,7 +698,7 @@ class MainActivity : FragmentActivity() {
      * Silent check against the GitHub releases API, run in the background
      * every time the app comes to the foreground (when the user has
      * auto-update checks enabled). Failures stay silent; a found update
-     * sets [pendingUpdateTag], which the Compose tree shows as a dialog over
+     * sets [pendingUpdate], which the Compose tree shows as a dialog over
      * the unlocked main UI.
      */
     private fun maybeCheckForUpdate() {
@@ -693,8 +712,8 @@ class MainActivity : FragmentActivity() {
         updateCheckInFlight = true
         lifecycleScope.launch {
             try {
-                val tag = withContext(Dispatchers.IO) { UpdateChecker.checkForUpdate() }
-                if (tag != null) pendingUpdateTag = tag
+                val result = withContext(Dispatchers.IO) { UpdateChecker.check() }
+                if (result is UpdateResult.Found) pendingUpdate = result.info
             } finally {
                 updateCheckInFlight = false
             }
@@ -715,46 +734,6 @@ class MainActivity : FragmentActivity() {
             LegalDocsRepository.refreshIfDue(applicationContext)
         }
     }
-
-    @Composable
-    private fun UpdateDialog(tag: String) {
-        val context = LocalContext.current
-        AlertDialog(
-            onDismissRequest = { pendingUpdateTag = null },
-            title = { Text(stringResource(R.string.update_available_title)) },
-            text = {
-                Text(
-                    stringResource(
-                        R.string.update_available_body, tag, BuildConfig.VERSION_NAME
-                    )
-                )
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        pendingUpdateTag = null
-                        try {
-                            startActivity(
-                                Intent(
-                                    Intent.ACTION_VIEW,
-                                    Uri.parse(
-                                        "https://github.com/lihongxi-g/osmium-authenticator/releases"
-                                    )
-                                )
-                            )
-                        } catch (_: Exception) {
-                            vm.showToast(context.getString(R.string.update_later))
-                        }
-                    }
-                ) { Text(stringResource(R.string.update_go_github)) }
-            },
-            dismissButton = {
-                TextButton(onClick = { pendingUpdateTag = null }) {
-                    Text(stringResource(R.string.update_later))
-            }
-        }
-    )
-}
 
 /**
  * Suggestion to set an app PIN on a device without fingerprint/face unlock.

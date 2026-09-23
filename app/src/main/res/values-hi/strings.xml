@@ -255,12 +255,13 @@
     <string name="export_log_done">लॉग क्लिपबोर्ड पर कॉपी हुआ</string>
     <string name="about_entry_desc">संस्करण, अपडेट और संपर्क</string>
     <string name="about_version">संस्करण %1$s</string>
-    <string name="check_updates">अपडेट जाँचें (GitHub Releases)</string>
+    <string name="check_updates">अपडेट जाँचें</string>
     <string name="about_follow">Osmium फ़ॉलो करें</string>
     <string name="social_telegram">Telegram</string>
     <string name="social_x">X</string>
     <string name="social_github">GitHub</string>
     <string name="social_mail">ईमेल</string>
+    <string name="social_website">वेबसाइट</string>
     <string name="no_browser">यह लिंक खोलने के लिए कोई ऐप उपलब्ध नहीं।</string>
     <string name="email_log_copied">लॉग ईमेल बॉडी में जोड़ा गया, पूरा लॉग क्लिपबोर्ड पर कॉपी हुआ</string>
     <string name="share_account">खाता साझा करें</string>
@@ -398,6 +399,9 @@
     <string name="update_check_desc">ऐप खुलने पर GitHub पर नया संस्करण चुपचाप जाँचता है</string>
     <string name="update_available_title">नया संस्करण उपलब्ध है</string>
     <string name="update_available_body">संस्करण %1$s उपलब्ध है (स्थापित: %2$s)। GitHub खोलें?</string>
+    <string name="update_available_notes_title">नया क्या है</string>
+    <string name="update_up_to_date">आपके पास पहले से नवीनतम संस्करण है (%1$s)</string>
+    <string name="update_check_failed">अपडेट की जाँच नहीं हो सकी - बाद में फिर कोशिश करें</string>
     <string name="update_go_github">GitHub खोलें</string>
     <string name="update_later">बाद में</string>
     <string name="webdav_http_warning_title">प्लेनटेक्स्ट कनेक्शन चेतावनी</string>

@@ -269,12 +269,13 @@
     <string name="export_log_done">Log copied to clipboard</string>
     <string name="about_entry_desc">Version, updates and contact</string>
     <string name="about_version">Version %1$s</string>
-    <string name="check_updates">Check for updates (GitHub Releases)</string>
+    <string name="check_updates">Check for updates</string>
     <string name="about_follow">Follow Osmium</string>
     <string name="social_telegram">Telegram</string>
     <string name="social_x">X</string>
     <string name="social_github">GitHub</string>
     <string name="social_mail">Email</string>
+    <string name="social_website">Website</string>
     <string name="no_browser">No app available to open this link.</string>
     <string name="email_log_copied">Log added to email body, full log copied to clipboard</string>
     <string name="share_account">Share account</string>
@@ -416,6 +417,9 @@
     <string name="update_check_desc">Silently checks GitHub for new versions when the app opens</string>
     <string name="update_available_title">New version available</string>
     <string name="update_available_body">Version %1$s is available (installed: %2$s). Open GitHub to see it?</string>
+    <string name="update_available_notes_title">What\'s new</string>
+    <string name="update_up_to_date">You already have the latest version (%1$s)</string>
+    <string name="update_check_failed">Could not check for updates - try again later</string>
     <string name="update_go_github">Open GitHub</string>
     <string name="update_later">Later</string>
     <string name="webdav_http_warning_title">Plaintext connection warning</string>

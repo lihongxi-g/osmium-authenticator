@@ -255,12 +255,13 @@
     <string name="export_log_done">Journal copié dans le presse-papiers</string>
     <string name="about_entry_desc">Version, mises à jour et contact</string>
     <string name="about_version">Version %1$s</string>
-    <string name="check_updates">Vérifier les mises à jour (GitHub Releases)</string>
+    <string name="check_updates">Vérifier les mises à jour</string>
     <string name="about_follow">Suivre Osmium</string>
     <string name="social_telegram">Telegram</string>
     <string name="social_x">X</string>
     <string name="social_github">GitHub</string>
     <string name="social_mail">E-mail</string>
+    <string name="social_website">Site web</string>
     <string name="no_browser">Aucune application disponible pour ouvrir ce lien.</string>
     <string name="email_log_copied">Journal ajouté au corps de l’e-mail, journal complet copié dans le presse-papiers</string>
     <string name="share_account">Partager le compte</string>
@@ -398,6 +399,9 @@
     <string name="update_check_desc">Vérifie silencieusement GitHub à l’ouverture</string>
     <string name="update_available_title">Nouvelle version disponible</string>
     <string name="update_available_body">La version %1$s est disponible (installée : %2$s). Ouvrir GitHub ?</string>
+    <string name="update_available_notes_title">Nouveautés</string>
+    <string name="update_up_to_date">Vous avez déjà la dernière version (%1$s)</string>
+    <string name="update_check_failed">Impossible de vérifier les mises à jour - réessayez plus tard</string>
     <string name="update_go_github">Ouvrir GitHub</string>
     <string name="update_later">Plus tard</string>
     <string name="webdav_http_warning_title">Avertissement de connexion en clair</string>
