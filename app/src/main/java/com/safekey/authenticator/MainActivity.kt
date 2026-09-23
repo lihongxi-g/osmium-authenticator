@@ -26,16 +26,23 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -46,6 +53,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -68,6 +76,7 @@ import com.safekey.authenticator.security.IntegrityCheck
 import com.safekey.authenticator.security.RootState
 import com.safekey.authenticator.totp.OtpUriParser
 import com.safekey.authenticator.ui.components.SwipeBackContainer
+import com.safekey.authenticator.ui.components.UpdateAvailableDialog
 import com.safekey.authenticator.ui.components.integrityCheckTitle
 import com.safekey.authenticator.ui.navigation.Screen
 import com.safekey.authenticator.ui.navigation.isRootBlocked
@@ -98,6 +107,8 @@ import com.safekey.authenticator.ui.screens.ManualScreen
 import com.safekey.authenticator.ui.screens.WebDavScreen
 import com.safekey.authenticator.ui.theme.SafeKeyTheme
 import com.safekey.authenticator.update.UpdateChecker
+import com.safekey.authenticator.update.UpdateInfo
+import com.safekey.authenticator.update.UpdateResult
 import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -109,8 +120,9 @@ class MainActivity : FragmentActivity() {
     private val vm: MainViewModel by viewModels()
     private var tampered = false
 
-    // Update-check state: silent once-per-day GitHub query, one dialog.
-    private var pendingUpdateTag by mutableStateOf<String?>(null)
+    // Update-check state: silent GitHub query on open, one dialog. The dialog
+    // also carries the release notes the same request returns.
+    private var pendingUpdate by mutableStateOf<UpdateInfo?>(null)
     private var updateCheckInFlight = false
 
     // ------------------------------------------------------------ lifecycle
@@ -147,6 +159,18 @@ class MainActivity : FragmentActivity() {
             val destroyed by vm.destroyed.collectAsState()
             val toast by vm.toast.collectAsState()
             val integrityNotice by vm.integrityNotice.collectAsState()
+            val biometricReady by vm.biometricAvailable.collectAsState()
+            val pinSet by vm.localPinSet.collectAsState()
+            val foregroundTick by vm.foregroundTick.collectAsState()
+            var pinReminderVisible by remember { mutableStateOf(false) }
+
+            // No fingerprint/face on this device: ask for an app PIN. The prompt
+            // repeats on every app open unless the user ticks "don't remind me".
+            LaunchedEffect(foregroundTick, biometricReady, pinSet, settings.pinReminderSilenced) {
+                if (!biometricReady && !pinSet && !settings.pinReminderSilenced) {
+                    pinReminderVisible = true
+                }
+            }
             val context = LocalContext.current
             // Keep these UI holders above the lock gate and AnimatedContent.
             // Navigating to a child route, or briefly showing the lock screen,
@@ -154,6 +178,10 @@ class MainActivity : FragmentActivity() {
             val accountsListState = rememberLazyListState()
             val accountTagRowState = rememberScrollState()
             val settingsScrollState = rememberScrollState()
+            // Per-screen state (e.g. a half-filled manual-add form) survives the
+            // gate overlay: the lock gate replaces the whole nav host, which
+            // used to wipe everything the user had typed.
+            val screenStateHolder = rememberSaveableStateHolder()
 
             SafeKeyTheme(
                 themeMode = settings.themeMode,
@@ -195,15 +223,46 @@ class MainActivity : FragmentActivity() {
                         else -> MainNavHost(
                             accountsListState = accountsListState,
                             accountTagRowState = accountTagRowState,
-                            settingsScrollState = settingsScrollState
+                            settingsScrollState = settingsScrollState,
+                            screenStateHolder = screenStateHolder
                         )
                     }
                     // Update notification only over the unlocked main UI.
-                    val updateTag = pendingUpdateTag
-                    if (updateTag != null && !locked && !pinRequired &&
+                    val update = pendingUpdate
+                    if (update != null && !locked && !pinRequired &&
                         !destroyed && !tampered
                     ) {
-                        UpdateDialog(tag = updateTag)
+                        UpdateAvailableDialog(
+                            tag = update.tag,
+                            notes = update.notes,
+                            url = update.url,
+                            onOpenReleasePage = { url ->
+                                pendingUpdate = null
+                                try {
+                                    startActivity(
+                                        Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                                    )
+                                } catch (_: Exception) {
+                                    vm.showToast(getString(R.string.no_browser))
+                                }
+                            },
+                            onDismiss = { pendingUpdate = null }
+                        )
+                    }
+                    val showPinReminder = pinReminderVisible && !biometricReady && !pinSet &&
+                        !settings.pinReminderSilenced && !locked && !pinRequired &&
+                        !destroyed && !tampered
+                    if (showPinReminder) {
+                        PinReminderDialog(
+                            onSetup = {
+                                pinReminderVisible = false
+                                vm.nav.push(Screen.PinSetup("pin"))
+                            },
+                            onDismiss = { silence ->
+                                pinReminderVisible = false
+                                if (silence) vm.setPinReminderSilenced(true)
+                            }
+                        )
                     }
                     // Enter-app integrity reminder (L2/L3), debounced in the
                     // ViewModel; suppressed while the restriction is lifted.
@@ -254,7 +313,13 @@ class MainActivity : FragmentActivity() {
         vm.onAppForeground()
         maybeCheckForUpdate()
         maybeRefreshLegalDocs()
-        lifecycleScope.launch { RootState.refresh(applicationContext) }
+        // The startup scan feeds the integrity screen, the enter-app reminder
+        // and the root-hardening overlay. With the feature hidden in developer
+        // mode it must not run behind the user's back either: it stays off
+        // until they run the check by hand (developer mode → run root check).
+        if (AppSettings.HIDDEN_FEATURE_INTEGRITY !in vm.settings.value.devHiddenFeatures) {
+            lifecycleScope.launch { RootState.refresh(applicationContext) }
+        }
     }
 
     override fun onStop() {
@@ -321,6 +386,7 @@ class MainActivity : FragmentActivity() {
             onCancel = null // periodic verification cannot be skipped while required
         )
     }
+
 
     @Composable
     private fun DestroyedScreen() {
@@ -632,7 +698,7 @@ class MainActivity : FragmentActivity() {
      * Silent check against the GitHub releases API, run in the background
      * every time the app comes to the foreground (when the user has
      * auto-update checks enabled). Failures stay silent; a found update
-     * sets [pendingUpdateTag], which the Compose tree shows as a dialog over
+     * sets [pendingUpdate], which the Compose tree shows as a dialog over
      * the unlocked main UI.
      */
     private fun maybeCheckForUpdate() {
@@ -646,8 +712,8 @@ class MainActivity : FragmentActivity() {
         updateCheckInFlight = true
         lifecycleScope.launch {
             try {
-                val tag = withContext(Dispatchers.IO) { UpdateChecker.checkForUpdate() }
-                if (tag != null) pendingUpdateTag = tag
+                val result = withContext(Dispatchers.IO) { UpdateChecker.check() }
+                if (result is UpdateResult.Found) pendingUpdate = result.info
             } finally {
                 updateCheckInFlight = false
             }
@@ -669,41 +735,46 @@ class MainActivity : FragmentActivity() {
         }
     }
 
-    @Composable
-    private fun UpdateDialog(tag: String) {
-        val context = LocalContext.current
-        AlertDialog(
-            onDismissRequest = { pendingUpdateTag = null },
-            title = { Text(stringResource(R.string.update_available_title)) },
-            text = {
-                Text(
-                    stringResource(
-                        R.string.update_available_body, tag, BuildConfig.VERSION_NAME
+/**
+ * Suggestion to set an app PIN on a device without fingerprint/face unlock.
+ * The reminder returns on the next app open unless the checkbox is ticked.
+ */
+@Composable
+private fun PinReminderDialog(
+    onSetup: () -> Unit,
+    onDismiss: (silence: Boolean) -> Unit
+) {
+    var silence by remember { mutableStateOf(false) }
+    AlertDialog(
+        onDismissRequest = { onDismiss(silence) },
+        title = { Text(stringResource(R.string.app_pin_setup)) },
+        text = {
+            Column {
+                Text(stringResource(R.string.pin_reminder_body))
+                Spacer(Modifier.height(8.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { silence = !silence }
+                ) {
+                    Checkbox(checked = silence, onCheckedChange = { silence = it })
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        text = stringResource(R.string.pin_reminder_never),
+                        style = MaterialTheme.typography.bodyMedium
                     )
-                )
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        pendingUpdateTag = null
-                        try {
-                            startActivity(
-                                Intent(
-                                    Intent.ACTION_VIEW,
-                                    Uri.parse(
-                                        "https://github.com/lihongxi-g/osmium-authenticator/releases"
-                                    )
-                                )
-                            )
-                        } catch (_: Exception) {
-                            vm.showToast(context.getString(R.string.update_later))
-                        }
-                    }
-                ) { Text(stringResource(R.string.update_go_github)) }
-            },
-            dismissButton = {
-                TextButton(onClick = { pendingUpdateTag = null }) {
-                    Text(stringResource(R.string.update_later))
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onSetup) {
+                Text(stringResource(R.string.pin_setup_title))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = { onDismiss(silence) }) {
+                Text(stringResource(R.string.update_later))
             }
         }
     )
@@ -769,7 +840,9 @@ private fun IntegrityNoticeDialog(
             error = error,
             remainingAttempts = null,
             onVerify = { pin ->
-                if (vm.verifyLocalPin(pin)) {
+                // onPinEntered (not verifyLocalPin) so wrong attempts count
+                // toward the self-destruct threshold here too.
+                if (vm.onPinEntered(pin)) {
                     vm.nav.pop()
                     when (next) {
                         "change_pin" -> vm.nav.push(Screen.PinSetup("pin"))
@@ -798,7 +871,8 @@ private fun IntegrityNoticeDialog(
     private fun MainNavHost(
         accountsListState: LazyListState,
         accountTagRowState: ScrollState,
-        settingsScrollState: ScrollState
+        settingsScrollState: ScrollState,
+        screenStateHolder: androidx.compose.runtime.saveable.SaveableStateHolder
     ) {
         val context = LocalContext.current
         val direction = vm.nav.direction
@@ -834,6 +908,7 @@ private fun IntegrityNoticeDialog(
                 },
                 label = "nav"
             ) { screen ->
+                screenStateHolder.SaveableStateProvider(screen.toString()) {
                 when (screen) {
                     is Screen.Accounts -> AccountsScreen(
                         vm = vm,
@@ -872,8 +947,17 @@ private fun IntegrityNoticeDialog(
                         vm = vm,
                         accountId = screen.accountId,
                         prefillUri = screen.prefill,
-                        onDone = { vm.nav.pop() },
-                        onBack = { vm.nav.pop() }
+                        // Leaving the form on purpose drops its draft, so
+                        // returning to edit the same account shows the stored
+                        // values rather than the previous typing.
+                        onDone = {
+                            screenStateHolder.removeState(screen.toString())
+                            vm.nav.pop()
+                        },
+                        onBack = {
+                            screenStateHolder.removeState(screen.toString())
+                            vm.nav.pop()
+                        }
                     )
 
                     is Screen.Detail -> DetailScreen(
@@ -982,7 +1066,29 @@ private fun IntegrityNoticeDialog(
 
                     is Screen.LanTransfer -> LanTransferScreen(
                         vm = vm,
-                        onBack = { vm.nav.pop() }
+                        onBack = { vm.nav.pop() },
+                        // Blocking a peer device is a security decision: verify
+                        // identity first (same pattern as the settings toggles).
+                        onRequireBiometric = if (canAuthenticateBiometric()) {
+                            { onSuccess ->
+                                launchBiometric(
+                                    onSuccess = onSuccess,
+                                    onCancelled = {
+                                        vm.showToast(context.getString(R.string.lock_cancelled))
+                                    },
+                                    onError = { msg -> vm.showToast(msg) }
+                                )
+                            }
+                        } else null,
+                        onRequireCredential = { onSuccess ->
+                            launchCredential(
+                                onSuccess = onSuccess,
+                                onCancelled = {
+                                    vm.showToast(context.getString(R.string.lock_cancelled))
+                                },
+                                onError = { msg -> vm.showToast(msg) }
+                            )
+                        }
                     )
 
                     is Screen.PinSetup -> PinSetupScreen(
@@ -1097,6 +1203,7 @@ private fun IntegrityNoticeDialog(
                         vm = vm,
                         onBack = { vm.nav.pop() }
                     )
+                }
                 }
             }
         }

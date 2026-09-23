@@ -146,6 +146,7 @@
     <string name="fileimport_instructions">別の認証アプリのエクスポートファイルを選択してください。Osmiumは形式を自動的に検出し、インポート前にプレビューを表示します。\n\n対応ソース:\n• Aegis — パスワードなしのエクスポート（平文）\n• 2FAS — パスワードなしでエクスポートした .2fas バックアップ\n• Raivo OTP — 旧形式の平文JSONエクスポート\n\nパスワードで暗号化されたエクスポートにはまだ対応していません: パスワードなしで再エクスポートしてください。</string>
     <string name="fileimport_security_note">ファイルはこの端末上でのみ読み取られ、アップロードされることはありません。エクスポートファイルには秘密鍵が含まれています。インポート後は削除してください。</string>
     <string name="fileimport_pick_button">エクスポートファイルを選択</string>
+    <string name="fileimport_detected">判別結果：%1$s</string>
     <string name="fileimport_pick_another">別のファイルを選択</string>
     <string name="fileimport_empty_file">選択したファイルは空です。</string>
     <string name="fileimport_found">インポート可能なアカウントが%1$d件見つかりました</string>
@@ -165,10 +166,9 @@
     <string name="fileimport_reason_secret">無効な秘密鍵 — インポートできません</string>
     <string name="thirdparty_import_title">他の認証アプリからインポート</string>
     <string name="thirdparty_import_desc">Google Authenticator、Aegis、2FAS、Raivo OTPからアカウントを移行</string>
-    <string name="thirdparty_intro">移行元のアプリを選択してください。OsmiumはGoogle Authenticatorの移行QRコードと、その他のアプリの平文エクスポートファイルをインポートできます。</string>
-    <string name="thirdparty_row_aegis_desc">平文エクスポートファイル（.json、パスワードなしでエクスポート）</string>
-    <string name="thirdparty_row_2fas_desc">パスワードなしでエクスポートしたバックアップ（.2fas）</string>
-    <string name="thirdparty_row_raivo_desc">旧形式の平文JSONエクスポート</string>
+    <string name="thirdparty_file_row_title">バックアップファイルから取り込む</string>
+    <string name="thirdparty_file_row_desc">Aegis、2FAS、Raivo OTP のエクスポート - 提供元を自動で判別</string>
+    <string name="thirdparty_intro">バックアップファイルを選ぶだけで、どの認証アプリのものかを自動で判別して取り込みます。Google Authenticator は移行用 QR コードで取り込みます。</string>
     <string name="thirdparty_notice">新機能 — インポートに失敗し、操作に間違いがないと確信できる場合は、ログ（設定 → アプリ情報 → ログをエクスポート）を添付して、Osmium開発者に問題を報告してください。</string>
     <string name="attributions_title">クレジットと情報源</string>
     <string name="attributions_intro">インポート機能は公に文書化されたエクスポート形式に基づいて作られています。Osmiumは以下のプロジェクトのコードを再利用していません — これらは形式のドキュメントとして、またOsmiumのインポートテストで使用される実際のエクスポートサンプルの出所として参照されています。</string>
@@ -255,12 +255,13 @@
     <string name="export_log_done">ログをクリップボードにコピーしました</string>
     <string name="about_entry_desc">バージョン、アップデート、連絡先</string>
     <string name="about_version">バージョン %1$s</string>
-    <string name="check_updates">アップデートを確認（GitHub Releases）</string>
+    <string name="check_updates">アップデートを確認</string>
     <string name="about_follow">Osmiumをフォロー</string>
     <string name="social_telegram">Telegram</string>
     <string name="social_x">X</string>
     <string name="social_github">GitHub</string>
     <string name="social_mail">メール</string>
+    <string name="social_website">ウェブサイト</string>
     <string name="no_browser">このリンクを開けるアプリがありません。</string>
     <string name="email_log_copied">ログをメール本文に追加し、全ログをクリップボードにコピーしました</string>
     <string name="share_account">アカウントを共有</string>
@@ -398,6 +399,9 @@
     <string name="update_check_desc">アプリ起動時にGitHubの新バージョンを静かに確認</string>
     <string name="update_available_title">新しいバージョンがあります</string>
     <string name="update_available_body">バージョン%1$sが公開されています（現在：%2$s）。GitHubで確認しますか？</string>
+    <string name="update_available_notes_title">更新内容</string>
+    <string name="update_up_to_date">すでに最新バージョンです（%1$s）</string>
+    <string name="update_check_failed">アップデートの確認に失敗しました。しばらくしてからお試しください</string>
     <string name="update_go_github">GitHubを開く</string>
     <string name="update_later">後で</string>
     <string name="webdav_http_warning_title">平文接続の警告</string>
@@ -424,12 +428,12 @@
     <string name="refresh">Refresh</string>
     <string name="lan_transfer_title">LAN Transfer</string>
     <string name="lan_transfer_desc">Quickly transfer accounts with a nearby device over local Wi-Fi</string>
-    <string name="lan_transfer_send_desc">Keep this screen open on the sending device. The receiver can enter the pairing code to transfer accounts.</string>
-    <string name="lan_transfer_receive_desc">Connect to the same Wi-Fi network as the sending device and enter the 6-digit pairing code.</string>
+    <string name="lan_transfer_send_desc">Connect to the receiving device on the same Wi-Fi, then enter the 12-digit code shown on its screen.</string>
+    <string name="lan_transfer_receive_desc">Keep this screen open and show the code below to the sending device.</string>
     <string name="lan_send_tab">Send</string>
     <string name="lan_receive_tab">Receive</string>
     <string name="lan_pairing_code_label">Pairing Code</string>
-    <string name="lan_pairing_code_hint">Enter 6-digit code</string>
+    <string name="lan_pairing_code_hint">Enter the 12-digit code</string>
     <string name="lan_server_ip_label">Local Address</string>
     <string name="lan_status_waiting">Waiting for receiver to connect…</string>
     <string name="lan_status_transferring">Transferring data…</string>
@@ -444,10 +448,10 @@
     <string name="lan_error_no_wifi">Not connected to a Wi-Fi network. Please connect both devices to the same Wi-Fi.</string>
     <string name="lan_error_no_device_selected">Please select a device to connect</string>
     <string name="lan_error_invalid_ip">Please enter a valid IP:Port, e.g. 192.168.1.100:52026</string>
-    <string name="lan_error_invalid_code_length">Pairing code must be 6 digits</string>
+    <string name="lan_error_invalid_code_length">Pairing code must be 12 digits</string>
     <string name="lan_error_wrong_code">Wrong pairing code or decryption failed</string>
     <string name="lan_error_connection">Connection failed: %1$s</string>
-    <string name="lan_security_tip">Protected with end-to-end AES-256-GCM encryption derived from the pairing code. Third parties on the local network cannot intercept your accounts.</string>
+    <string name="lan_security_tip">Ephemeral P-256 key exchange + AES-256-GCM. Both devices verify the 12-digit code before anything is sent, so third parties on the local network cannot read or impersonate the transfer.</string>
     <string name="filter_all">All</string>
     <string name="filter_uncategorized">Uncategorized</string>
     <string name="tags_settings_desc">Configure tag support and manage your tags.</string>
@@ -526,4 +530,7 @@
     <string name="check_file_cross">ファイルパスの整合性</string>
     <string name="check_state_drift">起動後の状態ドリフト</string>
     <string name="integrity_section_consistency">整合性チェック</string>
+    <string name="lan_status_done_receive">Received %1$d accounts</string>
+    <string name="pin_reminder_never">Don\'t remind me again</string>
+    <string name="pin_reminder_body">This device has no fingerprint or face unlock, so the app cannot verify who is opening it. Set an app PIN to protect your accounts.</string>
 </resources>

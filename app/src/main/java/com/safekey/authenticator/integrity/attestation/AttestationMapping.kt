@@ -88,10 +88,18 @@ internal object AttestationMapping {
                 )
             )
         is AttestationOutcome.ChainRejected ->
+            // Weak evidence, not a verdict: the only fact observed is that the
+            // chain does not validate against the pinned anchors — true on
+            // non-GMS devices with vendor roots, on emulators, or after Google
+            // rotates a root key. Scoring this FAIL made unrooted devices
+            // "COMPROMISED" and forced the root hardening on them. Hard evidence
+            // stays reserved for contradictions that positively indicate
+            // tampering (challenge mismatch, boot-hash mismatch).
             listOf(
                 IntegrityCheck(
-                    CHECK_ID, IntegritySeverity.FAIL, true,
-                    "chain rejected: " + outcome.detail.take(180)
+                    CHECK_ID, IntegritySeverity.WARN, true,
+                    "chain not validated against the pinned anchors: " +
+                        outcome.detail.take(160)
                 )
             )
         is AttestationOutcome.ChainUnreadable ->

@@ -65,12 +65,13 @@ internal object IntegrityConsistency {
             "self/mounts" to selfMounts,
             "mountinfo" to mountinfo
         )
-        val unreadable = views.filter { it.second.isBlank() }.map { it.first }
-        if (unreadable.size == views.size) return null
-        if (unreadable.isNotEmpty()) {
-            return "view unreadable: " + unreadable.joinToString(", ")
-        }
-        val suspicious = views.map { (name, text) ->
+        // A view this app cannot read is a miss, never evidence: reporting it
+        // made every scan on such a device "SUSPICIOUS" although nothing had
+        // been observed. Unreadable views are listed by [unreadableMountViews]
+        // and surfaced informationally by the probe instead.
+        val readable = views.filter { it.second.isNotBlank() }
+        if (readable.size < 2) return null
+        val suspicious = readable.map { (name, text) ->
             name to suspiciousMountPoints(text, mountinfo = name.contains("mountinfo"))
         }
         val reference = suspicious.first().second
@@ -82,6 +83,17 @@ internal object IntegrityConsistency {
         }
         return null
     }
+
+    /**
+     * Names of the mount views this app could not read. Informational only —
+     * never scored (see [mountViewMismatch]).
+     */
+    fun unreadableMountViews(mounts: String, selfMounts: String, mountinfo: String): List<String> =
+        listOf(
+            "mounts" to mounts,
+            "self/mounts" to selfMounts,
+            "mountinfo" to mountinfo
+        ).filter { it.second.isBlank() }.map { it.first }
 
     /**
      * Tri-state file route check: for every candidate path the three routes

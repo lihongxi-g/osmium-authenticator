@@ -24,11 +24,19 @@ object AppLog {
     fun init(context: Context) {
         logFile = File(context.filesDir, "safekey-log.txt")
         // carry over the previous session's crash log (if any)
-        val prev = logFile?.takeIf { it.exists() }?.readText()
+        // Defensive: this runs inside Application.onCreate, so an IO failure
+        // here would crash every single launch (and the crash handler recreates
+        // the file, turning it into a permanent crash loop).
+        val prev = logFile?.takeIf { it.exists() }?.let { file ->
+            runCatching { file.readText() }.getOrNull()
+        }
         if (!prev.isNullOrBlank()) {
             d("── previous session crash log ──")
-            prev.lines().take(MAX_LINES / 2).forEach { dRaw(it) }
-            logFile?.delete()
+            // The crash records sit at the END of the file (the ring buffer is
+            // persisted chronologically), so restore the tail — taking the head
+            // discarded exactly the part this file exists for.
+            prev.lines().takeLast(MAX_LINES / 2).forEach { dRaw(it) }
+            runCatching { logFile?.delete() }
         }
     }
 

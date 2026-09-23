@@ -1,6 +1,8 @@
 package com.safekey.authenticator.integrity
 
 import java.io.File
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.withTimeoutOrNull
 
 /**
  * K0 early snapshot — captured once at process start (SafeKeyApp.onCreate),
@@ -19,6 +21,9 @@ internal object IntegrityEarly {
         "/data/adb/magisk", "/system/bin/su", "/system/xbin/su", "/sbin/.magisk"
     )
 
+    /** Completed once [capture] has filled every snapshot. */
+    private val capturedSignal = CompletableDeferred<Unit>()
+
     @Volatile private var captured = false
     @Volatile private var props: Map<String, String>? = null
     @Volatile private var bits: Map<String, Boolean>? = null
@@ -27,14 +32,28 @@ internal object IntegrityEarly {
     fun capture() {
         if (captured) return
         captured = true
-        props = runCatching { IntegrityProbes.readProps() }.getOrDefault(emptyMap())
-        bits = BIT_PATHS.associateWith { path ->
-            runCatching { File(path).exists() }.getOrDefault(false)
+        try {
+            props = runCatching { IntegrityProbes.readProps() }.getOrDefault(emptyMap())
+            bits = BIT_PATHS.associateWith { path ->
+                runCatching { File(path).exists() }.getOrDefault(false)
+            }
+            suspiciousMounts = runCatching {
+                IntegrityConsistency.suspiciousMountPoints(readMounts(), mountinfo = false)
+            }.getOrDefault(emptySet())
+        } finally {
+            // Signals waiting scans even when a probe above blew up.
+            capturedSignal.complete(Unit)
         }
-        suspiciousMounts = runCatching {
-            IntegrityConsistency.suspiciousMountPoints(readMounts(), mountinfo = false)
-        }.getOrDefault(emptySet())
     }
+
+    /**
+     * Waits (bounded) until the process-start snapshot exists. Without this
+     * handshake a scan that starts first reads nulls, and since the snapshot is
+     * taken exactly once, the drift layer would be skipped for that report and
+     * the baseline would silently post-date the scan.
+     */
+    suspend fun awaitCaptured(timeoutMs: Long = 1_500L): Boolean =
+        withTimeoutOrNull(timeoutMs) { capturedSignal.await() } != null
 
     fun propsSnapshot(): Map<String, String>? = props
 

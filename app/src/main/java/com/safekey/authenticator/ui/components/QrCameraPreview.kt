@@ -11,6 +11,7 @@ import androidx.camera.view.PreviewView
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -74,8 +75,10 @@ fun QrCameraPreview(
         }
     }
 
-    // Re-arm scanning when the caller re-enables (e.g. dialog dismissed)
-    if (enabled) scanning.set(true)
+    // Re-arm scanning when the caller re-enables (e.g. dialog dismissed). This
+    // must not happen during composition: an unrelated recomposition re-armed
+    // the one-shot latch and the same code could be delivered twice.
+    LaunchedEffect(enabled) { if (enabled) scanning.set(true) }
 
     DisposableEffect(controller) {
         controller.setImageAnalysisAnalyzer(executor, analyzer)

@@ -118,8 +118,22 @@ object LegalDocsRepository {
                 AppLog.d("legal: HTTP ${connection.responseCode} for ${url.removePrefix(BASE_URL)}")
                 null
             } else {
-                val text = connection.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
-                if (text.isBlank() || text.length > MAX_CHARS) null else text
+                // Bounded read: the limit used to be applied *after* the whole
+                // body had been buffered, so a broken or hijacked response
+                // could still exhaust memory during the silent refresh on
+                // app open.
+                val text = connection.inputStream.bufferedReader(Charsets.UTF_8).use { reader ->
+                    val out = StringBuilder()
+                    val buffer = CharArray(8 * 1024)
+                    while (true) {
+                        val read = reader.read(buffer)
+                        if (read < 0) break
+                        out.appendRange(buffer, 0, read)
+                        if (out.length > MAX_CHARS) return@use null
+                    }
+                    out.toString()
+                } ?: return null
+                if (text.isBlank()) null else text
             }
         } catch (e: Exception) {
             null

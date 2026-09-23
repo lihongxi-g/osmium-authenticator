@@ -8,7 +8,6 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import com.safekey.authenticator.model.VaultFile
-import com.safekey.authenticator.security.VaultFormatException
 import com.safekey.authenticator.security.VaultIO
 import java.io.DataInputStream
 import java.io.DataOutputStream
@@ -16,6 +15,7 @@ import java.net.InetSocketAddress
 import java.net.Socket
 import java.util.Collections
 import java.util.LinkedList
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -175,50 +175,132 @@ class LanTransferClient(private val context: Context) {
         multicastLock = null
     }
 
-    suspend fun fetchVault(
+    suspend fun sendVault(
         host: String,
         port: Int,
-        pairingCode: String
-    ): Result<VaultFile> = withContext(Dispatchers.IO) {
+        pairingCode: String,
+        vault: VaultFile,
+        selfDeviceId: String,
+        selfName: String,
+        selfThreatCodes: List<String>,
+        isBlocked: suspend (ip: String, mac: String?, deviceId: String) -> Boolean
+    ): LanSendOutcome = withContext(Dispatchers.IO) {
         val socket = Socket()
         try {
             socket.connect(InetSocketAddress(host, port), 8_000)
             socket.soTimeout = 15_000
 
-            val dos = DataOutputStream(socket.getOutputStream())
-            val dis = DataInputStream(socket.getInputStream())
+            val output = DataOutputStream(socket.getOutputStream())
+            val input = DataInputStream(socket.getInputStream())
 
-            // Send magic header
-            dos.writeUTF(LanTransferServer.MAGIC_HEADER)
-            dos.flush()
+            // 1) hello: version, ephemeral key, nonce, identity, own threat codes
+            val sender = LanSession.newEphemeral()
+            val clientNonce = LanSession.newNonce()
+            LanWire.writeText(output, LanSession.MAGIC)
+            LanWire.writeBytes(output, sender.publicKeyBytes)
+            LanWire.writeBytes(output, clientNonce)
+            LanWire.writeText(output, selfDeviceId)
+            LanWire.writeText(output, selfName)
+            LanWire.writeText(output, LanWire.codesToText(selfThreatCodes))
 
-            // Read ACK
-            val ack = dis.readUTF()
-            if (ack != LanTransferServer.MAGIC_ACK) {
-                return@withContext Result.failure(Exception("Incompatible protocol response: $ack"))
+            // 2) the receiver either accepts the handshake or refuses outright
+            val status = LanWire.readText(input)
+            when (status) {
+                LanSession.DENY_BLOCKED -> return@withContext LanSendOutcome.RefusedByPeer(
+                    LanPeer(host, LanGuard.macFor(host), "", "", emptyList())
+                )
+                LanSession.ACK -> Unit
+                else -> return@withContext LanSendOutcome.Failed("refused: $status")
             }
 
-            val length = dis.readInt()
-            if (length <= 0 || length > VaultIO.MAX_PAYLOAD_BYTES) {
-                return@withContext Result.failure(Exception("Invalid payload size: $length"))
+            // 3) receiver key material, identity, threat codes and its proof
+            val receiverPublic = LanWire.readKey(input)
+            val serverNonce = LanWire.readKey(input, LanWire.MAX_NONCE_BYTES)
+            val receiverId = LanWire.readText(input)
+            val receiverName = LanWire.readText(input)
+            val receiverThreats = LanWire.codesFromText(LanWire.readText(input))
+            val receiverTag = LanWire.readKey(input, LanWire.MAX_TAG_BYTES)
+
+            val candidate = LanPeer(
+                ip = host,
+                mac = LanGuard.macFor(host),
+                deviceId = receiverId,
+                name = receiverName,
+                threatCodes = receiverThreats
+            )
+            val transcript = LanSession.transcript(
+                senderPublic = sender.publicKeyBytes,
+                receiverPublic = receiverPublic,
+                clientNonce = clientNonce,
+                serverNonce = serverNonce,
+                senderThreatCodes = selfThreatCodes,
+                receiverThreatCodes = receiverThreats,
+                senderDeviceId = selfDeviceId,
+                receiverDeviceId = receiverId
+            )
+            val sessionKey = LanSession.sessionKey(
+                privateKey = sender.privateKey,
+                peerPublicKeyBytes = receiverPublic,
+                pairingCode = pairingCode,
+                transcript = transcript
+            )
+
+            // The receiver has to prove it knows the same code: a wrong code, a
+            // substituted key (interception) or a different device all fail here.
+            if (!LanSession.matches(
+                    LanSession.receiverTag(sessionKey, transcript), receiverTag
+                )
+            ) {
+                return@withContext LanSendOutcome.ProofFailed
             }
 
-            val payloadBytes = ByteArray(length)
-            dis.readFully(payloadBytes)
-
-            // Decrypt with pairing code
-            val vault = try {
-                VaultIO.decrypt(payloadBytes, pairingCode.toCharArray())
-            } catch (e: VaultFormatException) {
-                return@withContext Result.failure(e)
+            // 4) this device's own decision: never send to a blocked peer
+            if (isBlocked(host, candidate.mac, receiverId)) {
+                LanWire.writeText(output, LanSession.DENY_PEER_BLOCKED)
+                return@withContext LanSendOutcome.PeerBlocked(candidate)
             }
 
-            Result.success(vault)
+            // 5) proof of the code, then the sealed vault
+            val payload = VaultIO.encodePlain(vault).toByteArray(Charsets.UTF_8)
+            LanWire.writeBytes(output, LanSession.senderTag(sessionKey, transcript))
+            LanWire.writeBytes(output, LanSession.seal(sessionKey, transcript, payload))
+
+            when (val finalStatus = LanWire.readText(input)) {
+                LanSession.ACK -> LanSendOutcome.Delivered(candidate)
+                else -> LanSendOutcome.Failed("rejected: $finalStatus")
+            }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
-            Log.d(TAG, "LanTransferClient fetch error: ${e.message}")
-            Result.failure(e)
+            Log.d(TAG, "LanTransferClient send error: ${e.message}")
+            LanSendOutcome.Failed(e.message ?: "error")
         } finally {
-            try { socket.close() } catch (_: Throwable) {}
+            try {
+                socket.close()
+            } catch (_: Throwable) {
+            }
         }
     }
+}
+
+/** Result of one send attempt. */
+sealed interface LanSendOutcome {
+
+    /** Payload delivered and acknowledged by the receiving device. */
+    data class Delivered(val peer: LanPeer) : LanSendOutcome
+
+    /** This device's 24h block list names the receiver, so nothing was sent. */
+    data class PeerBlocked(val peer: LanPeer) : LanSendOutcome
+
+    /** The receiver has this device blocked (or refused the handshake). */
+    data class RefusedByPeer(val peer: LanPeer) : LanSendOutcome
+
+    /**
+     * The receiver could not prove the pairing code for this session: wrong
+     * code, or the key exchange was substituted on the way.
+     */
+    data object ProofFailed : LanSendOutcome
+
+    /** Network or protocol failure. */
+    data class Failed(val message: String) : LanSendOutcome
 }

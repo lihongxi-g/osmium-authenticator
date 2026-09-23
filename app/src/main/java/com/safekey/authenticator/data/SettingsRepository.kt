@@ -45,7 +45,9 @@ data class AppSettings(
     val devExtraDigits: Boolean = false,
     val devHiddenFeatures: Set<String> = emptySet(),
     // ---- integrity detection logging (2026-09) ----
-    val devDetailedLogging: Boolean = false
+    val devDetailedLogging: Boolean = false,
+    /** User asked not to be reminded about setting a PIN on a device without biometrics. */
+    val pinReminderSilenced: Boolean = false
 ) {
     companion object {
         const val THEME_SYSTEM = "system"
@@ -59,6 +61,14 @@ data class AppSettings(
         const val DESTROY_OFF = "off"
         const val DESTROY_PIN = "destroy_pin"
         const val DESTROY_FAIL_COUNT = "fail_count"
+
+        /**
+         * Hidden-feature id (developer mode → hide settings entries) for the
+         * Android integrity detection entry. Hiding it hides the settings row
+         * AND keeps the automatic startup scan off — the user asked for the
+         * feature to be gone, not for it to keep running unseen.
+         */
+        const val HIDDEN_FEATURE_INTEGRITY = "integrity"
 
         const val AUTO_BACKUP_TARGET_WEBDAV = "webdav"
         const val AUTO_BACKUP_TARGET_LOCAL = "local"
@@ -108,6 +118,7 @@ class SettingsRepository(
         val DEV_EXTRA_DIGITS = booleanPreferencesKey("dev_extra_digits")
         val DEV_HIDDEN_FEATURES = stringSetPreferencesKey("dev_hidden_features")
         val DEV_DETAILED_LOGGING = booleanPreferencesKey("dev_detailed_logging")
+        val PIN_REMINDER_SILENCED = booleanPreferencesKey("pin_reminder_silenced")
     }
 
     val settings: Flow<AppSettings> = context.dataStore.data.map { prefs ->
@@ -139,7 +150,8 @@ class SettingsRepository(
             devPlaintextExport = prefs[Keys.DEV_PLAINTEXT_EXPORT] ?: false,
             devExtraDigits = prefs[Keys.DEV_EXTRA_DIGITS] ?: false,
             devHiddenFeatures = prefs[Keys.DEV_HIDDEN_FEATURES] ?: emptySet(),
-            devDetailedLogging = prefs[Keys.DEV_DETAILED_LOGGING] ?: false
+            devDetailedLogging = prefs[Keys.DEV_DETAILED_LOGGING] ?: false,
+            pinReminderSilenced = prefs[Keys.PIN_REMINDER_SILENCED] ?: false
         )
     }
 
@@ -284,6 +296,10 @@ class SettingsRepository(
 
     suspend fun setDevHiddenFeatures(ids: Set<String>) {
         context.dataStore.edit { it[Keys.DEV_HIDDEN_FEATURES] = ids }
+    }
+
+    suspend fun setPinReminderSilenced(silenced: Boolean) {
+        context.dataStore.edit { it[Keys.PIN_REMINDER_SILENCED] = silenced }
     }
 
     suspend fun setDevDetailedLogging(enabled: Boolean) {

@@ -146,6 +146,7 @@
     <string name="fileimport_instructions">किसी अन्य प्रमाणक ऐप से निर्यात फ़ाइल चुनें। Osmium फ़ॉर्मेट स्वतः पहचानता है और आयात से पहले पूर्वावलोकन दिखाता है।\n\nसमर्थित स्रोत:\n• Aegis — बिना पासवर्ड निर्यात (प्लेनटेक्स्ट)\n• 2FAS — बिना पासवर्ड निर्यात किया गया .2fas बैकअप\n• Raivo OTP — पुराना सादा JSON निर्यात\n\nपासवर्ड-एन्क्रिप्टेड निर्यात अभी समर्थित नहीं हैं: कृपया बिना पासवर्ड के फिर से निर्यात करें।</string>
     <string name="fileimport_security_note">फ़ाइल केवल इसी डिवाइस पर पढ़ी जाती है — कुछ भी अपलोड नहीं होता। निर्यात फ़ाइलों में आपके सीक्रेट होते हैं: आयात के बाद उन्हें हटा दें।</string>
     <string name="fileimport_pick_button">निर्यात फ़ाइल चुनें</string>
+    <string name="fileimport_detected">पहचाना गया: %1$s</string>
     <string name="fileimport_pick_another">दूसरी फ़ाइल चुनें</string>
     <string name="fileimport_empty_file">चुनी गई फ़ाइल खाली है।</string>
     <string name="fileimport_found">%1$d आयात योग्य खाते मिले</string>
@@ -165,10 +166,9 @@
     <string name="fileimport_reason_secret">अमान्य सीक्रेट — आयात नहीं हो सकता</string>
     <string name="thirdparty_import_title">दूसरे प्रमाणक ऐप से आयात</string>
     <string name="thirdparty_import_desc">Google Authenticator, Aegis, 2FAS या Raivo OTP से खाते माइग्रेट करें</string>
-    <string name="thirdparty_intro">जिस ऐप से आप माइग्रेट कर रहे हैं उसे चुनें। Osmium Google Authenticator के ट्रांसफ़र QR कोड और दूसरे ऐप्स की प्लेनटेक्स्ट निर्यात फ़ाइलें आयात करता है।</string>
-    <string name="thirdparty_row_aegis_desc">प्लेनटेक्स्ट निर्यात फ़ाइल (.json, बिना पासवर्ड निर्यात)</string>
-    <string name="thirdparty_row_2fas_desc">बिना पासवर्ड निर्यात किया गया बैकअप (.2fas)</string>
-    <string name="thirdparty_row_raivo_desc">पुराना सादा JSON निर्यात</string>
+    <string name="thirdparty_file_row_title">बैकअप फ़ाइल से आयात करें</string>
+    <string name="thirdparty_file_row_desc">Aegis, 2FAS या Raivo OTP एक्सपोर्ट - स्रोत अपने आप पहचाना जाता है</string>
+    <string name="thirdparty_intro">अपनी बैकअप फ़ाइल चुनें - Osmium पहचान लेता है कि यह किस ऑथेंटिकेटर की है और उसे आयात कर देता है। Google Authenticator ट्रांसफ़र QR कोड से माइग्रेट होता है।</string>
     <string name="thirdparty_notice">नई सुविधा - यदि आयात विफल हो जाए और आपको पूरा भरोसा हो कि आपने सब कुछ सही किया है, तो कृपया लॉग संलग्न करें (सेटिंग्स → जानकारी → लॉग निर्यात करें) और समस्या की रिपोर्ट Osmium डेवलपर को करें।</string>
     <string name="attributions_title">श्रेय और स्रोत</string>
     <string name="attributions_intro">आयात सुविधा सार्वजनिक रूप से प्रलेखित निर्यात फ़ॉर्मेटों पर आधारित है। Osmium नीचे दिए प्रोजेक्टों से कोई कोड उधार नहीं लेता - उन्हें फ़ॉर्मेट दस्तावेज़ीकरण और Osmium के आयात परीक्षणों में उपयोग किए गए वास्तविक निर्यात नमूनों के स्रोत के रूप में संदर्भित किया गया है।</string>
@@ -255,12 +255,13 @@
     <string name="export_log_done">लॉग क्लिपबोर्ड पर कॉपी हुआ</string>
     <string name="about_entry_desc">संस्करण, अपडेट और संपर्क</string>
     <string name="about_version">संस्करण %1$s</string>
-    <string name="check_updates">अपडेट जाँचें (GitHub Releases)</string>
+    <string name="check_updates">अपडेट जाँचें</string>
     <string name="about_follow">Osmium फ़ॉलो करें</string>
     <string name="social_telegram">Telegram</string>
     <string name="social_x">X</string>
     <string name="social_github">GitHub</string>
     <string name="social_mail">ईमेल</string>
+    <string name="social_website">वेबसाइट</string>
     <string name="no_browser">यह लिंक खोलने के लिए कोई ऐप उपलब्ध नहीं।</string>
     <string name="email_log_copied">लॉग ईमेल बॉडी में जोड़ा गया, पूरा लॉग क्लिपबोर्ड पर कॉपी हुआ</string>
     <string name="share_account">खाता साझा करें</string>
@@ -398,6 +399,9 @@
     <string name="update_check_desc">ऐप खुलने पर GitHub पर नया संस्करण चुपचाप जाँचता है</string>
     <string name="update_available_title">नया संस्करण उपलब्ध है</string>
     <string name="update_available_body">संस्करण %1$s उपलब्ध है (स्थापित: %2$s)। GitHub खोलें?</string>
+    <string name="update_available_notes_title">नया क्या है</string>
+    <string name="update_up_to_date">आपके पास पहले से नवीनतम संस्करण है (%1$s)</string>
+    <string name="update_check_failed">अपडेट की जाँच नहीं हो सकी - बाद में फिर कोशिश करें</string>
     <string name="update_go_github">GitHub खोलें</string>
     <string name="update_later">बाद में</string>
     <string name="webdav_http_warning_title">प्लेनटेक्स्ट कनेक्शन चेतावनी</string>
@@ -424,12 +428,12 @@
     <string name="refresh">Refresh</string>
     <string name="lan_transfer_title">LAN Transfer</string>
     <string name="lan_transfer_desc">Quickly transfer accounts with a nearby device over local Wi-Fi</string>
-    <string name="lan_transfer_send_desc">Keep this screen open on the sending device. The receiver can enter the pairing code to transfer accounts.</string>
-    <string name="lan_transfer_receive_desc">Connect to the same Wi-Fi network as the sending device and enter the 6-digit pairing code.</string>
+    <string name="lan_transfer_send_desc">Connect to the receiving device on the same Wi-Fi, then enter the 12-digit code shown on its screen.</string>
+    <string name="lan_transfer_receive_desc">Keep this screen open and show the code below to the sending device.</string>
     <string name="lan_send_tab">Send</string>
     <string name="lan_receive_tab">Receive</string>
     <string name="lan_pairing_code_label">Pairing Code</string>
-    <string name="lan_pairing_code_hint">Enter 6-digit code</string>
+    <string name="lan_pairing_code_hint">Enter the 12-digit code</string>
     <string name="lan_server_ip_label">Local Address</string>
     <string name="lan_status_waiting">Waiting for receiver to connect…</string>
     <string name="lan_status_transferring">Transferring data…</string>
@@ -444,10 +448,10 @@
     <string name="lan_error_no_wifi">Not connected to a Wi-Fi network. Please connect both devices to the same Wi-Fi.</string>
     <string name="lan_error_no_device_selected">Please select a device to connect</string>
     <string name="lan_error_invalid_ip">Please enter a valid IP:Port, e.g. 192.168.1.100:52026</string>
-    <string name="lan_error_invalid_code_length">Pairing code must be 6 digits</string>
+    <string name="lan_error_invalid_code_length">Pairing code must be 12 digits</string>
     <string name="lan_error_wrong_code">Wrong pairing code or decryption failed</string>
     <string name="lan_error_connection">Connection failed: %1$s</string>
-    <string name="lan_security_tip">Protected with end-to-end AES-256-GCM encryption derived from the pairing code. Third parties on the local network cannot intercept your accounts.</string>
+    <string name="lan_security_tip">Ephemeral P-256 key exchange + AES-256-GCM. Both devices verify the 12-digit code before anything is sent, so third parties on the local network cannot read or impersonate the transfer.</string>
     <string name="filter_all">All</string>
     <string name="filter_uncategorized">Uncategorized</string>
     <string name="tags_settings_desc">Configure tag support and manage your tags.</string>
@@ -526,4 +530,7 @@
     <string name="check_file_cross">फ़ाइल पथ सुसंगतता</string>
     <string name="check_state_drift">शुरुआत के बाद स्थिति बदलाव</string>
     <string name="integrity_section_consistency">सुसंगतता जाँच</string>
+    <string name="lan_status_done_receive">Received %1$d accounts</string>
+    <string name="pin_reminder_never">Don\'t remind me again</string>
+    <string name="pin_reminder_body">This device has no fingerprint or face unlock, so the app cannot verify who is opening it. Set an app PIN to protect your accounts.</string>
 </resources>

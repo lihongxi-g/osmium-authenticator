@@ -26,6 +26,7 @@ import com.safekey.authenticator.security.AppLog
 import java.security.KeyPairGenerator
 import java.security.KeyStore
 import java.security.SecureRandom
+import kotlinx.coroutines.CancellationException
 import java.security.cert.X509Certificate
 import java.security.spec.ECGenParameterSpec
 import java.time.Instant
@@ -45,7 +46,8 @@ import java.util.Arrays
 internal object AttestationProbe {
 
     private const val ANDROID_KEYSTORE = "AndroidKeyStore"
-    private const val KEY_ALIAS = "safekey_integrity_probe_v1"
+    /** Prefix for the per-run probe key alias. */
+    private const val KEY_ALIAS_PREFIX = "safekey_integrity_probe_"
     private const val CHALLENGE_BYTES = 32
     private const val BOOT_HASH_PROP = "ro.boot.vbmeta.digest"
 
@@ -54,31 +56,41 @@ internal object AttestationProbe {
 
     private fun run(context: Context): AttestationOutcome {
         val challenge = ByteArray(CHALLENGE_BYTES).also { SecureRandom().nextBytes(it) }
+        // One alias per run: with a single fixed alias two overlapping scans
+        // (the auto-backup worker scans directly while a foreground refresh can
+        // be running) delete each other's key between generateKeyPair() and
+        // getCertificateChain(), which silently dropped the whole K3 layer.
+        val alias = KEY_ALIAS_PREFIX + java.util.UUID.randomUUID().toString()
         return try {
-            val chain = generateChain(challenge)
+            val chain = generateChain(alias, challenge)
             if (chain == null) {
                 AttestationOutcome.Unsupported
             } else {
                 verify(context, chain, challenge)
             }
-        } catch (e: Exception) {
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Throwable) {
+            // Contract: never throws. Errors (class-loading failures inside the
+            // vendored verifier, StackOverflowError while parsing ASN.1) have to
+            // degrade to a neutral miss instead of killing the whole scan.
             AppLog.detection("attestation probe error: ${e.javaClass.simpleName}")
             AttestationOutcome.ProbeError(e.javaClass.simpleName)
         } finally {
-            deleteKeyQuietly()
+            deleteKeyQuietly(alias)
         }
     }
 
     /** Fresh key + certificate chain, or null when this device cannot attest. */
-    private fun generateChain(challenge: ByteArray): List<X509Certificate>? {
+    private fun generateChain(alias: String, challenge: ByteArray): List<X509Certificate>? {
         val keyStore = KeyStore.getInstance(ANDROID_KEYSTORE).apply { load(null) }
-        if (keyStore.containsAlias(KEY_ALIAS)) {
-            runCatching { keyStore.deleteEntry(KEY_ALIAS) }
+        if (keyStore.containsAlias(alias)) {
+            runCatching { keyStore.deleteEntry(alias) }
         }
         val generator =
             KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_EC, ANDROID_KEYSTORE)
         generator.initialize(
-            KeyGenParameterSpec.Builder(KEY_ALIAS, KeyProperties.PURPOSE_SIGN)
+            KeyGenParameterSpec.Builder(alias, KeyProperties.PURPOSE_SIGN)
                 .setAlgorithmParameterSpec(ECGenParameterSpec("secp256r1"))
                 .setDigests(KeyProperties.DIGEST_SHA256)
                 .setAttestationChallenge(challenge)
@@ -86,7 +98,7 @@ internal object AttestationProbe {
                 .build()
         )
         generator.generateKeyPair()
-        val raw = keyStore.getCertificateChain(KEY_ALIAS) ?: return null
+        val raw = keyStore.getCertificateChain(alias) ?: return null
         return raw.filterIsInstance<X509Certificate>().takeIf { it.isNotEmpty() }
     }
 
@@ -167,9 +179,9 @@ internal object AttestationProbe {
         }
     }
 
-    private fun deleteKeyQuietly() {
+    private fun deleteKeyQuietly(alias: String) {
         runCatching {
-            KeyStore.getInstance(ANDROID_KEYSTORE).apply { load(null) }.deleteEntry(KEY_ALIAS)
+            KeyStore.getInstance(ANDROID_KEYSTORE).apply { load(null) }.deleteEntry(alias)
         }
     }
 

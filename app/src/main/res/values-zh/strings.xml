@@ -154,6 +154,7 @@
     <string name="fileimport_instructions">选择其他验证器应用导出的备份文件。Osmium 会自动识别格式，并在导入前展示预览。\n\n支持的来源：\n• Aegis —— 无密码（明文）导出\n• 2FAS —— 无密码导出的 .2fas 备份\n• Raivo OTP —— 旧版明文 JSON 导出\n\n暂不支持带密码加密的导出：请在来源应用中改用无密码（明文）导出后再试。</string>
     <string name="fileimport_security_note">文件仅在本机读取，不会上传。导出文件包含你的密钥，导入后请及时删除。</string>
     <string name="fileimport_pick_button">选择导出文件</string>
+    <string name="fileimport_detected">已识别：%1$s</string>
     <string name="fileimport_pick_another">重新选择文件</string>
     <string name="fileimport_empty_file">所选文件为空。</string>
     <string name="fileimport_found">发现 %1$d 个可导入的账户</string>
@@ -174,10 +175,9 @@
 
     <string name="thirdparty_import_title">从其他验证器导入</string>
     <string name="thirdparty_import_desc">从 Google Authenticator、Aegis、2FAS 或 Raivo OTP 迁移账户</string>
-    <string name="thirdparty_intro">选择你要迁出的验证器应用。Osmium 支持 Google Authenticator 的迁移二维码，以及其它应用的明文导出文件。</string>
-    <string name="thirdparty_row_aegis_desc">明文导出文件（.json，导出时不设密码）</string>
-    <string name="thirdparty_row_2fas_desc">无密码导出的备份（.2fas）</string>
-    <string name="thirdparty_row_raivo_desc">旧版明文 JSON 导出</string>
+    <string name="thirdparty_file_row_title">从备份文件导入</string>
+    <string name="thirdparty_file_row_desc">Aegis、2FAS、Raivo OTP 的导出文件——自动识别来源</string>
+    <string name="thirdparty_intro">直接选择你的备份文件即可——Osmium 会自动识别是哪个验证器的备份，然后导入。Google Authenticator 请用迁移二维码。</string>
     <string name="thirdparty_notice">新功能——如果导入失败且你确定操作无误，请附带日志（设置 → 关于 → 导出日志）并把问题反馈给 Osmium 开发者。</string>
     <string name="attributions_title">来源说明</string>
     <string name="attributions_intro">导入功能基于各应用公开的导出格式实现。Osmium 未复制以下项目的代码——它们仅作为格式文档，以及 Osmium 导入测试所用真实导出样本的来源被引用。</string>
@@ -267,12 +267,13 @@
     <string name="export_log_done">日志已复制到剪贴板</string>
     <string name="about_entry_desc">版本、更新和联系方式</string>
     <string name="about_version">版本 %1$s</string>
-    <string name="check_updates">检查更新（GitHub Releases）</string>
+    <string name="check_updates">检查更新</string>
     <string name="about_follow">关注 Osmium</string>
     <string name="social_telegram">Telegram</string>
     <string name="social_x">X</string>
     <string name="social_github">GitHub</string>
     <string name="social_mail">邮件</string>
+    <string name="social_website">网站</string>
     <string name="no_browser">没有可打开此链接的应用。</string>
     <string name="email_log_copied">日志已填入邮件正文，完整日志已复制到剪贴板</string>
     <string name="share_account">分享账户</string>
@@ -414,6 +415,9 @@
     <string name="update_check_desc">每次打开应用时静默检查 GitHub 上的新版本</string>
     <string name="update_available_title">发现新版本</string>
     <string name="update_available_body">新版本 %1$s 已发布（当前版本 %2$s）。前往 GitHub 查看？</string>
+    <string name="update_available_notes_title">更新内容</string>
+    <string name="update_up_to_date">当前已是最新版本（%1$s）</string>
+    <string name="update_check_failed">检查更新失败，请稍后再试</string>
     <string name="update_go_github">前往 GitHub</string>
     <string name="update_later">稍后</string>
     <string name="webdav_http_warning_title">明文连接警告</string>
@@ -438,12 +442,12 @@
     <string name="refresh">刷新</string>
     <string name="lan_transfer_title">局域网快捷传输</string>
     <string name="lan_transfer_desc">在同一 WiFi 局域网内与另一台设备快速迁移或同步账户</string>
-    <string name="lan_transfer_send_desc">请在发送设备上保持此页面开启，接收方输入配对码后即可开始传输。</string>
-    <string name="lan_transfer_receive_desc">请与发送方连接至同一 WiFi 网络，并输入发送方屏幕上显示的 6 位配对码。</string>
+    <string name="lan_transfer_send_desc">请与接收方设备连接至同一 WiFi，并输入接收方屏幕上显示的 12 位验证码。</string>
+    <string name="lan_transfer_receive_desc">请保持此页面开启，并把下方验证码出示给发送方设备。</string>
     <string name="lan_send_tab">发送账户</string>
     <string name="lan_receive_tab">接收账户</string>
     <string name="lan_pairing_code_label">配对码</string>
-    <string name="lan_pairing_code_hint">输入 6 位数字配对码</string>
+    <string name="lan_pairing_code_hint">输入 12 位数字验证码</string>
     <string name="lan_server_ip_label">本机地址</string>
     <string name="lan_status_waiting">等待接收方连接并输入配对码…</string>
     <string name="lan_status_transferring">正在传输数据…</string>
@@ -458,11 +462,11 @@
     <string name="lan_error_no_wifi">未连接 WiFi 局域网，请先连接同一 WiFi</string>
     <string name="lan_error_no_device_selected">请选择要连接的发送设备</string>
     <string name="lan_error_invalid_ip">请输入合法的 IP:端口，如 192.168.1.100:52026</string>
-    <string name="lan_error_invalid_code_length">配对码必须为 6 位数字</string>
+    <string name="lan_error_invalid_code_length">验证码必须为 12 位数字</string>
     <string name="lan_error_wrong_code">配对码错误或解密失败</string>
     <string name="lan_error_too_many_attempts">失败连接尝试过多。请停止传输并重新开始。</string>
     <string name="lan_error_connection">连接失败：%1$s</string>
-    <string name="lan_security_tip">数据经 6 位配对码端到端 AES-256-GCM 加密传输，局域网内的第三方无法解密或窃听。</string>
+    <string name="lan_security_tip">使用一次性 P-256 密钥交换 + AES-256-GCM 加密：12 位验证码会在两台设备上互相验证后才会传输数据，局域网内的第三方无法读取或冒充。</string>
     <string name="filter_all">全部</string>
     <string name="filter_uncategorized">未分类</string>
     <string name="tags_settings_desc">配置标签功能并管理标签。</string>
@@ -541,4 +545,7 @@
     <string name="check_file_cross">文件路径一致性</string>
     <string name="check_state_drift">启动后状态漂移</string>
     <string name="integrity_section_consistency">一致性核验</string>
+    <string name="lan_status_done_receive">已接收 %1$d 个账户</string>
+    <string name="pin_reminder_never">以后不再提醒</string>
+    <string name="pin_reminder_body">此设备没有指纹或人脸识别，打开应用时无法验证身份。建议设置应用 PIN 以保护账户。</string>
 </resources>

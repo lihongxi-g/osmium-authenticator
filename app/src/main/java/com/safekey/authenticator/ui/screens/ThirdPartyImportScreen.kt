@@ -25,9 +25,10 @@ import com.safekey.authenticator.ui.components.SimpleTopBar
 import com.safekey.authenticator.ui.navigation.Screen
 
 /**
- * Migration source picker (second-level page): every supported third-party
- * authenticator is one row; tapping a row opens that app's import flow.
- * Google Authenticator migrates via QR codes, the others via export files.
+ * Migration entry (second-level page): one row to pick a backup FILE —
+ * Osmium sniffs the source app from the file itself, so the user never has to
+ * know which authenticator produced it — plus the QR route for Google
+ * Authenticator, which has no file export.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,31 +53,17 @@ fun ThirdPartyImportScreen(
             )
 
             SettingRow(
+                icon = AppIcons.FileDownload,
+                title = stringResource(R.string.thirdparty_file_row_title),
+                description = stringResource(R.string.thirdparty_file_row_desc),
+                onClick = { vm.nav.push(Screen.FileImport) },
+                trailing = { RowChevron() }
+            )
+            SettingRow(
                 icon = AppIcons.QrCodeScanner,
                 title = "Google Authenticator",
                 description = stringResource(R.string.migration_desc),
                 onClick = { vm.nav.push(Screen.GoogleImport) },
-                trailing = { RowChevron() }
-            )
-            SettingRow(
-                icon = AppIcons.FileDownload,
-                title = "Aegis",
-                description = stringResource(R.string.thirdparty_row_aegis_desc),
-                onClick = { vm.nav.push(Screen.FileImport) },
-                trailing = { RowChevron() }
-            )
-            SettingRow(
-                icon = AppIcons.FileDownload,
-                title = "2FAS",
-                description = stringResource(R.string.thirdparty_row_2fas_desc),
-                onClick = { vm.nav.push(Screen.FileImport) },
-                trailing = { RowChevron() }
-            )
-            SettingRow(
-                icon = AppIcons.FileDownload,
-                title = "Raivo OTP",
-                description = stringResource(R.string.thirdparty_row_raivo_desc),
-                onClick = { vm.nav.push(Screen.FileImport) },
                 trailing = { RowChevron() }
             )
 

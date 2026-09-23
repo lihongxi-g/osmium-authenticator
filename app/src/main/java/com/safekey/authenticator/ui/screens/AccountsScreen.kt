@@ -36,6 +36,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -83,7 +84,9 @@ fun AccountsScreen(
     val uncategorized by vm.uncategorizedSelected.collectAsState()
     val settings by vm.settings.collectAsState()
     val search by vm.searchQuery.collectAsState()
-    var searching by remember { mutableStateOf(false) }
+    // Saveable: the query lives in the ViewModel, so losing this flag across a
+    // gate round-trip left the list filtered with no visible search bar.
+    var searching by rememberSaveable { mutableStateOf(false) }
     var showAddSheet by remember { mutableStateOf(false) }
     val context = androidx.compose.ui.platform.LocalContext.current
     val filtered = uiList

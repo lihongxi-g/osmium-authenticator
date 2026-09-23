@@ -3,6 +3,8 @@ package com.safekey.authenticator.ui.screens
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -40,16 +42,22 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.safekey.authenticator.MainViewModel
 import com.safekey.authenticator.R
+import com.safekey.authenticator.data.AppSettings
 import com.safekey.authenticator.security.KeystoreTools
 import com.safekey.authenticator.security.RootState
 import com.safekey.authenticator.ui.components.AppIcons
+import com.safekey.authenticator.ui.components.UpdateAvailableDialog
 import com.safekey.authenticator.ui.components.SectionHeader
 import com.safekey.authenticator.ui.components.SettingRow
 import com.safekey.authenticator.ui.components.SimpleTopBar
 import com.safekey.authenticator.ui.components.integrityCheckTitle
 import com.safekey.authenticator.ui.components.integrityStatusColor
 import com.safekey.authenticator.ui.dev.DevStrings
+import com.safekey.authenticator.update.UpdateChecker
+import com.safekey.authenticator.update.UpdateInfo
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -82,6 +90,9 @@ fun DeveloperScreen(
     var keystoreLoading by remember { mutableStateOf(false) }
     var showHideList by remember { mutableStateOf(false) }
     var reencrypting by remember { mutableStateOf(false) }
+    // Preview of the update dialog: newest GitHub release, whatever this build is.
+    var updatePreview by remember { mutableStateOf<UpdateInfo?>(null) }
+    var updatePreviewLoading by remember { mutableStateOf(false) }
 
     // Ceremony state machine: null = closed, otherwise the target action.
     var ceremony by remember { mutableStateOf<String?>(null) }
@@ -217,6 +228,26 @@ fun DeveloperScreen(
                             RootState.refresh(context, force = true)
                             scanning = false
                             showReport = true
+                        }
+                    }
+                }
+            )
+
+            SettingRow(
+                icon = AppIcons.Refresh,
+                title = dev.previewUpdate,
+                description = if (updatePreviewLoading) dev.scanning else dev.previewUpdateDesc,
+                onClick = {
+                    if (!updatePreviewLoading) {
+                        updatePreviewLoading = true
+                        scope.launch {
+                            val info = withContext(Dispatchers.IO) { UpdateChecker.fetchLatest() }
+                            updatePreviewLoading = false
+                            if (info != null) {
+                                updatePreview = info
+                            } else {
+                                vm.showToast(dev.previewUpdateFailed)
+                            }
                         }
                     }
                 }
@@ -483,6 +514,26 @@ fun DeveloperScreen(
         )
     }
 
+    // Developer preview of the update dialog (release notes of the newest
+    // GitHub release), so the changelog rendering can be checked without
+    // waiting for a release that is newer than this build.
+    updatePreview?.let { info ->
+        UpdateAvailableDialog(
+            tag = info.tag,
+            notes = info.notes,
+            url = info.url,
+            onOpenReleasePage = { url ->
+                updatePreview = null
+                try {
+                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                } catch (_: Exception) {
+                    vm.showToast(context.getString(R.string.no_browser))
+                }
+            },
+            onDismiss = { updatePreview = null }
+        )
+    }
+
     // ---------------------------------------------------------------- ceremony
 
     val target = ceremony
@@ -626,7 +677,7 @@ private val HIDEABLE_ITEMS: List<Pair<String, Int>> = listOf(
     "screenshots" to R.string.allow_screenshots,
     "hideCodes" to R.string.hide_codes,
     "timeOffset" to R.string.time_offset,
-    "integrity" to R.string.integrity_entry_title,
+    AppSettings.HIDDEN_FEATURE_INTEGRITY to R.string.integrity_entry_title,
     "pin" to R.string.settings_pin,
     "destroy" to R.string.settings_destroy,
     "thirdparty" to R.string.thirdparty_import_title,

@@ -1,6 +1,8 @@
 package com.safekey.authenticator.repository
 
+import androidx.room.withTransaction
 import com.safekey.authenticator.database.AccountTagCrossRef
+import com.safekey.authenticator.database.AppDatabase
 import com.safekey.authenticator.database.TagDao
 import com.safekey.authenticator.database.TagEntity
 import com.safekey.authenticator.model.Tag
@@ -10,7 +12,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.util.UUID
 
-class TagRepository(private val dao: TagDao) {
+class TagRepository(
+    private val dao: TagDao,
+    private val db: AppDatabase? = null
+) {
     val tags: Flow<List<Tag>> = dao.observeAll().map { list -> list.map { Tag(it.id, it.name, it.color, it.createdAt, it.updatedAt) } }
 
     val accountTagIds: Flow<Map<String, Set<String>>> = dao.observeAllRefs().map { refs ->
@@ -47,8 +52,18 @@ class TagRepository(private val dao: TagDao) {
     }
 
     suspend fun setAccountTags(accountId: String, tagIds: Set<String>) {
-        dao.deleteRefsForAccount(accountId)
-        dao.insertRefs(tagIds.map { AccountTagCrossRef(accountId, it) })
+        // One transaction: the untransacted delete-then-insert pair could leave
+        // the account with no tags when the insert failed.
+        val refs = tagIds.map { AccountTagCrossRef(accountId, it) }
+        if (db == null) {
+            dao.deleteRefsForAccount(accountId)
+            dao.insertRefs(refs)
+        } else {
+            db.withTransaction {
+                dao.deleteRefsForAccount(accountId)
+                dao.insertRefs(refs)
+            }
+        }
     }
 
     suspend fun getAccountTagIds(accountId: String): Set<String> = dao.getRefsForAccount(accountId).map { it.tagId }.toSet()

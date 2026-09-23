@@ -146,6 +146,7 @@
     <string name="fileimport_instructions">Choisissez un fichier d’export d’une autre application d’authentification. Osmium détecte automatiquement le format et affiche un aperçu avant l’import.\n\nSources prises en charge :\n• Aegis — export sans mot de passe (en clair)\n• 2FAS — sauvegarde .2fas exportée sans mot de passe\n• Raivo OTP — ancien export JSON en clair\n\nLes exports protégés par mot de passe ne sont pas encore pris en charge : veuillez ré-exporter sans mot de passe.</string>
     <string name="fileimport_security_note">Le fichier est lu uniquement sur cet appareil — rien n’est envoyé. Les fichiers d’export contiennent vos secrets : supprimez-les après l’import.</string>
     <string name="fileimport_pick_button">Choisir le fichier d’export</string>
+    <string name="fileimport_detected">Détecté : %1$s</string>
     <string name="fileimport_pick_another">Choisir un autre fichier</string>
     <string name="fileimport_empty_file">Le fichier sélectionné est vide.</string>
     <string name="fileimport_found">%1$d compte(s) importable(s) trouvé(s)</string>
@@ -165,10 +166,9 @@
     <string name="fileimport_reason_secret">Secret invalide — import impossible</string>
     <string name="thirdparty_import_title">Import depuis un autre authentificateur</string>
     <string name="thirdparty_import_desc">Migrer des comptes depuis Google Authenticator, Aegis, 2FAS ou Raivo OTP</string>
-    <string name="thirdparty_intro">Choisissez l’application depuis laquelle vous migrez. Osmium importe les QR codes de transfert de Google Authenticator et les fichiers d’export en clair des autres applications.</string>
-    <string name="thirdparty_row_aegis_desc">Fichier d’export en clair (.json, exporté sans mot de passe)</string>
-    <string name="thirdparty_row_2fas_desc">Sauvegarde exportée sans mot de passe (.2fas)</string>
-    <string name="thirdparty_row_raivo_desc">Ancien export JSON en clair</string>
+    <string name="thirdparty_file_row_title">Importer depuis un fichier de sauvegarde</string>
+    <string name="thirdparty_file_row_desc">Export Aegis, 2FAS ou Raivo OTP : la source est détectée automatiquement</string>
+    <string name="thirdparty_intro">Choisissez votre fichier de sauvegarde : Osmium reconnaît l\'authentificateur d\'origine et l\'importe. Google Authenticator se migre via ses QR codes de transfert.</string>
     <string name="thirdparty_notice">Nouvelle fonctionnalité — si un import échoue et que vous êtes certain d’avoir fait tout correctement, joignez le journal (Paramètres → À propos → Exporter le journal) et signalez le problème au développeur d’Osmium.</string>
     <string name="attributions_title">Attributions et sources</string>
     <string name="attributions_intro">La fonction d’import s’appuie sur des formats d’export publiquement documentés. Osmium ne réutilise aucun code des projets ci-dessous — ils sont cités comme documentation de format et comme source des échantillons d’export réels utilisés dans les tests d’import d’Osmium.</string>
@@ -255,12 +255,13 @@
     <string name="export_log_done">Journal copié dans le presse-papiers</string>
     <string name="about_entry_desc">Version, mises à jour et contact</string>
     <string name="about_version">Version %1$s</string>
-    <string name="check_updates">Vérifier les mises à jour (GitHub Releases)</string>
+    <string name="check_updates">Vérifier les mises à jour</string>
     <string name="about_follow">Suivre Osmium</string>
     <string name="social_telegram">Telegram</string>
     <string name="social_x">X</string>
     <string name="social_github">GitHub</string>
     <string name="social_mail">E-mail</string>
+    <string name="social_website">Site web</string>
     <string name="no_browser">Aucune application disponible pour ouvrir ce lien.</string>
     <string name="email_log_copied">Journal ajouté au corps de l’e-mail, journal complet copié dans le presse-papiers</string>
     <string name="share_account">Partager le compte</string>
@@ -398,6 +399,9 @@
     <string name="update_check_desc">Vérifie silencieusement GitHub à l’ouverture</string>
     <string name="update_available_title">Nouvelle version disponible</string>
     <string name="update_available_body">La version %1$s est disponible (installée : %2$s). Ouvrir GitHub ?</string>
+    <string name="update_available_notes_title">Nouveautés</string>
+    <string name="update_up_to_date">Vous avez déjà la dernière version (%1$s)</string>
+    <string name="update_check_failed">Impossible de vérifier les mises à jour - réessayez plus tard</string>
     <string name="update_go_github">Ouvrir GitHub</string>
     <string name="update_later">Plus tard</string>
     <string name="webdav_http_warning_title">Avertissement de connexion en clair</string>
@@ -424,12 +428,12 @@
     <string name="refresh">Refresh</string>
     <string name="lan_transfer_title">LAN Transfer</string>
     <string name="lan_transfer_desc">Quickly transfer accounts with a nearby device over local Wi-Fi</string>
-    <string name="lan_transfer_send_desc">Keep this screen open on the sending device. The receiver can enter the pairing code to transfer accounts.</string>
-    <string name="lan_transfer_receive_desc">Connect to the same Wi-Fi network as the sending device and enter the 6-digit pairing code.</string>
+    <string name="lan_transfer_send_desc">Connect to the receiving device on the same Wi-Fi, then enter the 12-digit code shown on its screen.</string>
+    <string name="lan_transfer_receive_desc">Keep this screen open and show the code below to the sending device.</string>
     <string name="lan_send_tab">Send</string>
     <string name="lan_receive_tab">Receive</string>
     <string name="lan_pairing_code_label">Pairing Code</string>
-    <string name="lan_pairing_code_hint">Enter 6-digit code</string>
+    <string name="lan_pairing_code_hint">Enter the 12-digit code</string>
     <string name="lan_server_ip_label">Local Address</string>
     <string name="lan_status_waiting">Waiting for receiver to connect…</string>
     <string name="lan_status_transferring">Transferring data…</string>
@@ -444,10 +448,10 @@
     <string name="lan_error_no_wifi">Not connected to a Wi-Fi network. Please connect both devices to the same Wi-Fi.</string>
     <string name="lan_error_no_device_selected">Please select a device to connect</string>
     <string name="lan_error_invalid_ip">Please enter a valid IP:Port, e.g. 192.168.1.100:52026</string>
-    <string name="lan_error_invalid_code_length">Pairing code must be 6 digits</string>
+    <string name="lan_error_invalid_code_length">Pairing code must be 12 digits</string>
     <string name="lan_error_wrong_code">Wrong pairing code or decryption failed</string>
     <string name="lan_error_connection">Connection failed: %1$s</string>
-    <string name="lan_security_tip">Protected with end-to-end AES-256-GCM encryption derived from the pairing code. Third parties on the local network cannot intercept your accounts.</string>
+    <string name="lan_security_tip">Ephemeral P-256 key exchange + AES-256-GCM. Both devices verify the 12-digit code before anything is sent, so third parties on the local network cannot read or impersonate the transfer.</string>
     <string name="filter_all">All</string>
     <string name="filter_uncategorized">Uncategorized</string>
     <string name="tags_settings_desc">Configure tag support and manage your tags.</string>
@@ -526,4 +530,7 @@
     <string name="check_file_cross">Cohérence des chemins de fichiers</string>
     <string name="check_state_drift">Dérive d\'état après le démarrage</string>
     <string name="integrity_section_consistency">Vérifications de cohérence</string>
+    <string name="lan_status_done_receive">Received %1$d accounts</string>
+    <string name="pin_reminder_never">Don\'t remind me again</string>
+    <string name="pin_reminder_body">This device has no fingerprint or face unlock, so the app cannot verify who is opening it. Set an app PIN to protect your accounts.</string>
 </resources>

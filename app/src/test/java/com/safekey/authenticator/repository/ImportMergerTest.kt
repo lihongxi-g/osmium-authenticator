@@ -73,6 +73,42 @@ class ImportMergerTest {
         assertEquals(1, plan.duplicatesCount)
     }
 
+    // ---- duplicate keys in one backup (used to be silently dropped) ----
+
+    @Test
+    fun `two same key entries in one backup are both imported`() {
+        val plan = ImportMerger.plan(emptyList(), listOf(vault("", ""), vault("", "")))
+        assertEquals(2, plan.toAdd.size)
+        assertEquals(0, plan.duplicatesCount)
+    }
+
+    @Test
+    fun `a second same key entry becomes a new account when only one local match exists`() {
+        val existing = listOf(account("1", "Google", "a@gmail.com"))
+        val plan = ImportMerger.plan(
+            existing,
+            listOf(vault("Google", "a@gmail.com"), vault("Google", "a@gmail.com"))
+        )
+        assertEquals(1, plan.toUpdate.size)
+        assertEquals(1, plan.toAdd.size)
+        assertEquals(1, plan.duplicatesCount)
+    }
+
+    @Test
+    fun `local twins are each updated once`() {
+        val existing = listOf(
+            account("1", "Google", "a@gmail.com"),
+            account("2", "Google", "a@gmail.com")
+        )
+        val plan = ImportMerger.plan(
+            existing,
+            listOf(vault("Google", "a@gmail.com"), vault("Google", "a@gmail.com"))
+        )
+        assertEquals(0, plan.toAdd.size)
+        assertEquals(2, plan.toUpdate.size)
+        assertEquals(setOf("1", "2"), plan.toUpdate.map { it.first.id }.toSet())
+    }
+
     // ---- HOTP counter safety (restoring an old backup must never rewind) ----
 
     @Test

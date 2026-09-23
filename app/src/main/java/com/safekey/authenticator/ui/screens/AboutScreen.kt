@@ -38,6 +38,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.safekey.authenticator.BuildConfig
 import com.safekey.authenticator.MainViewModel
@@ -50,9 +51,15 @@ import com.safekey.authenticator.security.AppLog
 import com.safekey.authenticator.security.ClipboardHelper
 import com.safekey.authenticator.ui.components.AppIcons
 import com.safekey.authenticator.ui.components.SimpleTopBar
+import com.safekey.authenticator.ui.components.UpdateAvailableDialog
 import com.safekey.authenticator.ui.dev.DevStrings
 import com.safekey.authenticator.ui.navigation.Screen
+import com.safekey.authenticator.update.UpdateChecker
+import com.safekey.authenticator.update.UpdateInfo
+import com.safekey.authenticator.update.UpdateResult
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -65,6 +72,9 @@ fun AboutScreen(
     val context = LocalContext.current
     var showTerms by remember { mutableStateOf(false) }
     var showPrivacy by remember { mutableStateOf(false) }
+    /** Manual "check for updates": result of the GitHub query. */
+    var updateChecking by remember { mutableStateOf(false) }
+    var updateFound by remember { mutableStateOf<UpdateInfo?>(null) }
     val legalStates by LegalDocsRepository.states.collectAsState()
     val scope = rememberCoroutineScope()
     val dev = DevStrings.forContext(context)
@@ -118,19 +128,26 @@ fun AboutScreen(
             )
             Spacer(Modifier.height(24.dp))
 
-            // check updates → opens the GitHub Releases page in the browser.
+            // check updates → asks GitHub and shows what changed in the new
+            // release (same dialog as the silent startup check).
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable {
-                        val intent = Intent(
-                            Intent.ACTION_VIEW,
-                            Uri.parse("https://github.com/lihongxi-g/osmium-authenticator/releases")
-                        )
-                        try {
-                            context.startActivity(intent)
-                        } catch (_: Exception) {
-                            vm.showToast(context.getString(R.string.no_browser))
+                    .clickable(enabled = !updateChecking) {
+                        updateChecking = true
+                        scope.launch {
+                            val result = withContext(Dispatchers.IO) { UpdateChecker.check() }
+                            updateChecking = false
+                            when (result) {
+                                is UpdateResult.Found -> updateFound = result.info
+                                UpdateResult.UpToDate -> vm.showToast(
+                                    context.getString(
+                                        R.string.update_up_to_date, BuildConfig.VERSION_NAME
+                                    )
+                                )
+                                UpdateResult.Failed ->
+                                    vm.showToast(context.getString(R.string.update_check_failed))
+                            }
                         }
                     }
                     .padding(vertical = 12.dp),
@@ -142,12 +159,19 @@ fun AboutScreen(
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.weight(1f)
                 )
-                Icon(
-                    imageVector = AppIcons.ArrowBack,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                if (updateChecking) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(16.dp),
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Icon(
+                        imageVector = AppIcons.ArrowBack,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
 
             Spacer(Modifier.height(8.dp))
@@ -180,6 +204,9 @@ fun AboutScreen(
                 }
                 SocialIcon(AppIcons.Mail, stringResource(R.string.social_mail), "") {
                     sendFeedbackEmail(context, vm)
+                }
+                SocialIcon(AppIcons.Globe, stringResource(R.string.social_website), "https://osmium.im") { url ->
+                    openUrl(context, url, vm)
                 }
             }
 
@@ -281,6 +308,21 @@ fun AboutScreen(
                 showDevPinEntry = false
                 devPinError = null
             }
+        )
+    }
+
+    // Manual and silent update checks share one dialog, so the release notes
+    // read the same wherever they are opened from.
+    updateFound?.let { info ->
+        UpdateAvailableDialog(
+            tag = info.tag,
+            notes = info.notes,
+            url = info.url,
+            onOpenReleasePage = { url ->
+                updateFound = null
+                openUrl(context, url, vm)
+            },
+            onDismiss = { updateFound = null }
         )
     }
 }
@@ -468,7 +510,9 @@ private fun SocialIcon(icon: ImageVector, label: String, url: String, onOpen: (S
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            maxLines = 2
         )
     }
 }

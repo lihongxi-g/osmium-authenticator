@@ -74,9 +74,13 @@ class AttestationMappingTest {
     }
 
     @Test
-    fun `rejected chain fails the check`() {
+    fun `rejected chain is weak evidence, not a verdict`() {
+        // An anchor mismatch only says "not in the pinned set" — it happens on
+        // non-GMS devices with vendor roots, so it must not score as hard
+        // evidence (which forced the root hardening on unrooted devices).
         val main = mainCheck(AttestationOutcome.ChainRejected("no matching trust anchor"))
-        assertEquals(IntegritySeverity.FAIL, main.severity)
+        assertEquals(IntegritySeverity.WARN, main.severity)
+        assertTrue(main.hit)
     }
 
     @Test

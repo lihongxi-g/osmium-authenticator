@@ -98,9 +98,17 @@ fun AutoBackupScreen(
     }
 
     // Android 8/9 needs WRITE_EXTERNAL_STORAGE for the public folder.
+    // The permission result arrives asynchronously, so the "enable auto-backup"
+    // intent started before the request has to be resumed from the callback —
+    // without it the switch just snapped back on Android 8/9 and nothing ran.
+    var enableAfterPermission by remember { mutableStateOf(false) }
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
-    ) { /* granted or not, the screen reflects reality via checkSelfPermission */ }
+    ) { granted ->
+        val pending = enableAfterPermission
+        enableAfterPermission = false
+        if (granted && pending) vm.setAutoBackupEnabled(true)
+    }
 
     fun hasLegacyPermission(): Boolean =
         ContextCompat.checkSelfPermission(
@@ -124,6 +132,7 @@ fun AutoBackupScreen(
             target == AppSettings.AUTO_BACKUP_TARGET_LOCAL &&
             !hasLegacyPermission()
         ) {
+            enableAfterPermission = true
             permissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
             return
         }

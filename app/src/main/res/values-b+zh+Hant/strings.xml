@@ -153,6 +153,7 @@
     <string name="fileimport_instructions">從其他驗證器 App 選擇匯出檔案。Osmium 會自動偵測格式，並在匯入前顯示預覽。\n\n支援的來源：\n• Aegis——不使用密碼匯出（明文）\n• 2FAS——不使用密碼匯出的 .2fas 備份\n• Raivo OTP——舊版純 JSON 匯出\n\n尚不支援以密碼加密的匯出，請重新以無密碼方式匯出。</string>
     <string name="fileimport_security_note">此檔案僅在此裝置上讀取——不會上傳任何內容。匯出檔案含有你的金鑰，匯入後請刪除。</string>
     <string name="fileimport_pick_button">選擇匯出檔案</string>
+    <string name="fileimport_detected">已辨識：%1$s</string>
     <string name="fileimport_pick_another">選擇其他檔案</string>
     <string name="fileimport_empty_file">選取的檔案是空的。</string>
     <string name="fileimport_found">發現 %1$d 個可匯入的帳戶</string>
@@ -172,10 +173,9 @@
     <string name="fileimport_reason_secret">金鑰無效——無法匯入</string>
     <string name="thirdparty_import_title">從其他驗證器匯入</string>
     <string name="thirdparty_import_desc">從 Google Authenticator、Aegis、2FAS 或 Raivo OTP 遷移帳戶</string>
-    <string name="thirdparty_intro">選擇你要遷移的來源 App。Osmium 可匯入 Google Authenticator 的遷移二維碼，以及其他 App 的明文匯出檔案。</string>
-    <string name="thirdparty_row_aegis_desc">明文匯出檔案（.json，不使用密碼匯出）</string>
-    <string name="thirdparty_row_2fas_desc">不使用密碼匯出的備份（.2fas）</string>
-    <string name="thirdparty_row_raivo_desc">舊版純 JSON 匯出</string>
+    <string name="thirdparty_file_row_title">從備份檔案匯入</string>
+    <string name="thirdparty_file_row_desc">Aegis、2FAS、Raivo OTP 的匯出檔案——自動辨識來源</string>
+    <string name="thirdparty_intro">直接選擇你的備份檔案即可——Osmium 會自動辨識是哪個驗證器的備份，然後匯入。Google Authenticator 請使用移轉 QR 碼。</string>
     <string name="thirdparty_notice">新功能——若匯入失敗，且你確定操作步驟都正確，請附上日志（設定 → 關於 → 匯出日志）並向 Osmium 開發者回報問題。</string>
     <string name="attributions_title">致謝與來源</string>
     <string name="attributions_intro">匯入功能是根據公開文件所記載的匯出格式所建置。Osmium 沒有重用下列專案中的任何程式碼——它們僅作為格式參考文件，以及 Osmium 匯入測試中所用真實匯出樣本的來源。</string>
@@ -266,12 +266,13 @@
     <string name="export_log_done">日志已複製到剪貼簿</string>
     <string name="about_entry_desc">版本、更新和聯絡方式</string>
     <string name="about_version">版本 %1$s</string>
-    <string name="check_updates">檢查更新（GitHub Releases）</string>
+    <string name="check_updates">檢查更新</string>
     <string name="about_follow">關注 Osmium</string>
     <string name="social_telegram">Telegram</string>
     <string name="social_x">X</string>
     <string name="social_github">GitHub</string>
     <string name="social_mail">郵件</string>
+    <string name="social_website">網站</string>
     <string name="no_browser">沒有可打開此鏈接的應用。</string>
     <string name="email_log_copied">日志已填入郵件正文，完整日志已複製到剪貼簿</string>
     <string name="share_account">分享帳戶</string>
@@ -413,6 +414,9 @@
     <string name="update_check_desc">每次打開應用時靜默檢查 GitHub 上的新版本</string>
     <string name="update_available_title">發現新版本</string>
     <string name="update_available_body">新版本 %1$s 已發布（當前版本 %2$s）。前往 GitHub 查看？</string>
+    <string name="update_available_notes_title">更新內容</string>
+    <string name="update_up_to_date">目前已是最新版本（%1$s）</string>
+    <string name="update_check_failed">檢查更新失敗，請稍後再試</string>
     <string name="update_go_github">前往 GitHub</string>
     <string name="update_later">稍後</string>
     <string name="webdav_http_warning_title">明文連線警告</string>
@@ -437,12 +441,12 @@
     <string name="refresh">重新整理</string>
     <string name="lan_transfer_title">區域網路快速傳輸</string>
     <string name="lan_transfer_desc">在同一 WiFi 區域網路內與另一台裝置快速遷移或同步帳戶</string>
-    <string name="lan_transfer_send_desc">請在傳送裝置上保持此頁面開啟，接收端輸入配對碼后即可開始傳輸。</string>
-    <string name="lan_transfer_receive_desc">請與發送端連線至同一 WiFi 網絡，並輸入發送端屏幕上顯示的 6 位配對碼。</string>
+    <string name="lan_transfer_send_desc">請與接收端裝置連線至同一 WiFi，並輸入接收端畫面上顯示的 12 位驗證碼。</string>
+    <string name="lan_transfer_receive_desc">請保持此頁面開啟，並把下方驗證碼出示給發送端裝置。</string>
     <string name="lan_send_tab">傳送帳戶</string>
     <string name="lan_receive_tab">接收帳戶</string>
     <string name="lan_pairing_code_label">配對碼</string>
-    <string name="lan_pairing_code_hint">輸入 6 位數字配對碼</string>
+    <string name="lan_pairing_code_hint">輸入 12 位數字驗證碼</string>
     <string name="lan_server_ip_label">本機位址</string>
     <string name="lan_status_waiting">等待接收端連線並輸入配對碼…</string>
     <string name="lan_status_transferring">正在傳輸数據…</string>
@@ -457,10 +461,10 @@
     <string name="lan_error_no_wifi">未連線 WiFi 區域網路，請先連線同一 WiFi</string>
     <string name="lan_error_no_device_selected">請選取要連線的傳送裝置</string>
     <string name="lan_error_invalid_ip">請輸入合法的 IP:連接埠，如 192.168.1.100:52026</string>
-    <string name="lan_error_invalid_code_length">配對碼必須為 6 位數字</string>
+    <string name="lan_error_invalid_code_length">驗證碼必須為 12 位數字</string>
     <string name="lan_error_wrong_code">配對碼錯誤或解密失敗</string>
     <string name="lan_error_connection">連線失敗：%1$s</string>
-    <string name="lan_security_tip">数據經 6 位配對碼端到端 AES-256-GCM 加密傳輸，區域網路內的第三方無法解密或竊聽。</string>
+    <string name="lan_security_tip">使用一次性 P-256 金鑰交換 + AES-256-GCM 加密：12 位驗證碼會在兩台裝置上互相驗證後才會傳輸資料，區域網路內的第三方無法讀取或冒充。</string>
     <string name="filter_all">全部</string>
     <string name="filter_uncategorized">未分類</string>
     <string name="tags_settings_desc">設定標籤功能並管理標籤。</string>
@@ -539,4 +543,7 @@
     <string name="check_file_cross">檔案路徑一致性</string>
     <string name="check_state_drift">啟動後狀態漂移</string>
     <string name="integrity_section_consistency">一致性核驗</string>
+    <string name="lan_status_done_receive">已接收 %1$d 個帳戶</string>
+    <string name="pin_reminder_never">之後不再提醒</string>
+    <string name="pin_reminder_body">此裝置沒有指紋或人臉辨識，開啟應用程式時無法驗證身分。建議設定應用程式 PIN 以保護帳戶。</string>
 </resources>

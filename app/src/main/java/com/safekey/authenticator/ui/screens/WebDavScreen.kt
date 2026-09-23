@@ -337,11 +337,16 @@ fun WebDavScreen(
                 runBusy(context.getString(R.string.webdav_uploading)) {
                     val repo = (context.applicationContext as com.safekey.authenticator.SafeKeyApp).accountRepository
                     val pinHash = vm.pinManager.getPinHashForExport()
-                    val vf = repo.exportVault(
+                    val export = repo.exportVault(
                         pinSalt = pinHash?.first ?: "",
                         pinHash = pinHash?.second ?: ""
                     )
-                    val payload = VaultIO.encrypt(vf, exportPassword.toCharArray())
+                    if (export.dropped > 0) {
+                        throw WebDavException(
+                            "${export.dropped} accounts could not be decrypted — upload aborted"
+                        )
+                    }
+                    val payload = VaultIO.encrypt(export.vault, exportPassword.toCharArray())
                     try {
                         WebDavClient.upload(currentConfig(), fileName, payload.toByteArray(Charsets.UTF_8))
                     } catch (e: WebDavException) {

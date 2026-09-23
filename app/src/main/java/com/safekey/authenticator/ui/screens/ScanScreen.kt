@@ -27,6 +27,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -45,6 +46,9 @@ import com.safekey.authenticator.ui.components.QrCameraPreview
 import com.safekey.authenticator.ui.components.QrDecode
 import com.safekey.authenticator.ui.components.SimpleTopBar
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,6 +58,7 @@ fun ScanScreen(
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
     var hasPermission by remember {
         mutableStateOf(
@@ -76,32 +81,41 @@ fun ScanScreen(
         ActivityResultContracts.GetContent()
     ) { uri ->
         if (uri != null) {
-            try {
-                val bitmap = context.contentResolver.openInputStream(uri)?.use { input ->
-                    BitmapFactory.decodeStream(input)
-                }
-                if (bitmap != null) {
-                    QrDecode.decodeAsync(bitmap) { raw ->
-                        if (raw != null) {
-                            val parsed = try {
-                                OtpUriParser.parse(raw, vm.settings.value.devExtraDigits)
-                            } catch (_: Exception) {
-                                null
+            // A modern gallery photo is tens of MB: reading and decoding it on
+            // the main thread froze the UI (and could ANR). Only the zxing pass
+            // was offloaded before.
+            scope.launch {
+                try {
+                    val bitmap = withContext(Dispatchers.IO) {
+                        runCatching {
+                            context.contentResolver.openInputStream(uri)?.use { input ->
+                                BitmapFactory.decodeStream(input)
                             }
-                            if (parsed != null) {
-                                confirm = parsed
-                            } else {
-                                vm.showToast(context.getString(R.string.scan_no_uri))
-                            }
-                        } else {
-                            vm.showToast(context.getString(R.string.scan_no_qr))
-                        }
+                        }.getOrNull()
                     }
-                } else {
+                    if (bitmap != null) {
+                        QrDecode.decodeAsync(bitmap) { raw ->
+                            if (raw != null) {
+                                val parsed = try {
+                                    OtpUriParser.parse(raw, vm.settings.value.devExtraDigits)
+                                } catch (_: Exception) {
+                                    null
+                                }
+                                if (parsed != null) {
+                                    confirm = parsed
+                                } else {
+                                    vm.showToast(context.getString(R.string.scan_no_uri))
+                                }
+                            } else {
+                                vm.showToast(context.getString(R.string.scan_no_qr))
+                            }
+                        }
+                    } else {
+                        vm.showToast(context.getString(R.string.scan_gallery_failed))
+                    }
+                } catch (_: Exception) {
                     vm.showToast(context.getString(R.string.scan_gallery_failed))
                 }
-            } catch (_: Exception) {
-                vm.showToast(context.getString(R.string.scan_gallery_failed))
             }
         }
     }
