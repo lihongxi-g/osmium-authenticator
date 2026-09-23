@@ -1,0 +1,1 @@
+v2.5.3: LAN transfer pairing-code input no longer scrambles; import another authenticator by picking its backup file directly (the source is detected automatically); hiding Android integrity detection now really stops the check at launch; update checks show the release notes. The new LAN transfer protocol needs v2.5.3 on both devices.
