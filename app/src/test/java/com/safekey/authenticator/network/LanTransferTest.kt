@@ -194,6 +194,18 @@ class LanTransferTest {
                 LanSession.senderTag(sessionKey, transcript), senderTag
             )
             if (!valid) {
+                // Reject the transfer. Drain whatever the sender sent after the
+                // tag *before* replying: closing the socket while those bytes
+                // are still in flight made the sender's write hit a half-closed
+                // connection, which surfaced as an intermittent
+                // "Connection reset" SocketException (CI flake 2026-09).
+                // The payload is still never decrypted or accepted —
+                // payloadsAccepted stays 0, which is the assertion below.
+                // (Bounded, so a missing payload can never hang the test.)
+                val previousTimeout = socket.soTimeout
+                socket.soTimeout = 5_000
+                runCatching { LanWire.readPayload(input) }
+                socket.soTimeout = previousTimeout
                 LanWire.writeText(output, LanSession.DENY)
             } else {
                 payloadsAccepted.incrementAndGet()
