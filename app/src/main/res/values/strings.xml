@@ -87,6 +87,7 @@
     <string name="biometric_lock">Biometric lock</string>
     <string name="biometric_lock_desc">Require fingerprint, face, or device PIN to open the app.</string>
     <string name="biometric_unavailable">No biometric or screen lock is set up on this device. Set one in system settings first.</string>
+    <string name="biometric_temporarily_unavailable">Biometrics are temporarily unavailable (the sensor is busy or locked out). Wait a moment and try again, or unlock with your device password.</string>
     <string name="clipboard_timeout">Clipboard auto-clear</string>
     <string name="clipboard_off">Off</string>
     <string name="clipboard_15s">15 seconds</string>

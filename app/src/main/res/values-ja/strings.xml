@@ -82,6 +82,7 @@
     <string name="biometric_lock">生体認証ロック</string>
     <string name="biometric_lock_desc">アプリを開く際に指紋・顔・端末PINを要求します。</string>
     <string name="biometric_unavailable">この端末には生体認証や画面ロックが設定されていません。先にシステム設定で設定してください。</string>
+    <string name="biometric_temporarily_unavailable">生体認証は一時的に利用できません（センサーがビジーか、一時的にロックされています）。しばらくしてから再試行するか、端末のパスワードで解除してください。</string>
     <string name="clipboard_timeout">クリップボード自動消去</string>
     <string name="clipboard_off">オフ</string>
     <string name="clipboard_15s">15秒</string>

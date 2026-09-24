@@ -87,6 +87,7 @@
     <string name="biometric_lock">生物识别锁</string>
     <string name="biometric_lock_desc">打开应用时需要指纹、人脸或设备密码验证。</string>
     <string name="biometric_unavailable">设备没有设置生物识别或锁屏密码，请先在系统设置中添加。</string>
+    <string name="biometric_temporarily_unavailable">生物识别暂时不可用（传感器忙，或已被临时锁定）。请稍后重试，或用设备密码解锁。</string>
     <string name="clipboard_timeout">剪贴板自动清理</string>
     <string name="clipboard_off">关闭</string>
     <string name="clipboard_15s">15 秒</string>

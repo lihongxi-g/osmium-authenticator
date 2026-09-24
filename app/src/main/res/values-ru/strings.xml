@@ -82,6 +82,7 @@
     <string name="biometric_lock">Биометрическая блокировка</string>
     <string name="biometric_lock_desc">Требовать отпечаток, лицо или PIN устройства при открытии приложения.</string>
     <string name="biometric_unavailable">На устройстве не настроены биометрия или блокировка экрана. Сначала настройте их в системных настройках.</string>
+    <string name="biometric_temporarily_unavailable">Биометрия временно недоступна (датчик занят или временно заблокирован). Подождите немного и повторите попытку или разблокируйте паролем устройства.</string>
     <string name="clipboard_timeout">Автоочистка буфера обмена</string>
     <string name="clipboard_off">Выкл</string>
     <string name="clipboard_15s">15 секунд</string>

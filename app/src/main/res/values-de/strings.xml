@@ -82,6 +82,7 @@
     <string name="biometric_lock">Biometrische Sperre</string>
     <string name="biometric_lock_desc">Fingerabdruck, Gesicht oder Geräte-PIN beim Öffnen der App erforderlich.</string>
     <string name="biometric_unavailable">Auf diesem Gerät ist keine Biometrie oder Bildschirmsperre eingerichtet. Richte zuerst eine in den Systemeinstellungen ein.</string>
+    <string name="biometric_temporarily_unavailable">Biometrie ist vorübergehend nicht verfügbar (Sensor beschäftigt oder vorübergehend gesperrt). Warte einen Moment und versuche es erneut, oder entsperre mit deinem Gerätepasswort.</string>
     <string name="clipboard_timeout">Zwischenablage automatisch leeren</string>
     <string name="clipboard_off">Aus</string>
     <string name="clipboard_15s">15 Sekunden</string>

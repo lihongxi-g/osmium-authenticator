@@ -87,6 +87,7 @@
     <string name="biometric_lock">生物辨識锁</string>
     <string name="biometric_lock_desc">打開應用時需要指紋、人臉或裝置密碼驗證。</string>
     <string name="biometric_unavailable">裝置沒有設定生物辨識或螢幕鎖定密碼，請先在系統設定中新增。</string>
+    <string name="biometric_temporarily_unavailable">生物辨識暫時無法使用（感應器忙碌或被暫時鎖定）。請稍後再試，或用裝置密碼解鎖。</string>
     <string name="clipboard_timeout">剪貼簿自動清理</string>
     <string name="clipboard_off">關閉</string>
     <string name="clipboard_15s">15 秒</string>
