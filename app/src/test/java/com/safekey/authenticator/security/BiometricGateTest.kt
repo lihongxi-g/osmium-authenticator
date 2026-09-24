@@ -63,4 +63,69 @@ class BiometricGateTest {
             unlocked.toSet()
         )
     }
+
+    // ------------------------------------------------------- code -> state
+
+    /**
+     * The other half of the fail-open bug: the activity used to decide
+     * "no biometrics" from a single boolean. Only no-hardware/no-enrollment may
+     * mean there is no credential — every other code means "cannot use it right
+     * now" and must keep the gate closed.
+     */
+    @Test
+    fun onlyNoHardwareOrNoEnrollmentMeansNoCredential() {
+        assertEquals(
+            BiometricState.NO_CREDENTIAL,
+            classifyBiometricCode(BIOMETRIC_ERROR_NONE_ENROLLED /* 11 */)
+        )
+        assertEquals(
+            BiometricState.NO_CREDENTIAL,
+            classifyBiometricCode(BIOMETRIC_ERROR_NO_HARDWARE /* 12 */)
+        )
+    }
+
+    @Test
+    fun usableBiometrics_mapToAvailable() {
+        assertEquals(BiometricState.AVAILABLE, classifyBiometricCode(BIOMETRIC_SUCCESS /* 0 */))
+    }
+
+    @Test
+    fun everyOtherFailureMapsToUnavailable() {
+        // BIOMETRIC_ERROR_HW_UNAVAILABLE (1) is what a busy sensor and a
+        // temporary lockout report — the exact state the reviewer reproduced.
+        assertEquals(BiometricState.UNAVAILABLE, classifyBiometricCode(BIOMETRIC_ERROR_HW_UNAVAILABLE))
+        // pending security update, status unknown, unsupported
+        assertEquals(BiometricState.UNAVAILABLE, classifyBiometricCode(BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED))
+        assertEquals(BiometricState.UNAVAILABLE, classifyBiometricCode(BIOMETRIC_ERROR_STATUS_UNKNOWN))
+        assertEquals(BiometricState.UNAVAILABLE, classifyBiometricCode(BIOMETRIC_ERROR_UNSUPPORTED))
+    }
+
+    @Test
+    fun everyCredentialLikeFailureKeepsTheGateClosed() {
+        // Cross-check the two halves: a code that maps to UNAVAILABLE must never
+        // produce UNLOCK, with or without a PIN.
+        val unavailableCodes = listOf(
+            BIOMETRIC_ERROR_HW_UNAVAILABLE,
+            BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED,
+            BIOMETRIC_ERROR_STATUS_UNKNOWN,
+            BIOMETRIC_ERROR_UNSUPPORTED
+        )
+        unavailableCodes.forEach { code ->
+            val state = classifyBiometricCode(code)
+            assertEquals(BiometricState.UNAVAILABLE, state)
+            assertEquals(GateAction.STAY_LOCKED, action(state, hasPin = false))
+        }
+    }
+
+    private companion object {
+        // androidx.biometric values, spelled out so the mapping is pinned to the
+        // real numbers rather than to whatever the library constant becomes.
+        const val BIOMETRIC_SUCCESS = 0
+        const val BIOMETRIC_ERROR_HW_UNAVAILABLE = 1
+        const val BIOMETRIC_ERROR_NONE_ENROLLED = 11
+        const val BIOMETRIC_ERROR_NO_HARDWARE = 12
+        const val BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED = 15
+        const val BIOMETRIC_ERROR_STATUS_UNKNOWN = -1
+        const val BIOMETRIC_ERROR_UNSUPPORTED = -2
+    }
 }

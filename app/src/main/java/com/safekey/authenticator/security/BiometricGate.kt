@@ -1,5 +1,7 @@
 package com.safekey.authenticator.security
 
+import androidx.biometric.BiometricManager
+
 /**
  * What the device can offer for biometric authentication *right now*.
  *
@@ -74,4 +76,23 @@ fun gateAction(
         if (hasPin) GateAction.REQUIRE_PIN else GateAction.STAY_LOCKED
     hasPin -> GateAction.REQUIRE_PIN
     else -> GateAction.UNLOCK
+}
+
+/**
+ * Maps `BiometricManager.canAuthenticate()` to [BiometricState].
+ *
+ * This is the other half of the fail-open bug and lives here — not in the
+ * activity — so it can be unit-tested: only "no hardware" and "nothing
+ * enrolled" mean the device has no biometric credential. Every other failure
+ * (sensor busy, temporary lockout, pending security update, unknown) means the
+ * credential exists and simply cannot be used right now.
+ *
+ * The constants are inlined `static final int`s, so this stays a pure function
+ * with no Android runtime dependency.
+ */
+fun classifyBiometricCode(code: Int): BiometricState = when (code) {
+    BiometricManager.BIOMETRIC_SUCCESS -> BiometricState.AVAILABLE
+    BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED,
+    BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE -> BiometricState.NO_CREDENTIAL
+    else -> BiometricState.UNAVAILABLE
 }

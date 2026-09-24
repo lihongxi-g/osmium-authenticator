@@ -73,6 +73,7 @@ import com.safekey.authenticator.integrity.IntegrityLevel
 import com.safekey.authenticator.legal.LegalDocsRepository
 import com.safekey.authenticator.security.AppLog
 import com.safekey.authenticator.security.BiometricState
+import com.safekey.authenticator.security.classifyBiometricCode
 import com.safekey.authenticator.security.IntegrityCheck
 import com.safekey.authenticator.security.RootState
 import com.safekey.authenticator.totp.OtpUriParser
@@ -430,12 +431,18 @@ class MainActivity : FragmentActivity() {
             // Osmium PIN entry inside the biometric gate — correct PIN passes,
             // and the self-destruct PIN (if armed) still triggers destruction.
             val attempts = vm.remainingAttempts()
+            // A wrong PIN puts its message in vm.pinError; without collecting
+            // it here this pad stayed silent, and the user could not tell a
+            // wrong PIN from a dead button while blind retries counted toward
+            // the self-destruct threshold.
+            val pinError by vm.pinError.collectAsState()
             PinVerifyScreen(
                 title = stringResource(R.string.pin_verify_title),
                 subtitle = stringResource(R.string.pin_verify_subtitle),
-                error = errorMessage,
+                error = errorMessage ?: pinError,
                 remainingAttempts = attempts,
                 onVerify = { pin ->
+                    errorMessage = null
                     if (vm.onPinEntered(pin)) {
                         // correct PIN passes the biometric gate too
                         vm.unlock()
@@ -495,15 +502,19 @@ class MainActivity : FragmentActivity() {
             // the gate stays CLOSED and the state is re-checked until the
             // sensor is back: that state must never open the app, and the lock
             // screen keeps offering the system password/PIN meanwhile.
-            LaunchedEffect(Unit) {
+            // Keyed on the foreground tick as well as on first composition:
+            // coming back to the app re-runs the poll, and the loop itself
+            // stops as soon as the activity is no longer RESUMED, so it cannot
+            // keep querying the sensor in the background.
+            val foregroundTick by vm.foregroundTick.collectAsState()
+            LaunchedEffect(foregroundTick) {
                 delay(400)
                 while (true) {
+                    if (!lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) break
                     val state = biometricState()
                     vm.setBiometricState(state)
                     if (state == BiometricState.AVAILABLE) {
-                        if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED) &&
-                            vm.locked.value
-                        ) {
+                        if (vm.locked.value) {
                             launchBiometric(
                                 onSuccess = { vm.unlock() },
                                 onCancelled = { errorMessage = context.getString(R.string.lock_cancelled) },
@@ -542,7 +553,7 @@ class MainActivity : FragmentActivity() {
      * gate must stay closed for those (F-Droid reviewer report: the gate used
      * to open in exactly that state).
      */
-    private fun biometricState(): BiometricState = classifyBiometric(
+    private fun biometricState(): BiometricState = classifyBiometricCode(
         if (Build.VERSION.SDK_INT >= 29) {
             BiometricManager.from(this).canAuthenticate(
                 BiometricManager.Authenticators.BIOMETRIC_STRONG
@@ -553,12 +564,6 @@ class MainActivity : FragmentActivity() {
         }
     )
 
-    private fun classifyBiometric(code: Int): BiometricState = when (code) {
-        BiometricManager.BIOMETRIC_SUCCESS -> BiometricState.AVAILABLE
-        BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -> BiometricState.NO_CREDENTIAL
-        BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE -> BiometricState.NO_CREDENTIAL
-        else -> BiometricState.UNAVAILABLE
-    }
 
     private fun canAuthenticateAny(): Boolean =
         if (Build.VERSION.SDK_INT >= 29) {

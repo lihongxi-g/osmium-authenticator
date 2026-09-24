@@ -190,18 +190,39 @@ class GoogleMigrationParserTest {
     }
 
     @Test
-    fun `truncated string inside an entry is rejected instead of crashing`() {
-        // The reviewer's exact shape: a length-delimited string field whose
-        // declared length (13) runs past the end of the payload (183 + 13 > 190).
+    fun `truncated secret inside an entry is rejected instead of crashing`() {
+        // A bytes field whose declared length runs past the entry: this used to
+        // reach ByteArray.copyOfRange and throw out of the parser.
         val inner = rawField(1, 13, ByteArray(4)) + rawField(2, 13, ByteArray(6))
-        assertRejected(rawField(1, inner.size.toLong(), inner), "string field overruns the entry")
+        assertRejected(rawField(1, inner.size.toLong(), inner), "secret field overruns the entry")
+    }
+
+    @Test
+    fun `truncated name inside an entry is rejected instead of crashing`() {
+        // The reviewer's exact shape: the name field declares 13 bytes with only
+        // 4 left in the payload (their trace: length=190; regionStart=183;
+        // regionLength=13), which reached String(bytes, offset, length) and
+        // killed the process with StringIndexOutOfBoundsException.
+        val inner = rawField(2, 13, ByteArray(4))
+        assertRejected(rawField(1, inner.size.toLong(), inner), "name field overruns the payload")
     }
 
     @Test
     fun `truncated varint is rejected`() {
         // Continuation bit set on the last byte: the varint has no terminator.
         assertRejected(byteArrayOf(0x0A, 0x80.toByte()), "unterminated length varint")
-        assertRejected(byteArrayOf(0x08, 0xFF.toByte(), 0xFF.toByte()), "unterminated value varint")
+        // ...including a varint *inside* an entry, which pre-fix was read as
+        // digits = 127 and the payload was imported.
+        assertRejected(byteArrayOf(0x0A, 0x02, 0x28, 0xFF.toByte()), "unterminated value varint")
+    }
+
+    @Test
+    fun `truncated fixed32 after a valid entry is rejected`() {
+        // fixed32/fixed64 are unused by this schema but must not be skipped past
+        // the end of the payload silently (pre-fix the entry imported anyway).
+        val payload = rawField(1, rawField(2, "edge".toByteArray())) +
+            byteArrayOf(0x2D) + byteArrayOf(1, 2, 3)
+        assertRejected(payload, "payload ends inside a fixed32 field")
     }
 
     @Test
@@ -216,8 +237,9 @@ class GoogleMigrationParserTest {
 
     @Test
     fun `lengths beyond the payload are rejected`() {
-        // A varint length larger than Int.MAX_VALUE used to overflow into a
-        // negative index; it must be rejected like any other bad length.
-        assertRejected(rawField(1, 0x7FFF_FFFF_FFL, ByteArray(4)), "length beyond Int range")
+        // A varint length beyond Int.MAX_VALUE used to truncate to 0 when cast,
+        // so the entry parsed as empty and the payload was imported; it must be
+        // rejected like any other bad length.
+        assertRejected(rawField(1, 0x1_0000_0000L, ByteArray(4)), "length beyond Int range")
     }
 }
