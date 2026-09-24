@@ -220,7 +220,9 @@ class GoogleMigrationParserTest {
     fun `truncated fixed32 after a valid entry is rejected`() {
         // fixed32/fixed64 are unused by this schema but must not be skipped past
         // the end of the payload silently (pre-fix the entry imported anyway).
-        val payload = rawField(1, rawField(2, "edge".toByteArray())) +
+        val name = "edge".toByteArray()
+        val entry = rawField(2, name.size.toLong(), name)
+        val payload = rawField(1, entry.size.toLong(), entry) +
             byteArrayOf(0x2D) + byteArrayOf(1, 2, 3)
         assertRejected(payload, "payload ends inside a fixed32 field")
     }
