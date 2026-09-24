@@ -1,0 +1,1 @@
+v2.5.4: fixes the "verify on open" gate opening itself when biometrics are temporarily unavailable (sensor busy or a temporary lockout), and a crash when pasting a truncated Google Authenticator migration link.
