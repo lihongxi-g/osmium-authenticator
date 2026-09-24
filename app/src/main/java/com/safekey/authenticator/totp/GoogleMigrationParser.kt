@@ -112,7 +112,7 @@ object GoogleMigrationParser {
                 fieldNumber == 1 && wireType == 2 -> {
                     val len = readVarint(bytes, i)
                     i = len.second
-                    val end = i + len.first.toInt()
+                    val end = checkedEnd(i, len.first, limit = bytes.size)
                     out.add(parseOtpParameters(bytes, i, end))
                     i = end
                 }
@@ -122,7 +122,7 @@ object GoogleMigrationParser {
                 }
                 wireType == 2 -> {
                     val len = readVarint(bytes, i)
-                    i = len.second + len.first.toInt()
+                    i = checkedEnd(len.second, len.first, limit = bytes.size)
                 }
                 wireType == 5 -> i += 4 // fixed32, unused here
                 wireType == 1 -> i += 8 // fixed64, unused here
@@ -149,18 +149,21 @@ object GoogleMigrationParser {
             when (fieldNumber) {
                 1 -> { // bytes secret — RAW key bytes, NOT base32/base64 text
                     val len = readVarint(bytes, i)
-                    secretBytes = bytes.copyOfRange(len.second, len.second + len.first.toInt())
-                    i = len.second + len.first.toInt()
+                    val fieldEnd = checkedEnd(len.second, len.first, limit = end)
+                    secretBytes = bytes.copyOfRange(len.second, fieldEnd)
+                    i = fieldEnd
                 }
                 2 -> { // string name
                     val len = readVarint(bytes, i)
+                    val fieldEnd = checkedEnd(len.second, len.first, limit = end)
                     name = String(bytes, len.second, len.first.toInt(), Charsets.UTF_8)
-                    i = len.second + len.first.toInt()
+                    i = fieldEnd
                 }
                 3 -> { // string issuer
                     val len = readVarint(bytes, i)
+                    val fieldEnd = checkedEnd(len.second, len.first, limit = end)
                     issuer = String(bytes, len.second, len.first.toInt(), Charsets.UTF_8)
-                    i = len.second + len.first.toInt()
+                    i = fieldEnd
                 }
                 4 -> { // enum algorithm
                     val v = readVarint(bytes, i)
@@ -189,7 +192,7 @@ object GoogleMigrationParser {
                         i = v.second
                     } else if (wireType == 2) {
                         val len = readVarint(bytes, i)
-                        i = len.second + len.first.toInt()
+                        i = checkedEnd(len.second, len.first, limit = end)
                     } else {
                         i = end
                     }
@@ -222,7 +225,31 @@ object GoogleMigrationParser {
         return Base32.encode(raw).replace("=", "")
     }
 
-    /** Reads an unsigned LEB128 varint; returns (value, nextIndex). */
+    /**
+     * End index of a length-delimited field, after checking that the declared
+     * length actually fits in the payload.
+     *
+     * Every length-delimited read goes through here. Without it a truncated
+     * `otpauth-migration://` payload reached `String(bytes, offset, length)`
+     * and killed the process with StringIndexOutOfBoundsException (F-Droid
+     * reviewer report, 2026-09-24); now the payload is rejected with the
+     * ordinary "invalid payload" error the UI already shows.
+     */
+    private fun checkedEnd(start: Int, declaredLength: Long, limit: Int): Int {
+        if (declaredLength < 0 || declaredLength > (limit - start).toLong()) {
+            throw IllegalArgumentException(
+                "Truncated field: $declaredLength byte(s) declared at $start, limit $limit"
+            )
+        }
+        return start + declaredLength.toInt()
+    }
+
+    /**
+     * Reads an unsigned LEB128 varint; returns (value, nextIndex).
+     *
+     * A varint that runs off the end of the payload is rejected instead of
+     * returning a half-read value with a bogus next index.
+     */
     private fun readVarint(bytes: ByteArray, start: Int): Pair<Long, Int> {
         var result = 0L
         var shift = 0
@@ -231,10 +258,10 @@ object GoogleMigrationParser {
             val b = bytes[i].toInt() and 0xFF
             result = result or ((b and 0x7F).toLong() shl shift)
             i++
-            if (b and 0x80 == 0) break
+            if (b and 0x80 == 0) return result to i
             shift += 7
             if (shift > 63) throw IllegalArgumentException("Varint too long")
         }
-        return result to i
+        throw IllegalArgumentException("Truncated varint at $start of ${bytes.size}")
     }
 }

@@ -144,4 +144,80 @@ class GoogleMigrationParserTest {
         assertEquals("Google", accounts[0].issuer)
         assertEquals("GitHub", accounts[1].issuer)
     }
+
+    // ------------------------------------------------ truncated payloads (bounds)
+
+    private fun varint(n: Long): ByteArray {
+        val out = ArrayList<Byte>()
+        var v = n
+        while (true) {
+            if (v < 0x80) {
+                out.add(v.toByte())
+                break
+            }
+            out.add(((v and 0x7F) or 0x80).toByte())
+            v = v ushr 7
+        }
+        return out.toByteArray()
+    }
+
+    /** Length-delimited field with its declared length left intact. */
+    private fun rawField(number: Int, declaredLength: Long, body: ByteArray): ByteArray =
+        varint(((number shl 3) or 2).toLong()) + varint(declaredLength) + body
+
+    private fun uri(payload: ByteArray): String =
+        "otpauth-migration://offline?data=" +
+            java.util.Base64.getEncoder().encodeToString(payload)
+
+    /** Asserts the payload is rejected as invalid — and never crashes with anything else. */
+    private fun assertRejected(payload: ByteArray, label: String) {
+        try {
+            GoogleMigrationParser.parse(uri(payload))
+            throw AssertionError("$label: payload was accepted, expected a rejection")
+        } catch (e: IllegalArgumentException) {
+            // expected: the parser's own "invalid payload" error
+        } catch (e: Throwable) {
+            throw AssertionError("$label: expected IllegalArgumentException, got $e", e)
+        }
+    }
+
+    @Test
+    fun `truncated outer field is rejected instead of crashing`() {
+        // Declares a 13-byte entry but only 5 bytes follow: this used to reach
+        // String(bytes, offset, length) and kill the process with
+        // StringIndexOutOfBoundsException (F-Droid reviewer report).
+        assertRejected(rawField(1, 13, ByteArray(5)), "outer field overruns the payload")
+    }
+
+    @Test
+    fun `truncated string inside an entry is rejected instead of crashing`() {
+        // The reviewer's exact shape: a length-delimited string field whose
+        // declared length (13) runs past the end of the payload (183 + 13 > 190).
+        val inner = rawField(1, 13, ByteArray(4)) + rawField(2, 13, ByteArray(6))
+        assertRejected(rawField(1, inner.size.toLong(), inner), "string field overruns the entry")
+    }
+
+    @Test
+    fun `truncated varint is rejected`() {
+        // Continuation bit set on the last byte: the varint has no terminator.
+        assertRejected(byteArrayOf(0x0A, 0x80.toByte()), "unterminated length varint")
+        assertRejected(byteArrayOf(0x08, 0xFF.toByte(), 0xFF.toByte()), "unterminated value varint")
+    }
+
+    @Test
+    fun `entry length that only just fits still parses`() {
+        // Boundary: the declared length ends exactly at the payload's last byte.
+        val name = "edge".toByteArray()
+        val inner = rawField(1, 12L, ByteArray(12) { 0x11 }) + rawField(2, name.size.toLong(), name)
+        val accounts = GoogleMigrationParser.parse(uri(rawField(1, inner.size.toLong(), inner)))
+        assertEquals(1, accounts.size)
+        assertEquals("edge", accounts[0].name)
+    }
+
+    @Test
+    fun `lengths beyond the payload are rejected`() {
+        // A varint length larger than Int.MAX_VALUE used to overflow into a
+        // negative index; it must be rejected like any other bad length.
+        assertRejected(rawField(1, 0x7FFF_FFFF_FFL, ByteArray(4)), "length beyond Int range")
+    }
 }
