@@ -82,6 +82,7 @@
     <string name="biometric_lock">Bloqueo biométrico</string>
     <string name="biometric_lock_desc">Exige huella, rostro o PIN del dispositivo para abrir la aplicación.</string>
     <string name="biometric_unavailable">No hay biometría ni bloqueo de pantalla configurado en este dispositivo. Configúralo primero en los ajustes del sistema.</string>
+    <string name="biometric_temporarily_unavailable">La biometría no está disponible temporalmente (el sensor está ocupado o bloqueado). Espera un momento e inténtalo de nuevo, o desbloquea con la contraseña del dispositivo.</string>
     <string name="clipboard_timeout">Limpieza automática del portapapeles</string>
     <string name="clipboard_off">Desactivado</string>
     <string name="clipboard_15s">15 segundos</string>

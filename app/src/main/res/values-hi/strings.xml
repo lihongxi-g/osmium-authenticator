@@ -82,6 +82,7 @@
     <string name="biometric_lock">बायोमेट्रिक लॉक</string>
     <string name="biometric_lock_desc">ऐप खोलने पर फ़िंगरप्रिंट, चेहरा या डिवाइस PIN आवश्यक।</string>
     <string name="biometric_unavailable">इस डिवाइस पर कोई बायोमेट्रिक या स्क्रीन लॉक सेट नहीं है। पहले सिस्टम सेटिंग्स में सेट करें।</string>
+    <string name="biometric_temporarily_unavailable">बायोमेट्रिक्स फ़िलहाल उपलब्ध नहीं है (सेंसर व्यस्त है या अस्थायी रूप से लॉक है)। थोड़ी देर बाद फिर कोशिश करें, या डिवाइस पासवर्ड से अनलॉक करें।</string>
     <string name="clipboard_timeout">क्लिपबोर्ड स्वतः साफ़</string>
     <string name="clipboard_off">बंद</string>
     <string name="clipboard_15s">15 सेकंड</string>

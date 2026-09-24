@@ -14,9 +14,12 @@ import com.safekey.authenticator.repository.ImportMerger
 import com.safekey.authenticator.repository.ImportPlan
 import com.safekey.authenticator.repository.TagImportPlanner
 import com.safekey.authenticator.security.AppLog
+import com.safekey.authenticator.security.BiometricState
+import com.safekey.authenticator.security.GateAction
 import com.safekey.authenticator.security.PinManager
 import com.safekey.authenticator.security.RootState
 import com.safekey.authenticator.security.SelfDestructManager
+import com.safekey.authenticator.security.gateAction
 import com.safekey.authenticator.tags.TagFilter
 import com.safekey.authenticator.totp.Base32
 import com.safekey.authenticator.totp.TotpGenerator
@@ -365,12 +368,17 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         transferPickerActive = active
     }
 
-    /** Set by the activity: does this device have a usable fingerprint/face? */
-    private val _biometricAvailable = MutableStateFlow(false)
-    val biometricAvailable: StateFlow<Boolean> = _biometricAvailable
+    /**
+     * Set by the activity: what this device can do about biometric
+     * authentication right now (usable / nothing enrolled / temporarily
+     * unusable). The gate decision itself lives in [gateAction] so the
+     * "sensor busy" case can never be mistaken for "no credential".
+     */
+    private val _biometricState = MutableStateFlow(BiometricState.NO_CREDENTIAL)
+    val biometricState: StateFlow<BiometricState> = _biometricState
 
-    fun setBiometricAvailable(available: Boolean) {
-        _biometricAvailable.value = available
+    fun setBiometricState(state: BiometricState) {
+        _biometricState.value = state
     }
 
     /** Reactive app-PIN presence — the root gate needs to know it changes. */
@@ -424,39 +432,39 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         verifiedThisSession = false
         pendingEnterNotice = true
         maybeShowIntegrityNotice()
-        AppLog.d("foreground: biometric=${_biometricAvailable.value} pin=${pinManager.hasPin()} gate=${settings.value.gateOnOpen}")
+        AppLog.d("foreground: biometric=${_biometricState.value} pin=${pinManager.hasPin()} gate=${settings.value.gateOnOpen}")
         if (_destroyed.value) return
         _pinError.value = null
         // A system file picker (backup export/import) is still on top — do
         // not gate, or the transfer screen's state would be lost on return.
         if (transferPickerActive) return
-        if (!settings.value.gateOnOpen) {
-            _locked.value = false
-            _pinRequired.value = false
-            return
-        }
-        if (!_biometricAvailable.value && !pinManager.hasPin()) {
-            // No credential at all: nothing to verify with. While the root
-            // restriction is active the UI asks the user to set a PIN instead
-            // (MainActivity root gate).
-            _locked.value = false
-            _pinRequired.value = false
-            return
-        }
-        engageGate()
+        applyGate()
     }
 
     /**
-     * Engages the gate with whatever credential the device has: the biometric
-     * lock when a fingerprint/face is enrolled, otherwise the app PIN.
+     * Applies [gateAction] for the current situation: the gate never opens
+     * while a biometric credential exists but cannot be used right now
+     * (sensor busy, temporary lockout) — that case keeps the app locked and
+     * lets the lock screen offer the system credential or the app PIN.
      */
-    private fun engageGate() {
-        if (_biometricAvailable.value) {
-            _locked.value = true
-        } else if (pinManager.hasPin()) {
-            _pinRequired.value = true
+    private fun applyGate() {
+        when (gateAction(settings.value.gateOnOpen, _biometricState.value, pinManager.hasPin())) {
+            GateAction.UNLOCK -> {
+                _locked.value = false
+                _pinRequired.value = false
+            }
+            GateAction.LOCK_BIOMETRIC, GateAction.STAY_LOCKED -> {
+                _locked.value = true
+                _pinRequired.value = false
+            }
+            GateAction.REQUIRE_PIN -> {
+                _pinRequired.value = true
+            }
         }
     }
+
+    /** Called when the integrity scan or the user turns the gate on. */
+    private fun engageGate() = applyGate()
 
     /** Called when the activity goes to the background. */
     fun onAppBackground() {

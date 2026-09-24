@@ -72,6 +72,8 @@ import com.safekey.authenticator.data.LanguagePrefs
 import com.safekey.authenticator.integrity.IntegrityLevel
 import com.safekey.authenticator.legal.LegalDocsRepository
 import com.safekey.authenticator.security.AppLog
+import com.safekey.authenticator.security.BiometricState
+import com.safekey.authenticator.security.classifyBiometricCode
 import com.safekey.authenticator.security.IntegrityCheck
 import com.safekey.authenticator.security.RootState
 import com.safekey.authenticator.totp.OtpUriParser
@@ -159,15 +161,19 @@ class MainActivity : FragmentActivity() {
             val destroyed by vm.destroyed.collectAsState()
             val toast by vm.toast.collectAsState()
             val integrityNotice by vm.integrityNotice.collectAsState()
-            val biometricReady by vm.biometricAvailable.collectAsState()
+            val biometric by vm.biometricState.collectAsState()
+            // "This device has no biometric credential at all" — the only
+            // case where the app suggests setting an app PIN instead of
+            // gating. A momentarily unusable sensor is NOT that case.
+            val noBiometricCredential = biometric == BiometricState.NO_CREDENTIAL
             val pinSet by vm.localPinSet.collectAsState()
             val foregroundTick by vm.foregroundTick.collectAsState()
             var pinReminderVisible by remember { mutableStateOf(false) }
 
             // No fingerprint/face on this device: ask for an app PIN. The prompt
             // repeats on every app open unless the user ticks "don't remind me".
-            LaunchedEffect(foregroundTick, biometricReady, pinSet, settings.pinReminderSilenced) {
-                if (!biometricReady && !pinSet && !settings.pinReminderSilenced) {
+            LaunchedEffect(foregroundTick, noBiometricCredential, pinSet, settings.pinReminderSilenced) {
+                if (noBiometricCredential && !pinSet && !settings.pinReminderSilenced) {
                     pinReminderVisible = true
                 }
             }
@@ -249,7 +255,7 @@ class MainActivity : FragmentActivity() {
                             onDismiss = { pendingUpdate = null }
                         )
                     }
-                    val showPinReminder = pinReminderVisible && !biometricReady && !pinSet &&
+                    val showPinReminder = pinReminderVisible && noBiometricCredential && !pinSet &&
                         !settings.pinReminderSilenced && !locked && !pinRequired &&
                         !destroyed && !tampered
                     if (showPinReminder) {
@@ -309,7 +315,7 @@ class MainActivity : FragmentActivity() {
 
     override fun onStart() {
         super.onStart()
-        vm.setBiometricAvailable(canAuthenticateBiometric())
+        vm.setBiometricState(biometricState())
         vm.onAppForeground()
         maybeCheckForUpdate()
         maybeRefreshLegalDocs()
@@ -413,11 +419,11 @@ class MainActivity : FragmentActivity() {
     @Composable
     private fun LockGate() {
         var errorMessage by remember { mutableStateOf<String?>(null) }
-        // No biometrics on this device: the only way through is the app PIN, so
-        // open straight on the PIN pad instead of the "unlock" button screen,
-        // whose biometric call can only fail ("biometric unavailable").
+        // No usable biometrics right now: the only way through is the app PIN,
+        // so open straight on the PIN pad instead of the "unlock" button
+        // screen, whose biometric call can only fail ("biometric unavailable").
         var pinMode by remember {
-            mutableStateOf(!canAuthenticateBiometric() && vm.hasLocalPin())
+            mutableStateOf(biometricState() != BiometricState.AVAILABLE && vm.hasLocalPin())
         }
         val context = LocalContext.current
 
@@ -425,12 +431,18 @@ class MainActivity : FragmentActivity() {
             // Osmium PIN entry inside the biometric gate — correct PIN passes,
             // and the self-destruct PIN (if armed) still triggers destruction.
             val attempts = vm.remainingAttempts()
+            // A wrong PIN puts its message in vm.pinError; without collecting
+            // it here this pad stayed silent, and the user could not tell a
+            // wrong PIN from a dead button while blind retries counted toward
+            // the self-destruct threshold.
+            val pinError by vm.pinError.collectAsState()
             PinVerifyScreen(
                 title = stringResource(R.string.pin_verify_title),
                 subtitle = stringResource(R.string.pin_verify_subtitle),
-                error = errorMessage,
+                error = errorMessage ?: pinError,
                 remainingAttempts = attempts,
                 onVerify = { pin ->
+                    errorMessage = null
                     if (vm.onPinEntered(pin)) {
                         // correct PIN passes the biometric gate too
                         vm.unlock()
@@ -448,12 +460,19 @@ class MainActivity : FragmentActivity() {
                 errorMessage = errorMessage,
                 onUnlock = {
                     errorMessage = null
-                    if (canAuthenticateBiometric()) {
+                    // Re-query the sensor: a lockout or a busy sensor clears on
+                    // its own, so the button may work now even though the
+                    // screen was drawn while it did not.
+                    val state = biometricState()
+                    vm.setBiometricState(state)
+                    if (state == BiometricState.AVAILABLE) {
                         launchBiometric(
                             onSuccess = { vm.unlock() },
                             onCancelled = { errorMessage = context.getString(R.string.lock_cancelled) },
                             onError = { msg -> errorMessage = msg }
                         )
+                    } else if (state == BiometricState.UNAVAILABLE) {
+                        errorMessage = context.getString(R.string.biometric_temporarily_unavailable)
                     } else {
                         errorMessage = context.getString(R.string.biometric_unavailable)
                     }
@@ -478,31 +497,73 @@ class MainActivity : FragmentActivity() {
 
             // Attempt unlock automatically once the gate appears — only when
             // the activity is fully RESUMED, otherwise the prompt can die
-            // without a callback on some OEM builds.
-            LaunchedEffect(Unit) {
+            // without a callback on some OEM builds. While biometrics are
+            // temporarily unusable (sensor busy, lockout after failed tries)
+            // the gate stays CLOSED and the state is re-checked until the
+            // sensor is back: that state must never open the app, and the lock
+            // screen keeps offering the system password/PIN meanwhile.
+            // Keyed on the foreground tick as well as on first composition:
+            // coming back to the app re-runs the poll, and the loop itself
+            // stops as soon as the activity is no longer RESUMED, so it cannot
+            // keep querying the sensor in the background.
+            val foregroundTick by vm.foregroundTick.collectAsState()
+            LaunchedEffect(foregroundTick) {
                 delay(400)
-                if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED) &&
-                    canAuthenticateBiometric() && vm.locked.value
-                ) {
-                    launchBiometric(
-                        onSuccess = { vm.unlock() },
-                        onCancelled = { errorMessage = context.getString(R.string.lock_cancelled) },
-                        onError = { msg -> errorMessage = msg }
-                    )
+                while (true) {
+                    if (!lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) break
+                    val state = biometricState()
+                    vm.setBiometricState(state)
+                    if (state == BiometricState.AVAILABLE) {
+                        if (vm.locked.value) {
+                            launchBiometric(
+                                onSuccess = { vm.unlock() },
+                                onCancelled = { errorMessage = context.getString(R.string.lock_cancelled) },
+                                onError = { msg -> errorMessage = msg }
+                            )
+                        }
+                        break
+                    }
+                    if (state == BiometricState.NO_CREDENTIAL) {
+                        if (vm.hasLocalPin()) {
+                            pinMode = true
+                        } else {
+                            errorMessage = context.getString(R.string.biometric_unavailable)
+                        }
+                        break
+                    }
+                    // UNAVAILABLE — keep waiting on the lock screen.
+                    if (!vm.locked.value) break
+                    errorMessage = context.getString(R.string.biometric_temporarily_unavailable)
+                    delay(2_000)
                 }
             }
         }
     }
 
     private fun canAuthenticateBiometric(): Boolean =
+        biometricState() == BiometricState.AVAILABLE
+
+    /**
+     * What this device can do about biometric auth right now.
+     *
+     * Only "no hardware" and "nothing enrolled" mean the device has no
+     * biometric credential to offer — every other failure (sensor busy,
+     * temporary lockout after failed attempts, a pending security update,
+     * status unknown) means "has biometrics, unusable at the moment", and the
+     * gate must stay closed for those (F-Droid reviewer report: the gate used
+     * to open in exactly that state).
+     */
+    private fun biometricState(): BiometricState = classifyBiometricCode(
         if (Build.VERSION.SDK_INT >= 29) {
             BiometricManager.from(this).canAuthenticate(
                 BiometricManager.Authenticators.BIOMETRIC_STRONG
-            ) == BiometricManager.BIOMETRIC_SUCCESS
+            )
         } else {
             // androidx fallback path (FingerprintManager) for Android 8/9
-            BiometricManager.from(this).canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS
+            BiometricManager.from(this).canAuthenticate()
         }
+    )
+
 
     private fun canAuthenticateAny(): Boolean =
         if (Build.VERSION.SDK_INT >= 29) {

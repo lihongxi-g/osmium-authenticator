@@ -112,7 +112,7 @@ object GoogleMigrationParser {
                 fieldNumber == 1 && wireType == 2 -> {
                     val len = readVarint(bytes, i)
                     i = len.second
-                    val end = i + len.first.toInt()
+                    val end = checkedEnd(i, len.first, limit = bytes.size)
                     out.add(parseOtpParameters(bytes, i, end))
                     i = end
                 }
@@ -122,10 +122,10 @@ object GoogleMigrationParser {
                 }
                 wireType == 2 -> {
                     val len = readVarint(bytes, i)
-                    i = len.second + len.first.toInt()
+                    i = checkedEnd(len.second, len.first, limit = bytes.size)
                 }
-                wireType == 5 -> i += 4 // fixed32, unused here
-                wireType == 1 -> i += 8 // fixed64, unused here
+                wireType == 5 -> i = checkedSkip(bytes, i, 4) // fixed32: unused by this schema
+                wireType == 1 -> i = checkedSkip(bytes, i, 8) // fixed64: unused by this schema
                 else -> throw IllegalArgumentException("Unsupported wire type $wireType")
             }
         }
@@ -142,54 +142,57 @@ object GoogleMigrationParser {
         var counter = 0L
         var i = start
         while (i < end) {
-            val tag = readVarint(bytes, i)
+            val tag = readVarint(bytes, i, limit = end)
             i = tag.second
             val fieldNumber = (tag.first ushr 3).toInt()
             val wireType = (tag.first and 0x07).toInt()
             when (fieldNumber) {
                 1 -> { // bytes secret — RAW key bytes, NOT base32/base64 text
-                    val len = readVarint(bytes, i)
-                    secretBytes = bytes.copyOfRange(len.second, len.second + len.first.toInt())
-                    i = len.second + len.first.toInt()
+                    val len = readVarint(bytes, i, limit = end)
+                    val fieldEnd = checkedEnd(len.second, len.first, limit = end)
+                    secretBytes = bytes.copyOfRange(len.second, fieldEnd)
+                    i = fieldEnd
                 }
                 2 -> { // string name
-                    val len = readVarint(bytes, i)
+                    val len = readVarint(bytes, i, limit = end)
+                    val fieldEnd = checkedEnd(len.second, len.first, limit = end)
                     name = String(bytes, len.second, len.first.toInt(), Charsets.UTF_8)
-                    i = len.second + len.first.toInt()
+                    i = fieldEnd
                 }
                 3 -> { // string issuer
-                    val len = readVarint(bytes, i)
+                    val len = readVarint(bytes, i, limit = end)
+                    val fieldEnd = checkedEnd(len.second, len.first, limit = end)
                     issuer = String(bytes, len.second, len.first.toInt(), Charsets.UTF_8)
-                    i = len.second + len.first.toInt()
+                    i = fieldEnd
                 }
                 4 -> { // enum algorithm
-                    val v = readVarint(bytes, i)
+                    val v = readVarint(bytes, i, limit = end)
                     algorithm = v.first.toInt()
                     i = v.second
                 }
                 5 -> { // enum digits
-                    val v = readVarint(bytes, i)
+                    val v = readVarint(bytes, i, limit = end)
                     digits = v.first.toInt()
                     i = v.second
                 }
                 6 -> { // enum type
-                    val v = readVarint(bytes, i)
+                    val v = readVarint(bytes, i, limit = end)
                     type = v.first.toInt()
                     i = v.second
                 }
                 7 -> { // int64 counter
-                    val v = readVarint(bytes, i)
+                    val v = readVarint(bytes, i, limit = end)
                     counter = v.first
                     i = v.second
                 }
                 else -> {
                     // skip unknown field
                     if (wireType == 0) {
-                        val v = readVarint(bytes, i)
+                        val v = readVarint(bytes, i, limit = end)
                         i = v.second
                     } else if (wireType == 2) {
-                        val len = readVarint(bytes, i)
-                        i = len.second + len.first.toInt()
+                        val len = readVarint(bytes, i, limit = end)
+                        i = checkedEnd(len.second, len.first, limit = end)
                     } else {
                         i = end
                     }
@@ -222,19 +225,56 @@ object GoogleMigrationParser {
         return Base32.encode(raw).replace("=", "")
     }
 
-    /** Reads an unsigned LEB128 varint; returns (value, nextIndex). */
-    private fun readVarint(bytes: ByteArray, start: Int): Pair<Long, Int> {
+    /**
+     * End index of a length-delimited field, after checking that the declared
+     * length actually fits in the payload.
+     *
+     * Every length-delimited read goes through here. Without it a truncated
+     * `otpauth-migration://` payload reached `String(bytes, offset, length)`
+     * and killed the process with StringIndexOutOfBoundsException (F-Droid
+     * reviewer report, 2026-09-24); now the payload is rejected with the
+     * ordinary "invalid payload" error the UI already shows.
+     */
+    private fun checkedEnd(start: Int, declaredLength: Long, limit: Int): Int {
+        if (declaredLength < 0 || declaredLength > (limit - start).toLong()) {
+            throw IllegalArgumentException(
+                "Truncated field: $declaredLength byte(s) declared at $start, limit $limit"
+            )
+        }
+        return start + declaredLength.toInt()
+    }
+
+    /**
+     * Reads an unsigned LEB128 varint; returns (value, nextIndex).
+     *
+     * A varint that runs off the end of the payload (or past [limit], which
+     * inside an entry is that entry's end) is rejected instead of returning a
+     * half-read value with a bogus next index — that used to leave the caller's
+     * loop reading the same byte forever.
+     */
+    private fun readVarint(bytes: ByteArray, start: Int, limit: Int = bytes.size): Pair<Long, Int> {
         var result = 0L
         var shift = 0
         var i = start
-        while (i < bytes.size) {
+        while (i < limit) {
             val b = bytes[i].toInt() and 0xFF
             result = result or ((b and 0x7F).toLong() shl shift)
             i++
-            if (b and 0x80 == 0) break
+            if (b and 0x80 == 0) return result to i
             shift += 7
             if (shift > 63) throw IllegalArgumentException("Varint too long")
         }
-        return result to i
+        throw IllegalArgumentException("Truncated varint at $start (limit $limit of ${bytes.size})")
+    }
+
+    /**
+     * Advances over a fixed-width field (fixed32/fixed64), rejecting a payload
+     * that ends in the middle of one.
+     */
+    private fun checkedSkip(bytes: ByteArray, start: Int, width: Int): Int {
+        if (width < 0 || width > bytes.size - start) {
+            throw IllegalArgumentException("Truncated fixed$width field at $start of ${bytes.size}")
+        }
+        return start + width
     }
 }

@@ -82,6 +82,7 @@
     <string name="biometric_lock">Verrouillage biométrique</string>
     <string name="biometric_lock_desc">Exiger empreinte, visage ou code PIN de l’appareil pour ouvrir l’application.</string>
     <string name="biometric_unavailable">Aucune biométrie ni verrouillage d’écran n’est configuré sur cet appareil. Configurez-le d’abord dans les paramètres système.</string>
+    <string name="biometric_temporarily_unavailable">La biométrie est temporairement indisponible (capteur occupé ou temporairement verrouillé). Patientez un instant et réessayez, ou déverrouillez avec le mot de passe de l\'appareil.</string>
     <string name="clipboard_timeout">Nettoyage auto du presse-papiers</string>
     <string name="clipboard_off">Désactivé</string>
     <string name="clipboard_15s">15 secondes</string>
