@@ -23,8 +23,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.isSp
 import androidx.compose.ui.unit.sp
 import com.safekey.authenticator.data.AppSettings
 
@@ -96,10 +96,14 @@ val LocalOsmiumMotion = staticCompositionLocalOf { StandardMotion }
  */
 private fun Typography.scaled(scale: Float): Typography {
     if (scale == 1f) return this
-    fun TextStyle.scaledStyle() = copy(
-        fontSize = if (fontSize.isSp) fontSize * scale else fontSize,
-        lineHeight = if (lineHeight.isSp) lineHeight * scale else lineHeight
-    )
+    // Only sp values can be multiplied; unspecified (and em-based) values are
+    // left untouched instead of letting the arithmetic throw.
+    fun TextStyle.scaledStyle() = runCatching {
+        copy(
+            fontSize = if (fontSize == TextUnit.Unspecified) fontSize else fontSize * scale,
+            lineHeight = if (lineHeight == TextUnit.Unspecified) lineHeight else lineHeight * scale
+        )
+    }.getOrDefault(this)
     return copy(
         displayLarge = displayLarge.scaledStyle(),
         displayMedium = displayMedium.scaledStyle(),
