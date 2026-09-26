@@ -122,11 +122,12 @@ dependencies {
     // (IndexOutOfBoundsException in end()/exitGroup) observed on Android 16 /
     // OnePlus during ordinary recomposition — several composer group-stack
     // imbalance bugs were fixed across the 1.7.0–1.7.3 line.
-    val composeBom = platform("androidx.compose:compose-bom:2024.09.03")
+    val composeBom = platform("androidx.compose:compose-bom-alpha:2026.09.00")
     implementation(composeBom)
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
+    // PredictiveBackHandler is available in activity-compose 1.8.0+.
     implementation("androidx.activity:activity-compose:1.8.2")
     implementation("androidx.fragment:fragment-ktx:1.6.2")
     implementation("androidx.compose.ui:ui")

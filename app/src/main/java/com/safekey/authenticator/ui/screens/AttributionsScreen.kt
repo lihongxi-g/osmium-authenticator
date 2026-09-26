@@ -124,9 +124,10 @@ fun AttributionsScreen(
 
 @Composable
 private fun AttributionCard(title: String, description: String, onClick: () -> Unit) {
+    val expressive = com.safekey.authenticator.ui.theme.LocalExpressiveDesign.current
     Card(
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = if (expressive) MaterialTheme.colorScheme.surfaceContainerHigh else MaterialTheme.colorScheme.surfaceVariant
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         modifier = Modifier

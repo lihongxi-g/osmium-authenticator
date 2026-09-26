@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.safekey.authenticator.AccountUi
 import com.safekey.authenticator.ui.theme.monospaceFamily
+import com.safekey.authenticator.ui.theme.LocalExpressiveDesign
 
 /**
  * One account row: issuer + account name on the left, prominent code +
@@ -39,11 +40,12 @@ fun CodeCard(
     hideCode: Boolean = false,
     showTags: Boolean = true
 ) {
+    val expressive = LocalExpressiveDesign.current
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = if (expressive) MaterialTheme.colorScheme.surfaceContainerHigh else MaterialTheme.colorScheme.surfaceVariant
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {

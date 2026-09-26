@@ -97,6 +97,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch { settingsRepo.setWebDavConfig(config) }
     }
 
+
     // UI tick, ~2 Hz — smooth countdown without recomputing codes constantly
     private val _now = MutableStateFlow(System.currentTimeMillis())
     val now: StateFlow<Long> = _now
@@ -750,6 +751,10 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     fun setThemeMode(mode: String) = viewModelScope.launch { settingsRepo.setThemeMode(mode) }
     fun setDynamicColor(enabled: Boolean) = viewModelScope.launch { settingsRepo.setDynamicColor(enabled) }
+    fun setDesignSystem(value: String) = viewModelScope.launch { settingsRepo.setDesignSystem(value) }
+    fun setPaletteSeed(seed: Long) = viewModelScope.launch { settingsRepo.setPaletteSeed(seed) }
+    fun setPaletteStyle(style: String) = viewModelScope.launch { settingsRepo.setPaletteStyle(style) }
+    fun setPureBlack(enabled: Boolean) = viewModelScope.launch { settingsRepo.setPureBlack(enabled) }
     fun setGateOnOpen(enabled: Boolean) = viewModelScope.launch { settingsRepo.setGateOnOpen(enabled) }
     fun setAllowScreenshots(enabled: Boolean) = viewModelScope.launch { settingsRepo.setAllowScreenshots(enabled) }
     fun setHideCodes(enabled: Boolean) = viewModelScope.launch { settingsRepo.setHideCodes(enabled) }

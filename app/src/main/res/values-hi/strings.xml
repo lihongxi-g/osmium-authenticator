@@ -534,4 +534,25 @@
     <string name="lan_status_done_receive">Received %1$d accounts</string>
     <string name="pin_reminder_never">Don\'t remind me again</string>
     <string name="pin_reminder_body">This device has no fingerprint or face unlock, so the app cannot verify who is opening it. Set an app PIN to protect your accounts.</string>
+    <string name="appearance_title">Appearance</string>
+    <string name="appearance_desc">Choose Material 3, Expressive, colors, and style</string>
+    <string name="appearance_design_system">Design system</string>
+    <string name="appearance_material3">Material 3</string>
+    <string name="appearance_material3_desc">Osmium original interface</string>
+    <string name="appearance_expressive">Material 3 Expressive</string>
+    <string name="appearance_expressive_desc">Expressive hierarchy and motion</string>
+    <string name="appearance_colors">Colors</string>
+    <string name="appearance_seed_color">Seed color</string>
+    <string name="appearance_palette_style">Palette style</string>
+    <string name="palette_tonal_spot">Tonal spot</string>
+    <string name="palette_neutral">Neutral</string>
+    <string name="palette_vibrant">Vibrant</string>
+    <string name="palette_expressive">Expressive</string>
+    <string name="palette_rainbow">Rainbow</string>
+    <string name="palette_fruit_salad">Fruit salad</string>
+    <string name="palette_monochrome">Monochrome</string>
+    <string name="appearance_expressive_options">Expressive options</string>
+    <string name="appearance_amoled">Pure black dark background</string>
+    <string name="appearance_amoled_desc">Use true black for OLED screens</string>
+    <string name="appearance_security_note">Color and motion never replace security labels or clear confirmation.</string>
 </resources>

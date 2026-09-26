@@ -18,6 +18,11 @@ private val Context.dataStore by preferencesDataStore(name = "safekey_settings")
 data class AppSettings(
     val themeMode: String = THEME_SYSTEM,
     val dynamicColor: Boolean = true,
+    /** Material 3 or the expressive token/shape system. */
+    val designSystem: String = DESIGN_MATERIAL_3,
+    val paletteSeed: Long = DEFAULT_PALETTE_SEED,
+    val paletteStyle: String = PALETTE_TONAL_SPOT,
+    val pureBlack: Boolean = false,
     val gateOnOpen: Boolean = true,
     val allowScreenshots: Boolean = false,
     val hideCodes: Boolean = false,
@@ -57,6 +62,16 @@ data class AppSettings(
         const val SORT_COPIES = "copies"
         const val THEME_LIGHT = "light"
         const val THEME_DARK = "dark"
+        const val DESIGN_MATERIAL_3 = "material3"
+        const val DESIGN_EXPRESSIVE = "expressive"
+        const val PALETTE_TONAL_SPOT = "tonal_spot"
+        const val PALETTE_NEUTRAL = "neutral"
+        const val PALETTE_VIBRANT = "vibrant"
+        const val PALETTE_EXPRESSIVE = "expressive"
+        const val PALETTE_RAINBOW = "rainbow"
+        const val PALETTE_FRUIT_SALAD = "fruit_salad"
+        const val PALETTE_MONOCHROME = "monochrome"
+        const val DEFAULT_PALETTE_SEED = 0xFF4F5D92L
 
         const val DESTROY_OFF = "off"
         const val DESTROY_PIN = "destroy_pin"
@@ -87,6 +102,10 @@ class SettingsRepository(
     private object Keys {
         val THEME_MODE = stringPreferencesKey("theme_mode")
         val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
+        val DESIGN_SYSTEM = stringPreferencesKey("design_system")
+        val PALETTE_SEED = longPreferencesKey("palette_seed")
+        val PALETTE_STYLE = stringPreferencesKey("palette_style")
+        val PURE_BLACK = booleanPreferencesKey("pure_black")
         val GATE_ON_OPEN = booleanPreferencesKey("gate_on_open")
         val ALLOW_SCREENSHOTS = booleanPreferencesKey("allow_screenshots")
         val HIDE_CODES = booleanPreferencesKey("hide_codes")
@@ -125,6 +144,10 @@ class SettingsRepository(
         AppSettings(
             themeMode = prefs[Keys.THEME_MODE] ?: AppSettings.THEME_SYSTEM,
             dynamicColor = prefs[Keys.DYNAMIC_COLOR] ?: true,
+            designSystem = prefs[Keys.DESIGN_SYSTEM] ?: AppSettings.DESIGN_MATERIAL_3,
+            paletteSeed = prefs[Keys.PALETTE_SEED] ?: AppSettings.DEFAULT_PALETTE_SEED,
+            paletteStyle = prefs[Keys.PALETTE_STYLE] ?: AppSettings.PALETTE_TONAL_SPOT,
+            pureBlack = prefs[Keys.PURE_BLACK] ?: false,
             gateOnOpen = prefs[Keys.GATE_ON_OPEN] ?: true,
             allowScreenshots = prefs[Keys.ALLOW_SCREENSHOTS] ?: false,
             hideCodes = prefs[Keys.HIDE_CODES] ?: false,
@@ -161,6 +184,33 @@ class SettingsRepository(
 
     suspend fun setDynamicColor(enabled: Boolean) {
         context.dataStore.edit { it[Keys.DYNAMIC_COLOR] = enabled }
+    }
+
+    suspend fun setDesignSystem(value: String) {
+        context.dataStore.edit {
+            it[Keys.DESIGN_SYSTEM] = when (value) {
+                AppSettings.DESIGN_EXPRESSIVE -> AppSettings.DESIGN_EXPRESSIVE
+                else -> AppSettings.DESIGN_MATERIAL_3
+            }
+        }
+    }
+
+    suspend fun setPaletteSeed(seed: Long) {
+        context.dataStore.edit { it[Keys.PALETTE_SEED] = seed }
+    }
+
+    suspend fun setPaletteStyle(style: String) {
+        val allowed = setOf(
+            AppSettings.PALETTE_TONAL_SPOT, AppSettings.PALETTE_NEUTRAL,
+            AppSettings.PALETTE_VIBRANT, AppSettings.PALETTE_EXPRESSIVE,
+            AppSettings.PALETTE_RAINBOW, AppSettings.PALETTE_FRUIT_SALAD,
+            AppSettings.PALETTE_MONOCHROME
+        )
+        context.dataStore.edit { it[Keys.PALETTE_STYLE] = style.takeIf(allowed::contains) ?: AppSettings.PALETTE_TONAL_SPOT }
+    }
+
+    suspend fun setPureBlack(enabled: Boolean) {
+        context.dataStore.edit { it[Keys.PURE_BLACK] = enabled }
     }
 
     suspend fun setGateOnOpen(enabled: Boolean) {

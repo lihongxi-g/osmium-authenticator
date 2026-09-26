@@ -16,6 +16,7 @@ sealed class Screen {
     data class Detail(val accountId: String) : Screen()
     object Scan : Screen()
     object Settings : Screen()
+    object Appearance : Screen()
     object TagSettings : Screen()
     object Export : Screen()
     object Import : Screen()

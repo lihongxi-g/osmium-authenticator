@@ -16,6 +16,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
@@ -29,22 +30,28 @@ import kotlin.math.roundToInt
 @Composable
 fun SwipeBackContainer(
     canGoBack: Boolean,
+    predictiveBackProgress: Float = 0f,
     onBack: () -> Unit,
     content: @Composable () -> Unit
 ) {
     val scope = rememberCoroutineScope()
+    val density = androidx.compose.ui.platform.LocalDensity.current
     var dragPx by remember { mutableStateOf(0f) }
     var settling by remember { mutableStateOf(false) }
     val settle = remember { Animatable(0f) }
 
-    val offsetPx = if (settling) settle.value else dragPx
+    val offsetPx = when {
+        predictiveBackProgress > 0f -> with(density) { 96.dp.toPx() } * predictiveBackProgress
+        settling -> settle.value
+        else -> dragPx
+    }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .pointerInput(canGoBack) {
                 if (!canGoBack) return@pointerInput
-                val edgePx = 40f * density
+                val edgePx = with(density) { 40.dp.toPx() }
                 val widthPx = size.width.toFloat()
                 var total = 0f
                 var edgeActive = false

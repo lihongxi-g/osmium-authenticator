@@ -278,8 +278,9 @@ private fun CheckGroup(
     onToggle: (String) -> Unit
 ) {
     if (checks.isEmpty()) return
+    val expressive = com.safekey.authenticator.ui.theme.LocalExpressiveDesign.current
     Card(
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        colors = CardDefaults.cardColors(containerColor = if (expressive) MaterialTheme.colorScheme.surfaceContainerHigh else MaterialTheme.colorScheme.surfaceVariant),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -336,8 +337,9 @@ private fun RevocationCard(
     failed: Boolean,
     onRefresh: () -> Unit
 ) {
+    val expressive = com.safekey.authenticator.ui.theme.LocalExpressiveDesign.current
     Card(
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        colors = CardDefaults.cardColors(containerColor = if (expressive) MaterialTheme.colorScheme.surfaceContainerHigh else MaterialTheme.colorScheme.surfaceVariant),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         modifier = Modifier
             .fillMaxWidth()

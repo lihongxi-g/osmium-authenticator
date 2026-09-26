@@ -11,6 +11,9 @@ import android.os.Bundle
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.PredictiveBackHandler
+import androidx.activity.BackEventCompat
+import androidx.activity.ExperimentalActivityApi
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -83,6 +86,7 @@ import com.safekey.authenticator.ui.components.integrityCheckTitle
 import com.safekey.authenticator.ui.navigation.Screen
 import com.safekey.authenticator.ui.navigation.isRootBlocked
 import com.safekey.authenticator.ui.screens.AboutScreen
+import com.safekey.authenticator.ui.screens.AppearanceScreen
 import com.safekey.authenticator.ui.screens.DeveloperScreen
 import com.safekey.authenticator.ui.screens.AccountFormScreen
 import com.safekey.authenticator.ui.screens.AccountsScreen
@@ -115,6 +119,9 @@ import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.withContext
 
 class MainActivity : FragmentActivity() {
@@ -191,7 +198,11 @@ class MainActivity : FragmentActivity() {
 
             SafeKeyTheme(
                 themeMode = settings.themeMode,
-                dynamicColor = settings.dynamicColor
+                dynamicColor = settings.dynamicColor,
+                designSystem = settings.designSystem,
+                paletteSeed = settings.paletteSeed,
+                paletteStyle = settings.paletteStyle,
+                pureBlack = settings.pureBlack
             ) {
                 // Screenshot policy follows the user setting (default: blocked).
                 LaunchedEffect(settings.allowScreenshots) {
@@ -928,6 +939,7 @@ private fun IntegrityNoticeDialog(
         )
     }
 
+    @OptIn(ExperimentalActivityApi::class)
     @Composable
     private fun MainNavHost(
         accountsListState: LazyListState,
@@ -939,6 +951,7 @@ private fun IntegrityNoticeDialog(
         val direction = vm.nav.direction
         val current = vm.nav.current
         val rootRestricted by vm.rootRestricted.collectAsState()
+        var predictiveBackProgress by remember { mutableStateOf(0f) }
 
         // Defense in depth: if the restriction becomes active while a blocked
         // screen is open (e.g. restored after a config change), leave it
@@ -950,10 +963,22 @@ private fun IntegrityNoticeDialog(
             }
         }
 
-        BackHandler(enabled = vm.nav.canGoBack) { vm.nav.pop() }
+        PredictiveBackHandler(enabled = vm.nav.canGoBack) { progress: Flow<BackEventCompat> ->
+            try {
+                progress.collect { event ->
+                    predictiveBackProgress = event.progress
+                }
+                if (vm.nav.canGoBack) vm.nav.pop()
+                predictiveBackProgress = 0f
+            } catch (cancelled: CancellationException) {
+                predictiveBackProgress = 0f
+                throw cancelled
+            }
+        }
         Box(Modifier.fillMaxSize()) {
             SwipeBackContainer(
             canGoBack = vm.nav.canGoBack,
+            predictiveBackProgress = predictiveBackProgress,
             onBack = { vm.nav.pop() }
         ) {
             AnimatedContent(
@@ -1062,6 +1087,7 @@ private fun IntegrityNoticeDialog(
                         onImport = { vm.nav.push(Screen.Import) },
                         onWebDav = { vm.nav.push(Screen.WebDav) },
                         onAutoBackup = { vm.nav.push(Screen.AutoBackup) },
+                        onAppearance = { vm.nav.push(Screen.Appearance) },
                         onOpenPinSetup = { vm.nav.push(Screen.PinSetup("pin")) },
                         onOpenPinVerify = { next -> vm.nav.push(Screen.PinVerify(next)) },
                         onRequireBiometric = { onSuccess ->
@@ -1090,6 +1116,11 @@ private fun IntegrityNoticeDialog(
                             LanguagePrefs.set(this@MainActivity, lang)
                             recreate()
                         }
+                    )
+
+                    is Screen.Appearance -> AppearanceScreen(
+                        vm = vm,
+                        onBack = { vm.nav.pop() }
                     )
 
                     is Screen.TagSettings -> TagSettingsScreen(

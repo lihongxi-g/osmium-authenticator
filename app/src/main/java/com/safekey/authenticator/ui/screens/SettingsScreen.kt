@@ -68,6 +68,7 @@ fun SettingsScreen(
     onWebDav: () -> Unit,
     onAutoBackup: () -> Unit,
     onIntegrity: () -> Unit,
+    onAppearance: () -> Unit,
     onOpenPinSetup: () -> Unit,
     onOpenPinVerify: (String) -> Unit,
     onRequireBiometric: ((onSuccess: () -> Unit) -> Unit)? = null,
@@ -147,34 +148,14 @@ fun SettingsScreen(
         ) {
             SectionHeader(stringResource(R.string.settings_appearance))
 
-            if ("theme" !in hiddenFeatures) SettingRow(
-                icon = if (settings.themeMode == AppSettings.THEME_DARK) AppIcons.DarkMode else AppIcons.LightMode,
-                title = stringResource(R.string.theme_mode),
-                trailing = {
-                    Text(
-                        text = when (settings.themeMode) {
-                            AppSettings.THEME_LIGHT -> stringResource(R.string.theme_light)
-                            AppSettings.THEME_DARK -> stringResource(R.string.theme_dark)
-                            else -> stringResource(R.string.theme_system)
-                        },
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                },
-                onClick = { showThemeDialog = true }
+            if ("appearance" !in hiddenFeatures && "theme" !in hiddenFeatures && "dynamicColor" !in hiddenFeatures) SettingRow(
+                icon = AppIcons.Palette,
+                title = stringResource(R.string.appearance_title),
+                description = stringResource(R.string.appearance_desc),
+                onClick = onAppearance
             )
 
-            if ("dynamicColor" !in hiddenFeatures) SettingRow(
-                icon = AppIcons.Palette,
-                title = stringResource(R.string.dynamic_color),
-                description = stringResource(R.string.dynamic_color_desc),
-                trailing = {
-                    Switch(
-                        checked = settings.dynamicColor,
-                        onCheckedChange = { vm.setDynamicColor(it) }
-                    )
-                }
-            )
+            // Theme and palette controls live in the Appearance subpage.
 
             if ("sort" !in hiddenFeatures) SettingRow(
                 icon = AppIcons.SwapVert,

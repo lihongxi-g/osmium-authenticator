@@ -75,6 +75,27 @@
 
     <string name="settings_title">Settings</string>
     <string name="settings_appearance">Appearance</string>
+    <string name="appearance_title">Appearance</string>
+    <string name="appearance_desc">Choose Material 3, Expressive, colors, and style</string>
+    <string name="appearance_design_system">Design system</string>
+    <string name="appearance_material3">Material 3</string>
+    <string name="appearance_material3_desc">The original stable Osmium interface</string>
+    <string name="appearance_expressive">Material 3 Expressive</string>
+    <string name="appearance_expressive_desc">Stronger hierarchy and expressive motion</string>
+    <string name="appearance_colors">Colors</string>
+    <string name="appearance_seed_color">Seed color</string>
+    <string name="appearance_palette_style">Palette style</string>
+    <string name="palette_tonal_spot">Tonal spot</string>
+    <string name="palette_neutral">Neutral</string>
+    <string name="palette_vibrant">Vibrant</string>
+    <string name="palette_expressive">Expressive</string>
+    <string name="palette_rainbow">Rainbow</string>
+    <string name="palette_fruit_salad">Fruit salad</string>
+    <string name="palette_monochrome">Monochrome</string>
+    <string name="appearance_expressive_options">Expressive options</string>
+    <string name="appearance_amoled">Pure black dark background</string>
+    <string name="appearance_amoled_desc">Use true black for OLED displays</string>
+    <string name="appearance_security_note">Colors and motion never replace security text, icons, or confirmation.</string>
     <string name="settings_security">Security</string>
     <string name="settings_data">Data</string>
     <string name="settings_about">About</string>
