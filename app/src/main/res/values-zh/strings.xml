@@ -104,6 +104,7 @@
     <string name="appearance_saturation">饱和度</string>
     <string name="appearance_brightness">明度</string>
     <string name="appearance_predictive_back">预测式返回动画</string>
+    <string name="appearance_beta">BETA</string>
     <string name="appearance_predictive_back_desc">返回滑动时跟手预览上一页</string>
     <string name="appearance_predictive_back_note">当前 Android 版本不支持系统预测式返回，改用应用内边缘滑动。</string>
     <string name="appearance_ui_scale">界面缩放</string>

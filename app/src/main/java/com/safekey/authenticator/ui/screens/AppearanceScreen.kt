@@ -153,6 +153,7 @@ fun AppearanceScreen(vm: MainViewModel, onBack: () -> Unit) {
             SettingRow(
                 icon = AppIcons.ArrowBack,
                 title = stringResource(R.string.appearance_predictive_back),
+                badge = stringResource(R.string.appearance_beta),
                 description = stringResource(
                     if (predictiveSupported) {
                         R.string.appearance_predictive_back_desc

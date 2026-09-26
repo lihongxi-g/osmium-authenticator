@@ -104,6 +104,7 @@
     <string name="appearance_saturation">Saturation</string>
     <string name="appearance_brightness">Brightness</string>
     <string name="appearance_predictive_back">Predictive back animation</string>
+    <string name="appearance_beta">BETA</string>
     <string name="appearance_predictive_back_desc">Follow the back gesture and preview the previous screen</string>
     <string name="appearance_predictive_back_note">This Android version has no system predictive back; the app falls back to its own edge swipe.</string>
     <string name="appearance_ui_scale">UI scale</string>

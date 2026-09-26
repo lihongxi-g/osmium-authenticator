@@ -62,6 +62,8 @@ class NavigationState(initial: Screen = Screen.Accounts) {
         private set
 
     val current: Screen get() = stack.last()
+    /** The screen below the top one — the target a back gesture reveals. */
+    val previous: Screen? get() = if (stack.size > 1) stack[stack.size - 2] else null
     val canGoBack: Boolean get() = stack.size > 1
     val size: Int get() = stack.size
 
