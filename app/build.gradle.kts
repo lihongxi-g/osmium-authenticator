@@ -133,9 +133,12 @@ dependencies {
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
-    // Material3 1.4 alpha introduces the expressive theme/motion APIs while
-    // leaving the app's existing Compose BOM and Kotlin toolchain unchanged.
-    implementation("androidx.compose.material3:material3:1.4.0-alpha10")
+    // The two design systems (baseline Material 3 / expressive-style Material 3)
+    // are implemented with the stable Material 3 API from the BOM above. The
+    // 1.4.0-alpha line would force an AGP 8.6+/newer-Kotlin toolchain upgrade
+    // for a release build, so expressive tokens (colour, shape, type, motion)
+    // are defined locally instead.
+    implementation("androidx.compose.material3:material3")
     // NOTE: material-icons-core resolves to an empty shell AAR via BOM 2024.01
     // (icons moved to the -android variant in 1.6.0). All icons are self-drawn
     // in AppIcons.kt from official Material Symbols path data instead.

@@ -17,20 +17,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
-/**
- * Edge swipe-back with finger-following animation (跟手):
- * - drag starts only from the ~40dp left edge zone so list scrolling is unaffected
- * - while dragging, the offset is written straight into snapshot state
- *   (zero per-frame coroutines — keeps 120Hz scrolling smooth)
- * - release past ~25% width completes the back navigation; otherwise it bounces back
- */
+/** Edge swipe-back with a finger-following offset for non-system gestures. */
 @Composable
 fun SwipeBackContainer(
     canGoBack: Boolean,
     predictiveBackProgress: Float = 0f,
+    predictiveBackActive: Boolean = false,
     onBack: () -> Unit,
     content: @Composable () -> Unit
 ) {
@@ -41,7 +37,7 @@ fun SwipeBackContainer(
     val settle = remember { Animatable(0f) }
 
     val offsetPx = when {
-        predictiveBackProgress > 0f -> with(density) { 96.dp.toPx() } * predictiveBackProgress
+        predictiveBackActive -> with(density) { 96.dp.toPx() } * predictiveBackProgress
         settling -> settle.value
         else -> dragPx
     }
@@ -49,8 +45,8 @@ fun SwipeBackContainer(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .pointerInput(canGoBack) {
-                if (!canGoBack) return@pointerInput
+            .pointerInput(canGoBack, predictiveBackActive) {
+                if (!canGoBack || predictiveBackActive) return@pointerInput
                 val edgePx = with(density) { 40.dp.toPx() }
                 val widthPx = size.width.toFloat()
                 var total = 0f
@@ -61,10 +57,10 @@ fun SwipeBackContainer(
                         edgeActive = start.x < edgePx
                     },
                     onHorizontalDrag = { change, amount ->
-                        if (edgeActive && !settling) {
+                        if (edgeActive && !settling && !predictiveBackActive) {
                             change.consume()
                             total = (total + amount).coerceAtLeast(0f)
-                            dragPx = total // direct state write, no coroutine
+                            dragPx = total
                         }
                     },
                     onDragEnd = {
@@ -82,6 +78,7 @@ fun SwipeBackContainer(
                                     settle.snapTo(total)
                                     settle.animateTo(widthPx, tween(200, easing = FastOutSlowInEasing))
                                     dragPx = 0f
+                                    settle.snapTo(0f)
                                     settling = false
                                 }
                             } else {

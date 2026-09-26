@@ -111,6 +111,7 @@ import com.safekey.authenticator.ui.screens.ShareQrScreen
 import com.safekey.authenticator.ui.screens.SortOrderScreen
 import com.safekey.authenticator.ui.screens.ManualScreen
 import com.safekey.authenticator.ui.screens.WebDavScreen
+import com.safekey.authenticator.ui.theme.LocalOsmiumMotion
 import com.safekey.authenticator.ui.theme.SafeKeyTheme
 import com.safekey.authenticator.update.UpdateChecker
 import com.safekey.authenticator.update.UpdateInfo
@@ -951,7 +952,9 @@ private fun IntegrityNoticeDialog(
         val direction = vm.nav.direction
         val current = vm.nav.current
         val rootRestricted by vm.rootRestricted.collectAsState()
+        val motion = LocalOsmiumMotion.current
         var predictiveBackProgress by remember { mutableStateOf(0f) }
+        var predictiveBackActive by remember { mutableStateOf(false) }
 
         // Defense in depth: if the restriction becomes active while a blocked
         // screen is open (e.g. restored after a config change), leave it
@@ -965,31 +968,42 @@ private fun IntegrityNoticeDialog(
 
         PredictiveBackHandler(enabled = vm.nav.canGoBack) { progress: Flow<BackEventCompat> ->
             try {
+                predictiveBackActive = true
                 progress.collect { event ->
                     predictiveBackProgress = event.progress
                 }
-                if (vm.nav.canGoBack) vm.nav.pop()
-                predictiveBackProgress = 0f
+                predictiveBackActive = false
+                if (vm.nav.canGoBack) {
+                    vm.nav.pop()
+                    predictiveBackProgress = 0f
+                }
             } catch (cancelled: CancellationException) {
                 predictiveBackProgress = 0f
+                predictiveBackActive = false
                 throw cancelled
             }
+        }
+        BackHandler(
+            enabled = vm.nav.canGoBack && Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE
+        ) {
+            if (!predictiveBackActive) vm.nav.pop()
         }
         Box(Modifier.fillMaxSize()) {
             SwipeBackContainer(
             canGoBack = vm.nav.canGoBack,
             predictiveBackProgress = predictiveBackProgress,
+            predictiveBackActive = predictiveBackActive,
             onBack = { vm.nav.pop() }
         ) {
             AnimatedContent(
                 targetState = current,
                 transitionSpec = {
                     if (direction > 0) {
-                        (slideInHorizontally(tween(280)) { it / 3 } + fadeIn(tween(220))) togetherWith
-                            (slideOutHorizontally(tween(260)) { -it / 5 } + fadeOut(tween(200)))
+                        (slideInHorizontally(motion.enter) { it / 3 } + fadeIn(motion.fadeIn)) togetherWith
+                            (slideOutHorizontally(motion.exit) { -it / 5 } + fadeOut(motion.fadeOut))
                     } else {
-                        (slideInHorizontally(tween(280)) { -it / 3 } + fadeIn(tween(220))) togetherWith
-                            (slideOutHorizontally(tween(260)) { it / 5 } + fadeOut(tween(200)))
+                        (slideInHorizontally(motion.enter) { -it / 3 } + fadeIn(motion.fadeIn)) togetherWith
+                            (slideOutHorizontally(motion.exit) { it / 5 } + fadeOut(motion.fadeOut))
                     }
                 },
                 label = "nav"
