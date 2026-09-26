@@ -122,7 +122,7 @@ dependencies {
     // (IndexOutOfBoundsException in end()/exitGroup) observed on Android 16 /
     // OnePlus during ordinary recomposition — several composer group-stack
     // imbalance bugs were fixed across the 1.7.0–1.7.3 line.
-    val composeBom = platform("androidx.compose:compose-bom-alpha:2026.09.00")
+    val composeBom = platform("androidx.compose:compose-bom:2024.09.03")
     implementation(composeBom)
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
@@ -133,7 +133,9 @@ dependencies {
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation("androidx.compose.material3:material3")
+    // Material3 1.4 alpha introduces the expressive theme/motion APIs while
+    // leaving the app's existing Compose BOM and Kotlin toolchain unchanged.
+    implementation("androidx.compose.material3:material3:1.4.0-alpha10")
     // NOTE: material-icons-core resolves to an empty shell AAR via BOM 2024.01
     // (icons moved to the -android variant in 1.6.0). All icons are self-drawn
     // in AppIcons.kt from official Material Symbols path data instead.
