@@ -13,7 +13,6 @@ import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.PredictiveBackHandler
 import androidx.activity.BackEventCompat
-import androidx.activity.ExperimentalActivityApi
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -940,7 +939,6 @@ private fun IntegrityNoticeDialog(
         )
     }
 
-    @OptIn(ExperimentalActivityApi::class)
     @Composable
     private fun MainNavHost(
         accountsListState: LazyListState,
