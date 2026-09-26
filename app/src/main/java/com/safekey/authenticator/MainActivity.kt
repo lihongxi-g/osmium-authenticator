@@ -1042,8 +1042,6 @@ private fun IntegrityNoticeDialog(
             }
         }
 }
-}
-
 /**
  * Content for one navigation screen. Factored out of the nav host so the predictive-back
  * gesture can render the screen underneath as well (the preview the gesture drags away to),
@@ -1361,3 +1359,5 @@ private fun ScreenBody(
         )
     }
 }
+}
+
