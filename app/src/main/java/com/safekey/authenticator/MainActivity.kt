@@ -202,7 +202,8 @@ class MainActivity : FragmentActivity() {
                 designSystem = settings.designSystem,
                 paletteSeed = settings.paletteSeed,
                 paletteStyle = settings.paletteStyle,
-                pureBlack = settings.pureBlack
+                pureBlack = settings.pureBlack,
+                uiScale = settings.uiScale
             ) {
                 // Screenshot policy follows the user setting (default: blocked).
                 LaunchedEffect(settings.allowScreenshots) {
@@ -241,7 +242,8 @@ class MainActivity : FragmentActivity() {
                             accountsListState = accountsListState,
                             accountTagRowState = accountTagRowState,
                             settingsScrollState = settingsScrollState,
-                            screenStateHolder = screenStateHolder
+                            screenStateHolder = screenStateHolder,
+                            predictiveBackEnabled = settings.predictiveBack
                         )
                     }
                     // Update notification only over the unlocked main UI.
@@ -944,7 +946,8 @@ private fun IntegrityNoticeDialog(
         accountsListState: LazyListState,
         accountTagRowState: ScrollState,
         settingsScrollState: ScrollState,
-        screenStateHolder: androidx.compose.runtime.saveable.SaveableStateHolder
+        screenStateHolder: androidx.compose.runtime.saveable.SaveableStateHolder,
+        predictiveBackEnabled: Boolean
     ) {
         val context = LocalContext.current
         val direction = vm.nav.direction
@@ -964,31 +967,38 @@ private fun IntegrityNoticeDialog(
             }
         }
 
-        PredictiveBackHandler(enabled = vm.nav.canGoBack) { progress: Flow<BackEventCompat> ->
-            try {
-                predictiveBackActive = true
-                progress.collect { event ->
-                    predictiveBackProgress = event.progress
-                }
-                predictiveBackActive = false
-                if (vm.nav.canGoBack) {
-                    vm.nav.pop()
+        // Predictive back: the platform drives the gesture progress, so the
+        // transition follows the finger exactly and we only animate with it.
+        // Older platforms get the custom edge swipe instead — running both at
+        // once made the two gestures fight each other (the jitter users saw).
+        val platformPredictiveBack = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+        val useEdgeSwipe = predictiveBackEnabled && !platformPredictiveBack
+        if (predictiveBackEnabled && platformPredictiveBack) {
+            PredictiveBackHandler(enabled = vm.nav.canGoBack) { progress: Flow<BackEventCompat> ->
+                try {
+                    predictiveBackActive = true
+                    progress.collect { event ->
+                        predictiveBackProgress = event.progress
+                    }
+                    predictiveBackActive = false
+                    if (vm.nav.canGoBack) {
+                        vm.nav.pop()
+                        predictiveBackProgress = 0f
+                    }
+                } catch (cancelled: CancellationException) {
                     predictiveBackProgress = 0f
+                    predictiveBackActive = false
+                    throw cancelled
                 }
-            } catch (cancelled: CancellationException) {
-                predictiveBackProgress = 0f
-                predictiveBackActive = false
-                throw cancelled
             }
-        }
-        BackHandler(
-            enabled = vm.nav.canGoBack && Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE
-        ) {
-            if (!predictiveBackActive) vm.nav.pop()
+        } else {
+            BackHandler(enabled = vm.nav.canGoBack) {
+                vm.nav.pop()
+            }
         }
         Box(Modifier.fillMaxSize()) {
             SwipeBackContainer(
-            canGoBack = vm.nav.canGoBack,
+            canGoBack = vm.nav.canGoBack && useEdgeSwipe,
             predictiveBackProgress = predictiveBackProgress,
             predictiveBackActive = predictiveBackActive,
             onBack = { vm.nav.pop() }

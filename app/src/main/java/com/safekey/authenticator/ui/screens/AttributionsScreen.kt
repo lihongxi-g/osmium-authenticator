@@ -105,6 +105,16 @@ fun AttributionsScreen(
                 description = stringResource(R.string.attributions_keyattestation_desc),
                 onClick = { open("https://github.com/android/keyattestation") }
             )
+            AttributionCard(
+                title = "KernelSU (GPL-3.0)",
+                description = stringResource(R.string.attributions_kernelsu_desc),
+                onClick = { open("https://github.com/tiann/KernelSU") }
+            )
+            AttributionCard(
+                title = "MaterialKolor / Material Color Utilities (MIT, Apache-2.0)",
+                description = stringResource(R.string.attributions_materialkolor_desc),
+                onClick = { open("https://github.com/jordond/materialkolor") }
+            )
             Text(
                 text = stringResource(R.string.attributions_integrity_note),
                 style = MaterialTheme.typography.bodySmall,

@@ -139,6 +139,11 @@ dependencies {
     // for a release build, so expressive tokens (colour, shape, type, motion)
     // are defined locally instead.
     implementation("androidx.compose.material3:material3")
+    // Material You palette generation: the Material Color Utilities Kotlin port
+    // (HCT + the MCU dynamic schemes) that KernelSU's theme uses, pinned to the
+    // last Kotlin 1.9 build so the app's toolchain stays untouched. MIT-licensed;
+    // see the attributions page.
+    implementation("com.materialkolor:material-color-utilities:1.3.0")
     // NOTE: material-icons-core resolves to an empty shell AAR via BOM 2024.01
     // (icons moved to the -android variant in 1.6.0). All icons are self-drawn
     // in AppIcons.kt from official Material Symbols path data instead.

@@ -755,6 +755,8 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     fun setPaletteSeed(seed: Long) = viewModelScope.launch { settingsRepo.setPaletteSeed(seed) }
     fun setPaletteStyle(style: String) = viewModelScope.launch { settingsRepo.setPaletteStyle(style) }
     fun setPureBlack(enabled: Boolean) = viewModelScope.launch { settingsRepo.setPureBlack(enabled) }
+    fun setPredictiveBack(enabled: Boolean) = viewModelScope.launch { settingsRepo.setPredictiveBack(enabled) }
+    fun setUiScale(scale: Float) = viewModelScope.launch { settingsRepo.setUiScale(scale) }
     fun setGateOnOpen(enabled: Boolean) = viewModelScope.launch { settingsRepo.setGateOnOpen(enabled) }
     fun setAllowScreenshots(enabled: Boolean) = viewModelScope.launch { settingsRepo.setAllowScreenshots(enabled) }
     fun setHideCodes(enabled: Boolean) = viewModelScope.launch { settingsRepo.setHideCodes(enabled) }

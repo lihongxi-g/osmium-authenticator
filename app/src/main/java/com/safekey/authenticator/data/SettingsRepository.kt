@@ -3,6 +3,7 @@ package com.safekey.authenticator.data
 import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -23,6 +24,10 @@ data class AppSettings(
     val paletteSeed: Long = DEFAULT_PALETTE_SEED,
     val paletteStyle: String = PALETTE_TONAL_SPOT,
     val pureBlack: Boolean = false,
+    /** Predictive back animation (predictive-back gesture progress). */
+    val predictiveBack: Boolean = true,
+    /** Global text/UI scale, 0.8x - 1.2x. */
+    val uiScale: Float = UI_SCALE_DEFAULT,
     val gateOnOpen: Boolean = true,
     val allowScreenshots: Boolean = false,
     val hideCodes: Boolean = false,
@@ -71,6 +76,19 @@ data class AppSettings(
         const val PALETTE_RAINBOW = "rainbow"
         const val PALETTE_FRUIT_SALAD = "fruit_salad"
         const val PALETTE_MONOCHROME = "monochrome"
+        const val PALETTE_FIDELITY = "fidelity"
+        const val PALETTE_CONTENT = "content"
+
+        /** Palette styles accepted from the appearance settings (MCU styles). */
+        val PALETTE_STYLES = linkedSetOf(
+            PALETTE_TONAL_SPOT, PALETTE_NEUTRAL, PALETTE_VIBRANT, PALETTE_EXPRESSIVE,
+            PALETTE_RAINBOW, PALETTE_FRUIT_SALAD, PALETTE_MONOCHROME,
+            PALETTE_FIDELITY, PALETTE_CONTENT
+        )
+
+        const val UI_SCALE_DEFAULT = 1f
+        const val UI_SCALE_MIN = 0.8f
+        const val UI_SCALE_MAX = 1.2f
         const val DEFAULT_PALETTE_SEED = 0xFF4F5D92L
 
         const val DESTROY_OFF = "off"
@@ -106,6 +124,8 @@ class SettingsRepository(
         val PALETTE_SEED = longPreferencesKey("palette_seed")
         val PALETTE_STYLE = stringPreferencesKey("palette_style")
         val PURE_BLACK = booleanPreferencesKey("pure_black")
+        val PREDICTIVE_BACK = booleanPreferencesKey("predictive_back")
+        val UI_SCALE = floatPreferencesKey("ui_scale")
         val GATE_ON_OPEN = booleanPreferencesKey("gate_on_open")
         val ALLOW_SCREENSHOTS = booleanPreferencesKey("allow_screenshots")
         val HIDE_CODES = booleanPreferencesKey("hide_codes")
@@ -148,6 +168,9 @@ class SettingsRepository(
             paletteSeed = prefs[Keys.PALETTE_SEED] ?: AppSettings.DEFAULT_PALETTE_SEED,
             paletteStyle = prefs[Keys.PALETTE_STYLE] ?: AppSettings.PALETTE_TONAL_SPOT,
             pureBlack = prefs[Keys.PURE_BLACK] ?: false,
+            predictiveBack = prefs[Keys.PREDICTIVE_BACK] ?: true,
+            uiScale = (prefs[Keys.UI_SCALE] ?: AppSettings.UI_SCALE_DEFAULT)
+                .coerceIn(AppSettings.UI_SCALE_MIN, AppSettings.UI_SCALE_MAX),
             gateOnOpen = prefs[Keys.GATE_ON_OPEN] ?: true,
             allowScreenshots = prefs[Keys.ALLOW_SCREENSHOTS] ?: false,
             hideCodes = prefs[Keys.HIDE_CODES] ?: false,
@@ -200,13 +223,20 @@ class SettingsRepository(
     }
 
     suspend fun setPaletteStyle(style: String) {
-        val allowed = setOf(
-            AppSettings.PALETTE_TONAL_SPOT, AppSettings.PALETTE_NEUTRAL,
-            AppSettings.PALETTE_VIBRANT, AppSettings.PALETTE_EXPRESSIVE,
-            AppSettings.PALETTE_RAINBOW, AppSettings.PALETTE_FRUIT_SALAD,
-            AppSettings.PALETTE_MONOCHROME
-        )
-        context.dataStore.edit { it[Keys.PALETTE_STYLE] = style.takeIf(allowed::contains) ?: AppSettings.PALETTE_TONAL_SPOT }
+        context.dataStore.edit {
+            it[Keys.PALETTE_STYLE] = style.takeIf(AppSettings.PALETTE_STYLES::contains)
+                ?: AppSettings.PALETTE_TONAL_SPOT
+        }
+    }
+
+    suspend fun setPredictiveBack(enabled: Boolean) {
+        context.dataStore.edit { it[Keys.PREDICTIVE_BACK] = enabled }
+    }
+
+    suspend fun setUiScale(scale: Float) {
+        context.dataStore.edit {
+            it[Keys.UI_SCALE] = scale.coerceIn(AppSettings.UI_SCALE_MIN, AppSettings.UI_SCALE_MAX)
+        }
     }
 
     suspend fun setPureBlack(enabled: Boolean) {
