@@ -2,7 +2,6 @@ package com.safekey.authenticator.ui.components
 
 import androidx.activity.BackEventCompat
 import androidx.activity.compose.PredictiveBackHandler
-import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animate
@@ -24,11 +23,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
@@ -38,37 +35,47 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 
 /**
- * Converts platform `progress` into a travel fraction for the fallback path, used only when the
- * platform reports no touch coordinates (below API 34). The edge gesture commits after roughly a
- * third of the screen, so matching that is what keeps the page with the finger. This is a
- * platform fact, not the user's follow gain — that multiplies on top of it.
+ * Converts platform `progress` into a travel fraction for the last-resort path, used only when
+ * neither our own pointer stream nor the platform's touch coordinates are available. The edge
+ * gesture commits after roughly a third of the screen, so matching that keeps the page with the
+ * finger. This is a platform fact, not the user's follow gain — that multiplies on top of it.
  */
 private const val FALLBACK_PROGRESS_GAIN = 0.35f
 
-/** Peak alpha of the scrim that covers the revealed page. */
+/** Peak alpha of the scrim that covers the page underneath. */
 private const val SCRIM_MAX_ALPHA = 0.35f
+
+/** How close to an edge the finger must land before a drag counts as a back swipe. */
+private const val EDGE_ZONE_DP = 40
+
+/** Fraction of the width an edge drag must travel before the fallback counts it as a back gesture. */
+private const val FALLBACK_COMMIT_FRACTION = 0.15f
 
 /**
  * Predictive-back navigation container.
  *
- * Layout and behaviour follow KernelSU's navigation shell (miuix-nav, Apache-2.0 — see the
- * sources page for attribution):
+ * Geometry and input handling are the result of several rounds against a real device (see the
+ * project's predictive-back notes):
  *
- * - the reveal fraction is written 1:1 from the gesture and only ever read inside deferred
- *   `graphicsLayer { }` blocks, so a gesture frame costs no recomposition;
- * - the page being left slides out over the page underneath, which stays put (no parallax), so
- *   the sliver it shows at the screen edge is that page's own left margin rather than content
- *   shifted in from further right, behind a scrim;
- * - the moving page is never rounded-clipped: a leading-edge radius cuts a notch out of the
- *   screen edge, which reads as the page underneath leaking through;
- * - a cancelled gesture springs back with no overshoot; a committed one glides the rest of the
- *   way out *before* the pop, so the pop itself is invisible instead of a jump or a flash.
+ * - the offset lives in pixels in a single plain state, written by whichever input stream is live
+ *   and only ever read inside deferred `graphicsLayer { }` blocks, so a gesture frame costs no
+ *   recomposition and no per-sample animation machinery;
+ * - the page underneath is resident (composed at rest), untransformed and unclipped — composing it
+ *   during the gesture dropped frames, and clipping it re-recorded the whole page's draw on every
+ *   gesture frame, which dropped frames too;
+ * - the travelling page is never rounded-clipped: a leading-edge radius cuts a notch out of the
+ *   screen edge, which reads as the page underneath leaking through — and its offset is snapped to
+ *   whole device pixels, because a fractional edge composites against the page underneath and shows
+ *   up as a translucent seam;
+ * - the page leaves towards the edge the gesture started on, so both edges work;
+ * - a cancelled gesture springs back with no overshoot; a committed one glides the rest of the way
+ *   out *before* the pop, so the pop itself is invisible instead of a jump or a flash.
  *
  * @param systemPredictiveBack use the platform gesture (Android 13+ with predictive back on).
  * @param edgeSwipeFallback drive the same animation from an edge drag instead (older platforms).
  * @param navKey changes whenever the top screen changes; used to reset after a commit.
- * @param previous the screen underneath, rendered once the gesture is clearly under way. The
- *   caller freezes it at gesture start so the layer below cannot change mid-gesture.
+ * @param previous the screen underneath. The caller keeps it current across the navigation stack so
+ *   this layer can stay resident.
  */
 @Composable
 fun PredictiveBackContainer(
@@ -77,7 +84,6 @@ fun PredictiveBackContainer(
     edgeSwipeFallback: Boolean,
     navKey: Any?,
     previous: (@Composable () -> Unit)?,
-    onGestureStart: () -> Unit = {},
     /** Commit glide duration (developer-mode "back animation duration"). */
     commitDurationMillis: Int = AppSettings.MOTION_DURATION_DEFAULT,
     /** Developer-mode multiplier on how far the page travels per finger pixel. */
@@ -86,171 +92,193 @@ fun PredictiveBackContainer(
     content: @Composable () -> Unit
 ) {
     val density = LocalDensity.current
-    // The platform gesture feeds an Animatable (its callbacks run in an ordinary coroutine);
-    // the edge-swipe fallback writes plain state, because pointer callbacks run inside a
-    // restricted coroutine scope that cannot suspend on an Animatable.
-    val systemReveal = remember { Animatable(0f) }
-    val dragReveal = remember { mutableFloatStateOf(0f) }
+
+    // The travelling page's offset in pixels. Plain state rather than an Animatable: the drag
+    // rewrites it on every input sample, and an Animatable's per-sample cancel/relock work is pure
+    // overhead for that. The settle animations write it through `animate`.
+    val travelPx = remember { mutableFloatStateOf(0f) }
+    // Latest finger position from our own pointer stream, in container pixels (-1 = none yet).
+    val fingerPx = remember { mutableFloatStateOf(-1f) }
+    var widthPx by remember { mutableFloatStateOf(0f) }
     var dragging by remember { mutableStateOf(false) }
     var settling by remember { mutableStateOf(false) }
     var committed by remember { mutableStateOf(false) }
-    var showPrevious by remember { mutableStateOf(false) }
-    // Container width in pixels: the reference the platform's touch coordinates are measured
-    // against, so the page can follow the finger in real pixels.
-    var containerWidthPx by remember { mutableFloatStateOf(0f) }
-    // Which edge the current gesture came from. Locked for the whole gesture: the geometry must
-    // not flip halfway through.
+    var showScrim by remember { mutableStateOf(false) }
+    // Which edge the current gesture came from, locked for that gesture: the geometry must not flip
+    // halfway through.
     var fromRight by remember { mutableStateOf(false) }
+
     val commitGlide = remember(commitDurationMillis) {
         tween<Float>(commitDurationMillis, easing = FastOutSlowInEasing)
     }
+    val cancelSpring = remember {
+        spring<Float>(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessLow)
+    }
 
-    // 0f = settled, 1f = the page has travelled all the way off the screen.
-    val progress: () -> Float =
-        if (systemPredictiveBack) ({ systemReveal.value }) else ({ dragReveal.floatValue })
+    // Offset in pixels for a finger sitting at [finger], for a gesture that started at [rightEdge].
+    fun offsetForFinger(finger: Float, rightEdge: Boolean, width: Float): Float {
+        if (width <= 0f) return 0f
+        val travelled = if (rightEdge) width - finger else finger
+        return (travelled * gestureGain).coerceIn(0f, width)
+    }
 
-    // Platform-driven gesture. PredictiveBackHandler also covers the back button and the system
-    // back gesture on every platform that supports it, so nothing else is registered there.
+    /**
+     * Our own view of the finger. The platform's event stream is the authority on *whether* this is
+     * a back gesture, but it is not a reliable position feed: its `progress` stops at the commit
+     * point, and some builds deliver far fewer samples than the display refreshes — either of which
+     * leaves the page standing still while the finger keeps moving. So the position is sampled here
+     * as well, and takes over the moment the platform has confirmed a gesture is in flight. Samples
+     * are only observed, never consumed, so the platform gesture itself stays intact.
+     */
+    val pointerModifier = if (systemPredictiveBack) {
+        Modifier.pointerInput(canGoBack, systemPredictiveBack, gestureGain) {
+            val edgePx = with(density) { EDGE_ZONE_DP.dp.toPx() }
+            val width = size.width.toFloat()
+            awaitEachGesture {
+                val down = awaitFirstDown(requireUnconsumed = false)
+                val startedRight = down.position.x > width - edgePx
+                if (!startedRight && down.position.x > edgePx) return@awaitEachGesture
+                while (true) {
+                    val event = awaitPointerEvent(PointerEventPass.Initial)
+                    val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                    if (!change.pressed) break
+                    fingerPx.floatValue = change.position.x
+                    // Only drive the offset once the platform has confirmed a back gesture: a drag
+                    // that starts near the edge can also be a list scrolling.
+                    if (dragging && !settling) {
+                        fromRight = startedRight
+                        travelPx.floatValue = offsetForFinger(change.position.x, startedRight, width)
+                    }
+                    PredictiveBackTrace.pointerSample(change.position.x)
+                }
+                fingerPx.floatValue = -1f
+            }
+        }
+    } else {
+        Modifier
+    }
+
+    // Platform-driven gesture. PredictiveBackHandler also covers the back button, so nothing else is
+    // registered on platforms that support it.
     if (systemPredictiveBack) {
         PredictiveBackHandler(enabled = canGoBack) { events: Flow<BackEventCompat> ->
             try {
                 if (!dragging) {
                     dragging = true
                     // Every gesture starts from rest. A commit whose pop never landed leaves
-                    // `committed` set, and that pins the page at zero for the whole next drag —
-                    // which is what made the gesture appear to freeze at a random spot.
+                    // `committed` set, and that pins the page at zero for the whole next drag.
                     committed = false
-                    onGestureStart()
+                    showScrim = true
+                    PredictiveBackTrace.begin(fromRight)
                 }
                 var edgeLocked = false
                 events.collect { event ->
                     if (!edgeLocked) {
                         edgeLocked = true
                         fromRight = event.swipeEdge == BackEventCompat.EDGE_RIGHT
+                        PredictiveBackTrace.edgeLocked(fromRight)
                     }
                     // Deliberately not clamped from above: some platforms keep counting past the
-                    // commit point, and clamping that away freezes the page while the finger
-                    // keeps moving. Only the resulting offset is clamped.
+                    // commit point, and clamping that away freezes the page while the finger keeps
+                    // moving.
                     val fraction = event.progress.coerceAtLeast(0f)
-                    if (!showPrevious && fraction > 0.02f) showPrevious = true
-                    val fingerX = event.touchX
-                    // Prefer the real finger position: `progress` is capped at 1 once the gesture
-                    // would commit — a third of the way across the screen — so a progress-driven
-                    // page stops following while the finger still has half the screen to go.
-                    // Measured from the edge itself, not from an accumulated delta, so a late
-                    // first event cannot shift the mapping. Touch coordinates are window pixels
-                    // from API 34 up.
-                    val reveal = if (fingerX > 0f && containerWidthPx > 0f) {
-                        val travel = if (fromRight) {
-                            containerWidthPx - fingerX
+                    PredictiveBackTrace.platformEvent(fraction, event.touchX)
+                    // Leave the offset to our pointer stream whenever it is live for this gesture.
+                    if (fingerPx.floatValue < 0f) {
+                        travelPx.floatValue = if (event.touchX > 0f && widthPx > 0f) {
+                            PredictiveBackTrace.driver("touchX")
+                            offsetForFinger(event.touchX, fromRight, widthPx)
                         } else {
-                            fingerX
+                            PredictiveBackTrace.driver("progress")
+                            (fraction * FALLBACK_PROGRESS_GAIN * gestureGain).coerceIn(0f, 1f) * widthPx
                         }
-                        (travel / containerWidthPx * gestureGain).coerceIn(0f, 1f)
                     } else {
-                        (fraction * FALLBACK_PROGRESS_GAIN * gestureGain).coerceIn(0f, 1f)
+                        PredictiveBackTrace.driver("pointer")
                     }
-                    systemReveal.snapTo(reveal)
                 }
-                // The platform committed. Glide the rest of the way out while this layout is
-                // still on screen, then pop — otherwise the pop snaps the page back into place.
+                // Committed. Glide the rest of the way out while this layout is still on screen,
+                // then pop — otherwise the pop snaps the page back into place.
                 dragging = false
                 settling = true
-                systemReveal.animateTo(targetValue = 1f, animationSpec = commitGlide)
+                val from = travelPx.floatValue
+                animate(from, widthPx, commitGlide) { value, _ -> travelPx.floatValue = value }
                 settling = false
                 committed = true
+                PredictiveBackTrace.finish("commit", widthPx, from)
                 onBack()
             } catch (cancelled: CancellationException) {
                 dragging = false
                 settling = true
-                systemReveal.animateTo(
-                    targetValue = 0f,
-                    animationSpec = spring(
-                        dampingRatio = Spring.DampingRatioNoBouncy,
-                        stiffness = Spring.StiffnessLow
-                    )
-                )
+                val from = travelPx.floatValue
+                animate(from, 0f, cancelSpring) { value, _ -> travelPx.floatValue = value }
                 settling = false
-                showPrevious = false
+                showScrim = false
+                PredictiveBackTrace.finish("cancel", widthPx, from)
                 throw cancelled
             }
         }
     }
 
-    // Reset once the pop has been composed: the revealed page is the top page by then, so both
+    // Reset once the pop has been composed: the page underneath is the top page by then, so both
     // layers line up exactly and the reset is invisible.
     LaunchedEffect(navKey) {
         if (committed) {
-            systemReveal.snapTo(0f)
-            dragReveal.floatValue = 0f
+            travelPx.floatValue = 0f
             committed = false
-            showPrevious = false
+            showScrim = false
         }
     }
 
+    // Edge-drag fallback for platforms without the system gesture: same geometry, driven straight by
+    // the finger. This one consumes its touches, because with no system gesture in play the drag is
+    // the app's own and nothing else should act on it.
     val fallbackModifier = if (edgeSwipeFallback) {
-        Modifier.pointerInput(canGoBack, edgeSwipeFallback) {
+        Modifier.pointerInput(canGoBack, edgeSwipeFallback, gestureGain) {
             if (!canGoBack) return@pointerInput
-            val edgePx = with(density) { 40.dp.toPx() }
-            val thresholdPx = with(density) { 8.dp.toPx() }
-            val widthPx = size.width.toFloat()
-            var travelled = -1f
+            val edgePx = with(density) { EDGE_ZONE_DP.dp.toPx() }
+            val width = size.width.toFloat()
             while (true) {
-                // The gesture itself has to stay inside the restricted pointer scope, so it only
-                // writes plain state — the settle animation runs once we are back outside.
                 awaitEachGesture {
-                    travelled = -1f
                     val down = awaitFirstDown(requireUnconsumed = false)
-                    val startedRight = down.position.x > widthPx - edgePx
+                    val startedRight = down.position.x > width - edgePx
                     if (down.position.x > edgePx && !startedRight) return@awaitEachGesture
-                    // Only a real horizontal drag takes over: a vertical scroll that happens to
-                    // start near the edge must still scroll.
+                    // Only a real horizontal drag takes over: a vertical scroll that happens to start
+                    // near the edge must still scroll.
                     awaitHorizontalTouchSlopOrCancellation(down.id) { change, _ ->
                         change.consume()
                     } ?: return@awaitEachGesture
-                    // Both edges drive the same geometry; only the sign of the travel differs.
-                    val direction = if (startedRight) -1f else 1f
-                    var total = 0f
                     dragging = true
                     committed = false
+                    showScrim = true
                     fromRight = startedRight
-                    onGestureStart()
+                    PredictiveBackTrace.begin(startedRight)
                     while (true) {
                         val event = awaitPointerEvent()
                         val change = event.changes.firstOrNull { it.id == down.id } ?: break
                         if (!change.pressed || change.isConsumed) break
                         change.consume()
-                        total = (total + direction * change.positionChange().x).coerceAtLeast(0f)
-                        if (!showPrevious && total > thresholdPx) showPrevious = true
-                        // 1:1 with the finger, times the developer-mode gain.
-                        dragReveal.floatValue =
-                            (total / widthPx * gestureGain).coerceIn(0f, 1f)
+                        travelPx.floatValue =
+                            offsetForFinger(change.position.x, startedRight, width)
                     }
-                    travelled = total
                 }
-                if (travelled < 0f) continue
+                val travelled = travelPx.floatValue
                 dragging = false
                 settling = true
-                if (travelled > widthPx * 0.15f) {
-                    animate(
-                        initialValue = dragReveal.floatValue,
-                        targetValue = 1f,
-                        animationSpec = commitGlide
-                    ) { value, _ -> dragReveal.floatValue = value }
+                if (travelled > width * FALLBACK_COMMIT_FRACTION) {
+                    animate(travelled, width, commitGlide) { value, _ ->
+                        travelPx.floatValue = value
+                    }
                     settling = false
                     committed = true
+                    PredictiveBackTrace.finish("commit", width, travelled)
                     onBack()
                 } else {
-                    animate(
-                        initialValue = dragReveal.floatValue,
-                        targetValue = 0f,
-                        animationSpec = spring(
-                            dampingRatio = Spring.DampingRatioNoBouncy,
-                            stiffness = Spring.StiffnessLow
-                        )
-                    ) { value, _ -> dragReveal.floatValue = value }
+                    animate(travelled, 0f, cancelSpring) { value, _ ->
+                        travelPx.floatValue = value
+                    }
                     settling = false
-                    showPrevious = false
+                    showScrim = false
+                    PredictiveBackTrace.finish("cancel", width, travelled)
                 }
             }
         }
@@ -261,59 +289,33 @@ fun PredictiveBackContainer(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .onSizeChanged { containerWidthPx = it.width.toFloat() }
+            .onSizeChanged { widthPx = it.width.toFloat() }
             .background(MaterialTheme.colorScheme.background)
+            .then(pointerModifier)
             .then(fallbackModifier)
     ) {
         if (previous != null) {
-            // Composed unconditionally and kept alive, deliberately untransformed. Composing this
-            // page *during* the gesture is what made the drag drop frames and stall; shifting it
-            // (the usual parallax) puts content from further right into the sliver at the screen
-            // edge, where it is cut mid-glyph and reads as characters leaking through the page on
-            // top. Only the exposed strip is drawn — a pixel of slack towards the covered side so
-            // rounding can never leave a backdrop line at the edge.
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .drawWithContent {
-                        val exposed = progress() * size.width
-                        if (fromRight) {
-                            val left = size.width - exposed
-                            if (left >= size.width) return@drawWithContent
-                            clipRect(left - 1f, 0f, size.width, size.height) {
-                                this@drawWithContent.drawContent()
-                            }
-                        } else {
-                            if (exposed <= 0f) return@drawWithContent
-                            clipRect(0f, 0f, exposed + 1f, size.height) {
-                                this@drawWithContent.drawContent()
-                            }
-                        }
-                    }
-            ) {
+            // Resident and deliberately untransformed. Shifting this layer (the usual parallax) puts
+            // content from further right into the sliver at the screen edge, where it is cut
+            // mid-glyph and reads as characters leaking through the page on top. No clip either: the
+            // page on top is opaque and covers it, so this layer's cached display list is simply
+            // replayed, whereas clipping here forced a re-record of the whole page every gesture
+            // frame.
+            Box(modifier = Modifier.fillMaxSize()) {
                 previous()
             }
-            if (showPrevious) {
+            if (showScrim) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .drawWithContent {
-                            val exposed = progress() * size.width
-                            if (fromRight) {
-                                val left = size.width - exposed
-                                if (left >= size.width) return@drawWithContent
-                                clipRect(left - 1f, 0f, size.width, size.height) {
-                                    this@drawWithContent.drawContent()
-                                }
-                            } else {
-                                if (exposed <= 0f) return@drawWithContent
-                                clipRect(0f, 0f, exposed + 1f, size.height) {
-                                    this@drawWithContent.drawContent()
-                                }
-                            }
-                        }
                         .graphicsLayer {
-                            val p = progress()
+                            val p = if (widthPx > 0f) {
+                                (travelPx.floatValue / widthPx).coerceIn(0f, 1f)
+                            } else {
+                                0f
+                            }
+                            // Zero at both ends: a linear ramp flashes a grey layer on the first
+                            // and the last frame of the gesture.
                             alpha = SCRIM_MAX_ALPHA * 4f * p * (1f - p)
                         }
                         .background(Color.Black)
@@ -324,20 +326,17 @@ fun PredictiveBackContainer(
             modifier = Modifier
                 .fillMaxSize()
                 .graphicsLayer {
-                    // While committed the page underneath is already the top page, so the offset
-                    // must be zero no matter what the driver still holds. Otherwise the offset is
-                    // snapped to whole device pixels: a fractional edge gets composited against
-                    // the page underneath and shows up as a translucent seam.
+                    // While committed, the layer underneath is already the top page, so the offset
+                    // must be zero no matter what the driver still holds.
                     translationX = if (committed) {
                         0f
                     } else {
-                        // The travelling page leaves towards the edge the gesture came from.
-                        val pass = round(progress() * size.width)
+                        val pass = round(travelPx.floatValue)
                         if (fromRight) -pass else pass
                     }
                 }
-                // Opaque floor under the page: nothing underneath can ever show through the
-                // page's own transparent areas.
+                // Opaque floor under the page: nothing underneath can ever show through the page's
+                // own transparent areas.
                 .background(MaterialTheme.colorScheme.background)
         ) {
             content()

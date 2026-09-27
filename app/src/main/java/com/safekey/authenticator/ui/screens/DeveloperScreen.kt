@@ -46,6 +46,7 @@ import com.safekey.authenticator.data.AppSettings
 import com.safekey.authenticator.security.KeystoreTools
 import com.safekey.authenticator.security.RootState
 import com.safekey.authenticator.ui.components.AppIcons
+import com.safekey.authenticator.ui.components.PredictiveBackTrace
 import com.safekey.authenticator.ui.components.UpdateAvailableDialog
 import com.safekey.authenticator.ui.components.SectionHeader
 import com.safekey.authenticator.ui.components.SettingRow
@@ -356,6 +357,16 @@ fun DeveloperScreen(
                 steps = ((AppSettings.GESTURE_GAIN_MAX - AppSettings.GESTURE_GAIN_MIN) /
                     AppSettings.GESTURE_GAIN_STEP).roundToInt() - 1,
                 onValueChange = { vm.setGestureGain(it) }
+            )
+
+            // Read-only diagnostics for the drag: which input stream actually drove the last
+            // gesture and where it stopped. Tap to clear. Field debugging is the only way to tell
+            // whether the platform reports touch coordinates on a given device.
+            SettingRow(
+                icon = AppIcons.Info,
+                title = dev.gestureTrace,
+                description = PredictiveBackTrace.text.value.ifEmpty { dev.gestureTraceEmpty },
+                onClick = { PredictiveBackTrace.text.value = "" }
             )
 
             Spacer(Modifier.height(24.dp))
