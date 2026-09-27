@@ -285,7 +285,8 @@ private fun Modifier.fallbackEdgeSwipe(
     onStart: () -> Unit,
     onEdge: (rightEdge: Boolean) -> Unit,
     onDrag: (travelPx: Float) -> Unit,
-    onEnd: (travelPx: Float, widthPx: Float) -> Unit
+    // Suspending: the settle animations run here, outside the restricted pointer gesture scope.
+    onEnd: suspend (travelPx: Float, widthPx: Float) -> Unit
 ): Modifier = if (!enabled) {
     this
 } else {
