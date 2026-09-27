@@ -19,14 +19,14 @@ dependencies {
     api("com.google.guava:guava:33.5.0-android")
     api("com.google.protobuf:protobuf-javalite:4.28.3")
     api("com.google.protobuf:protobuf-kotlin-lite:4.28.3")
-    api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
 
     implementation("androidx.annotation:annotation:1.9.1")
     implementation("co.nstant.in:cbor:0.9")
     implementation("com.google.code.gson:gson:2.11.0")
     implementation("com.google.errorprone:error_prone_annotations:2.41.0")
     implementation("org.bouncycastle:bcpkix-jdk18on:1.78.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-guava:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-guava:1.9.0")
 
     testImplementation(kotlin("test"))
     testImplementation("junit:junit:4.13.2")

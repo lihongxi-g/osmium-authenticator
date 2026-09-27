@@ -1,13 +1,5 @@
 package com.safekey.authenticator.ui.components
 
-import android.app.Activity
-import android.content.Context
-import android.content.ContextWrapper
-import android.os.Build
-import android.window.BackEvent
-import android.window.OnBackInvokedCallback
-import android.window.OnBackInvokedDispatcher
-import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animate
@@ -39,8 +31,12 @@ import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.navigationevent.NavigationEvent
+import androidx.navigationevent.NavigationEventDispatcher
+import androidx.navigationevent.NavigationEventHandler
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.LocalNavigationEventDispatcherOwner
 import com.safekey.authenticator.data.AppSettings
 import kotlin.math.round
 import kotlinx.coroutines.launch
@@ -57,20 +53,19 @@ private const val EDGE_ZONE_DP = 40
 /**
  * Predictive-back navigation container.
  *
- * ## Input: the platform callback itself, not a compatibility wrapper
+ * ## The driver is the one KernelSU's shell uses
  *
- * The back gesture is taken straight from `OnBackInvokedDispatcher` (API 33+). The navigation shell
- * KernelSU uses reads the very same stream, but through `androidx.navigationevent`, whose Kotlin
- * metadata requires Kotlin 2.x — this app builds on Kotlin 1.9, and pulling that library in would
- * mean rebuilding the whole toolchain. Registering the platform callback directly gives the same
- * events without the extra layer, and it drops the one thing the older `androidx.activity`
- * predictive-back wrapper adds: a channel plus a coroutine between the platform callback and the
- * app. Here the offset is written *inside* `onBackProgressed`, on the main thread, in the frame the
- * event belongs to, which is as immediate as a gesture can get on Android.
+ * The gesture arrives through `androidx.navigationevent` — the same dispatcher miuix-nav (the
+ * navigation shell behind KernelSU's back animation) reads its events from, and the reason this
+ * app's Kotlin moved to 2.0: the library's published metadata is 2.0 and cannot be read by a 1.9
+ * compiler. The events land in [BackGestureHandler] on the main thread, and the offset is written
+ * *there*, in the frame the event belongs to. The older `androidx.activity` predictive-back wrapper
+ * this replaces put a channel plus a coroutine between the platform callback and the app, so a
+ * gesture frame could be a frame or more behind the finger, and bursts of samples could arrive
+ * together after a stall.
  *
- * Touch coordinates are used when the platform reports them (API 34+), because they are exact: a
- * measured swipe had the page edge precisely under the fingertip. Below that, and in the reported
- * readout, the platform's `progress` is the fallback.
+ * Touch coordinates are preferred when the platform reports them, because they are exact: a
+ * measured swipe had the page edge precisely under the fingertip. `progress` is the fallback.
  *
  * ## Geometry and drawing (each rule here fixed a real defect)
  *
@@ -116,8 +111,6 @@ fun PredictiveBackContainer(
     // halfway through.
     var fromRight by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
-    val activity = remember(context) { context.findActivity() }
 
     val commitGlide = remember(commitDurationMillis) {
         tween<Float>(commitDurationMillis, easing = FastOutSlowInEasing)
@@ -162,61 +155,64 @@ fun PredictiveBackContainer(
         }
     }
 
-    if (systemPredictiveBack) {
-        DisposableEffect(activity, canGoBack, gestureGain) {
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU || activity == null || !canGoBack) {
-                onDispose { }
-            } else {
-                val callback = PlatformBackCallback(
-                    onStarted = { event ->
-                        dragging = true
-                        // Every gesture starts from rest. A commit whose pop never landed leaves
-                        // `committed` set, and that pins the page at zero for the whole next drag.
-                        committed = false
-                        showScrim = false
-                        fromRight = event.swipeEdge == BackEvent.EDGE_RIGHT
-                        PredictiveBackTrace.begin(fromRight)
-                    },
-                    onProgressed = { event ->
-                        if (dragging) {
-                            val width = widthPx
-                            // Deliberately not clamped from above: some platforms keep counting past
-                            // the commit point, and clamping that away freezes the page while the
-                            // finger keeps moving.
-                            val fraction = event.progress.coerceAtLeast(0f)
-                            val touchX = if (Build.VERSION.SDK_INT >= 34) event.touchX else 0f
-                            PredictiveBackTrace.platformEvent(fraction, touchX)
-                            PredictiveBackTrace.latency(event.frameTimeMillis)
-                            if (!showScrim && fraction > 0.02f) showScrim = true
-                            renderedPx.floatValue = if (touchX > 0f && width > 0f) {
-                                PredictiveBackTrace.driver("touchX")
-                                offsetForFinger(touchX, fromRight, width)
-                            } else {
-                                PredictiveBackTrace.driver("progress")
-                                (fraction * FALLBACK_PROGRESS_GAIN * gestureGain)
-                                    .coerceIn(0f, 1f) * width
-                            }
-                            PredictiveBackTrace.followStep(renderedPx.floatValue)
+    val dispatcher = if (systemPredictiveBack) {
+        LocalNavigationEventDispatcherOwner.current?.navigationEventDispatcher
+    } else {
+        null
+    }
+    DisposableEffect(dispatcher, canGoBack, gestureGain) {
+        if (dispatcher == null || !canGoBack) {
+            onDispose { }
+        } else {
+            val handler = BackGestureHandler(
+                onStarted = { event ->
+                    dragging = true
+                    // Every gesture starts from rest. A commit whose pop never landed leaves
+                    // `committed` set, and that pins the page at zero for the whole next drag.
+                    committed = false
+                    showScrim = false
+                    fromRight = event.swipeEdge == NavigationEvent.EDGE_RIGHT
+                    PredictiveBackTrace.begin(fromRight)
+                },
+                onProgressed = { event ->
+                    if (dragging) {
+                        val width = widthPx
+                        // Deliberately not clamped from above: some platforms keep counting past the
+                        // commit point, and clamping that away freezes the page while the finger
+                        // keeps moving.
+                        val fraction = event.progress.coerceAtLeast(0f)
+                        val touchX = event.touchX
+                        PredictiveBackTrace.platformEvent(fraction, touchX)
+                        PredictiveBackTrace.latency(event.frameTimeMillis)
+                        if (!showScrim && fraction > 0.02f) showScrim = true
+                        renderedPx.floatValue = if (touchX > 0f && width > 0f) {
+                            PredictiveBackTrace.driver("touchX")
+                            offsetForFinger(touchX, fromRight, width)
+                        } else {
+                            PredictiveBackTrace.driver("progress")
+                            (fraction * FALLBACK_PROGRESS_GAIN * gestureGain)
+                                .coerceIn(0f, 1f) * width
                         }
-                    },
-                    onCommitted = {
-                        // Also the discrete case (the back button): no gesture, no progress events.
-                        if (!dragging) {
-                            dragging = true
-                            committed = false
-                            PredictiveBackTrace.begin(false)
-                        }
-                        dragging = false
-                        scope.launch { glideOut() }
-                    },
-                    onCancelled = {
-                        dragging = false
-                        scope.launch { springBack() }
+                        PredictiveBackTrace.followStep(renderedPx.floatValue)
                     }
-                )
-                val unregister = registerBackCallback(activity, callback)
-                onDispose { unregister() }
-            }
+                },
+                onCommitted = {
+                    // Also the discrete case (the back button): no gesture, no progress events.
+                    if (!dragging) {
+                        dragging = true
+                        committed = false
+                        PredictiveBackTrace.begin(false)
+                    }
+                    dragging = false
+                    scope.launch { glideOut() }
+                },
+                onCancelled = {
+                    dragging = false
+                    scope.launch { springBack() }
+                }
+            )
+            dispatcher.addHandler(handler, NavigationEventDispatcher.PRIORITY_DEFAULT)
+            onDispose { handler.remove() }
         }
     }
 
@@ -230,8 +226,8 @@ fun PredictiveBackContainer(
         }
     }
 
-    // Edge-drag fallback for platforms without the platform callback: same geometry, driven straight
-    // by the finger. It consumes its touches, because with no system gesture in play the drag is the
+    // Edge-drag fallback for platforms without the system gesture: same geometry, driven straight by
+    // the finger. It consumes its touches, because with no system gesture in play the drag is the
     // app's own and nothing else should act on it.
     val fallbackModifier = if (edgeSwipeFallback) {
         Modifier.fallbackEdgeSwipe(
@@ -328,6 +324,27 @@ fun PredictiveBackContainer(
 }
 
 /**
+ * Bridges the dispatcher's back-gesture callbacks to plain lambdas. The callbacks are invoked
+ * synchronously on the main thread by the dispatcher — no channel, no coroutine and no Compose
+ * snapshot sits between the platform and the write that moves the page.
+ */
+private class BackGestureHandler(
+    private val onStarted: (NavigationEvent) -> Unit,
+    private val onProgressed: (NavigationEvent) -> Unit,
+    private val onCommitted: () -> Unit,
+    private val onCancelled: () -> Unit
+) : NavigationEventHandler<NavigationEventInfo>(NavigationEventInfo.None, true, false) {
+
+    override fun onBackStarted(event: NavigationEvent) = onStarted(event)
+
+    override fun onBackProgressed(event: NavigationEvent) = onProgressed(event)
+
+    override fun onBackCompleted() = onCommitted()
+
+    override fun onBackCancelled() = onCancelled()
+}
+
+/**
  * Draws only the strip the travelling page has left uncovered, with a pixel of slack towards the
  * covered side so that rounding the page's offset can never leave a backdrop line at the edge.
  */
@@ -343,41 +360,7 @@ private inline fun ContentDrawScope.drawExposedStrip(exposed: Float, fromRight: 
 }
 
 /**
- * The platform's back-gesture callbacks, forwarded verbatim. They arrive on the main thread: no
- * channel, no coroutine and no Compose snapshot sits between the system and the caller.
- */
-@RequiresApi(Build.VERSION_CODES.TIRAMISU)
-private class PlatformBackCallback(
-    private val onStarted: (BackEvent) -> Unit,
-    private val onProgressed: (BackEvent) -> Unit,
-    private val onCommitted: () -> Unit,
-    private val onCancelled: () -> Unit
-) : OnBackInvokedCallback {
-    override fun onBackStarted(backEvent: BackEvent) = onStarted(backEvent)
-    override fun onBackProgressed(backEvent: BackEvent) = onProgressed(backEvent)
-    override fun onBackInvoked() = onCommitted()
-    override fun onBackCancelled() = onCancelled()
-}
-
-@RequiresApi(Build.VERSION_CODES.TIRAMISU)
-private fun registerBackCallback(activity: Activity, callback: OnBackInvokedCallback): () -> Unit {
-    val dispatcher = activity.onBackInvokedDispatcher
-    dispatcher.registerOnBackInvokedCallback(OnBackInvokedDispatcher.PRIORITY_DEFAULT, callback)
-    return { runCatching { dispatcher.unregisterOnBackInvokedCallback(callback) } }
-}
-
-/** Unwraps the activity from a possibly wrapped context; null when there is none. */
-private fun Context.findActivity(): Activity? {
-    var current: Context? = this
-    while (current is ContextWrapper) {
-        if (current is Activity) return current
-        current = current.baseContext
-    }
-    return null
-}
-
-/**
- * Edge-drag fallback for platforms without the platform callback: the app owns the gesture, so it
+ * Edge-drag fallback for platforms without the system gesture: the app owns the gesture, so it
  * consumes its touches and drives the offset straight from the finger. Same geometry as the system
  * path.
  */

@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.serialization")
+    id("org.jetbrains.kotlin.plugin.compose")
     id("com.google.devtools.ksp")
 }
 
@@ -13,7 +14,7 @@ android {
         applicationId = "com.safekey.authenticator"
         minSdk = 26
         targetSdk = 34
-        versionCode = 77
+        versionCode = 78
         versionName = "2.5.4"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
@@ -95,10 +96,8 @@ android {
         compose = true
         buildConfig = true
     }
-    composeOptions {
-        // 1.5.14 is the last of the 1.5.x line; matches Kotlin 1.9.24.
-        kotlinCompilerExtensionVersion = "1.5.14"
-    }
+    // Kotlin 2 ships the Compose compiler as a Kotlin plugin (see the plugins block), so
+    // composeOptions.kotlinCompilerExtensionVersion no longer applies.
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -122,14 +121,18 @@ dependencies {
     // (IndexOutOfBoundsException in end()/exitGroup) observed on Android 16 /
     // OnePlus during ordinary recomposition — several composer group-stack
     // imbalance bugs were fixed across the 1.7.0–1.7.3 line.
-    val composeBom = platform("androidx.compose:compose-bom:2024.09.03")
+    // Latest stable patch of the same Compose minor the UI was tuned against.
+    val composeBom = platform("androidx.compose:compose-bom:2025.02.00")
     implementation(composeBom)
-    implementation("androidx.core:core-ktx:1.12.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
+    implementation("androidx.core:core-ktx:1.15.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
     // PredictiveBackHandler is available in activity-compose 1.8.0+.
-    implementation("androidx.activity:activity-compose:1.8.2")
-    implementation("androidx.fragment:fragment-ktx:1.6.2")
+    implementation("androidx.activity:activity-compose:1.10.1")
+    // The back-gesture driver KernelSU's navigation shell is built on. Its published
+    // Kotlin metadata is 2.0, which is why this app's Kotlin had to move to 2.0 as well.
+    implementation("androidx.navigationevent:navigationevent-compose:1.0.0")
+    implementation("androidx.fragment:fragment-ktx:1.8.6")
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
@@ -148,17 +151,17 @@ dependencies {
     // (icons moved to the -android variant in 1.6.0). All icons are self-drawn
     // in AppIcons.kt from official Material Symbols path data instead.
 
-    implementation("androidx.room:room-runtime:2.6.1")
-    implementation("androidx.room:room-ktx:2.6.1")
-    ksp("androidx.room:room-compiler:2.6.1")
+    implementation("androidx.room:room-runtime:2.7.1")
+    implementation("androidx.room:room-ktx:2.7.1")
+    ksp("androidx.room:room-compiler:2.7.1")
 
     // QR generation + scanning for account sharing / imports (core only, no camera bloat)
-    implementation("com.google.zxing:core:3.5.2")
-    implementation("androidx.datastore:datastore-preferences:1.0.0")
+    implementation("com.google.zxing:core:3.5.3")
+    implementation("androidx.datastore:datastore-preferences:1.1.7")
 
     // Scheduled auto-backup (WebDAV / local storage). Google first-party;
     // handles Doze, process death and reboot without custom alarm plumbing.
-    implementation("androidx.work:work-runtime-ktx:2.9.1")
+    implementation("androidx.work:work-runtime-ktx:2.10.0")
     // Android 14/15 BiometricPrompt fixes. 1.1.0/1.2.0-alpha05 misbehave on
     // ColorOS 15; 1.4.0-alpha02 requires compileSdk 35 (a real release SDK).
     implementation("androidx.biometric:biometric:1.4.0-alpha02")
@@ -172,13 +175,13 @@ dependencies {
     implementation("androidx.camera:camera-lifecycle:$cameraxVersion")
     implementation("androidx.camera:camera-view:$cameraxVersion")
 
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
 
     // Vendored Google Android Key Attestation verifier (see keyattestation/NOTICE).
     implementation(project(":keyattestation"))
 
     testImplementation("junit:junit:4.13.2")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
     // XmlPullParser on the JVM for unit-testing the WebDAV multistatus parser
     testImplementation("net.sf.kxml:kxml2:2.3.0")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
