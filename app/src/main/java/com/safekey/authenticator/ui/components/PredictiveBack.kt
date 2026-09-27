@@ -31,14 +31,19 @@ import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigationevent.NavigationEvent
 import androidx.navigationevent.NavigationEventDispatcher
+import androidx.navigationevent.OnBackInvokedDefaultInput
 import androidx.navigationevent.NavigationEventHandler
 import androidx.navigationevent.NavigationEventInfo
-import androidx.navigationevent.compose.rememberNavigationEventDispatcherOwner
+import androidx.activity.compose.PredictiveBackHandler
+import androidx.activity.BackEventCompat
 import com.safekey.authenticator.data.AppSettings
 import kotlin.math.round
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
 /** Converts platform `progress` into a travel fraction when no touch coordinates are reported. */
@@ -111,6 +116,8 @@ fun PredictiveBackContainer(
     // halfway through.
     var fromRight by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val activity = remember(context) { context.findActivity() }
 
     val commitGlide = remember(commitDurationMillis) {
         tween<Float>(commitDurationMillis, easing = FastOutSlowInEasing)
@@ -155,17 +162,27 @@ fun PredictiveBackContainer(
         }
     }
 
-    // The dispatcher that carries the platform's back gesture. It has to be the one this library
-    // creates: `rememberNavigationEventDispatcherOwner` sets it up and attaches the platform input
-    // (`OnBackInvokedDefaultInput`). Reading the composition local alone is not enough here — a plain
-    // single-activity Compose host has no view-tree owner, so the local is null, the handler gets
-    // registered nowhere and the gesture falls through to finishing the activity.
-    val backDispatcherOwner = rememberNavigationEventDispatcherOwner()
-    val dispatcher = if (systemPredictiveBack) {
-        backDispatcherOwner.navigationEventDispatcher
+    // A dispatcher of our own for the navigationevent path, fed by the platform's own back-invoked
+    // dispatcher. Nothing provides a dispatcher in this app (a plain single-activity Compose host has
+    // no view-tree owner, and the library's `rememberNavigationEventDispatcherOwner` would throw in
+    // that situation), so it is wired by hand here: the two calls below are its whole platform side.
+    val platformBackDispatcher = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        activity?.onBackInvokedDispatcher
     } else {
         null
     }
+    val backDispatcher = remember { NavigationEventDispatcher() }
+    DisposableEffect(backDispatcher, platformBackDispatcher) {
+        if (platformBackDispatcher == null) {
+            onDispose { }
+        } else {
+            val input = runCatching {
+                OnBackInvokedDefaultInput(platformBackDispatcher).also { backDispatcher.addInput(it) }
+            }.getOrNull()
+            onDispose { if (input != null) runCatching { backDispatcher.removeInput(input) } }
+        }
+    }
+    val dispatcher = if (systemPredictiveBack) backDispatcher else null
     DisposableEffect(dispatcher, canGoBack, gestureGain) {
         if (dispatcher == null || !canGoBack) {
             onDispose { }
@@ -192,10 +209,10 @@ fun PredictiveBackContainer(
                         PredictiveBackTrace.latency(event.frameTimeMillis)
                         if (!showScrim && fraction > 0.02f) showScrim = true
                         renderedPx.floatValue = if (touchX > 0f && width > 0f) {
-                            PredictiveBackTrace.driver("touchX")
+                            PredictiveBackTrace.driver("nav touchX")
                             offsetForFinger(touchX, fromRight, width)
                         } else {
-                            PredictiveBackTrace.driver("progress")
+                            PredictiveBackTrace.driver("nav progress")
                             (fraction * FALLBACK_PROGRESS_GAIN * gestureGain)
                                 .coerceIn(0f, 1f) * width
                         }
@@ -219,6 +236,54 @@ fun PredictiveBackContainer(
             )
             dispatcher.addHandler(handler, NavigationEventDispatcher.PRIORITY_DEFAULT)
             onDispose { handler.remove() }
+        }
+    }
+
+    // Fallback driver, and the reason this file can be shipped while the navigationevent wiring above
+    // is still settling in: the platform hands a gesture to exactly one registered callback, so if
+    // the navigationevent input does not take it, this one does — and vice versa, never both. The
+    // readout's driver column says which of the two actually drove the gesture.
+    if (systemPredictiveBack) {
+        PredictiveBackHandler(enabled = canGoBack) { events: Flow<BackEventCompat> ->
+            try {
+                if (!dragging) {
+                    dragging = true
+                    committed = false
+                    showScrim = false
+                    PredictiveBackTrace.begin(fromRight)
+                }
+                var edgeLocked = false
+                events.collect { event ->
+                    if (!edgeLocked) {
+                        edgeLocked = true
+                        fromRight = event.swipeEdge == BackEventCompat.EDGE_RIGHT
+                        PredictiveBackTrace.edgeLocked(fromRight)
+                    }
+                    if (dragging) {
+                        val width = widthPx
+                        val fraction = event.progress.coerceAtLeast(0f)
+                        val touchX = event.touchX
+                        PredictiveBackTrace.platformEvent(fraction, touchX)
+                        PredictiveBackTrace.latency(0L)
+                        if (!showScrim && fraction > 0.02f) showScrim = true
+                        renderedPx.floatValue = if (touchX > 0f && width > 0f) {
+                            PredictiveBackTrace.driver("act touchX")
+                            offsetForFinger(touchX, fromRight, width)
+                        } else {
+                            PredictiveBackTrace.driver("act progress")
+                            (fraction * FALLBACK_PROGRESS_GAIN * gestureGain)
+                                .coerceIn(0f, 1f) * width
+                        }
+                        PredictiveBackTrace.followStep(renderedPx.floatValue)
+                    }
+                }
+                dragging = false
+                glideOut()
+            } catch (cancelled: CancellationException) {
+                dragging = false
+                springBack()
+                throw cancelled
+            }
         }
     }
 
@@ -417,4 +482,14 @@ private fun Modifier.fallbackEdgeSwipe(
             onEnd(traveled, width)
         }
     }
+}
+
+/** Unwraps the activity from a possibly wrapped context; null when there is none. */
+private fun Context.findActivity(): Activity? {
+    var current: Context? = this
+    while (current is ContextWrapper) {
+        if (current is Activity) return current
+        current = current.baseContext
+    }
+    return null
 }
