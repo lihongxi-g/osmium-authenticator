@@ -1,5 +1,6 @@
 package com.safekey.authenticator.ui.components
 
+import android.os.SystemClock
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 
@@ -33,6 +34,7 @@ object PredictiveBackTrace {
     private var frameTicks = 0
     private var lastFrameAt = 0L
     private var maxFrameMs = 0L
+    private var maxLagMs = 0L
 
     fun begin(rightEdge: Boolean) {
         edge = if (rightEdge) "R" else "L"
@@ -52,6 +54,7 @@ object PredictiveBackTrace {
         frameTicks = 0
         lastFrameAt = 0L
         maxFrameMs = 0L
+        maxLagMs = 0L
     }
 
     fun edgeLocked(rightEdge: Boolean) {
@@ -88,6 +91,18 @@ object PredictiveBackTrace {
         }
         lastFrameAt = now
         frameTicks++
+    }
+
+    /**
+     * Delivery latency of one gesture event: how long it took to reach this callback after the
+     * platform stamped it. Small numbers mean the events are being processed in the frame they were
+     * produced in; large ones would mean they are being queued somewhere on the way in — which is the
+     * one thing that cannot be diagnosed from the outside.
+     */
+    fun latency(frameTimeMillis: Long) {
+        if (frameTimeMillis <= 0L) return
+        val lag = SystemClock.uptimeMillis() - frameTimeMillis
+        if (lag > maxLagMs) maxLagMs = lag
     }
 
     /** Which stream ended up driving the offset. */
@@ -137,6 +152,7 @@ object PredictiveBackTrace {
             append(" · maxGap ").append(maxGapMs).append("ms")
             append(" · frames ").append(frameTicks)
             append(" · maxFrame ").append(maxFrameMs).append("ms")
+            append(" · maxLag ").append(maxLagMs).append("ms")
             append(" · last ").append(fmt(lastRenderedPx, 0))
             append(" · ").append(outcome)
             append(" · ").append(millis).append("ms")

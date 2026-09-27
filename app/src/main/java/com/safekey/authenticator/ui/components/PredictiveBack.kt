@@ -1,7 +1,13 @@
 package com.safekey.authenticator.ui.components
 
-import androidx.activity.BackEventCompat
-import androidx.activity.compose.PredictiveBackHandler
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
+import android.os.Build
+import android.window.BackEvent
+import android.window.OnBackInvokedCallback
+import android.window.OnBackInvokedDispatcher
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animate
@@ -15,11 +21,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
@@ -31,34 +39,40 @@ import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.safekey.authenticator.data.AppSettings
 import kotlin.math.round
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 
-/**
- * Converts platform `progress` into a travel fraction for the last-resort path, used only when the
- * platform sends no touch coordinates. The edge gesture commits after roughly a third of the way
- * across, so matching that keeps the page with the finger.
- */
+/** Converts platform `progress` into a travel fraction when no touch coordinates are reported. */
 private const val FALLBACK_PROGRESS_GAIN = 0.35f
 
 /** Peak alpha of the scrim that covers the page underneath. */
 private const val SCRIM_MAX_ALPHA = 0.35f
 
+/** How close to an edge the finger must land before an edge drag counts as a back swipe. */
+private const val EDGE_ZONE_DP = 40
+
 /**
- * Predictive-back navigation container: the offset is written straight from each gesture sample.
+ * Predictive-back navigation container.
  *
- * Measured on the production device (developer-screen readout): a fast flick produced ten samples
- * across a ~68 ms drag, i.e. roughly 150 per second — the stream is effectively per frame, and its
- * touch coordinates line up with the container's own pixel width (the page edge sat exactly under
- * the fingertip). So the page is simply placed where the finger is, with no interpolation, no
- * spring and no follow loop: every attempt at being cleverer than that here has only added lag —
- * and one of them added so much lag that the page looked frozen, because a fast finger outran the
- * clamp that was meant to stop it overshooting.
+ * ## Input: the platform callback itself, not a compatibility wrapper
  *
- * What is kept from the earlier rounds, because each one fixed a real defect:
+ * The back gesture is taken straight from `OnBackInvokedDispatcher` (API 33+). The navigation shell
+ * KernelSU uses reads the very same stream, but through `androidx.navigationevent`, whose Kotlin
+ * metadata requires Kotlin 2.x — this app builds on Kotlin 1.9, and pulling that library in would
+ * mean rebuilding the whole toolchain. Registering the platform callback directly gives the same
+ * events without the extra layer, and it drops the one thing the older `androidx.activity`
+ * predictive-back wrapper adds: a channel plus a coroutine between the platform callback and the
+ * app. Here the offset is written *inside* `onBackProgressed`, on the main thread, in the frame the
+ * event belongs to, which is as immediate as a gesture can get on Android.
+ *
+ * Touch coordinates are used when the platform reports them (API 34+), because they are exact: a
+ * measured swipe had the page edge precisely under the fingertip. Below that, and in the reported
+ * readout, the platform's `progress` is the fallback.
+ *
+ * ## Geometry and drawing (each rule here fixed a real defect)
  *
  * - the page underneath is resident (composed at rest) and untransformed. Composing it during the
  *   gesture dropped frames; shifting it (parallax) left its content cut mid-glyph in the sliver at
@@ -93,8 +107,6 @@ fun PredictiveBackContainer(
     onBack: () -> Unit,
     content: @Composable () -> Unit
 ) {
-    // Rendered offset in pixels: what the travelling page's translation reads, and the only thing
-    // the drag writes. Plain state, read exclusively inside the deferred block below.
     val renderedPx = remember { mutableFloatStateOf(0f) }
     var widthPx by remember { mutableFloatStateOf(0f) }
     var dragging by remember { mutableStateOf(false) }
@@ -103,16 +115,9 @@ fun PredictiveBackContainer(
     // Which edge the current gesture came from, locked for that gesture: the geometry must not flip
     // halfway through.
     var fromRight by remember { mutableStateOf(false) }
-
-    // Measurement only: while a drag is in flight, tick once per displayed frame so the readout can
-    // report the longest frame gap. It never drives anything, and it stops as soon as the drag does —
-    // a permanently running frame loop would keep the app rendering every vsync for nothing.
-    LaunchedEffect(dragging) {
-        if (!dragging) return@LaunchedEffect
-        while (true) {
-            withFrameNanos { PredictiveBackTrace.frameTick() }
-        }
-    }
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val activity = remember(context) { context.findActivity() }
 
     val commitGlide = remember(commitDurationMillis) {
         tween<Float>(commitDurationMillis, easing = FastOutSlowInEasing)
@@ -128,62 +133,89 @@ fun PredictiveBackContainer(
         return (travelled * gestureGain).coerceIn(0f, width)
     }
 
-    // Platform-driven gesture. PredictiveBackHandler also covers the back button, so nothing else is
-    // registered on platforms that support it.
+    suspend fun glideOut() {
+        val from = renderedPx.floatValue
+        animate(from, widthPx, animationSpec = commitGlide) { value, _ ->
+            renderedPx.floatValue = value
+        }
+        committed = true
+        PredictiveBackTrace.finish("commit", widthPx, from)
+        onBack()
+    }
+
+    suspend fun springBack() {
+        val from = renderedPx.floatValue
+        animate(from, 0f, animationSpec = cancelSpring) { value, _ ->
+            renderedPx.floatValue = value
+        }
+        showScrim = false
+        PredictiveBackTrace.finish("cancel", widthPx, from)
+    }
+
+    // Measurement only: while a drag is in flight, tick once per displayed frame so the readout can
+    // report the longest frame gap. It drives nothing, and it stops as soon as the drag does — a
+    // permanently running frame loop would keep the app rendering every vsync for nothing.
+    LaunchedEffect(dragging) {
+        if (!dragging) return@LaunchedEffect
+        while (true) {
+            withFrameNanos { PredictiveBackTrace.frameTick() }
+        }
+    }
+
     if (systemPredictiveBack) {
-        PredictiveBackHandler(enabled = canGoBack) { events: Flow<BackEventCompat> ->
-            try {
-                if (!dragging) {
-                    dragging = true
-                    // Every gesture starts from rest. A commit whose pop never landed leaves
-                    // `committed` set, and that pins the page at zero for the whole next drag.
-                    committed = false
-                    showScrim = true
-                    PredictiveBackTrace.begin(fromRight)
-                }
-                var edgeLocked = false
-                events.collect { event ->
-                    if (!edgeLocked) {
-                        edgeLocked = true
-                        fromRight = event.swipeEdge == BackEventCompat.EDGE_RIGHT
-                        PredictiveBackTrace.edgeLocked(fromRight)
+        DisposableEffect(activity, canGoBack, gestureGain) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU || activity == null || !canGoBack) {
+                onDispose { }
+            } else {
+                val callback = PlatformBackCallback(
+                    onStarted = { event ->
+                        dragging = true
+                        // Every gesture starts from rest. A commit whose pop never landed leaves
+                        // `committed` set, and that pins the page at zero for the whole next drag.
+                        committed = false
+                        showScrim = false
+                        fromRight = event.swipeEdge == BackEvent.EDGE_RIGHT
+                        PredictiveBackTrace.begin(fromRight)
+                    },
+                    onProgressed = { event ->
+                        if (dragging) {
+                            val width = widthPx
+                            // Deliberately not clamped from above: some platforms keep counting past
+                            // the commit point, and clamping that away freezes the page while the
+                            // finger keeps moving.
+                            val fraction = event.progress.coerceAtLeast(0f)
+                            val touchX = if (Build.VERSION.SDK_INT >= 34) event.touchX else 0f
+                            PredictiveBackTrace.platformEvent(fraction, touchX)
+                            PredictiveBackTrace.latency(event.frameTimeMillis)
+                            if (!showScrim && fraction > 0.02f) showScrim = true
+                            renderedPx.floatValue = if (touchX > 0f && width > 0f) {
+                                PredictiveBackTrace.driver("touchX")
+                                offsetForFinger(touchX, fromRight, width)
+                            } else {
+                                PredictiveBackTrace.driver("progress")
+                                (fraction * FALLBACK_PROGRESS_GAIN * gestureGain)
+                                    .coerceIn(0f, 1f) * width
+                            }
+                            PredictiveBackTrace.followStep(renderedPx.floatValue)
+                        }
+                    },
+                    onCommitted = {
+                        // Also the discrete case (the back button): no gesture, no progress events.
+                        if (!dragging) {
+                            dragging = true
+                            committed = false
+                            PredictiveBackTrace.begin(false)
+                        }
+                        dragging = false
+                        scope.launch { glideOut() }
+                    },
+                    onCancelled = {
+                        dragging = false
+                        scope.launch { springBack() }
                     }
-                    // Deliberately not clamped from above: some platforms keep counting past the
-                    // commit point, and clamping that away freezes the page while the finger keeps
-                    // moving.
-                    val fraction = event.progress.coerceAtLeast(0f)
-                    PredictiveBackTrace.platformEvent(fraction, event.touchX)
-                    PredictiveBackTrace.sampleTiming()
-                    // 1:1 with the finger. The platform's touch position is in window pixels, the
-                    // same space as this container's width.
-                    renderedPx.floatValue = if (event.touchX > 0f && widthPx > 0f) {
-                        PredictiveBackTrace.driver("touchX")
-                        offsetForFinger(event.touchX, fromRight, widthPx)
-                    } else {
-                        PredictiveBackTrace.driver("progress")
-                        (fraction * FALLBACK_PROGRESS_GAIN * gestureGain).coerceIn(0f, 1f) * widthPx
-                    }
-                    PredictiveBackTrace.followStep(renderedPx.floatValue)
-                }
-                // Committed. Glide the rest of the way out, then pop — otherwise the pop snaps the
-                // page back into place.
-                val from = renderedPx.floatValue
-                dragging = false
-                animate(from, widthPx, animationSpec = commitGlide) { value, _ ->
-                    renderedPx.floatValue = value
-                }
-                committed = true
-                PredictiveBackTrace.finish("commit", widthPx, from)
-                onBack()
-            } catch (cancelled: CancellationException) {
-                val from = renderedPx.floatValue
-                dragging = false
-                animate(from, 0f, animationSpec = cancelSpring) { value, _ ->
-                    renderedPx.floatValue = value
-                }
-                showScrim = false
-                PredictiveBackTrace.finish("cancel", widthPx, from)
-                throw cancelled
+                )
+                val unregister = registerBackCallback(activity, callback)
+                onDispose { unregister() }
             }
         }
     }
@@ -198,35 +230,26 @@ fun PredictiveBackContainer(
         }
     }
 
-    // Edge-drag fallback for platforms without the system gesture: same geometry, driven straight by
-    // the finger. This one consumes its touches, because with no system gesture in play the drag is
-    // the app's own and nothing else should act on it.
+    // Edge-drag fallback for platforms without the platform callback: same geometry, driven straight
+    // by the finger. It consumes its touches, because with no system gesture in play the drag is the
+    // app's own and nothing else should act on it.
     val fallbackModifier = if (edgeSwipeFallback) {
         Modifier.fallbackEdgeSwipe(
             enabled = canGoBack,
             gain = gestureGain,
-            onDrag = { travelPx -> renderedPx.floatValue = travelPx },
             onStart = {
                 dragging = true
                 committed = false
                 showScrim = true
+                PredictiveBackTrace.begin(fromRight)
             },
             onEdge = { rightEdge -> fromRight = rightEdge },
+            onDrag = { travelPx -> renderedPx.floatValue = travelPx },
             onEnd = { traveled, width ->
-                dragging = false
                 if (traveled > width * 0.15f) {
-                    animate(traveled, width, animationSpec = commitGlide) { value, _ ->
-                        renderedPx.floatValue = value
-                    }
-                    committed = true
-                    PredictiveBackTrace.finish("commit", width, traveled)
-                    onBack()
+                    glideOut()
                 } else {
-                    animate(traveled, 0f, animationSpec = cancelSpring) { value, _ ->
-                        renderedPx.floatValue = value
-                    }
-                    showScrim = false
-                    PredictiveBackTrace.finish("cancel", width, traveled)
+                    springBack()
                 }
             }
         )
@@ -244,9 +267,8 @@ fun PredictiveBackContainer(
         if (previous != null) {
             // Resident and untransformed, but only ever drawn on the strip the travelling page has
             // left uncovered. Without that, a gesture frame pays for two full-screen pages plus a
-            // full-screen scrim — about four screenfuls at 120 Hz — which is what is left of the
-            // stutter now that the drive itself is exact. The page sits in a layer of its own so the
-            // clip re-records two calls per frame instead of the page's entire draw.
+            // full-screen scrim — about four screenfuls at 120 Hz. The page sits in a layer of its
+            // own so the clip re-records two calls per frame instead of the page's entire draw.
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -305,13 +327,59 @@ fun PredictiveBackContainer(
     }
 }
 
-/** How close to an edge the finger must land before a drag counts as a back swipe. */
-private const val EDGE_ZONE_DP = 40
+/**
+ * Draws only the strip the travelling page has left uncovered, with a pixel of slack towards the
+ * covered side so that rounding the page's offset can never leave a backdrop line at the edge.
+ */
+private inline fun ContentDrawScope.drawExposedStrip(exposed: Float, fromRight: Boolean) {
+    if (fromRight) {
+        val left = size.width - exposed
+        if (left >= size.width) return
+        clipRect(left - 1f, 0f, size.width, size.height) { this@drawExposedStrip.drawContent() }
+    } else {
+        if (exposed <= 0f) return
+        clipRect(0f, 0f, exposed + 1f, size.height) { this@drawExposedStrip.drawContent() }
+    }
+}
 
 /**
- * Edge-drag fallback for platforms without the system predictive back: the app owns the gesture, so
- * it consumes its touches and drives the offset straight from the finger. Same geometry as the
- * system path.
+ * The platform's back-gesture callbacks, forwarded verbatim. They arrive on the main thread: no
+ * channel, no coroutine and no Compose snapshot sits between the system and the caller.
+ */
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
+private class PlatformBackCallback(
+    private val onStarted: (BackEvent) -> Unit,
+    private val onProgressed: (BackEvent) -> Unit,
+    private val onCommitted: () -> Unit,
+    private val onCancelled: () -> Unit
+) : OnBackInvokedCallback {
+    override fun onBackStarted(backEvent: BackEvent) = onStarted(backEvent)
+    override fun onBackProgressed(backEvent: BackEvent) = onProgressed(backEvent)
+    override fun onBackInvoked() = onCommitted()
+    override fun onBackCancelled() = onCancelled()
+}
+
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
+private fun registerBackCallback(activity: Activity, callback: OnBackInvokedCallback): () -> Unit {
+    val dispatcher = activity.onBackInvokedDispatcher
+    dispatcher.registerOnBackInvokedCallback(OnBackInvokedDispatcher.PRIORITY_DEFAULT, callback)
+    return { runCatching { dispatcher.unregisterOnBackInvokedCallback(callback) } }
+}
+
+/** Unwraps the activity from a possibly wrapped context; null when there is none. */
+private fun Context.findActivity(): Activity? {
+    var current: Context? = this
+    while (current is ContextWrapper) {
+        if (current is Activity) return current
+        current = current.baseContext
+    }
+    return null
+}
+
+/**
+ * Edge-drag fallback for platforms without the platform callback: the app owns the gesture, so it
+ * consumes its touches and drives the offset straight from the finger. Same geometry as the system
+ * path.
  */
 private fun Modifier.fallbackEdgeSwipe(
     enabled: Boolean,
@@ -329,8 +397,6 @@ private fun Modifier.fallbackEdgeSwipe(
         val width = size.width.toFloat()
         while (true) {
             var traveled = -1f
-            // The gesture itself has to stay inside the restricted pointer scope, so it only writes
-            // through the callbacks; the settle runs once we are back outside.
             awaitEachGesture {
                 traveled = -1f
                 val down = awaitFirstDown(requireUnconsumed = false)
@@ -361,20 +427,5 @@ private fun Modifier.fallbackEdgeSwipe(
             if (traveled < 0f) continue
             onEnd(traveled, width)
         }
-    }
-}
-
-/**
- * Draws only the strip the travelling page has left uncovered, with a pixel of slack towards the
- * covered side so that rounding the page's offset can never leave a backdrop line at the edge.
- */
-private inline fun ContentDrawScope.drawExposedStrip(exposed: Float, fromRight: Boolean) {
-    if (fromRight) {
-        val left = size.width - exposed
-        if (left >= size.width) return
-        clipRect(left - 1f, 0f, size.width, size.height) { this@drawExposedStrip.drawContent() }
-    } else {
-        if (exposed <= 0f) return
-        clipRect(0f, 0f, exposed + 1f, size.height) { this@drawExposedStrip.drawContent() }
     }
 }
