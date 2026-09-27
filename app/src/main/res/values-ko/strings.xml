@@ -572,4 +572,11 @@
     <string name="attributions_materialkolor_desc">Material You 팔레트는 MaterialKolor의 Material Color Utilities 포팅(MIT)으로 생성되며, 이는 Google의 Apache-2.0 색상 유틸리티를 포팅한 것입니다.</string>
     <string name="palette_content">콘텐츠</string>
     <string name="palette_fidelity">충실</string>
+    <string name="donate_title">개발자 후원하기</string>
+    <string name="donate_intro">Osmium이 도움이 되었다면 자발적으로 후원하여 개발을 지원하실 수 있습니다. 후원은 전적으로 자발적이며 앱 기능에는 아무런 영향이 없습니다.</string>
+    <string name="donate_tap_to_copy">탭하여 복사</string>
+    <string name="donate_copied">복사됨</string>
+    <string name="donate_notice_title">후원 약관 및 면책 조항</string>
+    <string name="donate_notice_short">후원은 자발적 증여입니다. 구매·구독·서비스 약속이 아니며 환불되지 않고 어떤 기능도 해제되지 않습니다. 보내기 전에 주소와 네트워크를 반드시 직접 확인하세요. 온체인 전송은 되돌릴 수 없습니다.</string>
+    <string name="donate_agreement_row">전체 후원 약관 보기</string>
 </resources>

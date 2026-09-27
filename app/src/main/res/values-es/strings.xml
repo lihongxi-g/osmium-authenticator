@@ -572,4 +572,11 @@
     <string name="attributions_materialkolor_desc">Las paletas de Material You las genera el port de Material Color Utilities de MaterialKolor (MIT), a su vez un port de las utilidades de color de Google (Apache-2.0).</string>
     <string name="palette_content">Contenido</string>
     <string name="palette_fidelity">Fidelidad</string>
+    <string name="donate_title">Apoyar al desarrollador</string>
+    <string name="donate_intro">Si Osmium te resulta útil, puedes apoyar su desarrollo. Las donaciones son totalmente voluntarias y no cambian nada en la aplicación.</string>
+    <string name="donate_tap_to_copy">Toca para copiar</string>
+    <string name="donate_copied">Copiado</string>
+    <string name="donate_notice_title">Términos de donación y exención de responsabilidad</string>
+    <string name="donate_notice_short">Las donaciones son donativos voluntarios: no son una compra, una suscripción ni una promesa de servicio, no son reembolsables y no desbloquean nada. Verifica siempre la dirección y la red — las transferencias on-chain no se pueden revertir.</string>
+    <string name="donate_agreement_row">Leer los términos completos</string>
 </resources>

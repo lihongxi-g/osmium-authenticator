@@ -1363,6 +1363,11 @@ private fun ScreenBody(
             onBack = { vm.nav.pop() }
         )
 
+        is Screen.Donate -> DonateScreen(
+            vm = vm,
+            onBack = { vm.nav.pop() }
+        )
+
         is Screen.Tags -> TagsScreen(
             vm = vm,
             onBack = { vm.nav.pop() }

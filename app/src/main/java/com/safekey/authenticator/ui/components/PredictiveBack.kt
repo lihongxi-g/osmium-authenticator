@@ -55,8 +55,11 @@ import kotlinx.coroutines.launch
 /** Converts platform `progress` into a travel fraction when no touch coordinates are reported. */
 private const val FALLBACK_PROGRESS_GAIN = 0.35f
 
-/** Peak alpha of the scrim that covers the page underneath. */
-private const val SCRIM_MAX_ALPHA = 0.35f
+/**
+ * Peak alpha of the scrim that covers the page underneath, matching the reference navigation shell's
+ * `dimAmount` default (KernelSU renders through miuix, whose `NavDisplayEffects.dimAmount` is 0.5).
+ */
+private const val SCRIM_MAX_ALPHA = 0.5f
 
 /** How close to an edge the finger must land before an edge drag counts as a back swipe. */
 private const val EDGE_ZONE_DP = 40
@@ -448,9 +451,12 @@ fun PredictiveBackContainer(
                             } else {
                                 0f
                             }
-                            // Zero at both ends: a linear ramp flashes a grey layer on the first and
-                            // the last frame of the gesture.
-                            alpha = SCRIM_MAX_ALPHA * 4f * p * (1f - p)
+                            // The reference curve is linear in the depth of the covered layer
+                            // (`scrimFraction = relativeDepth` in miuix's NavTransition), i.e. the scrim
+                            // lightens as the page underneath is revealed: more revealed, brighter.
+                            // A hump-shaped curve is the wrong way round — it darkens the whole first
+                            // half of the gesture, which reads as the animation being inverted.
+                            alpha = SCRIM_MAX_ALPHA * (1f - p)
                         }
                         .drawWithContent {
                             drawExposedStrip(renderedPx.floatValue)

@@ -178,6 +178,7 @@ fun AboutScreen(
             AboutLinkRow(stringResource(R.string.about_terms_title)) { showTerms = true }
             AboutLinkRow(stringResource(R.string.about_privacy_title)) { showPrivacy = true }
             AboutLinkRow(stringResource(R.string.attributions_title)) { vm.nav.push(Screen.Attributions) }
+            AboutLinkRow(stringResource(R.string.donate_title)) { vm.nav.push(Screen.Donate) }
 
             Spacer(Modifier.height(24.dp))
             Divider(color = MaterialTheme.colorScheme.surfaceVariant)
@@ -382,7 +383,7 @@ private fun AboutLinkRow(label: String, onClick: () -> Unit) {
  * retry button and a link to the website.
  */
 @Composable
-private fun LegalDialog(
+internal fun LegalDialog(
     title: String,
     state: LegalDocState,
     onOpenWebsite: () -> Unit,

@@ -44,6 +44,7 @@ sealed class Screen {
     object ThirdPartyImport : Screen()
     /** Open-source attributions and format-source references. */
     object Attributions : Screen()
+    object Donate : Screen()
     object Tags : Screen()
     /** Android device integrity report (K1 local checks + K3 key attestation). */
     object Integrity : Screen()

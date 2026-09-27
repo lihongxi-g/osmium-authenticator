@@ -572,4 +572,11 @@
     <string name="attributions_materialkolor_desc">Material You पैलेट MaterialKolor के Material Color Utilities पोर्ट (MIT) से बनते हैं, जो स्वयं Google के Apache-2.0 रंग उपयोगिताओं का पोर्ट है।</string>
     <string name="palette_content">सामग्री</string>
     <string name="palette_fidelity">निष्ठा</string>
+    <string name="donate_title">डेवलपर को सहयोग करें</string>
+    <string name="donate_intro">अगर Osmium आपके काम आया है, तो आप इसके विकास में सहयोग कर सकते हैं। सहयोग पूरी तरह स्वैच्छिक है और ऐप की किसी भी सुविधा को प्रभावित नहीं करता।</string>
+    <string name="donate_tap_to_copy">कॉपी करने के लिए टैप करें</string>
+    <string name="donate_copied">कॉपी हो गया</string>
+    <string name="donate_notice_title">दान की शर्तें और अस्वीकरण</string>
+    <string name="donate_notice_short">दान स्वैच्छिक भेंट हैं: यह खरीद, सदस्यता या किसी सेवा का वादा नहीं है, वापसी योग्य नहीं है और कुछ भी अनलॉक नहीं करता। भेजने से पहले पता और नेटवर्क स्वयं जाँचें — चेन पर किया गया ट्रांसफर वापस नहीं हो सकता।</string>
+    <string name="donate_agreement_row">पूरी दान शर्तें पढ़ें</string>
 </resources>

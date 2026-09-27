@@ -585,4 +585,11 @@
     <string name="attributions_materialkolor_desc">Material You 調色盤由 MaterialKolor 的 Material Color Utilities 移植版產生（MIT），該移植版源自 Google 的 Apache-2.0 色彩工具。</string>
     <string name="palette_content">內容</string>
     <string name="palette_fidelity">忠實</string>
+    <string name="donate_title">向開發者打賞</string>
+    <string name="donate_intro">如果 Osmium 對你有幫助，可以自願打賞支持後續開發。打賞完全出於自願，不影響應用的任何功能。</string>
+    <string name="donate_tap_to_copy">點擊複製</string>
+    <string name="donate_copied">已複製</string>
+    <string name="donate_notice_title">打賞條款與免責聲明</string>
+    <string name="donate_notice_short">打賞屬於自願贈與：不是購買、訂閱或任何服務承諾，不提供退款，也不解鎖任何功能。請務必自行核對地址與網路後再轉帳，鏈上轉帳不可撤銷。</string>
+    <string name="donate_agreement_row">查看完整打賞條款</string>
 </resources>

@@ -572,4 +572,11 @@
     <string name="attributions_materialkolor_desc">Material-You-Paletten werden von MaterialKolors Portierung der Material Color Utilities (MIT) erzeugt, die selbst eine Portierung der Apache-2.0-Farbwerkzeuge von Google ist.</string>
     <string name="palette_content">Inhalt</string>
     <string name="palette_fidelity">Originaltreue</string>
+    <string name="donate_title">Entwickler unterstützen</string>
+    <string name="donate_intro">Wenn Osmium für Sie nützlich ist, können Sie die Weiterentwicklung unterstützen. Spenden sind völlig freiwillig und ändern nichts an der App.</string>
+    <string name="donate_tap_to_copy">Zum Kopieren tippen</string>
+    <string name="donate_copied">Kopiert</string>
+    <string name="donate_notice_title">Spendenbedingungen und Haftungsausschluss</string>
+    <string name="donate_notice_short">Spenden sind freiwillige Zuwendungen: kein Kauf, kein Abonnement, kein Leistungsversprechen, nicht erstattungsfähig, und sie schalten nichts frei. Prüfen Sie Adresse und Netzwerk stets selbst — On-Chain-Überweisungen sind unwiderruflich.</string>
+    <string name="donate_agreement_row">Vollständige Spendenbedingungen lesen</string>
 </resources>

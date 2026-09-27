@@ -588,4 +588,11 @@
     <string name="lan_status_done_receive">Received %1$d accounts</string>
     <string name="pin_reminder_never">Don\'t remind me again</string>
     <string name="pin_reminder_body">This device has no fingerprint or face unlock, so the app cannot verify who is opening it. Set an app PIN to protect your accounts.</string>
+    <string name="donate_title">Donate to the developer</string>
+    <string name="donate_intro">If Osmium has been useful to you, you can support its continued development. Donations are entirely voluntary and change nothing about the app.</string>
+    <string name="donate_tap_to_copy">Tap to copy</string>
+    <string name="donate_copied">Copied</string>
+    <string name="donate_notice_title">Donation terms and disclaimer</string>
+    <string name="donate_notice_short">Donations are voluntary gifts: not a purchase, subscription or promise of any service, non-refundable, and they unlock nothing. Always verify the address and network yourself — on-chain transfers cannot be reversed.</string>
+    <string name="donate_agreement_row">Read the full donation terms</string>
 </resources>

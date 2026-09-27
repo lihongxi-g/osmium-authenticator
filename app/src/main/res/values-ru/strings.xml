@@ -572,4 +572,11 @@
     <string name="attributions_materialkolor_desc">Палитры Material You создаются портом Material Color Utilities от MaterialKolor (MIT), который сам является портом цветовых утилит Google (Apache-2.0).</string>
     <string name="palette_content">Контент</string>
     <string name="palette_fidelity">Точность</string>
+    <string name="donate_title">Поддержать разработчика</string>
+    <string name="donate_intro">Если Osmium оказался полезен, вы можете поддержать его развитие. Пожертвования полностью добровольны и ничего не меняют в приложении.</string>
+    <string name="donate_tap_to_copy">Нажмите, чтобы скопировать</string>
+    <string name="donate_copied">Скопировано</string>
+    <string name="donate_notice_title">Условия и отказ от ответственности</string>
+    <string name="donate_notice_short">Пожертвования — добровольный дар: это не покупка, не подписка и не обещание услуг, они не возвращаются и ничего не открывают. Всегда сами проверяйте адрес и сеть — переводы в блокчейне необратимы.</string>
+    <string name="donate_agreement_row">Полные условия пожертвования</string>
 </resources>

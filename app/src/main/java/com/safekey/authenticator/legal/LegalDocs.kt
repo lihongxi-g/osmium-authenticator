@@ -8,6 +8,7 @@ import java.util.Locale
 enum class LegalDoc(val path: String) {
     TERMS("useragreement"),
     PRIVACY("privacypolicy"),
+    DONATION("donation"),
 }
 
 /** UI state of one legal document. */

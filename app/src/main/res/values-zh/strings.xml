@@ -586,4 +586,11 @@
     <string name="lan_status_done_receive">已接收 %1$d 个账户</string>
     <string name="pin_reminder_never">以后不再提醒</string>
     <string name="pin_reminder_body">此设备没有指纹或人脸识别，打开应用时无法验证身份。建议设置应用 PIN 以保护账户。</string>
+    <string name="donate_title">向开发者打赏</string>
+    <string name="donate_intro">如果 Osmium 对你有帮助，可以自愿打赏支持后续开发。打赏完全出于自愿，不影响应用的任何功能。</string>
+    <string name="donate_tap_to_copy">点击复制</string>
+    <string name="donate_copied">已复制</string>
+    <string name="donate_notice_title">打赏条款与免责声明</string>
+    <string name="donate_notice_short">打赏属于自愿赠与：不是购买、订阅或任何服务承诺，不提供退款，也不解锁任何功能。请务必自行核对地址与网络后再转账，链上转账不可撤销。</string>
+    <string name="donate_agreement_row">查看完整打赏条款</string>
 </resources>

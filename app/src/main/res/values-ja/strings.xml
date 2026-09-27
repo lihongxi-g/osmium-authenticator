@@ -572,4 +572,11 @@
     <string name="attributions_materialkolor_desc">Material You のパレットは MaterialKolor による Material Color Utilities の移植版（MIT）で生成されます。これは Google の Apache-2.0 カラーユーティリティの移植です。</string>
     <string name="palette_content">コンテンツ</string>
     <string name="palette_fidelity">忠実</string>
+    <string name="donate_title">開発者を支援する</string>
+    <string name="donate_intro">Osmium がお役に立っているなら、今後の開発を支援していただけます。支援は完全に任意で、アプリの機能には一切影響しません。</string>
+    <string name="donate_tap_to_copy">タップしてコピー</string>
+    <string name="donate_copied">コピーしました</string>
+    <string name="donate_notice_title">支援の条件と免責事項</string>
+    <string name="donate_notice_short">支援は任意の贈与です。購入・サブスクリプション・役務の約束ではなく、返金はできず、機能が解放されることもありません。送金前にアドレスとネットワークをご自身で必ず確認してください。オンチェーン送金は取り消せません。</string>
+    <string name="donate_agreement_row">支援の詳細条件を読む</string>
 </resources>
