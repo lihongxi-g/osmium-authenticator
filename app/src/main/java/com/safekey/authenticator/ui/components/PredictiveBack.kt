@@ -39,6 +39,10 @@ import androidx.navigationevent.OnBackInvokedDefaultInput
 import androidx.navigationevent.NavigationEventHandler
 import androidx.navigationevent.NavigationEventInfo
 import androidx.activity.compose.PredictiveBackHandler
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
+import android.os.Build
 import androidx.activity.BackEventCompat
 import com.safekey.authenticator.data.AppSettings
 import kotlin.math.round
