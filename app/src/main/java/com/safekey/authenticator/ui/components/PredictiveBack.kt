@@ -135,7 +135,6 @@ fun PredictiveBackContainer(
     var widthPx by remember { mutableFloatStateOf(0f) }
     var dragging by remember { mutableStateOf(false) }
     var committed by remember { mutableStateOf(false) }
-    var showScrim by remember { mutableStateOf(false) }
     // Which edge the current gesture came from, locked for that gesture: the geometry must not flip
     // halfway through.
     var fromRight by remember { mutableStateOf(false) }
@@ -186,7 +185,6 @@ fun PredictiveBackContainer(
         } finally {
             settling = false
         }
-        showScrim = false
         PredictiveBackTrace.finish("cancel", widthPx, from)
     }
 
@@ -213,6 +211,14 @@ fun PredictiveBackContainer(
                 springBack()
             }
         }
+    }
+
+    // While a gesture owns the screen, hold back the accounts list's 2 Hz tick. The tick rebuilds the
+    // whole AccountUi list (codes included), i.e. it recomposes every visible card; if one lands on a
+    // gesture frame that frame goes over budget and the drag stutters — which is why that stutter only
+    // shows up *sometimes*. A countdown that is a few hundred milliseconds stale is invisible.
+    LaunchedEffect(dragging, settling) {
+        BackGestureActivity.active = dragging || settling
     }
 
     // Measurement only: while a gesture or its settle is in flight, tick once per displayed frame so
@@ -248,7 +254,6 @@ fun PredictiveBackContainer(
                     // Every gesture starts from rest. A commit whose pop never landed leaves
                     // `committed` set, and that pins the page at zero for the whole next drag.
                     committed = false
-                    showScrim = false
                     fromRight = event.swipeEdge == NavigationEvent.EDGE_RIGHT
                     PredictiveBackTrace.begin(fromRight)
                 },
@@ -262,7 +267,6 @@ fun PredictiveBackContainer(
                         val touchX = event.touchX
                         PredictiveBackTrace.platformEvent(fraction, touchX)
                         PredictiveBackTrace.latency(event.frameTimeMillis)
-                        if (!showScrim && fraction > 0.02f) showScrim = true
                         renderedPx.floatValue = if (touchX > 0f && width > 0f) {
                             PredictiveBackTrace.driver("nav touchX")
                             offsetForFinger(touchX, fromRight, width)
@@ -305,7 +309,6 @@ fun PredictiveBackContainer(
                 if (!dragging) {
                     dragging = true
                     committed = false
-                    showScrim = false
                     lastSampleAtMs = SystemClock.uptimeMillis()
                     PredictiveBackTrace.begin(fromRight)
                 }
@@ -322,7 +325,6 @@ fun PredictiveBackContainer(
                         val touchX = event.touchX
                         PredictiveBackTrace.platformEvent(fraction, touchX)
                         PredictiveBackTrace.latency(0L)
-                        if (!showScrim && fraction > 0.02f) showScrim = true
                         renderedPx.floatValue = if (touchX > 0f && width > 0f) {
                             PredictiveBackTrace.driver("act touchX")
                             offsetForFinger(touchX, fromRight, width)
@@ -379,7 +381,6 @@ fun PredictiveBackContainer(
         if (committed) {
             renderedPx.floatValue = 0f
             committed = false
-            showScrim = false
         }
     }
 
@@ -393,7 +394,6 @@ fun PredictiveBackContainer(
             onStart = {
                 dragging = true
                 committed = false
-                showScrim = true
                 lastSampleAtMs = SystemClock.uptimeMillis()
                 PredictiveBackTrace.begin(fromRight)
             },
@@ -441,34 +441,41 @@ fun PredictiveBackContainer(
                     previous()
                 }
             }
-            if (showScrim) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .graphicsLayer {
-                            val p = if (widthPx > 0f) {
-                                (renderedPx.floatValue / widthPx).coerceIn(0f, 1f)
-                            } else {
-                                0f
+            // Resident, like the preview above it, and drawn with no layer of its own. Two reasons:
+            // `graphicsLayer { alpha }` below 1 makes Compose render the node into an offscreen
+            // buffer, i.e. a fresh full-screen layer every frame of the gesture; and gating the whole
+            // subtree on a composition state inserted and removed it mid-gesture on top of that. A
+            // translucent rect clipped to the exposed strip draws the same picture with neither cost.
+            // The curve is linear in the depth of the covered layer (miuix's `scrimFraction =
+            // relativeDepth`), so the scrim lightens as the page underneath is revealed: more
+            // revealed, brighter — a hump-shaped curve would darken the whole first half.
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .drawWithContent {
+                        val exposed = renderedPx.floatValue
+                        if (exposed > 0f) {
+                            val p = if (widthPx > 0f) (exposed / widthPx).coerceIn(0f, 1f) else 0f
+                            clipRect(
+                                0f,
+                                0f,
+                                (exposed + 1f).coerceAtMost(size.width),
+                                size.height
+                            ) {
+                                drawRect(Color.Black, alpha = SCRIM_MAX_ALPHA * (1f - p))
                             }
-                            // The reference curve is linear in the depth of the covered layer
-                            // (`scrimFraction = relativeDepth` in miuix's NavTransition), i.e. the scrim
-                            // lightens as the page underneath is revealed: more revealed, brighter.
-                            // A hump-shaped curve is the wrong way round — it darkens the whole first
-                            // half of the gesture, which reads as the animation being inverted.
-                            alpha = SCRIM_MAX_ALPHA * (1f - p)
                         }
-                        .drawWithContent {
-                            drawExposedStrip(renderedPx.floatValue)
-                        }
-                        .background(Color.Black)
-                )
-            }
+                    }
+            )
         }
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .graphicsLayer {
+                // Cached in a layer of its own: with only a translation, the page's whole content
+                // (a list of cards) is otherwise re-recorded on every frame of the drag. Offscreen
+                // makes each frame a composite of an already-rendered texture, re-recorded only when
+                // the content itself changes (the countdown tick, not the gesture).
+                .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen) {
                     // While committed, the layer underneath is already the top page, so the offset
                     // must be zero no matter what the driver still holds.
                     // Always to the right, whichever edge the gesture came from: the animation is
@@ -512,8 +519,12 @@ private class BackGestureHandler(
  * page's offset can never leave a backdrop line at the edge.
  */
 private inline fun ContentDrawScope.drawExposedStrip(exposed: Float) {
-    if (exposed <= 0f) return
-    clipRect(0f, 0f, exposed + 1f, size.height) { this@drawExposedStrip.drawContent() }
+    // Always draws, even at rest: the clip is one pixel then, which is invisible because the
+    // travelling page covers the full width. What it buys is that the preview's GPU layer is
+    // allocated while the screen is idle instead of on the first frame of the first gesture — a
+    // full-screen texture allocation (about 14 MB at 1264x2800) is a dropped frame when it lands
+    // there, and the first drag after entering a screen is exactly where users notice one.
+    clipRect(0f, 0f, (exposed + 1f).coerceAtMost(size.width), size.height) { this@drawExposedStrip.drawContent() }
 }
 
 /**
@@ -578,4 +589,16 @@ private fun Context.findActivity(): Activity? {
         current = current.baseContext
     }
     return null
+}
+
+/**
+ * True while a back gesture owns the screen.
+ *
+ * The accounts list refreshes twice a second (a fresh `List<AccountUi>`, codes included), which
+ * recomposes every visible card. Landing one of those on a gesture frame pushes it over the 8.33 ms a
+ * 120 Hz display allows, so the drag drops a frame — intermittently, which is exactly how users
+ * describe it. The ticker reads this flag and waits; the gesture lasts a few hundred milliseconds.
+ */
+object BackGestureActivity {
+    var active by mutableStateOf(false)
 }

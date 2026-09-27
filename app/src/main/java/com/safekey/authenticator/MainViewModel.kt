@@ -23,6 +23,7 @@ import com.safekey.authenticator.security.gateAction
 import com.safekey.authenticator.tags.TagFilter
 import com.safekey.authenticator.totp.Base32
 import com.safekey.authenticator.totp.TotpGenerator
+import com.safekey.authenticator.ui.components.BackGestureActivity
 import com.safekey.authenticator.ui.navigation.NavigationState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -104,7 +105,14 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     private val tickJob: Job = viewModelScope.launch {
         while (true) {
-            _now.value = System.currentTimeMillis()
+            // Skip the tick while a back gesture owns the screen: it rebuilds the whole AccountUi
+            // list (Base32 decode + HMAC per account), and the resulting recomposition of every
+            // visible card is enough to push a gesture frame over the 8.33 ms budget a 120 Hz
+            // display allows. The countdown being a few hundred milliseconds stale is invisible;
+            // the codes that matter change on period boundaries, not on this tick.
+            if (!BackGestureActivity.active) {
+                _now.value = System.currentTimeMillis()
+            }
             delay(500)
         }
     }
