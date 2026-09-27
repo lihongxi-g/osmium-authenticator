@@ -105,6 +105,16 @@ object PredictiveBackTrace {
         if (lag > maxLagMs) maxLagMs = lag
     }
 
+    private var notes = ""
+
+    /**
+     * A one-off diagnostic string carried into the next readout, for facts that have no numeric home —
+     * whether the navigationevent input attached to the platform at all, and why not if it did not.
+     */
+    fun note(text: String) {
+        notes = if (notes.isEmpty()) text else notes + "," + text
+    }
+
     /** Which stream ended up driving the offset. */
     fun driver(name: String) {
         mode = name
@@ -157,6 +167,7 @@ object PredictiveBackTrace {
             append(" · ").append(outcome)
             append(" · ").append(millis).append("ms")
             append(" · width ").append(widthPx.toInt())
+            if (notes.isNotEmpty()) append(" · ").append(notes)
         }
     }
 

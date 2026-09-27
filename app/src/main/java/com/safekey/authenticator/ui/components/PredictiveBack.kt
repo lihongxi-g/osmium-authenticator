@@ -62,7 +62,8 @@ private const val SCRIM_MAX_ALPHA = 0.35f
 private const val EDGE_ZONE_DP = 40
 
 /**
- * How long a gesture may go completely silent before the offset is walked back to rest.
+ * How long a *finished* gesture may go completely silent — with the offset still parked — before the
+ * offset is walked back to rest.
  *
  * A gesture sometimes ends without any terminal callback — the platform's own gesture machinery takes
  * it over near the screen edges — and then nothing sends the page home: it parked mid-offset until the
@@ -196,7 +197,12 @@ fun PredictiveBackContainer(
     LaunchedEffect(Unit) {
         while (true) {
             delay(STALL_POLL_MS)
-            if (!settling &&
+            // Never while a drag is in flight: a silent drag means the finger is held still, and
+            // springing the page home under a held finger is precisely the twitch a user reports as
+            // "it convulses while I swipe". Only a gesture that has already ended can be stalled — a
+            // settle that never ran, or a glide that never finished.
+            if (!dragging &&
+                !settling &&
                 renderedPx.floatValue > 0.5f &&
                 SystemClock.uptimeMillis() - lastSampleAtMs > STALL_RECOVERY_MS
             ) {
@@ -348,9 +354,18 @@ fun PredictiveBackContainer(
     // throws in exactly that situation).
     if (platformBackDispatcher != null) {
         DisposableEffect(backDispatcher, platformBackDispatcher) {
+            // The priority argument is not optional for this to work: the single-argument addInput
+            // registers the input with priority -1, i.e. bound to no priority level at all, and the
+            // input only registers its platform callback when it is told that an enabled back handler
+            // exists *at its own priority*. With priority -1 that notification never arrives and the
+            // input sits there silently unregistered — which looks exactly like "the driver never
+            // takes the gesture" no matter which order the callbacks are registered in.
             val input = runCatching {
-                OnBackInvokedDefaultInput(platformBackDispatcher).also { backDispatcher.addInput(it) }
-            }.getOrNull()
+                OnBackInvokedDefaultInput(platformBackDispatcher).also {
+                    backDispatcher.addInput(it, NavigationEventDispatcher.PRIORITY_DEFAULT)
+                }
+            }.onFailure { PredictiveBackTrace.note("input fail:" + it::class.simpleName) }.getOrNull()
+            if (input != null) PredictiveBackTrace.note("input ok")
             onDispose { if (input != null) runCatching { backDispatcher.removeInput(input) } }
         }
     }
