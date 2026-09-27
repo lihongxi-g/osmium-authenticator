@@ -118,8 +118,21 @@ fun AppearanceScreen(vm: MainViewModel, onBack: () -> Unit) {
             )
             PaletteStyleRow(
                 selectedId = settings.paletteStyle,
-                onSelect = vm::setPaletteStyle
+                onSelect = { style ->
+                    // Picking a palette style means "use this instead of the wallpaper": the
+                    // three colour controls must never lock each other out.
+                    vm.setDynamicColor(false)
+                    vm.setPaletteStyle(style)
+                }
             )
+            if (settings.dynamicColor) {
+                Text(
+                    text = stringResource(R.string.appearance_color_source_note),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
+                )
+            }
 
             Text(
                 text = stringResource(R.string.appearance_seed_color),

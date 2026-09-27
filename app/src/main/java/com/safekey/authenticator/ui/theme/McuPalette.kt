@@ -143,10 +143,12 @@ internal fun ColorScheme.amoledSurface(): ColorScheme = copy(
 )
 
 /**
- * Seed colours offered in the appearance settings (same set KernelSU ships).
+ * Seed colours offered in the appearance settings. Material 600/700 tones, spread evenly over
+ * the hue wheel so neighbouring entries are actually distinguishable (the previous set had
+ * purple/indigo and yellow/amber pairs that looked almost identical).
  */
 internal val seedColorOptions: List<Long> = listOf(
-    0xFFF44336L, 0xFFE91E63L, 0xFF9C27B0L, 0xFF673AB7L, 0xFF3F51B5L,
-    0xFF2196F3L, 0xFF00BCD4L, 0xFF009688L, 0xFF4FAF50L, 0xFFFFEB3BL,
-    0xFFFFC107L, 0xFFFF9800L, 0xFF795548L, 0xFF607D8FL, 0xFFFF9CA8L
+    0xFFE53935L, 0xFFD81B60L, 0xFF8E24AAL, 0xFF5E35B1L, 0xFF3949ABL,
+    0xFF1E88E5L, 0xFF00ACC1L, 0xFF00897BL, 0xFF43A047L, 0xFF7CB342L,
+    0xFFF9A825L, 0xFFFB8C00L, 0xFF6D4C41L, 0xFF546E7AL
 )

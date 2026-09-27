@@ -1017,13 +1017,14 @@ private fun IntegrityNoticeDialog(
                     if (suppressTransition) {
                         EnterTransition.None togetherWith ExitTransition.None
                     } else if (direction > 0) {
-                        (slideInHorizontally(motion.enter) { it } + fadeIn(motion.fadeIn)) togetherWith
-                            (slideOutHorizontally(motion.exit) { -it / 4 } +
-                                fadeOut(motion.fadeOut, targetAlpha = 0.9f))
+                        // Full-width slide over the covered page, which parallaxes a quarter
+                        // width. Deliberately no cross-fade: a partly transparent page over a
+                        // moving one is what read as "the page underneath shows through".
+                        slideInHorizontally(motion.enter) { it } togetherWith
+                            slideOutHorizontally(motion.exit) { -it / 4 }
                     } else {
-                        (slideInHorizontally(motion.enter) { -it / 4 } +
-                            fadeIn(motion.fadeIn, initialAlpha = 0.9f)) togetherWith
-                            (slideOutHorizontally(motion.exit) { it } + fadeOut(motion.fadeOut))
+                        slideInHorizontally(motion.enter) { -it / 4 } togetherWith
+                            slideOutHorizontally(motion.exit) { it }
                     }
                 },
                 label = "nav"
