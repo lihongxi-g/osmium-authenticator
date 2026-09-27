@@ -383,8 +383,9 @@ private fun SwatchButton(
     }
 }
 
+/** Grouped card with a leading icon, a label/description and a slider. */
 @Composable
-private fun SliderSettingRow(
+fun SliderSettingRow(
     icon: ImageVector,
     title: String,
     description: String,

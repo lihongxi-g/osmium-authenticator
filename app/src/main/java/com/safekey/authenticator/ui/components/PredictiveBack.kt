@@ -27,6 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.safekey.authenticator.data.AppSettings
@@ -35,17 +36,15 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 
 /**
- * How far across the screen the page travels for a full platform back gesture. The platform's
- * edge gesture commits after roughly a third of the screen, so matching that is what makes the
- * page track the finger 1:1 instead of running ahead of it.
+ * How far across the screen the page travels for a full platform back gesture. Only a fallback:
+ * it is used when the platform does not report touch coordinates (below API 34), where the page
+ * can only be driven by `progress`. The platform's edge gesture commits after roughly a third of
+ * the screen, so matching that is what makes the page track the finger instead of running ahead.
  */
 private const val GESTURE_GAIN = 0.35f
 
 /** Peak alpha of the scrim that covers the revealed page. */
 private const val SCRIM_MAX_ALPHA = 0.35f
-
-/** Commit glide after the platform committed. Shared with the page-transition tempo. */
-private const val COMMIT_SETTLE_MILLIS = AppSettings.MOTION_DURATION_MS
 
 /**
  * Predictive-back navigation container.
@@ -77,6 +76,8 @@ fun PredictiveBackContainer(
     navKey: Any?,
     previous: (@Composable () -> Unit)?,
     onGestureStart: () -> Unit = {},
+    /** Commit glide duration (developer-mode "back animation duration"). */
+    commitDurationMillis: Int = AppSettings.MOTION_DURATION_DEFAULT,
     onBack: () -> Unit,
     content: @Composable () -> Unit
 ) {
@@ -90,6 +91,12 @@ fun PredictiveBackContainer(
     var settling by remember { mutableStateOf(false) }
     var committed by remember { mutableStateOf(false) }
     var showPrevious by remember { mutableStateOf(false) }
+    // Container width in pixels: the reference the platform's touch coordinates are measured
+    // against, so the page can follow the finger in real pixels.
+    var containerWidthPx by remember { mutableFloatStateOf(0f) }
+    val commitGlide = remember(commitDurationMillis) {
+        tween<Float>(commitDurationMillis, easing = FastOutSlowInEasing)
+    }
 
     // 0f = settled, 1f = the page has travelled all the way off the screen.
     val progress: () -> Float =
@@ -104,19 +111,33 @@ fun PredictiveBackContainer(
                     dragging = true
                     onGestureStart()
                 }
+                // Origin of the finger travel, seeded from the first event: an edge gesture starts
+                // on the edge, so that reading is the zero the follow is measured from.
+                var touchStart = -1f
                 events.collect { event ->
-                    val fraction = event.progress.coerceIn(0f, 1f)
+                    // Deliberately not clamped from above: some platforms keep counting past the
+                    // commit point, and clamping that away freezes the page while the finger
+                    // keeps moving. Only the resulting offset is clamped.
+                    val fraction = event.progress.coerceAtLeast(0f)
                     if (!showPrevious && fraction > 0.02f) showPrevious = true
-                    systemReveal.snapTo(fraction * GESTURE_GAIN)
+                    val fingerX = event.touchX
+                    if (touchStart < 0f) touchStart = fingerX
+                    // Prefer the real finger position. `progress` is capped at 1 once the gesture
+                    // would commit — a third of the way across the screen — so a progress-driven
+                    // page stops following while the finger still has half the screen to go.
+                    // Touch coordinates are reported in window pixels from API 34 up.
+                    val reveal = if (fingerX > 0f && containerWidthPx > 0f) {
+                        ((fingerX - touchStart) / containerWidthPx).coerceIn(0f, 1f)
+                    } else {
+                        (fraction * GESTURE_GAIN).coerceIn(0f, 1f)
+                    }
+                    systemReveal.snapTo(reveal)
                 }
                 // The platform committed. Glide the rest of the way out while this layout is
                 // still on screen, then pop — otherwise the pop snaps the page back into place.
                 dragging = false
                 settling = true
-                systemReveal.animateTo(
-                    targetValue = 1f,
-                    animationSpec = tween(COMMIT_SETTLE_MILLIS, easing = FastOutSlowInEasing)
-                )
+                systemReveal.animateTo(targetValue = 1f, animationSpec = commitGlide)
                 settling = false
                 committed = true
                 onBack()
@@ -189,7 +210,7 @@ fun PredictiveBackContainer(
                     animate(
                         initialValue = dragReveal.floatValue,
                         targetValue = 1f,
-                        animationSpec = tween(COMMIT_SETTLE_MILLIS, easing = FastOutSlowInEasing)
+                        animationSpec = commitGlide
                     ) { value, _ -> dragReveal.floatValue = value }
                     settling = false
                     committed = true
@@ -215,6 +236,7 @@ fun PredictiveBackContainer(
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .onSizeChanged { containerWidthPx = it.width.toFloat() }
             .background(MaterialTheme.colorScheme.background)
             .then(fallbackModifier)
     ) {

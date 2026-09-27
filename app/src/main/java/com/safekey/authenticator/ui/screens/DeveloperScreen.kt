@@ -58,6 +58,7 @@ import com.safekey.authenticator.update.UpdateInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.math.roundToInt
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -325,6 +326,22 @@ fun DeveloperScreen(
                 description = dev.detailedLoggingDesc,
                 trailing = { DevStateText(settings.devDetailedLogging, dev) },
                 onClick = { vm.setDevDetailedLogging(!settings.devDetailedLogging) }
+            )
+
+            // Tuning knob for the predictive-back glide and the page transitions. Lives here
+            // rather than in Appearance: the default is the tuned value, this is for hands-on
+            // comparison only.
+            SliderSettingRow(
+                icon = AppIcons.Timer,
+                title = dev.motionDuration,
+                description = dev.motionDurationDesc,
+                valueLabel = "${settings.motionDurationMs} ms",
+                value = settings.motionDurationMs.toFloat(),
+                range = AppSettings.MOTION_DURATION_MIN.toFloat()..
+                    AppSettings.MOTION_DURATION_MAX.toFloat(),
+                steps = (AppSettings.MOTION_DURATION_MAX - AppSettings.MOTION_DURATION_MIN) /
+                    AppSettings.MOTION_DURATION_STEP - 1,
+                onValueChange = { vm.setMotionDuration(it.roundToInt()) }
             )
 
             Spacer(Modifier.height(24.dp))
