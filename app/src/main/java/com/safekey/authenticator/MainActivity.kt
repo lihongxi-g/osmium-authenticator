@@ -247,7 +247,8 @@ class MainActivity : FragmentActivity() {
                             settingsScrollState = settingsScrollState,
                             screenStateHolder = screenStateHolder,
                             predictiveBackEnabled = settings.predictiveBack,
-                            motionDurationMillis = settings.motionDurationMs
+                            motionDurationMillis = settings.motionDurationMs,
+                            gestureGain = settings.gestureGain
                         )
                     }
                     // Update notification only over the unlocked main UI.
@@ -952,14 +953,18 @@ private fun IntegrityNoticeDialog(
         settingsScrollState: ScrollState,
         screenStateHolder: androidx.compose.runtime.saveable.SaveableStateHolder,
         predictiveBackEnabled: Boolean,
-        motionDurationMillis: Int
+        motionDurationMillis: Int,
+        gestureGain: Float
     ) {
         val context = LocalContext.current
         val direction = vm.nav.direction
         val current = vm.nav.current
         val rootRestricted by vm.rootRestricted.collectAsState()
         val motion = LocalOsmiumMotion.current
-        var gestureTarget by remember { mutableStateOf<Screen?>(null) }
+        // The screen underneath the top one. Kept composed at rest — composing it *during* a
+        // gesture is what made the drag drop frames — and re-pointed whenever the stack changes,
+        // so a gesture always previews the right page.
+        var previewTarget by remember { mutableStateOf(vm.nav.previous) }
         var suppressTransition by remember { mutableStateOf(false) }
 
         // Defense in depth: if the restriction becomes active while a blocked
@@ -979,7 +984,7 @@ private fun IntegrityNoticeDialog(
         val systemPredictiveBack = predictiveBackEnabled && platformPredictiveBack
         LaunchedEffect(current) {
             // After a gesture commit the container has already animated that pop.
-            gestureTarget = null
+            previewTarget = vm.nav.previous
             suppressTransition = false
         }
         if (!systemPredictiveBack) {
@@ -993,8 +998,8 @@ private fun IntegrityNoticeDialog(
             edgeSwipeFallback = predictiveBackEnabled && !platformPredictiveBack,
             navKey = current,
             commitDurationMillis = motionDurationMillis,
-            onGestureStart = { gestureTarget = vm.nav.previous },
-            previous = gestureTarget?.let { target ->
+            gestureGain = gestureGain,
+            previous = previewTarget?.let { target ->
                 {
                     screenStateHolder.SaveableStateProvider("predictive:" + target.toString()) {
                         ScreenBody(

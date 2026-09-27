@@ -25,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import kotlin.math.roundToInt
 import androidx.compose.ui.unit.sp
 import com.safekey.authenticator.data.AppSettings
 
@@ -73,12 +74,28 @@ class MotionTokens(
     val fadeOut: FiniteAnimationSpec<Float>
 )
 
-private val ExpressiveMotion = MotionTokens(
-    enter = spring(dampingRatio = 0.72f, stiffness = Spring.StiffnessMediumLow),
-    exit = spring(dampingRatio = 0.9f, stiffness = Spring.StiffnessMedium),
-    fadeIn = tween(180),
-    fadeOut = tween(150)
-)
+private fun expressiveMotion(durationMillis: Int): MotionTokens {
+    // Same tempo knob as the standard set, expressed as spring stiffness: a shorter duration
+    // gets a stiffer spring. Without this the developer-mode duration did nothing whenever the
+    // expressive design system was selected, which read as the setting being dead.
+    val enter = durationMillis.coerceIn(
+        AppSettings.MOTION_DURATION_MIN,
+        AppSettings.MOTION_DURATION_MAX
+    ).toFloat()
+    val faster = (AppSettings.MOTION_DURATION_DEFAULT / enter).coerceIn(0.5f, 2f)
+    return MotionTokens(
+        enter = spring(
+            dampingRatio = 0.72f,
+            stiffness = Spring.StiffnessMediumLow * faster
+        ),
+        exit = spring(
+            dampingRatio = 0.9f,
+            stiffness = Spring.StiffnessMedium * faster
+        ),
+        fadeIn = tween((180f * faster).roundToInt().coerceAtLeast(50)),
+        fadeOut = tween((150f * faster).roundToInt().coerceAtLeast(50))
+    )
+}
 
 /**
  * Standard (ease-based) motion, timed by the developer-mode "back animation duration" value so
@@ -187,7 +204,11 @@ fun SafeKeyTheme(
     val baseTypography = if (expressive) ExpressiveTypography else AppTypography
     val typography = remember(baseTypography, uiScale) { baseTypography.scaled(uiScale) }
     val motion = remember(expressive, motionDurationMillis) {
-        if (expressive) ExpressiveMotion else standardMotion(motionDurationMillis)
+        if (expressive) {
+            expressiveMotion(motionDurationMillis)
+        } else {
+            standardMotion(motionDurationMillis)
+        }
     }
     CompositionLocalProvider(
         LocalExpressiveDesign provides expressive,

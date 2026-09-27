@@ -344,6 +344,20 @@ fun DeveloperScreen(
                 onValueChange = { vm.setMotionDuration(it.roundToInt()) }
             )
 
+            // What actually changes the *gesture* feel: the duration above only tunes the settle
+            // glide and the page transitions, because the drag itself is locked to the finger.
+            SliderSettingRow(
+                icon = AppIcons.DragIndicator,
+                title = dev.gestureGain,
+                description = dev.gestureGainDesc,
+                valueLabel = String.format(Locale.US, "%.1fx", settings.gestureGain),
+                value = settings.gestureGain,
+                range = AppSettings.GESTURE_GAIN_MIN..AppSettings.GESTURE_GAIN_MAX,
+                steps = ((AppSettings.GESTURE_GAIN_MAX - AppSettings.GESTURE_GAIN_MIN) /
+                    AppSettings.GESTURE_GAIN_STEP).roundToInt() - 1,
+                onValueChange = { vm.setGestureGain(it) }
+            )
+
             Spacer(Modifier.height(24.dp))
 
             SettingRow(

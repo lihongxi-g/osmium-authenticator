@@ -30,6 +30,8 @@ data class AppSettings(
     val uiScale: Float = UI_SCALE_DEFAULT,
     /** Predictive-back glide and page-transition duration in ms (developer mode only). */
     val motionDurationMs: Int = MOTION_DURATION_DEFAULT,
+    /** Predictive-back follow gain, 0.6x - 1.4x (developer mode only). */
+    val gestureGain: Float = GESTURE_GAIN_DEFAULT,
     val gateOnOpen: Boolean = true,
     val allowScreenshots: Boolean = false,
     val hideCodes: Boolean = false,
@@ -101,6 +103,16 @@ data class AppSettings(
         const val MOTION_DURATION_MIN = 120
         const val MOTION_DURATION_MAX = 300
         const val MOTION_DURATION_STEP = 20
+
+        /**
+         * Predictive-back follow gain: how far the page travels per finger pixel. 1.0 is the
+         * finger-locked default; the range is deliberately narrow because a page that runs ahead
+         * of (or lags behind) the finger stops feeling like a real drag.
+         */
+        const val GESTURE_GAIN_DEFAULT = 1f
+        const val GESTURE_GAIN_MIN = 0.6f
+        const val GESTURE_GAIN_MAX = 1.4f
+        const val GESTURE_GAIN_STEP = 0.1f
         const val DEFAULT_PALETTE_SEED = 0xFF4F5D92L
 
         const val DESTROY_OFF = "off"
@@ -139,6 +151,7 @@ class SettingsRepository(
         val PREDICTIVE_BACK = booleanPreferencesKey("predictive_back")
         val UI_SCALE = floatPreferencesKey("ui_scale")
         val MOTION_DURATION = intPreferencesKey("motion_duration_ms")
+        val GESTURE_GAIN = floatPreferencesKey("gesture_gain")
         val GATE_ON_OPEN = booleanPreferencesKey("gate_on_open")
         val ALLOW_SCREENSHOTS = booleanPreferencesKey("allow_screenshots")
         val HIDE_CODES = booleanPreferencesKey("hide_codes")
@@ -186,6 +199,8 @@ class SettingsRepository(
                 .coerceIn(AppSettings.UI_SCALE_MIN, AppSettings.UI_SCALE_MAX),
             motionDurationMs = (prefs[Keys.MOTION_DURATION] ?: AppSettings.MOTION_DURATION_DEFAULT)
                 .coerceIn(AppSettings.MOTION_DURATION_MIN, AppSettings.MOTION_DURATION_MAX),
+            gestureGain = (prefs[Keys.GESTURE_GAIN] ?: AppSettings.GESTURE_GAIN_DEFAULT)
+                .coerceIn(AppSettings.GESTURE_GAIN_MIN, AppSettings.GESTURE_GAIN_MAX),
             gateOnOpen = prefs[Keys.GATE_ON_OPEN] ?: true,
             allowScreenshots = prefs[Keys.ALLOW_SCREENSHOTS] ?: false,
             hideCodes = prefs[Keys.HIDE_CODES] ?: false,
@@ -259,6 +274,15 @@ class SettingsRepository(
             it[Keys.MOTION_DURATION] = durationMs.coerceIn(
                 AppSettings.MOTION_DURATION_MIN,
                 AppSettings.MOTION_DURATION_MAX
+            )
+        }
+    }
+
+    suspend fun setGestureGain(gain: Float) {
+        context.dataStore.edit {
+            it[Keys.GESTURE_GAIN] = gain.coerceIn(
+                AppSettings.GESTURE_GAIN_MIN,
+                AppSettings.GESTURE_GAIN_MAX
             )
         }
     }

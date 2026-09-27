@@ -758,6 +758,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     fun setPredictiveBack(enabled: Boolean) = viewModelScope.launch { settingsRepo.setPredictiveBack(enabled) }
     fun setUiScale(scale: Float) = viewModelScope.launch { settingsRepo.setUiScale(scale) }
     fun setMotionDuration(durationMs: Int) = viewModelScope.launch { settingsRepo.setMotionDuration(durationMs) }
+    fun setGestureGain(gain: Float) = viewModelScope.launch { settingsRepo.setGestureGain(gain) }
     fun setGateOnOpen(enabled: Boolean) = viewModelScope.launch { settingsRepo.setGateOnOpen(enabled) }
     fun setAllowScreenshots(enabled: Boolean) = viewModelScope.launch { settingsRepo.setAllowScreenshots(enabled) }
     fun setHideCodes(enabled: Boolean) = viewModelScope.launch { settingsRepo.setHideCodes(enabled) }
