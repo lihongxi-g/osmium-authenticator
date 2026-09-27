@@ -568,7 +568,7 @@
     <string name="appearance_saturation">Насыщенность</string>
     <string name="appearance_ui_scale">Масштаб интерфейса</string>
     <string name="appearance_ui_scale_desc">Размер текста во всём приложении</string>
-    <string name="attributions_kernelsu_desc">Структура страницы оформления (список стилей палитры, выбор основного цвета, переключатель прогнозируемого возврата, масштаб интерфейса) основана на настройках темы KernelSU. KernelSU — свободное ПО под GNU GPL v3.</string>
+    <string name="attributions_kernelsu_desc">Структура страницы оформления (список стилей палитры, выбор основного цвета, переключатель прогнозируемого возврата, масштаб интерфейса) основана на настройках темы KernelSU; анимация прогнозируемого возврата (геометрия и драйвер слежения за пальцем) следует навигационной оболочке KernelSU (miuix-nav, Apache-2.0). KernelSU — свободное ПО под GNU GPL v3.</string>
     <string name="attributions_materialkolor_desc">Палитры Material You создаются портом Material Color Utilities от MaterialKolor (MIT), который сам является портом цветовых утилит Google (Apache-2.0).</string>
     <string name="palette_content">Контент</string>
     <string name="palette_fidelity">Точность</string>

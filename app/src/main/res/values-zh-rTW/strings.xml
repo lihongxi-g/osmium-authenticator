@@ -581,7 +581,7 @@
     <string name="appearance_saturation">飽和度</string>
     <string name="appearance_ui_scale">介面縮放</string>
     <string name="appearance_ui_scale_desc">調整全應用程式的文字大小</string>
-    <string name="attributions_kernelsu_desc">外觀頁的結構（配色風格清單、主題色選擇、預測式返回開關、介面縮放）參考 KernelSU 的主題設定。KernelSU 是基於 GNU GPL v3 的免費軟體。</string>
+    <string name="attributions_kernelsu_desc">外觀頁的結構（配色風格清單、主題色選擇、預測式返回開關、介面縮放）參考 KernelSU 的主題設定；預測式返回動畫（幾何與跟手驅動）參考 KernelSU 使用的導航庫 miuix-nav（Apache-2.0）。KernelSU 是基於 GNU GPL v3 的免費軟體。</string>
     <string name="attributions_materialkolor_desc">Material You 調色盤由 MaterialKolor 的 Material Color Utilities 移植版產生（MIT），該移植版源自 Google 的 Apache-2.0 色彩工具。</string>
     <string name="palette_content">內容</string>
     <string name="palette_fidelity">忠實</string>

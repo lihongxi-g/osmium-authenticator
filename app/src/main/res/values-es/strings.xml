@@ -568,7 +568,7 @@
     <string name="appearance_saturation">Saturación</string>
     <string name="appearance_ui_scale">Escala de la interfaz</string>
     <string name="appearance_ui_scale_desc">Tamaño del texto en toda la app</string>
-    <string name="attributions_kernelsu_desc">La estructura de la página de apariencia (lista de estilos de paleta, selector de color base, interruptor de retroceso predictivo, escala de la interfaz) se basa en los ajustes de tema de KernelSU. KernelSU es software libre bajo la GNU GPL v3.</string>
+    <string name="attributions_kernelsu_desc">La estructura de la página de apariencia (lista de estilos de paleta, selector de color base, interruptor de retroceso predictivo, escala de la interfaz) se basa en los ajustes de tema de KernelSU; la animación de retroceso predictivo (geometría y seguimiento del dedo) sigue el shell de navegación de KernelSU (miuix-nav, Apache-2.0). KernelSU es software libre bajo la GNU GPL v3.</string>
     <string name="attributions_materialkolor_desc">Las paletas de Material You las genera el port de Material Color Utilities de MaterialKolor (MIT), a su vez un port de las utilidades de color de Google (Apache-2.0).</string>
     <string name="palette_content">Contenido</string>
     <string name="palette_fidelity">Fidelidad</string>

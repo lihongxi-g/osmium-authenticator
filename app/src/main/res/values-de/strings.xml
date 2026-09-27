@@ -568,7 +568,7 @@
     <string name="appearance_saturation">Sättigung</string>
     <string name="appearance_ui_scale">UI-Skalierung</string>
     <string name="appearance_ui_scale_desc">Textgröße in der gesamten App</string>
-    <string name="attributions_kernelsu_desc">Der Aufbau der Darstellungsseite (Palettenstil-Liste, Auswahl der Grundfarbe, Predictive-Back-Schalter, UI-Skalierung) orientiert sich an den Design-Einstellungen von KernelSU. KernelSU ist freie Software unter der GNU GPL v3.</string>
+    <string name="attributions_kernelsu_desc">Der Aufbau der Darstellungsseite (Palettenstil-Liste, Auswahl der Grundfarbe, Predictive-Back-Schalter, UI-Skalierung) orientiert sich an den Design-Einstellungen von KernelSU; die Predictive-Back-Animation (Geometrie und Finger-Folge-Regler) folgt der Navigations-Hülle von KernelSU (miuix-nav, Apache-2.0). KernelSU ist freie Software unter der GNU GPL v3.</string>
     <string name="attributions_materialkolor_desc">Material-You-Paletten werden von MaterialKolors Portierung der Material Color Utilities (MIT) erzeugt, die selbst eine Portierung der Apache-2.0-Farbwerkzeuge von Google ist.</string>
     <string name="palette_content">Inhalt</string>
     <string name="palette_fidelity">Originaltreue</string>

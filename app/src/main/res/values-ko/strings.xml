@@ -568,7 +568,7 @@
     <string name="appearance_saturation">채도</string>
     <string name="appearance_ui_scale">UI 크기</string>
     <string name="appearance_ui_scale_desc">앱 전체 텍스트 크기</string>
-    <string name="attributions_kernelsu_desc">모양 페이지의 구성(팔레트 스타일 목록, 키 색상 선택, 예측형 뒤로 가기 스위치, UI 크기)은 KernelSU의 테마 설정을 참고했습니다. KernelSU는 GNU GPL v3에 따른 자유 소프트웨어입니다.</string>
+    <string name="attributions_kernelsu_desc">모양 페이지의 구성(팔레트 스타일 목록, 키 색상 선택, 예측형 뒤로 가기 스위치, UI 크기)은 KernelSU의 테마 설정을 참고했습니다. 예측형 뒤로 가기 애니메이션(기하 구조와 손가락 추종 드라이버)은 KernelSU의 내비게이션 셸(miuix-nav, Apache-2.0)을 따릅니다. KernelSU는 GNU GPL v3에 따른 자유 소프트웨어입니다.</string>
     <string name="attributions_materialkolor_desc">Material You 팔레트는 MaterialKolor의 Material Color Utilities 포팅(MIT)으로 생성되며, 이는 Google의 Apache-2.0 색상 유틸리티를 포팅한 것입니다.</string>
     <string name="palette_content">콘텐츠</string>
     <string name="palette_fidelity">충실</string>

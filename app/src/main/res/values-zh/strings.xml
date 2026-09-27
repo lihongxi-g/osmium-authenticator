@@ -222,7 +222,7 @@
     <string name="attributions_raivo_desc">记录 Raivo OTP 旧版导出格式的文章。</string>
     <string name="attributions_osmium_desc">Osmium 自身的源代码与许可证（GPL-3.0-or-later）。</string>
     <string name="attributions_note">Osmium 是基于 GNU GPL v3 或更高版本的免费软件。点击卡片可在浏览器中打开项目页面。</string>
-    <string name="attributions_kernelsu_desc">外观页的结构（配色风格列表、主题色选择、预测式返回开关、界面缩放）参考 KernelSU 的主题设置。KernelSU 是基于 GNU GPL v3 的免费软件。</string>
+    <string name="attributions_kernelsu_desc">外观页的结构（配色风格列表、主题色选择、预测式返回开关、界面缩放）参考 KernelSU 的主题设置；预测式返回动画（几何与跟手驱动）参考 KernelSU 使用的导航库 miuix-nav（Apache-2.0）。KernelSU 是基于 GNU GPL v3 的免费软件。</string>
     <string name="attributions_materialkolor_desc">Material You 调色板由 MaterialKolor 的 Material Color Utilities 移植版生成（MIT），该移植版源自 Google 的 Apache-2.0 颜色工具库。</string>
 
     <string name="loading">加载中…</string>

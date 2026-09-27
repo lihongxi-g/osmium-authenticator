@@ -568,7 +568,7 @@
     <string name="appearance_saturation">彩度</string>
     <string name="appearance_ui_scale">UI スケール</string>
     <string name="appearance_ui_scale_desc">アプリ全体の文字サイズ</string>
-    <string name="attributions_kernelsu_desc">外観ページの構成（パレットスタイル一覧、キーカラーの選択、予測型戻るのスイッチ、UI スケール）は KernelSU のテーマ設定を参考にしています。KernelSU は GNU GPL v3 の自由ソフトウェアです。</string>
+    <string name="attributions_kernelsu_desc">外観ページの構成（パレットスタイル一覧、キーカラーの選択、予測型戻るのスイッチ、UI スケール）は KernelSU のテーマ設定を参考にしています。予測型戻るアニメーション（ジオメトリと指追従ドライバ）は KernelSU が使うナビゲーションシェル（miuix-nav、Apache-2.0）に準拠しています。KernelSU は GNU GPL v3 の自由ソフトウェアです。</string>
     <string name="attributions_materialkolor_desc">Material You のパレットは MaterialKolor による Material Color Utilities の移植版（MIT）で生成されます。これは Google の Apache-2.0 カラーユーティリティの移植です。</string>
     <string name="palette_content">コンテンツ</string>
     <string name="palette_fidelity">忠実</string>
