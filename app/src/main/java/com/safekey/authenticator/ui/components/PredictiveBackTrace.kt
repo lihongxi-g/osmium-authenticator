@@ -28,6 +28,8 @@ object PredictiveBackTrace {
     private var startedAt = 0L
     private var frames = 0
     private var lastRenderedPx = Float.NaN
+    private var lastSampleAt = 0L
+    private var maxGapMs = 0L
 
     fun begin(rightEdge: Boolean) {
         edge = if (rightEdge) "R" else "L"
@@ -42,6 +44,8 @@ object PredictiveBackTrace {
         startedAt = System.currentTimeMillis()
         frames = 0
         lastRenderedPx = Float.NaN
+        lastSampleAt = 0L
+        maxGapMs = 0L
     }
 
     fun edgeLocked(rightEdge: Boolean) {
@@ -80,6 +84,20 @@ object PredictiveBackTrace {
         lastRenderedPx = renderedPx
     }
 
+    /**
+     * Time since the previous sample, in milliseconds. This is the number that says whether the
+     * platform's gesture stream is sparse (tens of ms apart) or effectively per frame; a whole
+     * design decision hinges on it, so it is measured rather than assumed.
+     */
+    fun sampleTiming() {
+        val now = System.currentTimeMillis()
+        if (lastSampleAt != 0L) {
+            val gap = now - lastSampleAt
+            if (gap > maxGapMs) maxGapMs = gap
+        }
+        lastSampleAt = now
+    }
+
     fun finish(outcome: String, widthPx: Float, travelPx: Float) {
         val millis = System.currentTimeMillis() - startedAt
         val travel = if (widthPx > 0f) (travelPx / widthPx * 100f).toInt() else 0
@@ -95,6 +113,7 @@ object PredictiveBackTrace {
             if (pointerSamples > 0) append(" (max ").append(fmt(maxFinger, 0)).append(")")
             append(" · driver ").append(mode)
             append(" · travel ").append(travel).append("%")
+            append(" · maxGap ").append(maxGapMs).append("ms")
             append(" · frames ").append(frames)
             append(" · last ").append(fmt(lastRenderedPx, 0))
             append(" · ").append(outcome)
