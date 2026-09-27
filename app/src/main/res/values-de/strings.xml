@@ -555,4 +555,21 @@
     <string name="appearance_amoled">Pure black dark background</string>
     <string name="appearance_amoled_desc">Use true black for OLED screens</string>
     <string name="appearance_security_note">Color and motion never replace security labels or clear confirmation.</string>
+    <!-- appearance / palette (motion, colour source, attributions) -->
+    <string name="appearance_behavior">Bewegung &amp; Anzeige</string>
+    <string name="appearance_beta">BETA</string>
+    <string name="appearance_brightness">Helligkeit</string>
+    <string name="appearance_color_source_note">Palettenstil und Ausgangsfarbe bleiben immer wählbar: Wer eines davon wählt, schaltet die dynamische Farbe aus.</string>
+    <string name="appearance_custom_color">Eigene Farbe</string>
+    <string name="appearance_hue">Farbton</string>
+    <string name="appearance_predictive_back">Predictive-Back-Animation</string>
+    <string name="appearance_predictive_back_desc">Folgt der Zurück-Geste und zeigt den vorherigen Bildschirm an</string>
+    <string name="appearance_predictive_back_note">Diese Android-Version unterstützt kein systemseitiges Predictive Back; die App nutzt stattdessen ihren eigenen Kantenwisch.</string>
+    <string name="appearance_saturation">Sättigung</string>
+    <string name="appearance_ui_scale">UI-Skalierung</string>
+    <string name="appearance_ui_scale_desc">Textgröße in der gesamten App</string>
+    <string name="attributions_kernelsu_desc">Der Aufbau der Darstellungsseite (Palettenstil-Liste, Auswahl der Grundfarbe, Predictive-Back-Schalter, UI-Skalierung) orientiert sich an den Design-Einstellungen von KernelSU. KernelSU ist freie Software unter der GNU GPL v3.</string>
+    <string name="attributions_materialkolor_desc">Material-You-Paletten werden von MaterialKolors Portierung der Material Color Utilities (MIT) erzeugt, die selbst eine Portierung der Apache-2.0-Farbwerkzeuge von Google ist.</string>
+    <string name="palette_content">Inhalt</string>
+    <string name="palette_fidelity">Originaltreue</string>
 </resources>

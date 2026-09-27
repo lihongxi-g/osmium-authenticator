@@ -555,4 +555,21 @@
     <string name="appearance_amoled">Pure black dark background</string>
     <string name="appearance_amoled_desc">Use true black for OLED screens</string>
     <string name="appearance_security_note">Color and motion never replace security labels or clear confirmation.</string>
+    <!-- appearance / palette (motion, colour source, attributions) -->
+    <string name="appearance_behavior">モーションと表示</string>
+    <string name="appearance_beta">BETA</string>
+    <string name="appearance_brightness">明度</string>
+    <string name="appearance_color_source_note">パレットスタイルとシードカラーは常に選択できます。どちらかを選ぶと動的な色はオフになります。</string>
+    <string name="appearance_custom_color">カスタムカラー</string>
+    <string name="appearance_hue">色相</string>
+    <string name="appearance_predictive_back">予測型戻るアニメーション</string>
+    <string name="appearance_predictive_back_desc">戻るジェスチャーに追従し、前の画面をプレビューします</string>
+    <string name="appearance_predictive_back_note">この Android バージョンにはシステムの予測型戻るがないため、アプリ独自のエッジスワイプを使用します。</string>
+    <string name="appearance_saturation">彩度</string>
+    <string name="appearance_ui_scale">UI スケール</string>
+    <string name="appearance_ui_scale_desc">アプリ全体の文字サイズ</string>
+    <string name="attributions_kernelsu_desc">外観ページの構成（パレットスタイル一覧、キーカラーの選択、予測型戻るのスイッチ、UI スケール）は KernelSU のテーマ設定を参考にしています。KernelSU は GNU GPL v3 の自由ソフトウェアです。</string>
+    <string name="attributions_materialkolor_desc">Material You のパレットは MaterialKolor による Material Color Utilities の移植版（MIT）で生成されます。これは Google の Apache-2.0 カラーユーティリティの移植です。</string>
+    <string name="palette_content">コンテンツ</string>
+    <string name="palette_fidelity">忠実</string>
 </resources>

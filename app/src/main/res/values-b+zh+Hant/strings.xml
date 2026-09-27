@@ -568,4 +568,21 @@
     <string name="appearance_amoled">Pure black dark background</string>
     <string name="appearance_amoled_desc">Use true black for OLED screens</string>
     <string name="appearance_security_note">Color and motion never replace security labels or clear confirmation.</string>
+    <!-- appearance / palette (motion, colour source, attributions) -->
+    <string name="appearance_behavior">動效與顯示</string>
+    <string name="appearance_beta">BETA</string>
+    <string name="appearance_brightness">明度</string>
+    <string name="appearance_color_source_note">配色風格和種子顏色始終可選：選擇任一項都會自動關閉動態取色。</string>
+    <string name="appearance_custom_color">自訂顏色</string>
+    <string name="appearance_hue">色相</string>
+    <string name="appearance_predictive_back">預測式返回動畫</string>
+    <string name="appearance_predictive_back_desc">返回滑動時跟手預覽上一頁</string>
+    <string name="appearance_predictive_back_note">目前 Android 版本不支援系統預測式返回，改用應用程式內邊緣滑動。</string>
+    <string name="appearance_saturation">飽和度</string>
+    <string name="appearance_ui_scale">介面縮放</string>
+    <string name="appearance_ui_scale_desc">調整全應用程式的文字大小</string>
+    <string name="attributions_kernelsu_desc">外觀頁的結構（配色風格清單、主題色選擇、預測式返回開關、介面縮放）參考 KernelSU 的主題設定。KernelSU 是基於 GNU GPL v3 的免費軟體。</string>
+    <string name="attributions_materialkolor_desc">Material You 調色盤由 MaterialKolor 的 Material Color Utilities 移植版產生（MIT），該移植版源自 Google 的 Apache-2.0 色彩工具。</string>
+    <string name="palette_content">內容</string>
+    <string name="palette_fidelity">忠實</string>
 </resources>

@@ -555,4 +555,21 @@
     <string name="appearance_amoled">Pure black dark background</string>
     <string name="appearance_amoled_desc">Use true black for OLED screens</string>
     <string name="appearance_security_note">Color and motion never replace security labels or clear confirmation.</string>
+    <!-- appearance / palette (motion, colour source, attributions) -->
+    <string name="appearance_behavior">모션 및 화면</string>
+    <string name="appearance_beta">BETA</string>
+    <string name="appearance_brightness">밝기</string>
+    <string name="appearance_color_source_note">팔레트 스타일과 시드 색상은 항상 선택할 수 있으며, 둘 중 하나를 고르면 동적 색상이 꺼집니다.</string>
+    <string name="appearance_custom_color">사용자 지정 색상</string>
+    <string name="appearance_hue">색조</string>
+    <string name="appearance_predictive_back">예측형 뒤로 가기 애니메이션</string>
+    <string name="appearance_predictive_back_desc">뒤로 가기 제스처를 따라가며 이전 화면을 미리 보여줍니다</string>
+    <string name="appearance_predictive_back_note">이 Android 버전에는 시스템 예측형 뒤로 가기가 없어 앱 자체 엣지 스와이프를 사용합니다.</string>
+    <string name="appearance_saturation">채도</string>
+    <string name="appearance_ui_scale">UI 크기</string>
+    <string name="appearance_ui_scale_desc">앱 전체 텍스트 크기</string>
+    <string name="attributions_kernelsu_desc">모양 페이지의 구성(팔레트 스타일 목록, 키 색상 선택, 예측형 뒤로 가기 스위치, UI 크기)은 KernelSU의 테마 설정을 참고했습니다. KernelSU는 GNU GPL v3에 따른 자유 소프트웨어입니다.</string>
+    <string name="attributions_materialkolor_desc">Material You 팔레트는 MaterialKolor의 Material Color Utilities 포팅(MIT)으로 생성되며, 이는 Google의 Apache-2.0 색상 유틸리티를 포팅한 것입니다.</string>
+    <string name="palette_content">콘텐츠</string>
+    <string name="palette_fidelity">충실</string>
 </resources>

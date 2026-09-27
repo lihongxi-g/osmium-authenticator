@@ -555,4 +555,21 @@
     <string name="appearance_amoled">Pure black dark background</string>
     <string name="appearance_amoled_desc">Use true black for OLED screens</string>
     <string name="appearance_security_note">Color and motion never replace security labels or clear confirmation.</string>
+    <!-- appearance / palette (motion, colour source, attributions) -->
+    <string name="appearance_behavior">Movimiento y pantalla</string>
+    <string name="appearance_beta">BETA</string>
+    <string name="appearance_brightness">Brillo</string>
+    <string name="appearance_color_source_note">El estilo de paleta y el color base siempre se pueden elegir: elegir cualquiera de ellos desactiva el color dinámico.</string>
+    <string name="appearance_custom_color">Color personalizado</string>
+    <string name="appearance_hue">Tono</string>
+    <string name="appearance_predictive_back">Animación de retroceso predictivo</string>
+    <string name="appearance_predictive_back_desc">Sigue el gesto de retroceso y muestra la pantalla anterior</string>
+    <string name="appearance_predictive_back_note">Esta versión de Android no tiene retroceso predictivo del sistema; la app usa su propio deslizamiento desde el borde.</string>
+    <string name="appearance_saturation">Saturación</string>
+    <string name="appearance_ui_scale">Escala de la interfaz</string>
+    <string name="appearance_ui_scale_desc">Tamaño del texto en toda la app</string>
+    <string name="attributions_kernelsu_desc">La estructura de la página de apariencia (lista de estilos de paleta, selector de color base, interruptor de retroceso predictivo, escala de la interfaz) se basa en los ajustes de tema de KernelSU. KernelSU es software libre bajo la GNU GPL v3.</string>
+    <string name="attributions_materialkolor_desc">Las paletas de Material You las genera el port de Material Color Utilities de MaterialKolor (MIT), a su vez un port de las utilidades de color de Google (Apache-2.0).</string>
+    <string name="palette_content">Contenido</string>
+    <string name="palette_fidelity">Fidelidad</string>
 </resources>

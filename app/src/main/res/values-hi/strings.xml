@@ -555,4 +555,21 @@
     <string name="appearance_amoled">Pure black dark background</string>
     <string name="appearance_amoled_desc">Use true black for OLED screens</string>
     <string name="appearance_security_note">Color and motion never replace security labels or clear confirmation.</string>
+    <!-- appearance / palette (motion, colour source, attributions) -->
+    <string name="appearance_behavior">मोशन और डिस्प्ले</string>
+    <string name="appearance_beta">BETA</string>
+    <string name="appearance_brightness">चमक</string>
+    <string name="appearance_color_source_note">पैलेट शैली और आधार रंग हमेशा चुने जा सकते हैं: इनमें से कोई भी चुनने पर डायनामिक रंग बंद हो जाता है।</string>
+    <string name="appearance_custom_color">कस्टम रंग</string>
+    <string name="appearance_hue">रंग</string>
+    <string name="appearance_predictive_back">प्रेडिक्टिव बैक एनिमेशन</string>
+    <string name="appearance_predictive_back_desc">बैक जेस्चर का अनुसरण करें और पिछली स्क्रीन की झलक देखें</string>
+    <string name="appearance_predictive_back_note">इस Android संस्करण में सिस्टम प्रेडिक्टिव बैक नहीं है; ऐप अपने किनारे-स्वाइप का उपयोग करता है।</string>
+    <string name="appearance_saturation">संतृप्ति</string>
+    <string name="appearance_ui_scale">UI स्केल</string>
+    <string name="appearance_ui_scale_desc">पूरे ऐप में टेक्स्ट का आकार</string>
+    <string name="attributions_kernelsu_desc">अपीयरेंस पेज की संरचना (पैलेट शैली सूची, मुख्य रंग चयन, प्रेडिक्टिव बैक स्विच, UI स्केल) KernelSU की थीम सेटिंग्स पर आधारित है। KernelSU, GNU GPL v3 के अंतर्गत मुक्त सॉफ़्टवेयर है।</string>
+    <string name="attributions_materialkolor_desc">Material You पैलेट MaterialKolor के Material Color Utilities पोर्ट (MIT) से बनते हैं, जो स्वयं Google के Apache-2.0 रंग उपयोगिताओं का पोर्ट है।</string>
+    <string name="palette_content">सामग्री</string>
+    <string name="palette_fidelity">निष्ठा</string>
 </resources>

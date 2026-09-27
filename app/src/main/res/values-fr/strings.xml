@@ -555,4 +555,21 @@
     <string name="appearance_amoled">Pure black dark background</string>
     <string name="appearance_amoled_desc">Use true black for OLED screens</string>
     <string name="appearance_security_note">Color and motion never replace security labels or clear confirmation.</string>
+    <!-- appearance / palette (motion, colour source, attributions) -->
+    <string name="appearance_behavior">Animation et affichage</string>
+    <string name="appearance_beta">BETA</string>
+    <string name="appearance_brightness">Luminosité</string>
+    <string name="appearance_color_source_note">Le style de palette et la couleur de base restent toujours sélectionnables : en choisir un désactive la couleur dynamique.</string>
+    <string name="appearance_custom_color">Couleur personnalisée</string>
+    <string name="appearance_hue">Teinte</string>
+    <string name="appearance_predictive_back">Animation de retour prédictif</string>
+    <string name="appearance_predictive_back_desc">Suit le geste de retour et prévisualise l\'écran précédent</string>
+    <string name="appearance_predictive_back_note">Cette version d\'Android n\'a pas de retour prédictif système ; l\'application utilise son propre glissement depuis le bord.</string>
+    <string name="appearance_saturation">Saturation</string>
+    <string name="appearance_ui_scale">Échelle de l\'interface</string>
+    <string name="appearance_ui_scale_desc">Taille du texte dans toute l\'application</string>
+    <string name="attributions_kernelsu_desc">La structure de la page d\'apparence (liste des styles de palette, sélecteur de couleur clé, commutateur de retour prédictif, échelle de l\'interface) s\'inspire des réglages de thème de KernelSU. KernelSU est un logiciel libre sous GNU GPL v3.</string>
+    <string name="attributions_materialkolor_desc">Les palettes Material You sont générées par le portage de Material Color Utilities de MaterialKolor (MIT), lui-même un portage des utilitaires de couleur de Google (Apache-2.0).</string>
+    <string name="palette_content">Contenu</string>
+    <string name="palette_fidelity">Fidélité</string>
 </resources>

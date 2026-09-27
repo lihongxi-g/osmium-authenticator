@@ -555,4 +555,21 @@
     <string name="appearance_amoled">Pure black dark background</string>
     <string name="appearance_amoled_desc">Use true black for OLED screens</string>
     <string name="appearance_security_note">Color and motion never replace security labels or clear confirmation.</string>
+    <!-- appearance / palette (motion, colour source, attributions) -->
+    <string name="appearance_behavior">Анимация и экран</string>
+    <string name="appearance_beta">BETA</string>
+    <string name="appearance_brightness">Яркость</string>
+    <string name="appearance_color_source_note">Стиль палитры и исходный цвет всегда доступны: выбор любого из них отключает динамический цвет.</string>
+    <string name="appearance_custom_color">Свой цвет</string>
+    <string name="appearance_hue">Оттенок</string>
+    <string name="appearance_predictive_back">Анимация прогнозируемого возврата</string>
+    <string name="appearance_predictive_back_desc">Следует за жестом возврата и показывает предыдущий экран</string>
+    <string name="appearance_predictive_back_note">В этой версии Android нет системного прогнозируемого возврата; приложение использует собственный свайп от края.</string>
+    <string name="appearance_saturation">Насыщенность</string>
+    <string name="appearance_ui_scale">Масштаб интерфейса</string>
+    <string name="appearance_ui_scale_desc">Размер текста во всём приложении</string>
+    <string name="attributions_kernelsu_desc">Структура страницы оформления (список стилей палитры, выбор основного цвета, переключатель прогнозируемого возврата, масштаб интерфейса) основана на настройках темы KernelSU. KernelSU — свободное ПО под GNU GPL v3.</string>
+    <string name="attributions_materialkolor_desc">Палитры Material You создаются портом Material Color Utilities от MaterialKolor (MIT), который сам является портом цветовых утилит Google (Apache-2.0).</string>
+    <string name="palette_content">Контент</string>
+    <string name="palette_fidelity">Точность</string>
 </resources>
