@@ -16,16 +16,6 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Diagnose sources
-        run: |
-          echo "== screens dir on the runner =="
-          ls -1 app/src/main/java/com/safekey/authenticator/ui/screens/ | wc -l
-          ls -1 app/src/main/java/com/safekey/authenticator/ui/screens/ | grep -i donate || echo "NO DONATE FILE ON RUNNER"
-          find app/src/main/java -name 'DonateScreen.kt' -o -name 'Donate*' | head
-          git log -1 --oneline
-          git ls-files | grep -c 'ui/screens/'
-          wc -l app/src/main/java/com/safekey/authenticator/ui/screens/DonateScreen.kt 2>/dev/null || true
-
       - name: Decode signing keystore
         env:
           SAFEKEY_KEYSTORE_B64: ${{ secrets.SAFEKEY_KEYSTORE_B64 }}

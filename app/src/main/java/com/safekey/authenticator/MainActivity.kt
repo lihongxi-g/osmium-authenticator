@@ -92,6 +92,7 @@ import com.safekey.authenticator.ui.screens.DeveloperScreen
 import com.safekey.authenticator.ui.screens.AccountFormScreen
 import com.safekey.authenticator.ui.screens.AccountsScreen
 import com.safekey.authenticator.ui.screens.AttributionsScreen
+import com.safekey.authenticator.ui.screens.DonateScreen
 import com.safekey.authenticator.ui.screens.AutoBackupScreen
 import com.safekey.authenticator.ui.screens.DetailScreen
 import com.safekey.authenticator.ui.screens.ExportScreen
