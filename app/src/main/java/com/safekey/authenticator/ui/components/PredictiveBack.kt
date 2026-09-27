@@ -72,6 +72,9 @@ private const val EDGE_ZONE_DP = 40
  */
 private const val STALL_RECOVERY_MS = 1500L
 
+/** How often the stall recovery checks. */
+private const val STALL_POLL_MS = 300L
+
 /**
  * Predictive-back navigation container.
  *
@@ -132,8 +135,10 @@ fun PredictiveBackContainer(
     // Which edge the current gesture came from, locked for that gesture: the geometry must not flip
     // halfway through.
     var fromRight by remember { mutableStateOf(false) }
-    // Wall clock of the newest gesture sample, for the stall recovery below.
+    // Wall clock of the newest gesture sample, and whether a settle animation is in flight; the two
+    // together are what the stall recovery watches.
     var lastSampleAtMs = 0L
+    var settling by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val activity = remember(context) { context.findActivity() }
@@ -154,8 +159,13 @@ fun PredictiveBackContainer(
 
     suspend fun glideOut() {
         val from = renderedPx.floatValue
-        animate(from, widthPx, animationSpec = commitGlide) { value, _ ->
-            renderedPx.floatValue = value
+        settling = true
+        try {
+            animate(from, widthPx, animationSpec = commitGlide) { value, _ ->
+                renderedPx.floatValue = value
+            }
+        } finally {
+            settling = false
         }
         committed = true
         PredictiveBackTrace.finish("commit", widthPx, from)
@@ -164,32 +174,44 @@ fun PredictiveBackContainer(
 
     suspend fun springBack() {
         val from = renderedPx.floatValue
-        animate(from, 0f, animationSpec = cancelSpring) { value, _ ->
-            renderedPx.floatValue = value
+        settling = true
+        try {
+            animate(from, 0f, animationSpec = cancelSpring) { value, _ ->
+                renderedPx.floatValue = value
+            }
+        } finally {
+            settling = false
         }
         showScrim = false
         PredictiveBackTrace.finish("cancel", widthPx, from)
     }
 
-    // Silent-gesture recovery. Runs only while a gesture is claimed, fires only after a stretch of
-    // complete silence, and is corrected by the next sample if the finger is still down.
-    LaunchedEffect(dragging) {
-        if (!dragging) return@LaunchedEffect
+    // Self-healing for every way a gesture can fail to send the page home: a gesture that ends with no
+    // terminal callback at all (the platform's own gesture machinery takes over near the screen edges),
+    // a settle whose coroutine was already cancelled by the time it tried to animate, or a glide that
+    // never finishes. The visible symptom is always the same — the page parked mid-offset with nothing
+    // happening — so a single check covers them all: if the offset has sat still and no settle is in
+    // flight, walk it home. Harmless when the finger is in fact still down, because the next sample
+    // lands milliseconds later and writes the finger position straight back over it.
+    LaunchedEffect(Unit) {
         while (true) {
-            delay(STALL_RECOVERY_MS)
-            val idle = SystemClock.uptimeMillis() - lastSampleAtMs
-            if (idle > STALL_RECOVERY_MS && renderedPx.floatValue > 0.5f) {
+            delay(STALL_POLL_MS)
+            if (!settling &&
+                renderedPx.floatValue > 0.5f &&
+                SystemClock.uptimeMillis() - lastSampleAtMs > STALL_RECOVERY_MS
+            ) {
                 PredictiveBackTrace.finish("stalled", widthPx, renderedPx.floatValue)
                 springBack()
             }
         }
     }
 
-    // Measurement only: while a drag is in flight, tick once per displayed frame so the readout can
-    // report the longest frame gap. It drives nothing, and it stops as soon as the drag does — a
-    // permanently running frame loop would keep the app rendering every vsync for nothing.
-    LaunchedEffect(dragging) {
-        if (!dragging) return@LaunchedEffect
+    // Measurement only: while a gesture or its settle is in flight, tick once per displayed frame so
+    // the readout can report the longest frame gap. It drives nothing, and it stops as soon as the
+    // settle finishes — a permanently running frame loop would keep the app rendering every vsync for
+    // nothing.
+    LaunchedEffect(dragging, settling) {
+        if (!dragging && !settling) return@LaunchedEffect
         while (true) {
             withFrameNanos { PredictiveBackTrace.frameTick() }
         }
@@ -205,16 +227,6 @@ fun PredictiveBackContainer(
         null
     }
     val backDispatcher = remember { NavigationEventDispatcher() }
-    DisposableEffect(backDispatcher, platformBackDispatcher) {
-        if (platformBackDispatcher == null) {
-            onDispose { }
-        } else {
-            val input = runCatching {
-                OnBackInvokedDefaultInput(platformBackDispatcher).also { backDispatcher.addInput(it) }
-            }.getOrNull()
-            onDispose { if (input != null) runCatching { backDispatcher.removeInput(input) } }
-        }
-    }
     val dispatcher = if (systemPredictiveBack) backDispatcher else null
     DisposableEffect(dispatcher, canGoBack, gestureGain) {
         if (dispatcher == null || !canGoBack) {
@@ -274,10 +286,10 @@ fun PredictiveBackContainer(
         }
     }
 
-    // Fallback driver, and the reason this file can be shipped while the navigationevent wiring above
-    // is still settling in: the platform hands a gesture to exactly one registered callback, so if
-    // the navigationevent input does not take it, this one does — and vice versa, never both. The
-    // readout's driver column says which of the two actually drove the gesture.
+    // Registered first, so the navigationevent input above takes the gesture — but kept as a fallback
+    // for the cases where that input is not in play (a platform without the system gesture callbacks,
+    // or the input failing to attach). The platform hands a gesture to exactly one registered callback,
+    // so these two can never both drive it; the readout's driver column says which one did.
     if (systemPredictiveBack) {
         PredictiveBackHandler(enabled = canGoBack) { events: Flow<BackEventCompat> ->
             try {
@@ -315,12 +327,31 @@ fun PredictiveBackContainer(
                     }
                 }
                 dragging = false
-                glideOut()
+                scope.launch { glideOut() }
             } catch (cancelled: CancellationException) {
+                // This coroutine is already cancelled, so anything suspending here — the settle
+                // animation above all — is cancelled on the spot and the page parks wherever the
+                // finger left it. The settle therefore has to run on a scope that is still alive.
                 dragging = false
-                springBack()
+                scope.launch { springBack() }
                 throw cancelled
             }
+        }
+    }
+
+    // The platform hands a gesture to a single callback, and the most recently registered one wins. This
+    // registration therefore sits *after* the androidx.activity handler below, which is what makes the
+    // navigationevent input the driver that actually takes the gesture. It is handed the platform's own
+    // OnBackInvokedDispatcher, wrapped in the library's input: those two calls are its whole platform
+    // side, and neither is reachable from a composition local here (a plain single-activity Compose host
+    // has no view-tree dispatcher owner, and the library's `rememberNavigationEventDispatcherOwner`
+    // throws in exactly that situation).
+    if (platformBackDispatcher != null) {
+        DisposableEffect(backDispatcher, platformBackDispatcher) {
+            val input = runCatching {
+                OnBackInvokedDefaultInput(platformBackDispatcher).also { backDispatcher.addInput(it) }
+            }.getOrNull()
+            onDispose { if (input != null) runCatching { backDispatcher.removeInput(input) } }
         }
     }
 
