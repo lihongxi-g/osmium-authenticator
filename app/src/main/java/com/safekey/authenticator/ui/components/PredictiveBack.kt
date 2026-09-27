@@ -36,7 +36,7 @@ import androidx.navigationevent.NavigationEvent
 import androidx.navigationevent.NavigationEventDispatcher
 import androidx.navigationevent.NavigationEventHandler
 import androidx.navigationevent.NavigationEventInfo
-import androidx.navigationevent.compose.LocalNavigationEventDispatcherOwner
+import androidx.navigationevent.compose.rememberNavigationEventDispatcherOwner
 import com.safekey.authenticator.data.AppSettings
 import kotlin.math.round
 import kotlinx.coroutines.launch
@@ -155,8 +155,14 @@ fun PredictiveBackContainer(
         }
     }
 
+    // The dispatcher that carries the platform's back gesture. It has to be the one this library
+    // creates: `rememberNavigationEventDispatcherOwner` sets it up and attaches the platform input
+    // (`OnBackInvokedDefaultInput`). Reading the composition local alone is not enough here — a plain
+    // single-activity Compose host has no view-tree owner, so the local is null, the handler gets
+    // registered nowhere and the gesture falls through to finishing the activity.
+    val backDispatcherOwner = rememberNavigationEventDispatcherOwner()
     val dispatcher = if (systemPredictiveBack) {
-        LocalNavigationEventDispatcherOwner.current?.navigationEventDispatcher
+        backDispatcherOwner.navigationEventDispatcher
     } else {
         null
     }
