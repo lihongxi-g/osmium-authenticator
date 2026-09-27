@@ -30,6 +30,9 @@ object PredictiveBackTrace {
     private var lastRenderedPx = Float.NaN
     private var lastSampleAt = 0L
     private var maxGapMs = 0L
+    private var frameTicks = 0
+    private var lastFrameAt = 0L
+    private var maxFrameMs = 0L
 
     fun begin(rightEdge: Boolean) {
         edge = if (rightEdge) "R" else "L"
@@ -46,6 +49,9 @@ object PredictiveBackTrace {
         lastRenderedPx = Float.NaN
         lastSampleAt = 0L
         maxGapMs = 0L
+        frameTicks = 0
+        lastFrameAt = 0L
+        maxFrameMs = 0L
     }
 
     fun edgeLocked(rightEdge: Boolean) {
@@ -67,6 +73,21 @@ object PredictiveBackTrace {
     fun pointerSample(fingerX: Float) {
         pointerSamples++
         if (maxFinger.isNaN() || fingerX > maxFinger) maxFinger = fingerX
+    }
+
+    /**
+     * One displayed frame. The longest gap between two of them is the render-stall detector: a
+     * heavy frame shows up here as a large number, while a stalled input stream shows up in
+     * [sampleTiming] instead — telling those two apart is the whole point of keeping both.
+     */
+    fun frameTick() {
+        val now = System.nanoTime()
+        if (lastFrameAt != 0L) {
+            val gapMs = (now - lastFrameAt) / 1_000_000L
+            if (gapMs > maxFrameMs) maxFrameMs = gapMs
+        }
+        lastFrameAt = now
+        frameTicks++
     }
 
     /** Which stream ended up driving the offset. */
@@ -114,7 +135,8 @@ object PredictiveBackTrace {
             append(" · driver ").append(mode)
             append(" · travel ").append(travel).append("%")
             append(" · maxGap ").append(maxGapMs).append("ms")
-            append(" · frames ").append(frames)
+            append(" · frames ").append(frameTicks)
+            append(" · maxFrame ").append(maxFrameMs).append("ms")
             append(" · last ").append(fmt(lastRenderedPx, 0))
             append(" · ").append(outcome)
             append(" · ").append(millis).append("ms")

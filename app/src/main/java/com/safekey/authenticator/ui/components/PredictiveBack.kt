@@ -21,8 +21,13 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.drawscope.ContentDrawScope
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
@@ -55,9 +60,10 @@ private const val SCRIM_MAX_ALPHA = 0.35f
  *
  * What is kept from the earlier rounds, because each one fixed a real defect:
  *
- * - the page underneath is resident (composed at rest), untransformed and unclipped. Composing it
- *   during the gesture dropped frames; shifting it (parallax) left its content cut mid-glyph in the
- *   sliver at the screen edge; clipping it re-recorded its whole draw on every gesture frame;
+ * - the page underneath is resident (composed at rest) and untransformed. Composing it during the
+ *   gesture dropped frames; shifting it (parallax) left its content cut mid-glyph in the sliver at
+ *   the screen edge. It is only *drawn* on the exposed strip, and it sits in a layer of its own so
+ *   that clip re-records two calls per frame instead of the whole page's draw;
  * - the travelling page is never rounded-clipped (a leading-edge radius cuts a notch out of the
  *   screen edge, which reads as the page underneath leaking through) and its offset is snapped to
  *   whole device pixels (a fractional edge composites against the page underneath and shows up as a
@@ -97,6 +103,16 @@ fun PredictiveBackContainer(
     // Which edge the current gesture came from, locked for that gesture: the geometry must not flip
     // halfway through.
     var fromRight by remember { mutableStateOf(false) }
+
+    // Measurement only: while a drag is in flight, tick once per displayed frame so the readout can
+    // report the longest frame gap. It never drives anything, and it stops as soon as the drag does —
+    // a permanently running frame loop would keep the app rendering every vsync for nothing.
+    LaunchedEffect(dragging) {
+        if (!dragging) return@LaunchedEffect
+        while (true) {
+            withFrameNanos { PredictiveBackTrace.frameTick() }
+        }
+    }
 
     val commitGlide = remember(commitDurationMillis) {
         tween<Float>(commitDurationMillis, easing = FastOutSlowInEasing)
@@ -226,10 +242,25 @@ fun PredictiveBackContainer(
             .then(fallbackModifier)
     ) {
         if (previous != null) {
-            // Resident and deliberately untransformed and unclipped. See the notes above: each of
-            // those three was tried and each one cost more than it saved.
-            Box(modifier = Modifier.fillMaxSize()) {
-                previous()
+            // Resident and untransformed, but only ever drawn on the strip the travelling page has
+            // left uncovered. Without that, a gesture frame pays for two full-screen pages plus a
+            // full-screen scrim — about four screenfuls at 120 Hz — which is what is left of the
+            // stutter now that the drive itself is exact. The page sits in a layer of its own so the
+            // clip re-records two calls per frame instead of the page's entire draw.
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .drawWithContent {
+                        drawExposedStrip(renderedPx.floatValue, fromRight)
+                    }
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
+                ) {
+                    previous()
+                }
             }
             if (showScrim) {
                 Box(
@@ -244,6 +275,9 @@ fun PredictiveBackContainer(
                             // Zero at both ends: a linear ramp flashes a grey layer on the first and
                             // the last frame of the gesture.
                             alpha = SCRIM_MAX_ALPHA * 4f * p * (1f - p)
+                        }
+                        .drawWithContent {
+                            drawExposedStrip(renderedPx.floatValue, fromRight)
                         }
                         .background(Color.Black)
                 )
@@ -327,5 +361,20 @@ private fun Modifier.fallbackEdgeSwipe(
             if (traveled < 0f) continue
             onEnd(traveled, width)
         }
+    }
+}
+
+/**
+ * Draws only the strip the travelling page has left uncovered, with a pixel of slack towards the
+ * covered side so that rounding the page's offset can never leave a backdrop line at the edge.
+ */
+private inline fun ContentDrawScope.drawExposedStrip(exposed: Float, fromRight: Boolean) {
+    if (fromRight) {
+        val left = size.width - exposed
+        if (left >= size.width) return
+        clipRect(left - 1f, 0f, size.width, size.height) { this@drawExposedStrip.drawContent() }
+    } else {
+        if (exposed <= 0f) return
+        clipRect(0f, 0f, exposed + 1f, size.height) { this@drawExposedStrip.drawContent() }
     }
 }
