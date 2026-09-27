@@ -26,6 +26,8 @@ object PredictiveBackTrace {
     private var maxFinger = Float.NaN
     private var mode = "?"
     private var startedAt = 0L
+    private var frames = 0
+    private var lastRenderedPx = Float.NaN
 
     fun begin(rightEdge: Boolean) {
         edge = if (rightEdge) "R" else "L"
@@ -38,6 +40,8 @@ object PredictiveBackTrace {
         maxFinger = Float.NaN
         mode = "?"
         startedAt = System.currentTimeMillis()
+        frames = 0
+        lastRenderedPx = Float.NaN
     }
 
     fun edgeLocked(rightEdge: Boolean) {
@@ -66,6 +70,16 @@ object PredictiveBackTrace {
         mode = name
     }
 
+    /**
+     * One step of the per-frame follow loop, with the offset it rendered. Counting these is what
+     * proves the loop is actually running on a given device (a stalled follow shows up as a handful
+     * of frames for a gesture that lasted hundreds of milliseconds).
+     */
+    fun followStep(renderedPx: Float) {
+        frames++
+        lastRenderedPx = renderedPx
+    }
+
     fun finish(outcome: String, widthPx: Float, travelPx: Float) {
         val millis = System.currentTimeMillis() - startedAt
         val travel = if (widthPx > 0f) (travelPx / widthPx * 100f).toInt() else 0
@@ -81,6 +95,8 @@ object PredictiveBackTrace {
             if (pointerSamples > 0) append(" (max ").append(fmt(maxFinger, 0)).append(")")
             append(" · driver ").append(mode)
             append(" · travel ").append(travel).append("%")
+            append(" · frames ").append(frames)
+            append(" · last ").append(fmt(lastRenderedPx, 0))
             append(" · ").append(outcome)
             append(" · ").append(millis).append("ms")
             append(" · width ").append(widthPx.toInt())

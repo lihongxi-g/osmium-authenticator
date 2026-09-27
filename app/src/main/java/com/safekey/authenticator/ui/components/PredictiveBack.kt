@@ -2,9 +2,9 @@ package com.safekey.authenticator.ui.components
 
 import androidx.activity.BackEventCompat
 import androidx.activity.compose.PredictiveBackHandler
-import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -21,7 +21,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -31,12 +31,10 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.safekey.authenticator.data.AppSettings
-import kotlin.math.abs
+import kotlin.math.exp
 import kotlin.math.round
-import kotlin.math.sqrt
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collectLatest
 
 /**
  * Converts platform `progress` into a travel fraction for the last-resort path, used only when
@@ -56,34 +54,33 @@ private const val EDGE_ZONE_DP = 40
 private const val FALLBACK_COMMIT_FRACTION = 0.15f
 
 /**
- * Stiffness of the spring that carries the page to the newest finger sample.
+ * Angular frequency of the spring that carries the page to the predicted finger position.
  *
- * Measured on the production device: a full swipe carries only about ten gesture samples, roughly
- * 50 px and 24 ms apart. Snapping to each sample therefore moves the page in visible jumps and
- * leaves it standing still in between — which is what reads as dropped frames and as being stuck.
- * Interpolating instead gives motion on every displayed frame; the seed velocity (below) keeps the
- * page under the finger rather than trailing it.
+ * Measured on the production device: a whole swipe carries only about ten gesture samples, roughly
+ * 50 px and 24 ms apart, and the system does not forward ordinary touch events while it owns the
+ * gesture. Moving the page on each sample alone therefore leaves it motionless for two frames out of
+ * three — the "dropped frames" and "stuck" reports. The finger position is extrapolated between
+ * samples instead, and the spring only smooths the corners, so the page moves on every frame.
  */
-private const val FOLLOW_STIFFNESS = 5000f
+private const val FOLLOW_OMEGA = 70f
 
-/** Angular frequency of the follow spring, used for the no-overshoot velocity bound. */
-private val FOLLOW_OMEGA = sqrt(FOLLOW_STIFFNESS)
-
-/** What the follow loop animates towards: the newest sample and the speed it is moving at. */
-private data class Follow(val settling: Boolean, val targetPx: Float, val velocityPx: Float)
+/**
+ * How far ahead the last sample's speed may be trusted, in seconds. Roughly one sample interval, so
+ * a finger that stops or turns around cannot leave the page running away for longer than that.
+ */
+private const val PREDICT_HORIZON_S = 0.025f
 
 /**
  * Predictive-back navigation container.
  *
  * Input model and geometry are both the result of field measurements (see the project's
- * predictive-back notes). Two platform facts shape the design:
+ * predictive-back notes):
  *
- * - the gesture stream is *sparse* (about ten events per swipe) and carries the finger position, so
- *   the rendered offset follows the newest sample through a critically damped spring instead of
- *   jumping to it — and the sample's own velocity is fed in, so following does not add a lag;
+ * - the platform's gesture stream carries the finger position but only about ten samples per swipe,
+ *   so the page is driven by an extrapolation of those samples (position + speed) through a
+ *   critically damped spring, integrated by hand once per displayed frame;
  * - that stream is **not** delivered to the app as ordinary touch events while the system owns the
- *   gesture (`ptr 0` on device), so the extra pointer sampler below is only a bonus for platforms
- *   that do forward them.
+ *   gesture, so the extra pointer sampler below is only a bonus for platforms that do forward them.
  *
  * Rendering: the offset is read exclusively inside deferred `graphicsLayer { }` blocks, so a gesture
  * frame costs no recomposition. The page underneath is resident (composed at rest), untransformed
@@ -116,16 +113,14 @@ fun PredictiveBackContainer(
 ) {
     val density = LocalDensity.current
 
-    // Rendered offset in pixels: what the travelling page's translation reads. Animatable is the
-    // right tool *here* — it is what turns sparse gesture samples into per-frame motion.
-    val dragged = remember { Animatable(0f) }
-    // Newest finger-derived offset. Cheap plain state, rewritten on every sample.
-    val targetPx = remember { mutableFloatStateOf(0f) }
-    // Speed of that target, in px/s, sampled between events and fed into the follow spring so the
-    // page neither trails the finger nor shoots past it.
-    var targetVelocityPx = 0f
-    var lastTargetPx = 0f
-    var lastSampleNanos = 0L
+    // Rendered offset in pixels: what the travelling page's translation reads. Plain state written
+    // by the frame loop below (and by the settle animations).
+    val renderedPx = remember { mutableFloatStateOf(0f) }
+    // Newest finger sample, its speed, and when it arrived. Plain values: the frame loop reads them
+    // every frame, so they never need to trigger anything themselves.
+    var samplePx = 0f
+    var sampleVelocityPx = 0f
+    var sampleNanos = 0L
     // Latest finger position from our own pointer stream, in container pixels (-1 = none yet).
     val fingerPx = remember { mutableFloatStateOf(-1f) }
     var widthPx by remember { mutableFloatStateOf(0f) }
@@ -140,9 +135,6 @@ fun PredictiveBackContainer(
     val commitGlide = remember(commitDurationMillis) {
         tween<Float>(commitDurationMillis, easing = FastOutSlowInEasing)
     }
-    val followSpring = remember {
-        spring<Float>(dampingRatio = 1f, stiffness = FOLLOW_STIFFNESS)
-    }
     val cancelSpring = remember {
         spring<Float>(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessLow)
     }
@@ -154,37 +146,64 @@ fun PredictiveBackContainer(
         return (travelled * gestureGain).coerceIn(0f, width)
     }
 
-    /** Publish a new target, deriving its speed from the gap since the previous sample. */
-    fun setTarget(value: Float) {
+    /** Publish a finger sample, deriving its speed from the gap since the previous one. */
+    fun setFinger(finger: Float, rightEdge: Boolean, width: Float) {
+        val value = offsetForFinger(finger, rightEdge, width)
         val now = System.nanoTime()
-        val seconds = (now - lastSampleNanos) / 1_000_000_000f
-        if (lastSampleNanos != 0L && seconds > 0.001f) {
-            targetVelocityPx = (value - lastTargetPx) / seconds
+        if (sampleNanos != 0L) {
+            val seconds = (now - sampleNanos) / 1_000_000_000f
+            if (seconds > 0.001f) sampleVelocityPx = (value - samplePx) / seconds
         }
-        lastTargetPx = value
-        lastSampleNanos = now
-        targetPx.floatValue = value
+        samplePx = value
+        sampleNanos = now
     }
 
-    /** Forget the sample history so a new gesture cannot inherit the previous one's speed. */
-    fun resetTargetHistory() {
-        lastSampleNanos = 0L
-        targetVelocityPx = 0f
-        lastTargetPx = dragged.value
+    /** Drop the sample history so a new gesture cannot inherit the previous one's speed. */
+    fun resetSamples(at: Float) {
+        samplePx = at
+        sampleVelocityPx = 0f
+        sampleNanos = 0L
     }
 
-    // The per-frame follow. Restarts on every new sample, seeded with the sample's velocity clamped
-    // to the no-overshoot bound of a critically damped spring — the same trick the navigation shell
-    // this geometry comes from uses for its settle.
+    // The follow loop. One integration step per displayed frame: extrapolate the finger from the
+    // newest sample and its speed, then move the page towards that through a critically damped
+    // spring — hand-written rather than delegated to Animatable/snapshotFlow so that every step is
+    // visible here (a previous version stalled on device in exactly that delegation).
     LaunchedEffect(Unit) {
-        snapshotFlow { Follow(settling, targetPx.floatValue, targetVelocityPx) }
-            .collectLatest { (isSettling, target, velocity) ->
-                if (isSettling) return@collectLatest
-                val gap = target - dragged.value
-                val bound = FOLLOW_OMEGA * abs(gap)
-                val seed = velocity.coerceIn(-bound, bound)
-                dragged.animateTo(target, followSpring, initialVelocity = seed)
+        var lastFrameNanos = 0L
+        var velocity = 0f
+        while (true) {
+            withFrameNanos { now ->
+                val dt = if (lastFrameNanos == 0L) {
+                    0f
+                } else {
+                    ((now - lastFrameNanos) / 1_000_000_000f).coerceIn(0f, 0.05f)
+                }
+                lastFrameNanos = now
+                if (dt <= 0f || settling || (sampleNanos == 0L && !dragging)) {
+                    return@withFrameNanos
+                }
+                // Where the finger is now, according to the newest sample and its speed.
+                val elapsed = if (sampleNanos == 0L) {
+                    0f
+                } else {
+                    (now - sampleNanos) / 1_000_000_000f
+                }
+                val predicted = samplePx + sampleVelocityPx * elapsed.coerceAtMost(PREDICT_HORIZON_S)
+                val target = if (dragging) predicted else 0f
+                // Critically damped step, closed form: with error e and e'(0) = v,
+                //   e(t) = (e + (v + w·e)·t)·exp(-w·t)
+                // which crosses zero (overshoots) only when the bracket has the opposite sign to e.
+                val error = renderedPx.floatValue - target
+                var bracket = velocity + FOLLOW_OMEGA * error
+                if (bracket * error < 0f) bracket = 0f
+                val decay = exp(-FOLLOW_OMEGA * dt)
+                val nextError = (error + bracket * dt) * decay
+                renderedPx.floatValue = target + nextError
+                velocity = (bracket - FOLLOW_OMEGA * (error + bracket * dt)) * decay
+                PredictiveBackTrace.followStep(renderedPx.floatValue)
             }
+        }
     }
 
     /**
@@ -206,11 +225,11 @@ fun PredictiveBackContainer(
                     val change = event.changes.firstOrNull { it.id == down.id } ?: break
                     if (!change.pressed) break
                     fingerPx.floatValue = change.position.x
-                    // Only drive the offset once the platform has confirmed a back gesture: a drag
-                    // that starts near the edge can also be a list scrolling.
+                    // Only follow once the platform has confirmed a back gesture: a drag that starts
+                    // near the edge can also be a list scrolling.
                     if (dragging && !settling) {
                         fromRight = startedRight
-                        setTarget(offsetForFinger(change.position.x, startedRight, width))
+                        setFinger(change.position.x, startedRight, width)
                     }
                     PredictiveBackTrace.pointerSample(change.position.x)
                 }
@@ -232,7 +251,7 @@ fun PredictiveBackContainer(
                     // `committed` set, and that pins the page at zero for the whole next drag.
                     committed = false
                     showScrim = true
-                    resetTargetHistory()
+                    resetSamples(renderedPx.floatValue)
                     PredictiveBackTrace.begin(fromRight)
                 }
                 var edgeLocked = false
@@ -247,41 +266,45 @@ fun PredictiveBackContainer(
                     // moving.
                     val fraction = event.progress.coerceAtLeast(0f)
                     PredictiveBackTrace.platformEvent(fraction, event.touchX)
-                    // Only publish a target; the follow loop above turns it into motion. Our own
-                    // pointer samples win when they exist, then the platform's touch position, then
-                    // its progress as the last resort.
+                    // Only publish a sample; the frame loop turns it into motion. Our own pointer
+                    // samples win when they exist, then the platform's touch position, then its
+                    // progress as the last resort.
                     if (fingerPx.floatValue >= 0f) {
                         PredictiveBackTrace.driver("pointer")
                     } else if (event.touchX > 0f && widthPx > 0f) {
                         PredictiveBackTrace.driver("touchX")
-                        setTarget(offsetForFinger(event.touchX, fromRight, widthPx))
+                        setFinger(event.touchX, fromRight, widthPx)
                     } else {
                         PredictiveBackTrace.driver("progress")
-                        setTarget(
+                        val value =
                             (fraction * FALLBACK_PROGRESS_GAIN * gestureGain)
                                 .coerceIn(0f, 1f) * widthPx
-                        )
+                        samplePx = value
+                        sampleNanos = System.nanoTime()
                     }
                 }
-                // Committed. Target the far edge, let the settle glide finish, then pop — otherwise
-                // the pop snaps the page back into place.
-                val from = dragged.value
+                // Committed. Glide the rest of the way out, then pop — otherwise the pop snaps the
+                // page back into place.
+                val from = renderedPx.floatValue
                 dragging = false
                 settling = true
-                targetPx.floatValue = widthPx
-                dragged.animateTo(widthPx, commitGlide)
+                animate(from, widthPx, animationSpec = commitGlide) { value, _ ->
+                    renderedPx.floatValue = value
+                }
                 settling = false
+                resetSamples(widthPx)
                 committed = true
                 PredictiveBackTrace.finish("commit", widthPx, from)
                 onBack()
             } catch (cancelled: CancellationException) {
-                val from = dragged.value
+                val from = renderedPx.floatValue
                 dragging = false
                 settling = true
-                dragged.animateTo(0f, cancelSpring)
+                animate(from, 0f, animationSpec = cancelSpring) { value, _ ->
+                    renderedPx.floatValue = value
+                }
                 settling = false
-                targetPx.floatValue = 0f
-                resetTargetHistory()
+                resetSamples(0f)
                 showScrim = false
                 PredictiveBackTrace.finish("cancel", widthPx, from)
                 throw cancelled
@@ -293,9 +316,8 @@ fun PredictiveBackContainer(
     // layers line up exactly and the reset is invisible.
     LaunchedEffect(navKey) {
         if (committed) {
-            dragged.snapTo(0f)
-            targetPx.floatValue = 0f
-            resetTargetHistory()
+            renderedPx.floatValue = 0f
+            resetSamples(0f)
             committed = false
             showScrim = false
         }
@@ -323,31 +345,34 @@ fun PredictiveBackContainer(
                     committed = false
                     showScrim = true
                     fromRight = startedRight
-                    resetTargetHistory()
+                    resetSamples(renderedPx.floatValue)
                     PredictiveBackTrace.begin(startedRight)
                     while (true) {
                         val event = awaitPointerEvent()
                         val change = event.changes.firstOrNull { it.id == down.id } ?: break
                         if (!change.pressed || change.isConsumed) break
                         change.consume()
-                        setTarget(offsetForFinger(change.position.x, startedRight, width))
+                        setFinger(change.position.x, startedRight, width)
                     }
                 }
-                val travelled = targetPx.floatValue
+                val travelled = renderedPx.floatValue
                 dragging = false
                 settling = true
                 if (travelled > width * FALLBACK_COMMIT_FRACTION) {
-                    targetPx.floatValue = width
-                    dragged.animateTo(width, commitGlide)
+                    animate(travelled, width, animationSpec = commitGlide) { value, _ ->
+                        renderedPx.floatValue = value
+                    }
                     settling = false
+                    resetSamples(width)
                     committed = true
                     PredictiveBackTrace.finish("commit", width, travelled)
                     onBack()
                 } else {
-                    dragged.animateTo(0f, cancelSpring)
+                    animate(travelled, 0f, animationSpec = cancelSpring) { value, _ ->
+                        renderedPx.floatValue = value
+                    }
                     settling = false
-                    targetPx.floatValue = 0f
-                    resetTargetHistory()
+                    resetSamples(0f)
                     showScrim = false
                     PredictiveBackTrace.finish("cancel", width, travelled)
                 }
@@ -381,7 +406,7 @@ fun PredictiveBackContainer(
                         .fillMaxSize()
                         .graphicsLayer {
                             val p = if (widthPx > 0f) {
-                                (dragged.value / widthPx).coerceIn(0f, 1f)
+                                (renderedPx.floatValue / widthPx).coerceIn(0f, 1f)
                             } else {
                                 0f
                             }
@@ -402,7 +427,7 @@ fun PredictiveBackContainer(
                     translationX = if (committed) {
                         0f
                     } else {
-                        val pass = round(dragged.value)
+                        val pass = round(renderedPx.floatValue)
                         if (fromRight) -pass else pass
                     }
                 }
