@@ -475,14 +475,19 @@ fun PredictiveBackContainer(
                 // (a list of cards) is otherwise re-recorded on every frame of the drag. Offscreen
                 // makes each frame a composite of an already-rendered texture, re-recorded only when
                 // the content itself changes (the countdown tick, not the gesture).
-                .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen) {
-                    // While committed, the layer underneath is already the top page, so the offset
-                    // must be zero no matter what the driver still holds.
-                    // Always to the right, whichever edge the gesture came from: the animation is
-                    // deliberately not mirrored (the follow distance still tracks the finger, the
-                    // direction does not).
-                    translationX = if (committed) 0f else round(renderedPx.floatValue)
-                }
+                .graphicsLayer(
+                    compositingStrategy = CompositingStrategy.Offscreen,
+                    // Passed by name: with a trailing lambda this overload resolves the lambda to
+                    // a positional parameter that is not the block, which fails to compile.
+                    block = {
+                        // While committed, the layer underneath is already the top page, so the
+                        // offset must be zero no matter what the driver still holds. Always to the
+                        // right, whichever edge the gesture came from: the animation is deliberately
+                        // not mirrored (the follow distance still tracks the finger, the direction
+                        // does not).
+                        translationX = if (committed) 0f else round(renderedPx.floatValue)
+                    }
+                )
                 // Opaque floor under the page: nothing underneath can ever show through the page's
                 // own transparent areas.
                 .background(MaterialTheme.colorScheme.background)
