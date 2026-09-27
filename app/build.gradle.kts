@@ -8,13 +8,15 @@ plugins {
 
 android {
     namespace = "com.safekey.authenticator"
-    compileSdk = 35
+    // 36 is required by androidx.navigationevent (the back-gesture driver); targetSdk stays
+    // where it was, since raising it changes runtime behaviour and is a separate decision.
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.safekey.authenticator"
         minSdk = 26
         targetSdk = 34
-        versionCode = 78
+        versionCode = 79
         versionName = "2.5.4"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
