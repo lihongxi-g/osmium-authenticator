@@ -5,6 +5,7 @@ import androidx.activity.compose.PredictiveBackHandler
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -18,6 +19,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -55,8 +57,8 @@ private const val COMMIT_SETTLE_MILLIS = 220
  * Layout and behaviour follow KernelSU's navigation shell (miuix-nav, Apache-2.0 — see the
  * sources page for attribution):
  *
- * - one driver (the reveal fraction) is written 1:1 from the gesture and only ever read inside
- *   deferred `graphicsLayer { }` blocks, so a gesture frame costs no recomposition;
+ * - the reveal fraction is written 1:1 from the gesture and only ever read inside deferred
+ *   `graphicsLayer { }` blocks, so a gesture frame costs no recomposition;
  * - the page being left slides out over a solid backdrop, and the page underneath parallaxes in
  *   from the leading edge behind a scrim, so a gap never shows another screen's edge;
  * - the moving page is corner-clipped on its leading edge only (the edge facing the revealed
@@ -82,15 +84,20 @@ fun PredictiveBackContainer(
     content: @Composable () -> Unit
 ) {
     val density = LocalDensity.current
-    // 0f = settled, 1f = the page has travelled all the way off the screen.
-    val reveal = remember { Animatable(0f) }
+    // The platform gesture feeds an Animatable (its callbacks run in an ordinary coroutine);
+    // the edge-swipe fallback writes plain state, because pointer callbacks run inside a
+    // restricted coroutine scope that cannot suspend on an Animatable.
+    val systemReveal = remember { Animatable(0f) }
+    val dragReveal = remember { mutableFloatStateOf(0f) }
     var dragging by remember { mutableStateOf(false) }
     var settling by remember { mutableStateOf(false) }
     var committed by remember { mutableStateOf(false) }
     var showPrevious by remember { mutableStateOf(false) }
 
     val travelling = dragging || settling
-    val progress: () -> Float = { reveal.value }
+    // 0f = settled, 1f = the page has travelled all the way off the screen.
+    val progress: () -> Float =
+        if (systemPredictiveBack) ({ systemReveal.value }) else ({ dragReveal.floatValue })
     val leadingClip = RoundedCornerShape(
         topStart = 16.dp,
         bottomStart = 16.dp,
@@ -110,13 +117,13 @@ fun PredictiveBackContainer(
                 events.collect { event ->
                     val fraction = event.progress.coerceIn(0f, 1f)
                     if (!showPrevious && fraction > 0.02f) showPrevious = true
-                    reveal.snapTo(fraction * GESTURE_GAIN)
+                    systemReveal.snapTo(fraction * GESTURE_GAIN)
                 }
                 // The platform committed. Glide the rest of the way out while this layout is
                 // still on screen, then pop — otherwise the pop snaps the page back into place.
                 dragging = false
                 settling = true
-                reveal.animateTo(
+                systemReveal.animateTo(
                     targetValue = 1f,
                     animationSpec = tween(COMMIT_SETTLE_MILLIS, easing = FastOutSlowInEasing)
                 )
@@ -126,7 +133,7 @@ fun PredictiveBackContainer(
             } catch (cancelled: CancellationException) {
                 dragging = false
                 settling = true
-                reveal.animateTo(
+                systemReveal.animateTo(
                     targetValue = 0f,
                     animationSpec = spring(
                         dampingRatio = Spring.DampingRatioNoBouncy,
@@ -144,7 +151,8 @@ fun PredictiveBackContainer(
     // layers line up exactly and the reset is invisible.
     LaunchedEffect(navKey) {
         if (committed) {
-            reveal.snapTo(0f)
+            systemReveal.snapTo(0f)
+            dragReveal.floatValue = 0f
             committed = false
             showPrevious = false
         }
@@ -156,45 +164,55 @@ fun PredictiveBackContainer(
             val edgePx = with(density) { 40.dp.toPx() }
             val thresholdPx = with(density) { 8.dp.toPx() }
             val widthPx = size.width.toFloat()
-            awaitEachGesture {
-                val down = awaitFirstDown(requireUnconsumed = false)
-                if (down.position.x > edgePx) return@awaitEachGesture
-                // Only a real horizontal drag takes over — a vertical scroll that happens to
-                // start near the edge must still scroll.
-                awaitHorizontalTouchSlopOrCancellation(down.id) { change, _ ->
-                    change.consume()
-                } ?: return@awaitEachGesture
-                var total = 0f
-                dragging = true
-                onGestureStart()
-                while (true) {
-                    val event = awaitPointerEvent()
-                    val change = event.changes.firstOrNull { it.id == down.id } ?: break
-                    if (!change.pressed || change.isConsumed) break
-                    change.consume()
-                    total = (total + change.positionChange().x).coerceAtLeast(0f)
-                    if (!showPrevious && total > thresholdPx) showPrevious = true
-                    // 1:1 with the finger: the page follows the drag in pixels.
-                    reveal.snapTo((total / widthPx).coerceIn(0f, 1f))
+            var travelled = -1f
+            while (true) {
+                // The gesture itself has to stay inside the restricted pointer scope, so it only
+                // writes plain state — the settle animation runs once we are back outside.
+                awaitEachGesture {
+                    travelled = -1f
+                    val down = awaitFirstDown(requireUnconsumed = false)
+                    if (down.position.x > edgePx) return@awaitEachGesture
+                    // Only a real horizontal drag takes over: a vertical scroll that happens to
+                    // start near the edge must still scroll.
+                    awaitHorizontalTouchSlopOrCancellation(down.id) { change, _ ->
+                        change.consume()
+                    } ?: return@awaitEachGesture
+                    var total = 0f
+                    dragging = true
+                    onGestureStart()
+                    while (true) {
+                        val event = awaitPointerEvent()
+                        val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                        if (!change.pressed || change.isConsumed) break
+                        change.consume()
+                        total = (total + change.positionChange().x).coerceAtLeast(0f)
+                        if (!showPrevious && total > thresholdPx) showPrevious = true
+                        // 1:1 with the finger: the page follows the drag in pixels.
+                        dragReveal.floatValue = (total / widthPx).coerceIn(0f, 1f)
+                    }
+                    travelled = total
                 }
+                if (travelled < 0f) continue
                 dragging = false
                 settling = true
-                if (total > widthPx * 0.15f) {
-                    reveal.animateTo(
+                if (travelled > widthPx * 0.15f) {
+                    animate(
+                        initialValue = dragReveal.floatValue,
                         targetValue = 1f,
                         animationSpec = tween(COMMIT_SETTLE_MILLIS, easing = FastOutSlowInEasing)
-                    )
+                    ) { value, _ -> dragReveal.floatValue = value }
                     settling = false
                     committed = true
                     onBack()
                 } else {
-                    reveal.animateTo(
+                    animate(
+                        initialValue = dragReveal.floatValue,
                         targetValue = 0f,
                         animationSpec = spring(
                             dampingRatio = Spring.DampingRatioNoBouncy,
                             stiffness = Spring.StiffnessLow
                         )
-                    )
+                    ) { value, _ -> dragReveal.floatValue = value }
                     settling = false
                     showPrevious = false
                 }
