@@ -185,6 +185,18 @@ fun AppearanceScreen(vm: MainViewModel, onBack: () -> Unit) {
                 scale = settings.uiScale,
                 onScale = vm::setUiScale
             )
+            SliderSettingRow(
+                icon = AppIcons.Timer,
+                title = stringResource(R.string.appearance_motion_duration),
+                description = stringResource(R.string.appearance_motion_duration_desc),
+                valueLabel = "${settings.motionDurationMs} ms",
+                value = settings.motionDurationMs.toFloat(),
+                range = AppSettings.MOTION_DURATION_MIN.toFloat()..
+                    AppSettings.MOTION_DURATION_MAX.toFloat(),
+                steps = (AppSettings.MOTION_DURATION_MAX - AppSettings.MOTION_DURATION_MIN) /
+                    AppSettings.MOTION_DURATION_STEP - 1,
+                onValueChange = { vm.setMotionDuration(it.roundToInt()) }
+            )
 
             Text(
                 text = stringResource(R.string.appearance_security_note),
@@ -379,6 +391,30 @@ private fun SwatchButton(
 
 @Composable
 private fun UiScaleRow(scale: Float, onScale: (Float) -> Unit) {
+    SliderSettingRow(
+        icon = AppIcons.DragIndicator,
+        title = stringResource(R.string.appearance_ui_scale),
+        description = stringResource(R.string.appearance_ui_scale_desc),
+        valueLabel = "${(scale * 100).roundToInt()}%",
+        value = scale,
+        range = AppSettings.UI_SCALE_MIN..AppSettings.UI_SCALE_MAX,
+        steps = 7,
+        onValueChange = onScale
+    )
+}
+
+/** Grouped card with a leading icon, a label/description and a slider. */
+@Composable
+private fun SliderSettingRow(
+    icon: ImageVector,
+    title: String,
+    description: String,
+    valueLabel: String,
+    value: Float,
+    range: ClosedFloatingPointRange<Float>,
+    steps: Int,
+    onValueChange: (Float) -> Unit
+) {
     SettingsCard {
         Column(
             modifier = Modifier
@@ -387,7 +423,7 @@ private fun UiScaleRow(scale: Float, onScale: (Float) -> Unit) {
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
-                    imageVector = AppIcons.DragIndicator,
+                    imageVector = icon,
                     contentDescription = null,
                     modifier = Modifier.size(24.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
@@ -398,27 +434,27 @@ private fun UiScaleRow(scale: Float, onScale: (Float) -> Unit) {
                         .padding(start = 16.dp, end = 8.dp)
                 ) {
                     Text(
-                        text = stringResource(R.string.appearance_ui_scale),
+                        text = title,
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = stringResource(R.string.appearance_ui_scale_desc),
+                        text = description,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 Text(
-                    text = "${(scale * 100).roundToInt()}%",
+                    text = valueLabel,
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             Slider(
-                value = scale,
-                onValueChange = onScale,
-                valueRange = AppSettings.UI_SCALE_MIN..AppSettings.UI_SCALE_MAX,
-                steps = 7
+                value = value,
+                onValueChange = onValueChange,
+                valueRange = range,
+                steps = steps
             )
         }
     }

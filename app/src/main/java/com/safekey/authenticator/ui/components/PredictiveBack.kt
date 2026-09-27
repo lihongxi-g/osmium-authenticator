@@ -14,7 +14,6 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.awaitHorizontalTouchSlopOrCancellation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -24,9 +23,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
@@ -48,8 +45,8 @@ private const val PARALLAX_FRACTION = 0.12f
 /** Peak alpha of the scrim that covers the revealed page. */
 private const val SCRIM_MAX_ALPHA = 0.35f
 
-/** Commit glide: carries the page the rest of the way out after the platform committed. */
-private const val COMMIT_SETTLE_MILLIS = 220
+/** Default commit glide, used when the caller does not pass its own duration. */
+private const val DEFAULT_COMMIT_SETTLE_MILLIS = 185
 
 /**
  * Predictive-back navigation container.
@@ -61,8 +58,8 @@ private const val COMMIT_SETTLE_MILLIS = 220
  *   `graphicsLayer { }` blocks, so a gesture frame costs no recomposition;
  * - the page being left slides out over a solid backdrop, and the page underneath parallaxes in
  *   from the leading edge behind a scrim, so a gap never shows another screen's edge;
- * - the moving page is corner-clipped on its leading edge only (the edge facing the revealed
- *   page), which keeps the rounding away from the screen edge;
+ * - the moving page is never rounded-clipped: a leading-edge radius cuts a notch out of the
+ *   screen edge, which reads as the page underneath leaking through;
  * - a cancelled gesture springs back with no overshoot; a committed one glides the rest of the
  *   way out *before* the pop, so the pop itself is invisible instead of a jump or a flash.
  *
@@ -80,6 +77,8 @@ fun PredictiveBackContainer(
     navKey: Any?,
     previous: (@Composable () -> Unit)?,
     onGestureStart: () -> Unit = {},
+    /** Duration of the commit glide (the slider in the appearance settings). */
+    commitDurationMillis: Int = DEFAULT_COMMIT_SETTLE_MILLIS,
     onBack: () -> Unit,
     content: @Composable () -> Unit
 ) {
@@ -94,16 +93,9 @@ fun PredictiveBackContainer(
     var committed by remember { mutableStateOf(false) }
     var showPrevious by remember { mutableStateOf(false) }
 
-    val travelling = dragging || settling
     // 0f = settled, 1f = the page has travelled all the way off the screen.
     val progress: () -> Float =
         if (systemPredictiveBack) ({ systemReveal.value }) else ({ dragReveal.floatValue })
-    val leadingClip = RoundedCornerShape(
-        topStart = 16.dp,
-        bottomStart = 16.dp,
-        topEnd = 0.dp,
-        bottomEnd = 0.dp
-    )
 
     // Platform-driven gesture. PredictiveBackHandler also covers the back button and the system
     // back gesture on every platform that supports it, so nothing else is registered there.
@@ -125,7 +117,7 @@ fun PredictiveBackContainer(
                 settling = true
                 systemReveal.animateTo(
                     targetValue = 1f,
-                    animationSpec = tween(COMMIT_SETTLE_MILLIS, easing = FastOutSlowInEasing)
+                    animationSpec = tween(commitDurationMillis, easing = FastOutSlowInEasing)
                 )
                 settling = false
                 committed = true
@@ -199,7 +191,7 @@ fun PredictiveBackContainer(
                     animate(
                         initialValue = dragReveal.floatValue,
                         targetValue = 1f,
-                        animationSpec = tween(COMMIT_SETTLE_MILLIS, easing = FastOutSlowInEasing)
+                        animationSpec = tween(commitDurationMillis, easing = FastOutSlowInEasing)
                     ) { value, _ -> dragReveal.floatValue = value }
                     settling = false
                     committed = true
@@ -258,7 +250,9 @@ fun PredictiveBackContainer(
                     // must be zero no matter what the driver still holds.
                     translationX = if (committed) 0f else progress() * size.width
                 }
-                .clip(if (travelling) leadingClip else RectangleShape)
+                // Opaque floor under the page: nothing underneath can ever show through the
+                // page's own transparent areas.
+                .background(MaterialTheme.colorScheme.background)
         ) {
             content()
         }

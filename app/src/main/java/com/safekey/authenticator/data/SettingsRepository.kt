@@ -28,6 +28,8 @@ data class AppSettings(
     val predictiveBack: Boolean = true,
     /** Global text/UI scale, 0.8x - 1.2x. */
     val uiScale: Float = UI_SCALE_DEFAULT,
+    /** Predictive-back and page-transition duration in milliseconds. */
+    val motionDurationMs: Int = MOTION_DURATION_DEFAULT,
     val gateOnOpen: Boolean = true,
     val allowScreenshots: Boolean = false,
     val hideCodes: Boolean = false,
@@ -89,6 +91,16 @@ data class AppSettings(
         const val UI_SCALE_DEFAULT = 1f
         const val UI_SCALE_MIN = 0.8f
         const val UI_SCALE_MAX = 1.2f
+
+        /**
+         * Back/page transition duration. The default matches the platform's own predictive-back
+         * settle; the range deliberately stays conservative (a shorter glide is abrupt, a longer
+         * one reads as lag).
+         */
+        const val MOTION_DURATION_DEFAULT = 185
+        const val MOTION_DURATION_MIN = 120
+        const val MOTION_DURATION_MAX = 300
+        const val MOTION_DURATION_STEP = 20
         const val DEFAULT_PALETTE_SEED = 0xFF4F5D92L
 
         const val DESTROY_OFF = "off"
@@ -126,6 +138,7 @@ class SettingsRepository(
         val PURE_BLACK = booleanPreferencesKey("pure_black")
         val PREDICTIVE_BACK = booleanPreferencesKey("predictive_back")
         val UI_SCALE = floatPreferencesKey("ui_scale")
+        val MOTION_DURATION = intPreferencesKey("motion_duration_ms")
         val GATE_ON_OPEN = booleanPreferencesKey("gate_on_open")
         val ALLOW_SCREENSHOTS = booleanPreferencesKey("allow_screenshots")
         val HIDE_CODES = booleanPreferencesKey("hide_codes")
@@ -171,6 +184,8 @@ class SettingsRepository(
             predictiveBack = prefs[Keys.PREDICTIVE_BACK] ?: true,
             uiScale = (prefs[Keys.UI_SCALE] ?: AppSettings.UI_SCALE_DEFAULT)
                 .coerceIn(AppSettings.UI_SCALE_MIN, AppSettings.UI_SCALE_MAX),
+            motionDurationMs = (prefs[Keys.MOTION_DURATION] ?: AppSettings.MOTION_DURATION_DEFAULT)
+                .coerceIn(AppSettings.MOTION_DURATION_MIN, AppSettings.MOTION_DURATION_MAX),
             gateOnOpen = prefs[Keys.GATE_ON_OPEN] ?: true,
             allowScreenshots = prefs[Keys.ALLOW_SCREENSHOTS] ?: false,
             hideCodes = prefs[Keys.HIDE_CODES] ?: false,
@@ -236,6 +251,15 @@ class SettingsRepository(
     suspend fun setUiScale(scale: Float) {
         context.dataStore.edit {
             it[Keys.UI_SCALE] = scale.coerceIn(AppSettings.UI_SCALE_MIN, AppSettings.UI_SCALE_MAX)
+        }
+    }
+
+    suspend fun setMotionDuration(durationMs: Int) {
+        context.dataStore.edit {
+            it[Keys.MOTION_DURATION] = durationMs.coerceIn(
+                AppSettings.MOTION_DURATION_MIN,
+                AppSettings.MOTION_DURATION_MAX
+            )
         }
     }
 

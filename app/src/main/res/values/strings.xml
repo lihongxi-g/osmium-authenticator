@@ -110,6 +110,8 @@
     <string name="appearance_predictive_back_note">This Android version has no system predictive back; the app falls back to its own edge swipe.</string>
     <string name="appearance_ui_scale">UI scale</string>
     <string name="appearance_ui_scale_desc">Text size across the app</string>
+    <string name="appearance_motion_duration">Back animation duration</string>
+    <string name="appearance_motion_duration_desc">Slide timing for the back gesture and page transitions</string>
     <string name="settings_security">Security</string>
     <string name="settings_data">Data</string>
     <string name="settings_about">About</string>
