@@ -29,6 +29,8 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import com.safekey.authenticator.data.AppSettings
+import kotlin.math.round
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 
@@ -39,14 +41,11 @@ import kotlinx.coroutines.flow.Flow
  */
 private const val GESTURE_GAIN = 0.35f
 
-/** How far the revealed page slides in from the leading edge, relative to the width. */
-private const val PARALLAX_FRACTION = 0.12f
-
 /** Peak alpha of the scrim that covers the revealed page. */
 private const val SCRIM_MAX_ALPHA = 0.35f
 
-/** Default commit glide, used when the caller does not pass its own duration. */
-private const val DEFAULT_COMMIT_SETTLE_MILLIS = 185
+/** Commit glide after the platform committed. Shared with the page-transition tempo. */
+private const val COMMIT_SETTLE_MILLIS = AppSettings.MOTION_DURATION_MS
 
 /**
  * Predictive-back navigation container.
@@ -56,8 +55,9 @@ private const val DEFAULT_COMMIT_SETTLE_MILLIS = 185
  *
  * - the reveal fraction is written 1:1 from the gesture and only ever read inside deferred
  *   `graphicsLayer { }` blocks, so a gesture frame costs no recomposition;
- * - the page being left slides out over a solid backdrop, and the page underneath parallaxes in
- *   from the leading edge behind a scrim, so a gap never shows another screen's edge;
+ * - the page being left slides out over the page underneath, which stays put (no parallax), so
+ *   the sliver it shows at the screen edge is that page's own left margin rather than content
+ *   shifted in from further right, behind a scrim;
  * - the moving page is never rounded-clipped: a leading-edge radius cuts a notch out of the
  *   screen edge, which reads as the page underneath leaking through;
  * - a cancelled gesture springs back with no overshoot; a committed one glides the rest of the
@@ -77,8 +77,6 @@ fun PredictiveBackContainer(
     navKey: Any?,
     previous: (@Composable () -> Unit)?,
     onGestureStart: () -> Unit = {},
-    /** Duration of the commit glide (the slider in the appearance settings). */
-    commitDurationMillis: Int = DEFAULT_COMMIT_SETTLE_MILLIS,
     onBack: () -> Unit,
     content: @Composable () -> Unit
 ) {
@@ -117,7 +115,7 @@ fun PredictiveBackContainer(
                 settling = true
                 systemReveal.animateTo(
                     targetValue = 1f,
-                    animationSpec = tween(commitDurationMillis, easing = FastOutSlowInEasing)
+                    animationSpec = tween(COMMIT_SETTLE_MILLIS, easing = FastOutSlowInEasing)
                 )
                 settling = false
                 committed = true
@@ -191,7 +189,7 @@ fun PredictiveBackContainer(
                     animate(
                         initialValue = dragReveal.floatValue,
                         targetValue = 1f,
-                        animationSpec = tween(commitDurationMillis, easing = FastOutSlowInEasing)
+                        animationSpec = tween(COMMIT_SETTLE_MILLIS, easing = FastOutSlowInEasing)
                     ) { value, _ -> dragReveal.floatValue = value }
                     settling = false
                     committed = true
@@ -221,15 +219,10 @@ fun PredictiveBackContainer(
             .then(fallbackModifier)
     ) {
         if (showPrevious && previous != null) {
-            // The page underneath parallaxes in from the leading edge. Deliberately opaque — a
-            // translucent page over a moving one is what reads as "not fully covering".
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .graphicsLayer {
-                        translationX = -(1f - progress()) * size.width * PARALLAX_FRACTION
-                    }
-            ) {
+            // Deliberately untransformed. Shifting this layer (the usual parallax) puts content
+            // from further right into the sliver at the screen edge, where it is cut mid-glyph
+            // and reads as characters leaking through the page on top.
+            Box(modifier = Modifier.fillMaxSize()) {
                 previous()
             }
             Box(
@@ -247,8 +240,10 @@ fun PredictiveBackContainer(
                 .fillMaxSize()
                 .graphicsLayer {
                     // While committed the page underneath is already the top page, so the offset
-                    // must be zero no matter what the driver still holds.
-                    translationX = if (committed) 0f else progress() * size.width
+                    // must be zero no matter what the driver still holds. Otherwise the offset is
+                    // snapped to whole device pixels: a fractional edge gets composited against
+                    // the page underneath and shows up as a translucent seam.
+                    translationX = if (committed) 0f else round(progress() * size.width)
                 }
                 // Opaque floor under the page: nothing underneath can ever show through the
                 // page's own transparent areas.

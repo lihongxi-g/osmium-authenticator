@@ -81,21 +81,18 @@ private val ExpressiveMotion = MotionTokens(
 )
 
 /**
- * Standard (ease-based) motion, timed by the user's "back animation duration" setting so the
- * predictive-back gesture and the page transitions always share one tempo.
+ * Standard (ease-based) motion, fixed at the app's back/page tempo so the predictive-back
+ * gesture and the page transitions always share one speed.
  */
-private fun standardMotion(durationMillis: Int): MotionTokens {
-    val enter = durationMillis.coerceIn(
-        AppSettings.MOTION_DURATION_MIN,
-        AppSettings.MOTION_DURATION_MAX
-    )
-    val exit = (enter - 20).coerceAtLeast(AppSettings.MOTION_DURATION_MIN)
-    val fade = (enter - 60).coerceAtLeast(80)
-    return MotionTokens(enter = tween(enter), exit = tween(exit), fadeIn = tween(fade), fadeOut = tween(fade))
-}
+private val StandardMotion = MotionTokens(
+    enter = tween(AppSettings.MOTION_DURATION_MS),
+    exit = tween(AppSettings.MOTION_DURATION_MS - 20),
+    fadeIn = tween(AppSettings.MOTION_DURATION_MS - 50),
+    fadeOut = tween(AppSettings.MOTION_DURATION_MS - 50)
+)
 
 /** Current motion tokens; expressive mode swaps in the springy set. */
-val LocalOsmiumMotion = staticCompositionLocalOf { standardMotion(AppSettings.MOTION_DURATION_DEFAULT) }
+val LocalOsmiumMotion = staticCompositionLocalOf { StandardMotion }
 
 /**
  * Scales the type scale only — layout metrics keep their dp values, so a
@@ -144,7 +141,6 @@ fun SafeKeyTheme(
     paletteStyle: String = AppSettings.PALETTE_TONAL_SPOT,
     pureBlack: Boolean = false,
     uiScale: Float = 1f,
-    motionDurationMillis: Int = AppSettings.MOTION_DURATION_DEFAULT,
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
@@ -184,12 +180,9 @@ fun SafeKeyTheme(
     }
     val baseTypography = if (expressive) ExpressiveTypography else AppTypography
     val typography = remember(baseTypography, uiScale) { baseTypography.scaled(uiScale) }
-    val motion = remember(expressive, motionDurationMillis) {
-        if (expressive) ExpressiveMotion else standardMotion(motionDurationMillis)
-    }
     CompositionLocalProvider(
         LocalExpressiveDesign provides expressive,
-        LocalOsmiumMotion provides motion
+        LocalOsmiumMotion provides if (expressive) ExpressiveMotion else StandardMotion
     ) {
         MaterialTheme(
             colorScheme = colorScheme,

@@ -110,8 +110,6 @@
     <string name="appearance_predictive_back_note">当前 Android 版本不支持系统预测式返回，改用应用内边缘滑动。</string>
     <string name="appearance_ui_scale">界面缩放</string>
     <string name="appearance_ui_scale_desc">调整全应用的文字大小</string>
-    <string name="appearance_motion_duration">返回动效时长</string>
-    <string name="appearance_motion_duration_desc">返回手势与页面切换的滑动时长</string>
     <string name="settings_security">安全</string>
     <string name="settings_data">数据</string>
     <string name="settings_about">关于</string>

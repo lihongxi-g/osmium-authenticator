@@ -205,8 +205,7 @@ class MainActivity : FragmentActivity() {
                 paletteSeed = settings.paletteSeed,
                 paletteStyle = settings.paletteStyle,
                 pureBlack = settings.pureBlack,
-                uiScale = settings.uiScale,
-                motionDurationMillis = settings.motionDurationMs
+                uiScale = settings.uiScale
             ) {
                 // Screenshot policy follows the user setting (default: blocked).
                 LaunchedEffect(settings.allowScreenshots) {
@@ -246,8 +245,7 @@ class MainActivity : FragmentActivity() {
                             accountTagRowState = accountTagRowState,
                             settingsScrollState = settingsScrollState,
                             screenStateHolder = screenStateHolder,
-                            predictiveBackEnabled = settings.predictiveBack,
-                            motionDurationMillis = settings.motionDurationMs
+                            predictiveBackEnabled = settings.predictiveBack
                         )
                     }
                     // Update notification only over the unlocked main UI.
@@ -951,8 +949,7 @@ private fun IntegrityNoticeDialog(
         accountTagRowState: ScrollState,
         settingsScrollState: ScrollState,
         screenStateHolder: androidx.compose.runtime.saveable.SaveableStateHolder,
-        predictiveBackEnabled: Boolean,
-        motionDurationMillis: Int
+        predictiveBackEnabled: Boolean
     ) {
         val context = LocalContext.current
         val direction = vm.nav.direction
@@ -992,7 +989,6 @@ private fun IntegrityNoticeDialog(
             systemPredictiveBack = systemPredictiveBack,
             edgeSwipeFallback = predictiveBackEnabled && !platformPredictiveBack,
             navKey = current,
-            commitDurationMillis = motionDurationMillis,
             onGestureStart = { gestureTarget = vm.nav.previous },
             previous = gestureTarget?.let { target ->
                 {
