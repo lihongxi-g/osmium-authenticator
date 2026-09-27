@@ -381,7 +381,7 @@ fun PredictiveBackContainer(
                 modifier = Modifier
                     .fillMaxSize()
                     .drawWithContent {
-                        drawExposedStrip(renderedPx.floatValue, fromRight)
+                        drawExposedStrip(renderedPx.floatValue)
                     }
             ) {
                 Box(
@@ -407,7 +407,7 @@ fun PredictiveBackContainer(
                             alpha = SCRIM_MAX_ALPHA * 4f * p * (1f - p)
                         }
                         .drawWithContent {
-                            drawExposedStrip(renderedPx.floatValue, fromRight)
+                            drawExposedStrip(renderedPx.floatValue)
                         }
                         .background(Color.Black)
                 )
@@ -419,12 +419,10 @@ fun PredictiveBackContainer(
                 .graphicsLayer {
                     // While committed, the layer underneath is already the top page, so the offset
                     // must be zero no matter what the driver still holds.
-                    translationX = if (committed) {
-                        0f
-                    } else {
-                        val pass = round(renderedPx.floatValue)
-                        if (fromRight) -pass else pass
-                    }
+                    // Always to the right, whichever edge the gesture came from: the animation is
+                    // deliberately not mirrored (the follow distance still tracks the finger, the
+                    // direction does not).
+                    translationX = if (committed) 0f else round(renderedPx.floatValue)
                 }
                 // Opaque floor under the page: nothing underneath can ever show through the page's
                 // own transparent areas.
@@ -457,18 +455,13 @@ private class BackGestureHandler(
 }
 
 /**
- * Draws only the strip the travelling page has left uncovered, with a pixel of slack towards the
- * covered side so that rounding the page's offset can never leave a backdrop line at the edge.
+ * Draws only the strip the travelling page has left uncovered — always the leading (left) edge, since
+ * the animation is not mirrored — with a pixel of slack towards the covered side so that rounding the
+ * page's offset can never leave a backdrop line at the edge.
  */
-private inline fun ContentDrawScope.drawExposedStrip(exposed: Float, fromRight: Boolean) {
-    if (fromRight) {
-        val left = size.width - exposed
-        if (left >= size.width) return
-        clipRect(left - 1f, 0f, size.width, size.height) { this@drawExposedStrip.drawContent() }
-    } else {
-        if (exposed <= 0f) return
-        clipRect(0f, 0f, exposed + 1f, size.height) { this@drawExposedStrip.drawContent() }
-    }
+private inline fun ContentDrawScope.drawExposedStrip(exposed: Float) {
+    if (exposed <= 0f) return
+    clipRect(0f, 0f, exposed + 1f, size.height) { this@drawExposedStrip.drawContent() }
 }
 
 /**
