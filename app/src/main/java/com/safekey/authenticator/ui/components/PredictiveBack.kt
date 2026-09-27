@@ -43,10 +43,12 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.os.Build
+import android.os.SystemClock
 import androidx.activity.BackEventCompat
 import com.safekey.authenticator.data.AppSettings
 import kotlin.math.round
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
@@ -58,6 +60,17 @@ private const val SCRIM_MAX_ALPHA = 0.35f
 
 /** How close to an edge the finger must land before an edge drag counts as a back swipe. */
 private const val EDGE_ZONE_DP = 40
+
+/**
+ * How long a gesture may go completely silent before the offset is walked back to rest.
+ *
+ * A gesture sometimes ends without any terminal callback — the platform's own gesture machinery takes
+ * it over near the screen edges — and then nothing sends the page home: it parked mid-offset until the
+ * next swipe. Silence is the only signal available, and the recovery is deliberately harmless: if the
+ * finger is in fact still down, the next sample arrives within milliseconds and writes the finger
+ * position straight back over it.
+ */
+private const val STALL_RECOVERY_MS = 1500L
 
 /**
  * Predictive-back navigation container.
@@ -119,6 +132,8 @@ fun PredictiveBackContainer(
     // Which edge the current gesture came from, locked for that gesture: the geometry must not flip
     // halfway through.
     var fromRight by remember { mutableStateOf(false) }
+    // Wall clock of the newest gesture sample, for the stall recovery below.
+    var lastSampleAtMs = 0L
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val activity = remember(context) { context.findActivity() }
@@ -154,6 +169,20 @@ fun PredictiveBackContainer(
         }
         showScrim = false
         PredictiveBackTrace.finish("cancel", widthPx, from)
+    }
+
+    // Silent-gesture recovery. Runs only while a gesture is claimed, fires only after a stretch of
+    // complete silence, and is corrected by the next sample if the finger is still down.
+    LaunchedEffect(dragging) {
+        if (!dragging) return@LaunchedEffect
+        while (true) {
+            delay(STALL_RECOVERY_MS)
+            val idle = SystemClock.uptimeMillis() - lastSampleAtMs
+            if (idle > STALL_RECOVERY_MS && renderedPx.floatValue > 0.5f) {
+                PredictiveBackTrace.finish("stalled", widthPx, renderedPx.floatValue)
+                springBack()
+            }
+        }
     }
 
     // Measurement only: while a drag is in flight, tick once per displayed frame so the readout can
@@ -194,6 +223,7 @@ fun PredictiveBackContainer(
             val handler = BackGestureHandler(
                 onStarted = { event ->
                     dragging = true
+                    lastSampleAtMs = SystemClock.uptimeMillis()
                     // Every gesture starts from rest. A commit whose pop never landed leaves
                     // `committed` set, and that pins the page at zero for the whole next drag.
                     committed = false
@@ -220,6 +250,7 @@ fun PredictiveBackContainer(
                             (fraction * FALLBACK_PROGRESS_GAIN * gestureGain)
                                 .coerceIn(0f, 1f) * width
                         }
+                        lastSampleAtMs = SystemClock.uptimeMillis()
                         PredictiveBackTrace.followStep(renderedPx.floatValue)
                     }
                 },
@@ -254,6 +285,7 @@ fun PredictiveBackContainer(
                     dragging = true
                     committed = false
                     showScrim = false
+                    lastSampleAtMs = SystemClock.uptimeMillis()
                     PredictiveBackTrace.begin(fromRight)
                 }
                 var edgeLocked = false
@@ -278,6 +310,7 @@ fun PredictiveBackContainer(
                             (fraction * FALLBACK_PROGRESS_GAIN * gestureGain)
                                 .coerceIn(0f, 1f) * width
                         }
+                        lastSampleAtMs = SystemClock.uptimeMillis()
                         PredictiveBackTrace.followStep(renderedPx.floatValue)
                     }
                 }
@@ -312,10 +345,14 @@ fun PredictiveBackContainer(
                 dragging = true
                 committed = false
                 showScrim = true
+                lastSampleAtMs = SystemClock.uptimeMillis()
                 PredictiveBackTrace.begin(fromRight)
             },
             onEdge = { rightEdge -> fromRight = rightEdge },
-            onDrag = { travelPx -> renderedPx.floatValue = travelPx },
+            onDrag = { travelPx ->
+                renderedPx.floatValue = travelPx
+                lastSampleAtMs = SystemClock.uptimeMillis()
+            },
             onEnd = { traveled, width ->
                 if (traveled > width * 0.15f) {
                     glideOut()
