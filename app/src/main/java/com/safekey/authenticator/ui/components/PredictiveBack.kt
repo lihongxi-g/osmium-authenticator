@@ -201,7 +201,7 @@ fun PredictiveBackContainer(
                 dragging = false
                 settling = true
                 val from = travelPx.floatValue
-                animate(from, widthPx, commitGlide) { value, _ -> travelPx.floatValue = value }
+                animate(from, widthPx, animationSpec = commitGlide) { value, _ -> travelPx.floatValue = value }
                 settling = false
                 committed = true
                 PredictiveBackTrace.finish("commit", widthPx, from)
@@ -210,7 +210,7 @@ fun PredictiveBackContainer(
                 dragging = false
                 settling = true
                 val from = travelPx.floatValue
-                animate(from, 0f, cancelSpring) { value, _ -> travelPx.floatValue = value }
+                animate(from, 0f, animationSpec = cancelSpring) { value, _ -> travelPx.floatValue = value }
                 settling = false
                 showScrim = false
                 PredictiveBackTrace.finish("cancel", widthPx, from)
@@ -265,7 +265,7 @@ fun PredictiveBackContainer(
                 dragging = false
                 settling = true
                 if (travelled > width * FALLBACK_COMMIT_FRACTION) {
-                    animate(travelled, width, commitGlide) { value, _ ->
+                    animate(travelled, width, animationSpec = commitGlide) { value, _ ->
                         travelPx.floatValue = value
                     }
                     settling = false
@@ -273,7 +273,7 @@ fun PredictiveBackContainer(
                     PredictiveBackTrace.finish("commit", width, travelled)
                     onBack()
                 } else {
-                    animate(travelled, 0f, cancelSpring) { value, _ ->
+                    animate(travelled, 0f, animationSpec = cancelSpring) { value, _ ->
                         travelPx.floatValue = value
                     }
                     settling = false
