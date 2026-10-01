@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import androidx.navigationevent.NavigationEvent
 import androidx.navigationevent.NavigationEventDispatcher
@@ -83,14 +84,21 @@ private const val STALL_POLL_MS = 300L
  *
  * ## The driver is the one KernelSU's shell uses
  *
- * The gesture arrives through `androidx.navigationevent` — the same dispatcher miuix-nav (the
- * navigation shell behind KernelSU's back animation) reads its events from, and the reason this
+ * The gesture is meant to arrive through `androidx.navigationevent` — the same dispatcher miuix-nav
+ * (the navigation shell behind KernelSU's back animation) reads its events from, and the reason this
  * app's Kotlin moved to 2.0: the library's published metadata is 2.0 and cannot be read by a 1.9
  * compiler. The events land in [BackGestureHandler] on the main thread, and the offset is written
- * *there*, in the frame the event belongs to. The older `androidx.activity` predictive-back wrapper
- * this replaces put a channel plus a coroutine between the platform callback and the app, so a
- * gesture frame could be a frame or more behind the finger, and bursts of samples could arrive
- * together after a stall.
+ * *there*, in the frame the event belongs to. The `androidx.activity` predictive-back wrapper — still
+ * composed as a net, and *above* this container's own registration — puts a channel plus a coroutine
+ * between the platform callback and the app instead, so on that path a gesture frame can be a frame or
+ * more behind the finger and bursts of samples can arrive together after a stall.
+ *
+ * Both paths register on the platform's dispatcher at the same priority, where a same-priority
+ * registration replaces the previous callback: the newest registration takes the gesture. That is why
+ * the fallback is composed first here, why the input is re-registered on every navigation, and why the
+ * fallback is retired for good once the navigationevent input has been handed a gesture — on a real
+ * device the driver column read `act` for a whole session because the fallback re-registered after us
+ * on the one frame that mattered. The readout's `driver` field is the proof either way.
  *
  * Touch coordinates are preferred when the platform reports them, because they are exact: a
  * measured swipe had the page edge precisely under the fingertip. `progress` is the fallback.
@@ -146,6 +154,7 @@ fun PredictiveBackContainer(
     g.compositions++
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    val view = LocalView.current
     val activity = remember(context) { context.findActivity() }
 
     val commitGlide = remember(commitDurationMillis) {
@@ -160,6 +169,21 @@ fun PredictiveBackContainer(
         if (width <= 0f) return 0f
         val travelled = if (rightEdge) width - finger else finger
         return (travelled * gestureGain).coerceIn(0f, width)
+    }
+
+    /**
+     * Retires the androidx.activity fallback for the rest of the session once the navigationevent
+     * input has actually been handed a gesture.
+     *
+     * Both paths register on the platform's dispatcher at the same priority, where the newest
+     * registration takes the gesture — so a fallback that is never taken away keeps winning races
+     * (every push re-registers it, and it registers after us on that frame). Once this path has
+     * demonstrably received a gesture we know it is live, so the alternative is no longer a net and
+     * only a competitor. Called once the settle has finished, never mid-gesture: flipping it
+     * recomposes this container, which is the one thing that must not happen on a gesture frame.
+     */
+    fun retireFallbackIfProven() {
+        if (g.sawNav && !BackGestureActivity.navDelivered) BackGestureActivity.navDelivered = true
     }
 
     suspend fun glideOut() {
@@ -177,6 +201,7 @@ fun PredictiveBackContainer(
         }
         committed = true
         PredictiveBackTrace.finish("commit", widthPx, from, g.compositions)
+        retireFallbackIfProven()
         onBack()
     }
 
@@ -195,6 +220,7 @@ fun PredictiveBackContainer(
             if (!g.dragging) BackGestureActivity.active = false
         }
         PredictiveBackTrace.finish("cancel", widthPx, from, g.compositions)
+        retireFallbackIfProven()
     }
 
     // Self-healing for every way a gesture can fail to send the page home: a gesture that ends with no
@@ -207,6 +233,11 @@ fun PredictiveBackContainer(
     LaunchedEffect(Unit) {
         while (true) {
             delay(STALL_POLL_MS)
+            // The finished readout is handed to the developer screen from here rather than from the
+            // gesture itself: that state write recomposes the whole developer screen, and from inside
+            // the settle it showed up as an 88 ms "settle frame" that was only the readout redrawing
+            // itself.
+            PredictiveBackTrace.publish()
             val silentMs = SystemClock.uptimeMillis() - g.lastSampleAtMs
             if (g.dragging) {
                 // Never walk the page home under a finger: a silent drag means the finger is held
@@ -238,85 +269,23 @@ fun PredictiveBackContainer(
     // watching the gesture state, because an effect only runs after the frame it is keyed on — the
     // first frames of a drag could still be handed a tick that rebuilds the whole account list.
 
-    // A dispatcher of our own for the navigationevent path, fed by the platform's own back-invoked
-    // dispatcher. Nothing provides a dispatcher in this app (a plain single-activity Compose host has
-    // no view-tree owner, and the library's `rememberNavigationEventDispatcherOwner` would throw in
-    // that situation), so it is wired by hand here: the two calls below are its whole platform side.
-    val platformBackDispatcher = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        activity?.onBackInvokedDispatcher
-    } else {
-        null
-    }
-    val backDispatcher = remember { NavigationEventDispatcher() }
-    val dispatcher = if (systemPredictiveBack) backDispatcher else null
-    DisposableEffect(dispatcher, canGoBack, gestureGain) {
-        if (dispatcher == null || !canGoBack) {
-            onDispose { }
-        } else {
-            val handler = BackGestureHandler(
-                onStarted = { event ->
-                    g.dragging = true
-                    // Straight away, not via an effect settling on the next frame: from here until
-                    // the settle finishes, no tick may rebuild the account list.
-                    BackGestureActivity.active = true
-                    g.lastSampleAtMs = PredictiveBackTrace.sample()
-                    // Every gesture starts from rest. A commit whose pop never landed leaves
-                    // `committed` set, and that pins the page at zero for the whole next drag.
-                    committed = false
-                    g.fromRight = event.swipeEdge == NavigationEvent.EDGE_RIGHT
-                    g.compositions = 0
-                    PredictiveBackTrace.begin(g.fromRight)
-                },
-                onProgressed = { event ->
-                    if (g.dragging) {
-                        val width = widthPx
-                        // Deliberately not clamped from above: some platforms keep counting past the
-                        // commit point, and clamping that away freezes the page while the finger
-                        // keeps moving.
-                        val fraction = event.progress.coerceAtLeast(0f)
-                        val touchX = event.touchX
-                        PredictiveBackTrace.platformEvent(fraction, touchX)
-                        PredictiveBackTrace.latency(event.frameTimeMillis)
-                        renderedPx.floatValue = if (touchX > 0f && width > 0f) {
-                            PredictiveBackTrace.driver("nav touchX")
-                            offsetForFinger(touchX, g.fromRight, width)
-                        } else {
-                            PredictiveBackTrace.driver("nav progress")
-                            (fraction * FALLBACK_PROGRESS_GAIN * gestureGain)
-                                .coerceIn(0f, 1f) * width
-                        }
-                        g.lastSampleAtMs = PredictiveBackTrace.sample()
-                    }
-                },
-                onCommitted = {
-                    // Also the discrete case (the back button): no gesture, no progress events.
-                    if (!g.dragging) {
-                        g.dragging = true
-                        committed = false
-                        g.compositions = 0
-                        PredictiveBackTrace.begin(false)
-                    }
-                    g.dragging = false
-                    BackGestureActivity.active = true
-                    scope.launch { glideOut() }
-                },
-                onCancelled = {
-                    g.dragging = false
-                    BackGestureActivity.active = true
-                    scope.launch { springBack() }
-                }
-            )
-            dispatcher.addHandler(handler, NavigationEventDispatcher.PRIORITY_DEFAULT)
-            onDispose { handler.remove() }
-        }
-    }
-
-    // Kept as the net under the navigationevent input above (the one that actually takes the
-    // gesture): for the cases where that input is not in play — a platform without the system
-    // gesture callbacks, or the input failing to attach. The platform hands a gesture to exactly one
-    // registered callback — the last one registered on a given priority — so these two can never both
-    // drive it, and the readout's driver column says which one did.
-    if (systemPredictiveBack) {
+    // The androidx.activity predictive-back wrapper, kept only as the net under the navigationevent
+    // input below — the path this container is built around, and the only one whose events reach the
+    // offset in the frame they were produced in instead of through a channel and a coroutine.
+    //
+    // It is composed *above* our own registration deliberately, and that is not cosmetic: both paths
+    // register on the platform's dispatcher at the same priority, where a same-priority registration
+    // replaces the previous callback, so the *last* registration is the one a gesture is handed to.
+    // This composable registers from inside its own effect while our input registers from a
+    // notification that `addHandler`/`addInput` deliver synchronously (navigationevent's
+    // `updateBackInvokedCallbackState`), so declaration order is what decides it — and declared here,
+    // it can never end up after us.
+    //
+    // Retired for the rest of the session once the navigationevent input has actually been handed a
+    // gesture: at that point it is proven live, the alternative has nothing left to fall back to, and
+    // leaving it registered only wins races it should lose. The readout's driver column says whether
+    // that happened.
+    if (systemPredictiveBack && !BackGestureActivity.navDelivered) {
         PredictiveBackHandler(enabled = canGoBack) { events: Flow<BackEventCompat> ->
             try {
                 if (!g.dragging) {
@@ -325,7 +294,7 @@ fun PredictiveBackContainer(
                     committed = false
                     g.lastSampleAtMs = PredictiveBackTrace.sample()
                     g.compositions = 0
-                    PredictiveBackTrace.begin(g.fromRight)
+                    PredictiveBackTrace.begin(g.fromRight, view.display?.refreshRate ?: 0f)
                 }
                 var edgeLocked = false
                 events.collect { event ->
@@ -364,15 +333,96 @@ fun PredictiveBackContainer(
         }
     }
 
-    // The platform hands a gesture to a single callback, and the most recently registered one wins. This
-    // registration therefore sits *after* the androidx.activity handler below, which is what makes the
-    // navigationevent input the driver that actually takes the gesture. It is handed the platform's own
-    // OnBackInvokedDispatcher, wrapped in the library's input: those two calls are its whole platform
-    // side, and neither is reachable from a composition local here (a plain single-activity Compose host
-    // has no view-tree dispatcher owner, and the library's `rememberNavigationEventDispatcherOwner`
-    // throws in exactly that situation).
+    // A dispatcher of our own for the navigationevent path, fed by the platform's own back-invoked
+    // dispatcher. Nothing provides a dispatcher in this app (a plain single-activity Compose host has
+    // no view-tree owner, and the library's `rememberNavigationEventDispatcherOwner` would throw in
+    // that situation), so it is wired by hand here: the two calls below are its whole platform side.
+    val platformBackDispatcher = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        activity?.onBackInvokedDispatcher
+    } else {
+        null
+    }
+    val backDispatcher = remember { NavigationEventDispatcher() }
+    val dispatcher = if (systemPredictiveBack) backDispatcher else null
+    DisposableEffect(dispatcher, canGoBack, gestureGain) {
+        if (dispatcher == null || !canGoBack) {
+            onDispose { }
+        } else {
+            val handler = BackGestureHandler(
+                onStarted = { event ->
+                    g.dragging = true
+                    // The platform has just handed this path a gesture: it is live on this device.
+                    g.sawNav = true
+                    // Straight away, not via an effect settling on the next frame: from here until
+                    // the settle finishes, no tick may rebuild the account list.
+                    BackGestureActivity.active = true
+                    g.lastSampleAtMs = PredictiveBackTrace.sample()
+                    // Every gesture starts from rest. A commit whose pop never landed leaves
+                    // `committed` set, and that pins the page at zero for the whole next drag.
+                    committed = false
+                    g.fromRight = event.swipeEdge == NavigationEvent.EDGE_RIGHT
+                    g.compositions = 0
+                    PredictiveBackTrace.begin(g.fromRight, view.display?.refreshRate ?: 0f)
+                },
+                onProgressed = { event ->
+                    if (g.dragging) {
+                        val width = widthPx
+                        // Deliberately not clamped from above: some platforms keep counting past the
+                        // commit point, and clamping that away freezes the page while the finger
+                        // keeps moving.
+                        val fraction = event.progress.coerceAtLeast(0f)
+                        val touchX = event.touchX
+                        PredictiveBackTrace.platformEvent(fraction, touchX)
+                        PredictiveBackTrace.latency(event.frameTimeMillis)
+                        renderedPx.floatValue = if (touchX > 0f && width > 0f) {
+                            PredictiveBackTrace.driver("nav touchX")
+                            offsetForFinger(touchX, g.fromRight, width)
+                        } else {
+                            PredictiveBackTrace.driver("nav progress")
+                            (fraction * FALLBACK_PROGRESS_GAIN * gestureGain)
+                                .coerceIn(0f, 1f) * width
+                        }
+                        g.lastSampleAtMs = PredictiveBackTrace.sample()
+                    }
+                },
+                onCommitted = {
+                    // Also the discrete case (the back button): no gesture, no progress events.
+                    if (!g.dragging) {
+                        g.dragging = true
+                        committed = false
+                        g.compositions = 0
+                        PredictiveBackTrace.begin(false, view.display?.refreshRate ?: 0f)
+                    }
+                    g.dragging = false
+                    BackGestureActivity.active = true
+                    scope.launch { glideOut() }
+                },
+                onCancelled = {
+                    g.dragging = false
+                    BackGestureActivity.active = true
+                    scope.launch { springBack() }
+                }
+            )
+            dispatcher.addHandler(handler, NavigationEventDispatcher.PRIORITY_DEFAULT)
+            onDispose { handler.remove() }
+        }
+    }
+
     if (platformBackDispatcher != null) {
-        DisposableEffect(backDispatcher, platformBackDispatcher) {
+        // Re-registered on every navigation and once more when the activity fallback retires.
+        //
+        // The keys are the mechanism, not bookkeeping. Our input registers its platform callback from
+        // a notification delivered synchronously by `addHandler`/`addInput`, and this app registers its
+        // fallback (the androidx.activity composable above) from inside that composable's own effect —
+        // so on any frame where both re-register, declaration order decides who is on top. The
+        // fallback re-registers whenever `canGoBack` flips, i.e. on the push out of the root and on the
+        // pop back to it; keyed on `canGoBack` (and `navKey`, for any other registration it may do),
+        // our input is re-created after it in the same frame and lands on top again. Keyed on
+        // `navDelivered` too, because retiring the fallback must be followed by a fresh registration:
+        // if the platform's same-priority slot was holding the fallback's callback, removing it leaves
+        // that slot empty, and an input that still believes it is registered would never re-register —
+        // leaving the back gesture with no consumer at all.
+        DisposableEffect(backDispatcher, platformBackDispatcher, canGoBack, navKey, BackGestureActivity.navDelivered) {
             // The priority argument is not optional for this to work: the single-argument addInput
             // registers the input with priority -1, i.e. bound to no priority level at all, and the
             // input only registers its platform callback when it is told that an enabled back handler
@@ -413,7 +463,7 @@ fun PredictiveBackContainer(
                 committed = false
                 g.lastSampleAtMs = PredictiveBackTrace.sample()
                 g.compositions = 0
-                PredictiveBackTrace.begin(g.fromRight)
+                PredictiveBackTrace.begin(g.fromRight, view.display?.refreshRate ?: 0f)
             },
             onEdge = { rightEdge -> g.fromRight = rightEdge },
             onDrag = { travelPx ->
@@ -630,6 +680,14 @@ private fun Context.findActivity(): Activity? {
  */
 object BackGestureActivity {
     @Volatile var active: Boolean = false
+
+    /**
+     * True once the navigationevent input — the path this app's gesture handling is built on — has
+     * actually been handed a back gesture. Until then the androidx.activity fallback stays registered
+     * as a net; after that it would only win registration races, so the container stops composing it.
+     * Snapshot state because that decision is read during composition (once per session).
+     */
+    var navDelivered by mutableStateOf(false)
 }
 
 /**
@@ -652,4 +710,6 @@ private class GestureState {
     var lastSampleAtMs = 0L
     /** How often the container's body has run since the last gesture began (readout only). */
     var compositions = 0
+    /** Set once this session's navigationevent handler has been handed a real gesture. */
+    var sawNav = false
 }

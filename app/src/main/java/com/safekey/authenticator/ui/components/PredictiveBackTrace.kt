@@ -10,12 +10,13 @@ import androidx.compose.runtime.mutableStateOf
  * Field diagnostics only, and deliberately global: the drag is fed by two input streams — the
  * platform's gesture events and our own pointer samples — and the only way to tell which one is
  * actually live on a given device (and where one of them stalls) is to look at the numbers after
- * a real gesture. All fields are plain values; [text] is the single observable the UI reads.
+ * a real gesture. All fields are plain values; [text] is the single observable the UI reads, and it
+ * is written by [publish] rather than by [finish] itself — see there.
  *
  * Every method here is called from a per-frame or per-sample path, so each one is a handful of field
  * writes and nothing else: no allocation, no string building (that happens once, in [finish]) and no
- * Compose snapshot write. The frame counter no longer drives a `withFrameNanos` loop — the caller
- * ticks it from the layer block it already has.
+ * Compose snapshot write. The frame counter does not drive a `withFrameNanos` loop either — the
+ * caller ticks it from the layer block it already has.
  */
 object PredictiveBackTrace {
 
@@ -38,14 +39,23 @@ object PredictiveBackTrace {
     private var startedAt = 0L
     private var lastSampleAt = 0L
     private var maxGapMs = 0L
+    private var refreshRate = 0f
     private var frameTicks = 0
     private var lastFrameAt = 0L
+    private var lastFrameWasSettle = false
     private var maxFrameDragMs = 0L
     private var maxFrameSettleMs = 0L
+    private var frameDragNanos = 0L
+    private var frameDragCount = 0
+    private var frameSettleNanos = 0L
+    private var frameSettleCount = 0
     private var maxLagMs = 0L
     private var notes = ""
 
-    fun begin(rightEdge: Boolean) {
+    /** The readout written by [finish] and waiting to be shown by [publish]. */
+    private var pending: String? = null
+
+    fun begin(rightEdge: Boolean, refreshRateHz: Float = 0f) {
         edge = if (rightEdge) "R" else "L"
         events = 0
         maxProgress = 0f
@@ -56,10 +66,16 @@ object PredictiveBackTrace {
         startedAt = System.currentTimeMillis()
         lastSampleAt = 0L
         maxGapMs = 0L
+        refreshRate = refreshRateHz
         frameTicks = 0
         lastFrameAt = 0L
+        lastFrameWasSettle = false
         maxFrameDragMs = 0L
         maxFrameSettleMs = 0L
+        frameDragNanos = 0L
+        frameDragCount = 0
+        frameSettleNanos = 0L
+        frameSettleCount = 0
         maxLagMs = 0L
     }
 
@@ -96,27 +112,41 @@ object PredictiveBackTrace {
 
     /**
      * One displayed frame of a gesture, its settle or the pop that follows — called from the
-     * travelling page's layer block, which is the only place that sees all of them.
+     * travelling page's layer block, the one place that sees all of them.
      *
      * The longest gap between two of them is the render-stall detector, split by phase because the
      * two phases have different jobs: the drag is geometry (a missed frame shows up as the page
-     * lagging the finger) while the settle is the animation plus a whole navigation pop. A heavy
-     * frame shows up here, while a stalled input stream shows up in `maxGap` and a queued one in
+     * lagging the finger) while the settle is an animation plus, on a commit, a whole navigation pop.
+     * A heavy frame shows up here, a stalled input stream shows up in `maxGap` and a queued one in
      * `maxLag` — telling those three apart is the whole point of keeping all of them.
+     *
+     * The per-phase rate (`fps`) is the other half of the picture and the number that decides what to
+     * do next: the budget is 8.3 ms a frame on a 120 Hz panel, so a rate near 60 means every other
+     * vsync is being missed. Compare it against `rate` (the display's own refresh rate) to tell "the
+     * app cannot keep up" apart from "this window is composited at 60 Hz either way".
      */
     fun frameTick(settling: Boolean) {
         val now = System.nanoTime()
         if (lastFrameAt != 0L) {
-            val gapMs = (now - lastFrameAt) / 1_000_000L
-            if (gapMs <= FRAME_RUN_GAP_MS) {
+            val gapNanos = now - lastFrameAt
+            val gapMs = gapNanos / 1_000_000L
+            // A phase change is a boundary, not a frame: the drag's last frame and the settle's first
+            // one are not consecutive, and counting that gap invented an 88 ms "frame" that was
+            // really the readout recomposing itself.
+            if (gapMs <= FRAME_RUN_GAP_MS && settling == lastFrameWasSettle) {
                 if (settling) {
                     if (gapMs > maxFrameSettleMs) maxFrameSettleMs = gapMs
+                    frameSettleNanos += gapNanos
+                    frameSettleCount++
                 } else {
                     if (gapMs > maxFrameDragMs) maxFrameDragMs = gapMs
+                    frameDragNanos += gapNanos
+                    frameDragCount++
                 }
             }
         }
         lastFrameAt = now
+        lastFrameWasSettle = settling
         frameTicks++
     }
 
@@ -146,14 +176,19 @@ object PredictiveBackTrace {
     }
 
     /**
-     * @param compositions recompositions of the navigation container since the gesture began. One is
-     *   the baseline (the frame the readout itself is built on); anything above that means the
-     *   container recomposed mid-gesture and re-ran the two resident pages with it.
+     * Formats the readout and parks it until [publish]. Deliberately not written straight to [text]:
+     * that is Compose state, and the screen that reads it is the developer screen — so writing it here
+     * recomposed that whole screen *inside* the gesture's own measured window, which looked like an
+     * 88 ms "settle frame" and was in fact the readout redrawing itself.
+     *
+     * @param compositions recompositions of the navigation container since the gesture began; one is
+     *   the baseline (the frame the readout itself is built on). More than that means the container
+     *   recomposed mid-gesture.
      */
     fun finish(outcome: String, widthPx: Float, travelPx: Float, compositions: Int = 0) {
         val millis = System.currentTimeMillis() - startedAt
         val travel = if (widthPx > 0f) (travelPx / widthPx * 100f).toInt() else 0
-        text.value = buildString {
+        pending = buildString {
             append(edge).append(" · ")
             append("events ").append(events)
             append(" · prog ").append(fmt(maxProgress, 2))
@@ -165,6 +200,8 @@ object PredictiveBackTrace {
             append(" · travel ").append(travel).append("%")
             append(" · maxGap ").append(maxGapMs).append("ms")
             append(" · frames ").append(frameTicks)
+            append(" · fps ").append(fps(frameDragNanos, frameDragCount))
+            append("/").append(fps(frameSettleNanos, frameSettleCount))
             append(" · frame ").append(maxOf(maxFrameDragMs, maxFrameSettleMs))
             append("ms (drag ").append(maxFrameDragMs)
             append(" · settle ").append(maxFrameSettleMs).append(")")
@@ -173,8 +210,23 @@ object PredictiveBackTrace {
             append(" · ").append(outcome)
             append(" · ").append(millis).append("ms")
             append(" · width ").append(widthPx.toInt())
+            if (refreshRate > 0f) append(" · rate ").append(fmt(refreshRate, 0))
             if (notes.isNotEmpty()) append(" · ").append(notes)
         }
+    }
+
+    /** Shows the last [finish] readout. No-op until one is pending. */
+    fun publish() {
+        val next = pending ?: return
+        pending = null
+        text.value = next
+    }
+
+    /** Frames per second over a phase's accumulated frame gaps; "-" until two frames have landed. */
+    private fun fps(sumNanos: Long, count: Int): String {
+        if (count <= 0 || sumNanos <= 0L) return "-"
+        val perFrame = sumNanos.toDouble() / count
+        return (1_000_000_000.0 / perFrame).toInt().toString()
     }
 
     private fun fmt(value: Float, decimals: Int): String {
