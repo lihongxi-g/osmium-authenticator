@@ -21,7 +21,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
@@ -133,15 +132,18 @@ fun PredictiveBackContainer(
 ) {
     val renderedPx = remember { mutableFloatStateOf(0f) }
     var widthPx by remember { mutableFloatStateOf(0f) }
-    var dragging by remember { mutableStateOf(false) }
+    // Snapshot state on purpose: the layer block below is its only reader, and a layer-block read
+    // invalidates the layer without recomposing anything — which is what we want at the pop.
     var committed by remember { mutableStateOf(false) }
-    // Which edge the current gesture came from, locked for that gesture: the geometry must not flip
-    // halfway through.
-    var fromRight by remember { mutableStateOf(false) }
-    // Wall clock of the newest gesture sample, and whether a settle animation is in flight; the two
-    // together are what the stall recovery watches.
-    var lastSampleAtMs = 0L
-    var settling by remember { mutableStateOf(false) }
+    // Everything else the gesture writes lives in a plain holder. None of it is read during
+    // composition, and keeping it in snapshot state meant every start and every end of a gesture
+    // recomposed this container — and with it both resident pages, since the content and preview
+    // lambdas take an unstable ViewModel — landing on exactly the frame the drag begins and the
+    // frame the settle begins.
+    val g = remember { GestureState() }
+    // How often this container's body has run since the last gesture started; readout only, and the
+    // number that says whether that split actually holds on a device.
+    g.compositions++
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val activity = remember(context) { context.findActivity() }
@@ -162,30 +164,37 @@ fun PredictiveBackContainer(
 
     suspend fun glideOut() {
         val from = renderedPx.floatValue
-        settling = true
+        g.settling = true
+        // Held across the pop as well, so the 2 Hz tick cannot rebuild the account list in the
+        // middle of the settle; the reset effect below releases it once the pop has composed.
+        BackGestureActivity.active = true
         try {
             animate(from, widthPx, animationSpec = commitGlide) { value, _ ->
                 renderedPx.floatValue = value
             }
         } finally {
-            settling = false
+            g.settling = false
         }
         committed = true
-        PredictiveBackTrace.finish("commit", widthPx, from)
+        PredictiveBackTrace.finish("commit", widthPx, from, g.compositions)
         onBack()
     }
 
     suspend fun springBack() {
         val from = renderedPx.floatValue
-        settling = true
+        g.settling = true
+        BackGestureActivity.active = true
         try {
             animate(from, 0f, animationSpec = cancelSpring) { value, _ ->
                 renderedPx.floatValue = value
             }
         } finally {
-            settling = false
+            g.settling = false
+            // Nothing is pending on this path — no pop — so nothing else will release it. Unless a
+            // new gesture has already taken over, in which case it still owns the flag.
+            if (!g.dragging) BackGestureActivity.active = false
         }
-        PredictiveBackTrace.finish("cancel", widthPx, from)
+        PredictiveBackTrace.finish("cancel", widthPx, from, g.compositions)
     }
 
     // Self-healing for every way a gesture can fail to send the page home: a gesture that ends with no
@@ -198,39 +207,36 @@ fun PredictiveBackContainer(
     LaunchedEffect(Unit) {
         while (true) {
             delay(STALL_POLL_MS)
-            // Never while a drag is in flight: a silent drag means the finger is held still, and
-            // springing the page home under a held finger is precisely the twitch a user reports as
-            // "it convulses while I swipe". Only a gesture that has already ended can be stalled — a
-            // settle that never ran, or a glide that never finished.
-            if (!dragging &&
-                !settling &&
-                renderedPx.floatValue > 0.5f &&
-                SystemClock.uptimeMillis() - lastSampleAtMs > STALL_RECOVERY_MS
-            ) {
-                PredictiveBackTrace.finish("stalled", widthPx, renderedPx.floatValue)
-                springBack()
+            val silentMs = SystemClock.uptimeMillis() - g.lastSampleAtMs
+            if (g.dragging) {
+                // Never walk the page home under a finger: a silent drag means the finger is held
+                // still, and springing the page home then is precisely the twitch a user reports as
+                // "it convulses while I swipe". The flag is a different matter — a drag this stale is
+                // not being held, and the countdown must not stay frozen for the rest of the
+                // session. (The drag state itself is left alone: clearing it would throw away the
+                // samples of a finger that is in fact still down.)
+                if (silentMs > STALL_RECOVERY_MS * 4) BackGestureActivity.active = false
+            } else if (!g.settling) {
+                if (renderedPx.floatValue <= 0.5f) {
+                    // Nothing pending and nothing parked: no gesture owns the screen any more, so
+                    // the countdown may tick again. Also the net under a commit whose pop never
+                    // arrived, and under any path that set the flag and then died.
+                    BackGestureActivity.active = false
+                } else if (silentMs > STALL_RECOVERY_MS) {
+                    // A settle that never ran, or a glide that never finished: the page is parked
+                    // mid-offset with nothing coming. Only a gesture that has already ended can be
+                    // stalled this way.
+                    PredictiveBackTrace.finish("stalled", widthPx, renderedPx.floatValue, g.compositions)
+                    springBack()
+                }
             }
         }
     }
 
-    // While a gesture owns the screen, hold back the accounts list's 2 Hz tick. The tick rebuilds the
-    // whole AccountUi list (codes included), i.e. it recomposes every visible card; if one lands on a
-    // gesture frame that frame goes over budget and the drag stutters — which is why that stutter only
-    // shows up *sometimes*. A countdown that is a few hundred milliseconds stale is invisible.
-    LaunchedEffect(dragging, settling) {
-        BackGestureActivity.active = dragging || settling
-    }
-
-    // Measurement only: while a gesture or its settle is in flight, tick once per displayed frame so
-    // the readout can report the longest frame gap. It drives nothing, and it stops as soon as the
-    // settle finishes — a permanently running frame loop would keep the app rendering every vsync for
-    // nothing.
-    LaunchedEffect(dragging, settling) {
-        if (!dragging && !settling) return@LaunchedEffect
-        while (true) {
-            withFrameNanos { PredictiveBackTrace.frameTick() }
-        }
-    }
+    // The settle releases this flag itself, and the reset effect below releases it once a commit's
+    // pop has composed; writes happen straight from the gesture callbacks rather than from an effect
+    // watching the gesture state, because an effect only runs after the frame it is keyed on — the
+    // first frames of a drag could still be handed a tick that rebuilds the whole account list.
 
     // A dispatcher of our own for the navigationevent path, fed by the platform's own back-invoked
     // dispatcher. Nothing provides a dispatcher in this app (a plain single-activity Compose host has
@@ -249,16 +255,20 @@ fun PredictiveBackContainer(
         } else {
             val handler = BackGestureHandler(
                 onStarted = { event ->
-                    dragging = true
-                    lastSampleAtMs = SystemClock.uptimeMillis()
+                    g.dragging = true
+                    // Straight away, not via an effect settling on the next frame: from here until
+                    // the settle finishes, no tick may rebuild the account list.
+                    BackGestureActivity.active = true
+                    g.lastSampleAtMs = PredictiveBackTrace.sample()
                     // Every gesture starts from rest. A commit whose pop never landed leaves
                     // `committed` set, and that pins the page at zero for the whole next drag.
                     committed = false
-                    fromRight = event.swipeEdge == NavigationEvent.EDGE_RIGHT
-                    PredictiveBackTrace.begin(fromRight)
+                    g.fromRight = event.swipeEdge == NavigationEvent.EDGE_RIGHT
+                    g.compositions = 0
+                    PredictiveBackTrace.begin(g.fromRight)
                 },
                 onProgressed = { event ->
-                    if (dragging) {
+                    if (g.dragging) {
                         val width = widthPx
                         // Deliberately not clamped from above: some platforms keep counting past the
                         // commit point, and clamping that away freezes the page while the finger
@@ -269,28 +279,30 @@ fun PredictiveBackContainer(
                         PredictiveBackTrace.latency(event.frameTimeMillis)
                         renderedPx.floatValue = if (touchX > 0f && width > 0f) {
                             PredictiveBackTrace.driver("nav touchX")
-                            offsetForFinger(touchX, fromRight, width)
+                            offsetForFinger(touchX, g.fromRight, width)
                         } else {
                             PredictiveBackTrace.driver("nav progress")
                             (fraction * FALLBACK_PROGRESS_GAIN * gestureGain)
                                 .coerceIn(0f, 1f) * width
                         }
-                        lastSampleAtMs = SystemClock.uptimeMillis()
-                        PredictiveBackTrace.followStep(renderedPx.floatValue)
+                        g.lastSampleAtMs = PredictiveBackTrace.sample()
                     }
                 },
                 onCommitted = {
                     // Also the discrete case (the back button): no gesture, no progress events.
-                    if (!dragging) {
-                        dragging = true
+                    if (!g.dragging) {
+                        g.dragging = true
                         committed = false
+                        g.compositions = 0
                         PredictiveBackTrace.begin(false)
                     }
-                    dragging = false
+                    g.dragging = false
+                    BackGestureActivity.active = true
                     scope.launch { glideOut() }
                 },
                 onCancelled = {
-                    dragging = false
+                    g.dragging = false
+                    BackGestureActivity.active = true
                     scope.launch { springBack() }
                 }
             )
@@ -299,27 +311,30 @@ fun PredictiveBackContainer(
         }
     }
 
-    // Registered first, so the navigationevent input above takes the gesture — but kept as a fallback
-    // for the cases where that input is not in play (a platform without the system gesture callbacks,
-    // or the input failing to attach). The platform hands a gesture to exactly one registered callback,
-    // so these two can never both drive it; the readout's driver column says which one did.
+    // Kept as the net under the navigationevent input above (the one that actually takes the
+    // gesture): for the cases where that input is not in play — a platform without the system
+    // gesture callbacks, or the input failing to attach. The platform hands a gesture to exactly one
+    // registered callback — the last one registered on a given priority — so these two can never both
+    // drive it, and the readout's driver column says which one did.
     if (systemPredictiveBack) {
         PredictiveBackHandler(enabled = canGoBack) { events: Flow<BackEventCompat> ->
             try {
-                if (!dragging) {
-                    dragging = true
+                if (!g.dragging) {
+                    g.dragging = true
+                    BackGestureActivity.active = true
                     committed = false
-                    lastSampleAtMs = SystemClock.uptimeMillis()
-                    PredictiveBackTrace.begin(fromRight)
+                    g.lastSampleAtMs = PredictiveBackTrace.sample()
+                    g.compositions = 0
+                    PredictiveBackTrace.begin(g.fromRight)
                 }
                 var edgeLocked = false
                 events.collect { event ->
                     if (!edgeLocked) {
                         edgeLocked = true
-                        fromRight = event.swipeEdge == BackEventCompat.EDGE_RIGHT
-                        PredictiveBackTrace.edgeLocked(fromRight)
+                        g.fromRight = event.swipeEdge == BackEventCompat.EDGE_RIGHT
+                        PredictiveBackTrace.edgeLocked(g.fromRight)
                     }
-                    if (dragging) {
+                    if (g.dragging) {
                         val width = widthPx
                         val fraction = event.progress.coerceAtLeast(0f)
                         val touchX = event.touchX
@@ -327,23 +342,22 @@ fun PredictiveBackContainer(
                         PredictiveBackTrace.latency(0L)
                         renderedPx.floatValue = if (touchX > 0f && width > 0f) {
                             PredictiveBackTrace.driver("act touchX")
-                            offsetForFinger(touchX, fromRight, width)
+                            offsetForFinger(touchX, g.fromRight, width)
                         } else {
                             PredictiveBackTrace.driver("act progress")
                             (fraction * FALLBACK_PROGRESS_GAIN * gestureGain)
                                 .coerceIn(0f, 1f) * width
                         }
-                        lastSampleAtMs = SystemClock.uptimeMillis()
-                        PredictiveBackTrace.followStep(renderedPx.floatValue)
+                        g.lastSampleAtMs = PredictiveBackTrace.sample()
                     }
                 }
-                dragging = false
+                g.dragging = false
                 scope.launch { glideOut() }
             } catch (cancelled: CancellationException) {
                 // This coroutine is already cancelled, so anything suspending here — the settle
                 // animation above all — is cancelled on the spot and the page parks wherever the
                 // finger left it. The settle therefore has to run on a scope that is still alive.
-                dragging = false
+                g.dragging = false
                 scope.launch { springBack() }
                 throw cancelled
             }
@@ -382,6 +396,8 @@ fun PredictiveBackContainer(
             renderedPx.floatValue = 0f
             committed = false
         }
+        // The pop has composed, so this page is the top page and nothing owns the screen any more.
+        if (!g.dragging && !g.settling) BackGestureActivity.active = false
     }
 
     // Edge-drag fallback for platforms without the system gesture: same geometry, driven straight by
@@ -392,15 +408,17 @@ fun PredictiveBackContainer(
             enabled = canGoBack,
             gain = gestureGain,
             onStart = {
-                dragging = true
+                g.dragging = true
+                BackGestureActivity.active = true
                 committed = false
-                lastSampleAtMs = SystemClock.uptimeMillis()
-                PredictiveBackTrace.begin(fromRight)
+                g.lastSampleAtMs = PredictiveBackTrace.sample()
+                g.compositions = 0
+                PredictiveBackTrace.begin(g.fromRight)
             },
-            onEdge = { rightEdge -> fromRight = rightEdge },
+            onEdge = { rightEdge -> g.fromRight = rightEdge },
             onDrag = { travelPx ->
                 renderedPx.floatValue = travelPx
-                lastSampleAtMs = SystemClock.uptimeMillis()
+                g.lastSampleAtMs = PredictiveBackTrace.sample()
             },
             onEnd = { traveled, width ->
                 if (traveled > width * 0.15f) {
@@ -485,6 +503,11 @@ fun PredictiveBackContainer(
                     // whichever edge the gesture came from: the animation is deliberately not
                     // mirrored (the follow distance still tracks the finger, the direction does not).
                     translationX = if (committed) 0f else round(renderedPx.floatValue)
+                    // The one place that sees every frame of a gesture, its settle and the pop — so
+                    // the readout's frame-gap detector is fed from here. It used to be a
+                    // `withFrameNanos` loop, which paid a frame callback, a coroutine resume and a
+                    // dispatch per frame to measure the very work it was adding to.
+                    PredictiveBackTrace.frameTick(g.settling)
                 }
                 // Opaque floor under the page: nothing underneath can ever show through the page's
                 // own transparent areas.
@@ -601,7 +624,32 @@ private fun Context.findActivity(): Activity? {
  * recomposes every visible card. Landing one of those on a gesture frame pushes it over the 8.33 ms a
  * 120 Hz display allows, so the drag drops a frame — intermittently, which is exactly how users
  * describe it. The ticker reads this flag and waits; the gesture lasts a few hundred milliseconds.
+ *
+ * Deliberately *not* snapshot state: its only reader is the ViewModel's ticker coroutine, and a
+ * snapshot write from inside a composition-adjacent scope is an invalidation nobody consumes.
  */
 object BackGestureActivity {
-    var active by mutableStateOf(false)
+    @Volatile var active: Boolean = false
+}
+
+/**
+ * Everything a gesture writes about itself, none of it read during composition.
+ *
+ * A plain holder rather than snapshot state: writing these used to invalidate the container, whose
+ * body re-invokes the content and preview lambdas — which take an unstable ViewModel, so they cannot
+ * be skipped while it is being recomposed — and the recomposition landed on the first frame of the
+ * drag and the frame the settle starts, i.e. on the two frames a user actually sees.
+ */
+private class GestureState {
+    /** A drag is in flight. */
+    var dragging = false
+    /** A settle animation (commit glide or cancel spring) is in flight. */
+    var settling = false
+    /** Which edge this gesture started from, locked for the gesture: the geometry must not flip
+     *  halfway through. */
+    var fromRight = false
+    /** Wall clock of the newest sample; the stall recovery watches this. */
+    var lastSampleAtMs = 0L
+    /** How often the container's body has run since the last gesture began (readout only). */
+    var compositions = 0
 }

@@ -11,11 +11,22 @@ import androidx.compose.runtime.mutableStateOf
  * platform's gesture events and our own pointer samples — and the only way to tell which one is
  * actually live on a given device (and where one of them stalls) is to look at the numbers after
  * a real gesture. All fields are plain values; [text] is the single observable the UI reads.
+ *
+ * Every method here is called from a per-frame or per-sample path, so each one is a handful of field
+ * writes and nothing else: no allocation, no string building (that happens once, in [finish]) and no
+ * Compose snapshot write. The frame counter no longer drives a `withFrameNanos` loop — the caller
+ * ticks it from the layer block it already has.
  */
 object PredictiveBackTrace {
 
     /** One-line summary of the last finished gesture, shown in the developer screen. */
     val text: MutableState<String> = mutableStateOf("")
+
+    /**
+     * Two displayed frames further apart than this are not part of the same run of frames — the gap
+     * between them is idle time, not a stall, and counting it would drown the signal.
+     */
+    private const val FRAME_RUN_GAP_MS = 120L
 
     private var edge = "?"
     private var events = 0
@@ -23,18 +34,16 @@ object PredictiveBackTrace {
     private var touchSamples = 0
     private var firstTouch = Float.NaN
     private var lastTouch = Float.NaN
-    private var pointerSamples = 0
-    private var maxFinger = Float.NaN
     private var mode = "?"
     private var startedAt = 0L
-    private var frames = 0
-    private var lastRenderedPx = Float.NaN
     private var lastSampleAt = 0L
     private var maxGapMs = 0L
     private var frameTicks = 0
     private var lastFrameAt = 0L
-    private var maxFrameMs = 0L
+    private var maxFrameDragMs = 0L
+    private var maxFrameSettleMs = 0L
     private var maxLagMs = 0L
+    private var notes = ""
 
     fun begin(rightEdge: Boolean) {
         edge = if (rightEdge) "R" else "L"
@@ -43,17 +52,14 @@ object PredictiveBackTrace {
         touchSamples = 0
         firstTouch = Float.NaN
         lastTouch = Float.NaN
-        pointerSamples = 0
-        maxFinger = Float.NaN
         mode = "?"
         startedAt = System.currentTimeMillis()
-        frames = 0
-        lastRenderedPx = Float.NaN
         lastSampleAt = 0L
         maxGapMs = 0L
         frameTicks = 0
         lastFrameAt = 0L
-        maxFrameMs = 0L
+        maxFrameDragMs = 0L
+        maxFrameSettleMs = 0L
         maxLagMs = 0L
     }
 
@@ -72,22 +78,43 @@ object PredictiveBackTrace {
         }
     }
 
-    /** A sample from our own pointer stream, in container pixels. */
-    fun pointerSample(fingerX: Float) {
-        pointerSamples++
-        if (maxFinger.isNaN() || fingerX > maxFinger) maxFinger = fingerX
+    /**
+     * One gesture sample. Returns the wall clock for the caller's own stall watch, and records the
+     * gap to the previous sample — the readout's `maxGap`, the number that says whether the
+     * platform's stream is per-frame or sparse. (A whole design decision hinges on that, so it is
+     * measured rather than assumed.)
+     */
+    fun sample(): Long {
+        val now = SystemClock.uptimeMillis()
+        if (lastSampleAt != 0L) {
+            val gap = now - lastSampleAt
+            if (gap > maxGapMs) maxGapMs = gap
+        }
+        lastSampleAt = now
+        return now
     }
 
     /**
-     * One displayed frame. The longest gap between two of them is the render-stall detector: a
-     * heavy frame shows up here as a large number, while a stalled input stream shows up in
-     * [sampleTiming] instead — telling those two apart is the whole point of keeping both.
+     * One displayed frame of a gesture, its settle or the pop that follows — called from the
+     * travelling page's layer block, which is the only place that sees all of them.
+     *
+     * The longest gap between two of them is the render-stall detector, split by phase because the
+     * two phases have different jobs: the drag is geometry (a missed frame shows up as the page
+     * lagging the finger) while the settle is the animation plus a whole navigation pop. A heavy
+     * frame shows up here, while a stalled input stream shows up in `maxGap` and a queued one in
+     * `maxLag` — telling those three apart is the whole point of keeping all of them.
      */
-    fun frameTick() {
+    fun frameTick(settling: Boolean) {
         val now = System.nanoTime()
         if (lastFrameAt != 0L) {
             val gapMs = (now - lastFrameAt) / 1_000_000L
-            if (gapMs > maxFrameMs) maxFrameMs = gapMs
+            if (gapMs <= FRAME_RUN_GAP_MS) {
+                if (settling) {
+                    if (gapMs > maxFrameSettleMs) maxFrameSettleMs = gapMs
+                } else {
+                    if (gapMs > maxFrameDragMs) maxFrameDragMs = gapMs
+                }
+            }
         }
         lastFrameAt = now
         frameTicks++
@@ -105,8 +132,6 @@ object PredictiveBackTrace {
         if (lag > maxLagMs) maxLagMs = lag
     }
 
-    private var notes = ""
-
     /**
      * A one-off diagnostic string carried into the next readout, for facts that have no numeric home —
      * whether the navigationevent input attached to the platform at all, and why not if it did not.
@@ -121,30 +146,11 @@ object PredictiveBackTrace {
     }
 
     /**
-     * One step of the per-frame follow loop, with the offset it rendered. Counting these is what
-     * proves the loop is actually running on a given device (a stalled follow shows up as a handful
-     * of frames for a gesture that lasted hundreds of milliseconds).
+     * @param compositions recompositions of the navigation container since the gesture began. One is
+     *   the baseline (the frame the readout itself is built on); anything above that means the
+     *   container recomposed mid-gesture and re-ran the two resident pages with it.
      */
-    fun followStep(renderedPx: Float) {
-        frames++
-        lastRenderedPx = renderedPx
-    }
-
-    /**
-     * Time since the previous sample, in milliseconds. This is the number that says whether the
-     * platform's gesture stream is sparse (tens of ms apart) or effectively per frame; a whole
-     * design decision hinges on it, so it is measured rather than assumed.
-     */
-    fun sampleTiming() {
-        val now = System.currentTimeMillis()
-        if (lastSampleAt != 0L) {
-            val gap = now - lastSampleAt
-            if (gap > maxGapMs) maxGapMs = gap
-        }
-        lastSampleAt = now
-    }
-
-    fun finish(outcome: String, widthPx: Float, travelPx: Float) {
+    fun finish(outcome: String, widthPx: Float, travelPx: Float, compositions: Int = 0) {
         val millis = System.currentTimeMillis() - startedAt
         val travel = if (widthPx > 0f) (travelPx / widthPx * 100f).toInt() else 0
         text.value = buildString {
@@ -155,15 +161,15 @@ object PredictiveBackTrace {
             if (touchSamples > 0) {
                 append(" (").append(fmt(firstTouch, 0)).append("→").append(fmt(lastTouch, 0)).append(")")
             }
-            append(" · ptr ").append(pointerSamples)
-            if (pointerSamples > 0) append(" (max ").append(fmt(maxFinger, 0)).append(")")
             append(" · driver ").append(mode)
             append(" · travel ").append(travel).append("%")
             append(" · maxGap ").append(maxGapMs).append("ms")
             append(" · frames ").append(frameTicks)
-            append(" · maxFrame ").append(maxFrameMs).append("ms")
+            append(" · frame ").append(maxOf(maxFrameDragMs, maxFrameSettleMs))
+            append("ms (drag ").append(maxFrameDragMs)
+            append(" · settle ").append(maxFrameSettleMs).append(")")
+            append(" · comp ").append(compositions)
             append(" · maxLag ").append(maxLagMs).append("ms")
-            append(" · last ").append(fmt(lastRenderedPx, 0))
             append(" · ").append(outcome)
             append(" · ").append(millis).append("ms")
             append(" · width ").append(widthPx.toInt())
