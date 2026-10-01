@@ -236,8 +236,8 @@ fun PredictiveBackContainer(
             // The finished readout is handed to the developer screen from here rather than from the
             // gesture itself: that state write recomposes the whole developer screen, and from inside
             // the settle it showed up as an 88 ms "settle frame" that was only the readout redrawing
-            // itself.
-            PredictiveBackTrace.publish()
+            // itself. Never while something is in flight, or back-to-back swipes would pay for it.
+            if (!g.dragging && !g.settling) PredictiveBackTrace.publish()
             val silentMs = SystemClock.uptimeMillis() - g.lastSampleAtMs
             if (g.dragging) {
                 // Never walk the page home under a finger: a silent drag means the finger is held
