@@ -23,7 +23,6 @@ import com.safekey.authenticator.security.gateAction
 import com.safekey.authenticator.tags.TagFilter
 import com.safekey.authenticator.totp.Base32
 import com.safekey.authenticator.totp.TotpGenerator
-import com.safekey.authenticator.ui.components.BackGestureActivity
 import com.safekey.authenticator.ui.navigation.NavigationState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -32,8 +31,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
@@ -41,12 +38,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-
-/** How often the account pipeline re-checks whether a back gesture still owns the screen. */
-private const val BACK_GESTURE_HOLD_POLL_MS = 50L
-
-/** Longest the countdown may be held by the flag alone; the container's watcher clears it sooner. */
-private const val BACK_GESTURE_HOLD_MAX_MS = 2_000L
 
 /** A rendered account: domain data + the live code for the current tick. */
 data class AccountUi(
@@ -112,36 +103,13 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     private val _now = MutableStateFlow(System.currentTimeMillis())
     val now: StateFlow<Long> = _now
 
-    /**
-     * Emits nothing while a back gesture (or its settle) owns the screen, then emits the newest
-     * value. Paired with [conflate] at the call site, so nothing piles up.
-     *
-     * Bounded: a stuck flag costs the countdown two seconds, never a frozen list — the container's
-     * stall watcher clears the flag whenever nothing is actually in flight, and this is the belt
-     * under that.
-     */
-    private fun <T> Flow<T>.holdWhileBackGesture(): Flow<T> =
-        flow {
-            collect { value ->
-                var waited = 0L
-                while (BackGestureActivity.active && waited < BACK_GESTURE_HOLD_MAX_MS) {
-                    delay(BACK_GESTURE_HOLD_POLL_MS)
-                    waited += BACK_GESTURE_HOLD_POLL_MS
-                }
-                emit(value)
-            }
-        }
-
     private val tickJob: Job = viewModelScope.launch {
         while (true) {
-            // Skip the tick while a back gesture owns the screen: it rebuilds the whole AccountUi
-            // list (Base32 decode + HMAC per account), and the resulting recomposition of every
-            // visible card is enough to push a gesture frame over the 8.33 ms budget a 120 Hz
-            // display allows. The countdown being a few hundred milliseconds stale is invisible;
-            // the codes that matter change on period boundaries, not on this tick.
-            if (!BackGestureActivity.active) {
-                _now.value = System.currentTimeMillis()
-            }
+            // Runs through back gestures on purpose. Holding it back keeps the countdown off the
+            // gesture's frames, but a *held* gesture then freezes the page underneath into a
+            // screenshot — progress bars, seconds and all — which reads as a bug. A frame dropped
+            // twice a second on a moving page is the lesser of the two.
+            _now.value = System.currentTimeMillis()
             delay(500)
         }
     }
@@ -209,17 +177,6 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
             }
         }
             .flowOn(Dispatchers.Default)
-            // Conflated, because the values skipped below are only ever the countdown being a few
-            // hundred milliseconds stale; the codes themselves change on period boundaries.
-            .conflate()
-            // A fresh `List<AccountUi>` recomposes every visible card, and — because the page being
-            // swiped away from is cached in a layer — it invalidates that whole layer, so the frame
-            // it lands on re-records a screenful. The ticker already skips its own write while a
-            // gesture owns the screen (`BackGestureActivity`), but a tick that was already in flight
-            // when the gesture began still lands mid-drag, and a drag only lasts a few hundred
-            // milliseconds. Holding the whole pipeline instead of just the ticker is what takes that
-            // last "every now and then" out of the frame budget.
-            .holdWhileBackGesture()
             .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     /** Display order, applying the selected sort mode. */
