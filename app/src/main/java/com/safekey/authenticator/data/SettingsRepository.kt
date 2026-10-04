@@ -36,7 +36,7 @@ data class AppSettings(
     val autoBackupKeepCount: Int = 5,
     val autoBackupLastTime: Long = 0L,
     val autoBackupLastError: String = "",
-    val autoCheckUpdates: Boolean = true,
+    val autoCheckUpdates: Boolean = false,
     val tagsEnabled: Boolean = true,
     // ---- root hardening / developer mode (2.4.2) ----
     val devModeEnabled: Boolean = false,
@@ -143,7 +143,7 @@ class SettingsRepository(
             autoBackupKeepCount = prefs[Keys.AUTO_BACKUP_KEEP] ?: AppSettings.AUTO_BACKUP_KEEP_DEFAULT,
             autoBackupLastTime = prefs[Keys.AUTO_BACKUP_LAST_TIME] ?: 0L,
             autoBackupLastError = prefs[Keys.AUTO_BACKUP_LAST_ERROR] ?: "",
-            autoCheckUpdates = prefs[Keys.AUTO_CHECK_UPDATES] ?: true,
+            autoCheckUpdates = prefs[Keys.AUTO_CHECK_UPDATES] ?: false,
             tagsEnabled = prefs[Keys.TAGS_ENABLED] ?: true,
             devModeEnabled = prefs[Keys.DEV_MODE_ENABLED] ?: false,
             devDisableRootSecurity = prefs[Keys.DEV_DISABLE_ROOT_SECURITY] ?: false,

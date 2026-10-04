@@ -1,6 +1,7 @@
-Osmium is a privacy-first, fully offline authenticator for two-factor codes (TOTP/HOTP).
+Osmium is a privacy-first, fully offline authenticator for two-factor codes (TOTP/HOTP): codes are generated on-device and work without any network connection.
 
 • Codes are computed entirely on-device — no account, no sign-up, and no telemetry.
+• No connections at start-up. Osmium goes online only when you ask it to: the automatic update check is off by default, and the Terms of Use / Privacy Policy are downloaded from osmium.im only when you open them.
 • Secrets are encrypted with a non-exportable key in the Android Keystore before they are written to disk.
 • TOTP and HOTP: 6/7/8 digits, SHA-1/SHA-256/SHA-512; Steam Guard codes supported.
 • Organize accounts with tags and search.

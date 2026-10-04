@@ -230,8 +230,9 @@
     <string name="color_cyan">Cian</string>
     <string name="color_blue">Azul</string>
     <string name="color_purple">Morado</string>
-    <string name="tampered_title">Error</string>
-    <string name="tampered_message">Esta aplicación ha sido manipulada y no puede ejecutarse. Descarga la versión oficial desde GitHub Releases.</string>
+    <string name="tampered_title">Compilación no oficial</string>
+    <string name="tampered_message">Este APK no está firmado con la clave oficial de Osmium, por lo que puede haber sido recompilado o refirmado por otra persona. Continúa solo si confías en el origen de esta compilación. Las compilaciones oficiales están en GitHub Releases.</string>
+    <string name="tampered_continue">Continuar de todos modos</string>
     <string name="tampered_exit">Salir</string>
     <string name="pin_cleared">PIN eliminado</string>
     <string name="language">Idioma</string>

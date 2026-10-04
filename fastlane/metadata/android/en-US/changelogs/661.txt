@@ -1,0 +1,1 @@
+v2.5.5: the APK signature check is now a warning you can continue past instead of a hard block (F-Droid's own signed build and rebuilds from source now run), the automatic update check is off by default, and the Terms of Use / Privacy Policy are downloaded only when you open them — no network request at start-up.

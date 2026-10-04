@@ -230,8 +230,9 @@
     <string name="color_cyan">청록</string>
     <string name="color_blue">파랑</string>
     <string name="color_purple">보라</string>
-    <string name="tampered_title">오류</string>
-    <string name="tampered_message">이 앱은 변조되어 실행할 수 없습니다. GitHub Releases에서 공식 버전을 다운로드하세요.</string>
+    <string name="tampered_title">비공식 빌드</string>
+    <string name="tampered_message">이 APK는 Osmium 공식 키로 서명되지 않아 다른 사람이 다시 빌드하거나 다시 서명했을 수 있습니다. 이 빌드의 출처를 신뢰할 때만 계속하세요. 공식 빌드는 GitHub Releases에 있습니다.</string>
+    <string name="tampered_continue">그래도 계속</string>
     <string name="tampered_exit">종료</string>
     <string name="pin_cleared">PIN이 삭제되었습니다</string>
     <string name="language">언어</string>

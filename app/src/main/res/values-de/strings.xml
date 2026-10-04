@@ -230,8 +230,9 @@
     <string name="color_cyan">Cyan</string>
     <string name="color_blue">Blau</string>
     <string name="color_purple">Lila</string>
-    <string name="tampered_title">Fehler</string>
-    <string name="tampered_message">Diese App wurde manipuliert und kann nicht ausgeführt werden. Lade die offizielle Version von GitHub Releases herunter.</string>
+    <string name="tampered_title">Inoffizieller Build</string>
+    <string name="tampered_message">Dieses APK wurde nicht mit dem offiziellen Osmium-Schlüssel signiert und stammt daher möglicherweise von jemand anderem neu gebaut oder neu signiert. Fahre nur fort, wenn du der Herkunft dieses Builds vertraust. Offizielle Builds gibt es bei GitHub Releases.</string>
+    <string name="tampered_continue">Trotzdem fortfahren</string>
     <string name="tampered_exit">Beenden</string>
     <string name="pin_cleared">PIN gelöscht</string>
     <string name="language">Sprache</string>

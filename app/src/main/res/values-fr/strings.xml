@@ -230,8 +230,9 @@
     <string name="color_cyan">Cyan</string>
     <string name="color_blue">Bleu</string>
     <string name="color_purple">Violet</string>
-    <string name="tampered_title">Erreur</string>
-    <string name="tampered_message">Cette application a été altérée et ne peut pas s’exécuter. Téléchargez la version officielle depuis GitHub Releases.</string>
+    <string name="tampered_title">Version non officielle</string>
+    <string name="tampered_message">Cet APK n’a pas été signé avec la clé officielle d’Osmium : il a peut-être été recompilé ou resigné par quelqu’un d’autre. Ne continuez que si vous faites confiance à l’origine de cette version. Les versions officielles sont sur GitHub Releases.</string>
+    <string name="tampered_continue">Continuer quand même</string>
     <string name="tampered_exit">Quitter</string>
     <string name="pin_cleared">PIN effacé</string>
     <string name="language">Langue</string>

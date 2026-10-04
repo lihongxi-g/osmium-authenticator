@@ -242,8 +242,9 @@
     <string name="color_cyan">Cyan</string>
     <string name="color_blue">Blue</string>
     <string name="color_purple">Purple</string>
-    <string name="tampered_title">Error</string>
-    <string name="tampered_message">This app has been tampered with and cannot run. Download the official version from GitHub Releases.</string>
+    <string name="tampered_title">Unofficial build</string>
+    <string name="tampered_message">This APK was not signed with the official Osmium key, so it may have been rebuilt or re-signed by someone else. Only continue if you trust where this build came from. Official builds are on GitHub Releases.</string>
+    <string name="tampered_continue">Continue anyway</string>
     <string name="tampered_exit">Exit</string>
     <string name="pin_cleared">PIN cleared</string>
     <string name="language">Language</string>

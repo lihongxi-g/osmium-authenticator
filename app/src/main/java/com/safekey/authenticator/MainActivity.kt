@@ -70,7 +70,6 @@ import com.safekey.authenticator.backup.AutoBackupScheduler
 import com.safekey.authenticator.data.AppSettings
 import com.safekey.authenticator.data.LanguagePrefs
 import com.safekey.authenticator.integrity.IntegrityLevel
-import com.safekey.authenticator.legal.LegalDocsRepository
 import com.safekey.authenticator.security.AppLog
 import com.safekey.authenticator.security.BiometricState
 import com.safekey.authenticator.security.classifyBiometricCode
@@ -120,7 +119,13 @@ import kotlinx.coroutines.withContext
 class MainActivity : FragmentActivity() {
 
     private val vm: MainViewModel by viewModels()
-    private var tampered = false
+
+    // Anti-repackaging: a foreign signer is a warning, not a wall. F-Droid
+    // publishes its own signed build and anyone may rebuild the GPL source, so
+    // a mismatch shows a notice the user must acknowledge before the UI opens
+    // (see [TamperedScreen]) instead of refusing to run.
+    private var tampered by mutableStateOf(false)
+    private var tamperAcknowledged by mutableStateOf(false)
 
     // Update-check state: silent GitHub query on open, one dialog. The dialog
     // also carries the release notes the same request returns.
@@ -144,7 +149,8 @@ class MainActivity : FragmentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Anti-repackaging: refuse to run a re-signed APK.
+        // Anti-repackaging: flag a re-signed APK. The notice blocks the UI
+        // until the user acknowledges it — never a silent continue.
         tampered = IntegrityCheck.isTampered(this)
 
         // Block screenshots and the recents thumbnail — no secrets leak.
@@ -159,6 +165,8 @@ class MainActivity : FragmentActivity() {
             val locked by vm.locked.collectAsState()
             val pinRequired by vm.pinRequired.collectAsState()
             val destroyed by vm.destroyed.collectAsState()
+            // Signature mismatch keeps the UI closed until acknowledged.
+            val tamperBlocked = tampered && !tamperAcknowledged
             val toast by vm.toast.collectAsState()
             val integrityNotice by vm.integrityNotice.collectAsState()
             val biometric by vm.biometricState.collectAsState()
@@ -222,7 +230,9 @@ class MainActivity : FragmentActivity() {
                         .background(MaterialTheme.colorScheme.background)
                 ) {
                     when {
-                        tampered -> TamperedScreen()
+                        tamperBlocked -> TamperedScreen(
+                            onContinue = { tamperAcknowledged = true }
+                        )
                         destroyed -> DestroyedScreen()
                         pinRequired -> PinGate()
                         locked -> LockGate()
@@ -236,7 +246,7 @@ class MainActivity : FragmentActivity() {
                     // Update notification only over the unlocked main UI.
                     val update = pendingUpdate
                     if (update != null && !locked && !pinRequired &&
-                        !destroyed && !tampered
+                        !destroyed && !tamperBlocked
                     ) {
                         UpdateAvailableDialog(
                             tag = update.tag,
@@ -257,7 +267,7 @@ class MainActivity : FragmentActivity() {
                     }
                     val showPinReminder = pinReminderVisible && noBiometricCredential && !pinSet &&
                         !settings.pinReminderSilenced && !locked && !pinRequired &&
-                        !destroyed && !tampered
+                        !destroyed && !tamperBlocked
                     if (showPinReminder) {
                         PinReminderDialog(
                             onSetup = {
@@ -273,7 +283,7 @@ class MainActivity : FragmentActivity() {
                     // Enter-app integrity reminder (L2/L3), debounced in the
                     // ViewModel; suppressed while the restriction is lifted.
                     val notice = integrityNotice
-                    if (notice != null && !locked && !pinRequired && !destroyed && !tampered) {
+                    if (notice != null && !locked && !pinRequired && !destroyed && !tamperBlocked) {
                         IntegrityNoticeDialog(
                             notice = notice,
                             onViewReport = {
@@ -318,7 +328,7 @@ class MainActivity : FragmentActivity() {
         vm.setBiometricState(biometricState())
         vm.onAppForeground()
         maybeCheckForUpdate()
-        maybeRefreshLegalDocs()
+        // Legal documents are fetched only when the user opens them (About).
         // The startup scan feeds the integrity screen, the enter-app reminder
         // and the root-hardening overlay. With the feature hidden in developer
         // mode it must not run behind the user's back either: it stays off
@@ -351,13 +361,23 @@ class MainActivity : FragmentActivity() {
 
     // ------------------------------------------------------------ tamper
 
+    /**
+     * Shown when the APK signature is not the official one. A warning, not a
+     * wall: F-Droid publishes a re-signed build and anyone may rebuild the GPL
+     * source, so the user can continue after acknowledging the notice.
+     */
     @Composable
-    private fun TamperedScreen() {
+    private fun TamperedScreen(onContinue: () -> Unit) {
         AlertDialog(
             onDismissRequest = { },
             title = { Text(stringResource(R.string.tampered_title)) },
             text = { Text(stringResource(R.string.tampered_message)) },
             confirmButton = {
+                TextButton(onClick = onContinue) {
+                    Text(stringResource(R.string.tampered_continue))
+                }
+            },
+            dismissButton = {
                 TextButton(onClick = { finishAffinity() }) {
                     Text(stringResource(R.string.tampered_exit))
                 }
@@ -764,7 +784,8 @@ class MainActivity : FragmentActivity() {
      */
     private fun maybeCheckForUpdate() {
         val settings = vm.settings.value
-        if (!settings.autoCheckUpdates || updateCheckInFlight || tampered ||
+        if (!settings.autoCheckUpdates || updateCheckInFlight ||
+            (tampered && !tamperAcknowledged) ||
             vm.destroyed.value
         ) return
         val now = System.currentTimeMillis()
@@ -782,19 +803,10 @@ class MainActivity : FragmentActivity() {
     }
 
     // --------------------------------------------------------- legal docs
-
-    /**
-     * Reads the latest Terms of Use / Privacy Policy from osmium.im in the
-     * background when the app opens. Throttling lives inside
-     * [LegalDocsRepository]; failures stay silent here — the About dialogs
-     * show a failure notice with retry and a link to the website.
-     */
-    private fun maybeRefreshLegalDocs() {
-        if (tampered || vm.destroyed.value) return
-        lifecycleScope.launch {
-            LegalDocsRepository.refreshIfDue(applicationContext)
-        }
-    }
+    //
+    // The Terms of Use / Privacy Policy are fetched on demand by the About
+    // screen (see AboutScreen's LaunchedEffect), never at app start: the app
+    // makes no request until the user opens a document.
 
 /**
  * Suggestion to set an app PIN on a device without fingerprint/face unlock.

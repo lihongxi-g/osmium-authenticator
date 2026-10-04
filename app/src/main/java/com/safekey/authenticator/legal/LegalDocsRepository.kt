@@ -17,8 +17,9 @@ import kotlinx.coroutines.withContext
  *
  * Requests are plain GETs for public text. They carry no account,
  * authenticator or device data; the only header added is a User-Agent with
- * the app name and version. Reads happen when the app opens (see
- * MainActivity), throttled to [COOLDOWN_MS] between successful refreshes.
+ * the app name and version. Reads happen only when the user opens a document
+ * (About → Terms of Use / Privacy Policy), throttled to [COOLDOWN_MS] between
+ * successful refreshes.
  * Results are held in memory only. The diagnostic log records metadata
  * (document, HTTP status) and never any content.
  */

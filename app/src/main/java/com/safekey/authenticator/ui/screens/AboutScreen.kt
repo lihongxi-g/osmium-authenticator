@@ -25,6 +25,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -221,6 +222,11 @@ fun AboutScreen(
     }
 
     if (showTerms) {
+        // Fetch the document only now — the app makes no legal-doc request
+        // until the user opens one (F-Droid review: no connections on start).
+        LaunchedEffect(Unit) {
+            LegalDocsRepository.refreshIfDue(context.applicationContext)
+        }
         LegalDialog(
             title = stringResource(R.string.about_terms_title),
             state = legalStates[LegalDoc.TERMS] ?: LegalDocState.Loading,
@@ -236,6 +242,9 @@ fun AboutScreen(
         )
     }
     if (showPrivacy) {
+        LaunchedEffect(Unit) {
+            LegalDocsRepository.refreshIfDue(context.applicationContext)
+        }
         LegalDialog(
             title = stringResource(R.string.about_privacy_title),
             state = legalStates[LegalDoc.PRIVACY] ?: LegalDocState.Loading,

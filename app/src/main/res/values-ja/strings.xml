@@ -230,8 +230,9 @@
     <string name="color_cyan">シアン</string>
     <string name="color_blue">青</string>
     <string name="color_purple">紫</string>
-    <string name="tampered_title">エラー</string>
-    <string name="tampered_message">このアプリは改ざんされているため実行できません。GitHub Releasesから公式版をダウンロードしてください。</string>
+    <string name="tampered_title">非公式ビルド</string>
+    <string name="tampered_message">この APK は Osmium の公式キーで署名されていないため、第三者が再ビルドまたは再署名した可能性があります。このビルドの入手元を信頼できる場合のみ続行してください。公式ビルドは GitHub Releases にあります。</string>
+    <string name="tampered_continue">それでも続行</string>
     <string name="tampered_exit">終了</string>
     <string name="pin_cleared">PINを消去しました</string>
     <string name="language">言語</string>

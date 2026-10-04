@@ -239,8 +239,9 @@
     <string name="color_cyan">青</string>
     <string name="color_blue">藍</string>
     <string name="color_purple">紫</string>
-    <string name="tampered_title">錯誤</string>
-    <string name="tampered_message">應用已被篡改，無法運行。請從 GitHub Releases 下載官方版本。</string>
+    <string name="tampered_title">非官方建置</string>
+    <string name="tampered_message">這個安裝包不是用 Osmium 官方金鑰簽署的，可能由他人重新建置或重新簽署。只有在你確認這個安裝包的來源可信時才繼續。官方版本請見 GitHub Releases。</string>
+    <string name="tampered_continue">仍要繼續</string>
     <string name="tampered_exit">退出</string>
     <string name="pin_cleared">PIN 已清除</string>
     <string name="language">語言</string>

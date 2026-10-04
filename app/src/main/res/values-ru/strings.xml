@@ -230,8 +230,9 @@
     <string name="color_cyan">Голубой</string>
     <string name="color_blue">Синий</string>
     <string name="color_purple">Фиолетовый</string>
-    <string name="tampered_title">Ошибка</string>
-    <string name="tampered_message">Приложение было изменено и не может работать. Загрузите официальную версию из GitHub Releases.</string>
+    <string name="tampered_title">Неофициальная сборка</string>
+    <string name="tampered_message">Этот APK подписан не официальным ключом Osmium — возможно, его пересобрал или переподписал кто-то другой. Продолжайте только если доверяете источнику этой сборки. Официальные сборки — на GitHub Releases.</string>
+    <string name="tampered_continue">Всё равно продолжить</string>
     <string name="tampered_exit">Выйти</string>
     <string name="pin_cleared">PIN удалён</string>
     <string name="language">Язык</string>

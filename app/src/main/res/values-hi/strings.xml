@@ -230,8 +230,9 @@
     <string name="color_cyan">सियान</string>
     <string name="color_blue">नीला</string>
     <string name="color_purple">बैंगनी</string>
-    <string name="tampered_title">त्रुटि</string>
-    <string name="tampered_message">यह ऐप छेड़छाड़ किया गया है और नहीं चल सकता। GitHub Releases से आधिकारिक संस्करण डाउनलोड करें।</string>
+    <string name="tampered_title">अनौपचारिक बिल्ड</string>
+    <string name="tampered_message">यह APK आधिकारिक Osmium कुंजी से हस्ताक्षरित नहीं है, इसलिए हो सकता है कि किसी और ने इसे दोबारा बनाया या दोबारा हस्ताक्षरित किया हो। इस बिल्ड का स्रोत भरोसेमंद हो तभी जारी रखें। आधिकारिक बिल्ड GitHub Releases पर हैं।</string>
+    <string name="tampered_continue">फिर भी जारी रखें</string>
     <string name="tampered_exit">बाहर निकलें</string>
     <string name="pin_cleared">PIN साफ़ हुआ</string>
     <string name="language">भाषा</string>
