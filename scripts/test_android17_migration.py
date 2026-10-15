@@ -40,7 +40,7 @@ class Android17MigrationTest(unittest.TestCase):
 
     def test_ci_installs_api37(self):
         workflow = (ROOT / ".github/workflows/build.yml").read_text()
-        self.assertIn('"platforms;android-37"', workflow)
+        self.assertIn('"platforms;android-37.0"', workflow)
         self.assertNotIn('"platforms;android-35"', workflow)
 
     def test_translations_have_identical_keys(self):
