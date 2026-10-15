@@ -31,6 +31,7 @@ class LanStrings private constructor(
     val cancelled: String,
     val updateBoth: String,
     val waitingSender: String,
+    val unknownScan: String,
     val riskCodes: Map<String, String>
 ) {
 
@@ -63,6 +64,7 @@ class LanStrings private constructor(
             cancelled = "Transfer cancelled. No accounts were sent.",
             updateBoth = "Update Osmium on both devices before transferring.",
             waitingSender = "Waiting for the sending device…",
+            unknownScan = "This device could not read its own network state, so no risk check was possible. Continue only if you trust this network.",
             riskCodes = mapOf(
                 "wifi_open" to "The Wi-Fi network is open — anyone nearby can read its traffic.",
                 "wifi_wep" to "The Wi-Fi network uses WEP, which is broken.",
@@ -96,6 +98,7 @@ class LanStrings private constructor(
             cancelled = "传输已取消，未发送任何账户。",
             updateBoth = "请先将两台设备的 Osmium 都更新到新版再传输。",
             waitingSender = "等待发送方设备连接…",
+            unknownScan = "本机无法读取当前网络状态，未能完成风险检测。请确认你信任当前网络后再继续。",
             riskCodes = mapOf(
                 "wifi_open" to "当前 Wi-Fi 为开放网络，附近任何人都能读取流量。",
                 "wifi_wep" to "当前 Wi-Fi 使用已失效的 WEP 加密。",

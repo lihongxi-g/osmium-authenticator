@@ -634,6 +634,8 @@ private fun ReceiveTabContent(
                         LanTransferServer.ERR_TOO_MANY_FAILED_ATTEMPTS ->
                             errorText = context.getString(R.string.lan_error_too_many_attempts)
                         LanTransferServer.ERR_DECLINED -> statusText = lan.cancelled
+                        LanTransferServer.ERR_PROOF ->
+                            errorText = context.getString(R.string.lan_error_wrong_code)
                         LanTransferServer.ERR_PROTOCOL -> errorText = lan.updateBoth
                         else -> errorText = err
                     }
@@ -886,7 +888,9 @@ private fun rememberLanRiskConfirmation(
         )
     }
     return { report, peer ->
-        if (report?.hasThreats != true && peer?.threatCodes.isNullOrEmpty()) true
+        // An unreadable scan is "unknown", not "safe": ask instead of passing
+        // the transfer through on a state the device could not verify.
+        if (report != null && !report.hasThreats && peer?.threatCodes.isNullOrEmpty()) true
         else if (pending != null) false
         else {
             val request = PendingLanRisk(report, peer)
@@ -925,7 +929,9 @@ private fun LanRiskDialog(
         },
         text = {
             Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                if (local.isEmpty()) {
+                if (localReport == null) {
+                    Text(lan.unknownScan, style = MaterialTheme.typography.bodyMedium)
+                } else if (local.isEmpty()) {
                     Text(lan.riskNone, style = MaterialTheme.typography.bodyMedium)
                 } else {
                     Text(lan.riskLocalHeader, style = MaterialTheme.typography.labelLarge)

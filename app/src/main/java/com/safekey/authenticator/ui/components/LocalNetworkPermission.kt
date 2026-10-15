@@ -40,7 +40,11 @@ fun rememberLocalNetworkPermissionRequest(onDenied: () -> Unit): ((() -> Unit) -
     }
     return { action ->
         if (LocalNetworkAccess.isGranted(context)) action()
-        else if (pending == null) {
+        else if (pending != null) {
+            // A prompt is already on screen: say so instead of dropping the
+            // request silently, so the caller can show its own feedback.
+            onDenied()
+        } else {
             pending = action
             launcher.launch(LocalNetworkAccess.PERMISSION)
         }

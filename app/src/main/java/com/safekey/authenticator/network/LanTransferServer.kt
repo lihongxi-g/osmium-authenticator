@@ -51,6 +51,7 @@ class LanTransferServer(
         const val ERR_NO_WIFI = "NO_WIFI"
         const val ERR_DECLINED = "TRANSFER_DECLINED"
         const val ERR_PROTOCOL = "PROTOCOL_MISMATCH"
+        const val ERR_PROOF = "PAIRING_PROOF_FAILED"
 
         /** A stalled/rogue peer must not pin a handler coroutine forever. */
         const val SOCKET_TIMEOUT_MS = 15_000
@@ -140,7 +141,9 @@ class LanTransferServer(
 
                             val hello = readHello(input)
                             if (hello == null) {
-                                failed = true
+                                // A peer on another protocol version is not an
+                                // attack: do not spend the failed-attempt budget
+                                // that exists to stop pairing-code guessing.
                                 withContext(Dispatchers.Main) { onError(ERR_PROTOCOL) }
                                 return@launch
                             }
@@ -186,15 +189,22 @@ class LanTransferServer(
 
                             val peer = LanPeer(peerIp, peerMac, hello.deviceId, hello.name, hello.threatCodes)
                             socket.soTimeout = LanTransferConsent.SOCKET_TIMEOUT_MS
+                            var prompted = false
                             if (!LanTransferConsent.authorize(
                                     input, output,
                                     LanSession.senderTag(sessionKey, transcript),
                                     LanSession.readyTag(sessionKey, transcript)
-                                ) { withContext(Dispatchers.Main) { confirmPeer(peer) } }
+                                ) { prompted = true; withContext(Dispatchers.Main) { confirmPeer(peer) } }
                             ) {
                                 LanWire.writeText(output, LanSession.DENY)
-                                failed = true
-                                withContext(Dispatchers.Main) { onError(ERR_DECLINED) }
+                                // The dialog is only shown after the peer proved
+                                // the code, so "not prompted" means a wrong code
+                                // (or a substituted handshake) and stays charged;
+                                // a user declining is charged to nothing.
+                                failed = !prompted
+                                withContext(Dispatchers.Main) {
+                                    onError(if (prompted) ERR_DECLINED else ERR_PROOF)
+                                }
                                 return@launch
                             }
                             socket.soTimeout = SOCKET_TIMEOUT_MS

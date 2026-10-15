@@ -27,6 +27,19 @@ class LanRiskOrderTest(unittest.TestCase):
         self.assertIn("LanTransferConsent.authorize", server)
         self.assertLess(server.index("LanTransferConsent.authorize"), server.index("LanWire.readPayload"))
 
+    def test_receiver_separates_a_wrong_code_from_a_user_cancel(self):
+        server = (SRC / "network/LanTransferServer.kt").read_text()
+        self.assertIn("const val ERR_PROOF", server)
+        self.assertIn("else ERR_PROOF", server)
+        # Only a proved-before-prompted failure may spend the attempt budget.
+        self.assertIn("failed = !prompted", server)
+        screen = (SRC / "ui/screens/LanTransferScreen.kt").read_text()
+        self.assertIn("LanTransferServer.ERR_PROOF", screen)
+
+    def test_unknown_scan_state_requires_confirmation(self):
+        screen = (SRC / "ui/screens/LanTransferScreen.kt").read_text()
+        self.assertIn("report != null && !report.hasThreats", screen)
+
 
 if __name__ == "__main__":
     unittest.main()
