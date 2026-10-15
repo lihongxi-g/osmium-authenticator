@@ -16,6 +16,8 @@ import com.safekey.authenticator.integrity.IntegrityEngine
 import com.safekey.authenticator.security.RootState
 import com.safekey.authenticator.security.VaultIO
 import com.safekey.authenticator.network.WebDavClient
+import com.safekey.authenticator.network.LocalNetworkAccess
+import com.safekey.authenticator.network.LocalNetworkPermissionException
 import kotlinx.coroutines.flow.first
 import java.io.File
 import java.io.IOException
@@ -68,6 +70,13 @@ class AutoBackupWorker(
         }
         try {
             runBackup(app, settings)
+        } catch (_: LocalNetworkPermissionException) {
+            // A worker cannot request runtime permissions. Keep the old backups
+            // and wait for the user to grant access from the foreground UI.
+            settingsRepo.setAutoBackupResult("LOCAL_NETWORK_PERMISSION", System.currentTimeMillis())
+            return Result.success()
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
         } catch (e: Exception) {
             settingsRepo.setAutoBackupResult(
                 "${e.javaClass.simpleName}: ${e.message}", System.currentTimeMillis()
@@ -121,6 +130,7 @@ class AutoBackupWorker(
                     )
                     return
                 }
+                LocalNetworkAccess.checkWebDav(applicationContext, config.baseUrl)
                 WebDavClient.upload(config, fileName, payload)
                 pruneWebDavBackups(config, settings.autoBackupKeepCount)
             }

@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Osmium</string>
+    <string name="local_network_permission_title">局域网访问权限</string>
+    <string name="local_network_permission_desc">局域网传输和本地服务器的 WebDAV 备份需要“附近的设备”权限。拒绝后可在系统应用权限中重新授予。</string>
+    <string name="local_network_open_settings">应用权限设置</string>
     <string name="app_tagline">隐私优先的身份验证器</string>
     <string name="tags_title">标签</string>
     <string name="tags_empty">还没有标签。创建标签来整理账户。</string>

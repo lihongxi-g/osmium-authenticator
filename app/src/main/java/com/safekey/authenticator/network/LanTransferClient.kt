@@ -13,6 +13,7 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.net.InetSocketAddress
 import java.net.Socket
+import java.io.EOFException
 import java.util.Collections
 import java.util.LinkedList
 import kotlinx.coroutines.CancellationException
@@ -37,6 +38,7 @@ class LanTransferClient(private val context: Context) {
     private val mainHandler = Handler(Looper.getMainLooper())
     private var nsdDiscoveryListener: NsdManager.DiscoveryListener? = null
     private var multicastLock: WifiManager.MulticastLock? = null
+    @Volatile private var activeSocket: Socket? = null
     
     // Resolve queue to avoid "listener already in use" on older and newer Android NSD stacks
     private val resolveQueue = Collections.synchronizedList(LinkedList<NsdServiceInfo>())
@@ -175,6 +177,10 @@ class LanTransferClient(private val context: Context) {
         multicastLock = null
     }
 
+    fun cancelTransfer() {
+        runCatching { activeSocket?.close() }
+    }
+
     suspend fun sendVault(
         host: String,
         port: Int,
@@ -183,12 +189,14 @@ class LanTransferClient(private val context: Context) {
         selfDeviceId: String,
         selfName: String,
         selfThreatCodes: List<String>,
-        isBlocked: suspend (ip: String, mac: String?, deviceId: String) -> Boolean
+        isBlocked: suspend (ip: String, mac: String?, deviceId: String) -> Boolean,
+        confirmPeer: suspend (LanPeer) -> Boolean
     ): LanSendOutcome = withContext(Dispatchers.IO) {
         val socket = Socket()
+        activeSocket = socket
         try {
             socket.connect(InetSocketAddress(host, port), 8_000)
-            socket.soTimeout = 15_000
+            socket.soTimeout = LanTransferConsent.SOCKET_TIMEOUT_MS
 
             val output = DataOutputStream(socket.getOutputStream())
             val input = DataInputStream(socket.getInputStream())
@@ -204,13 +212,17 @@ class LanTransferClient(private val context: Context) {
             LanWire.writeText(output, LanWire.codesToText(selfThreatCodes))
 
             // 2) the receiver either accepts the handshake or refuses outright
-            val status = LanWire.readText(input)
+            val status = try {
+                LanWire.readText(input)
+            } catch (_: EOFException) {
+                return@withContext LanSendOutcome.Incompatible
+            }
             when (status) {
                 LanSession.DENY_BLOCKED -> return@withContext LanSendOutcome.RefusedByPeer(
                     LanPeer(host, LanGuard.macFor(host), "", "", emptyList())
                 )
                 LanSession.ACK -> Unit
-                else -> return@withContext LanSendOutcome.Failed("refused: $status")
+                else -> return@withContext LanSendOutcome.Incompatible
             }
 
             // 3) receiver key material, identity, threat codes and its proof
@@ -260,10 +272,18 @@ class LanTransferClient(private val context: Context) {
                 return@withContext LanSendOutcome.PeerBlocked(candidate)
             }
 
-            // 5) proof of the code, then the sealed vault
-            val payload = VaultIO.encodePlain(vault).toByteArray(Charsets.UTF_8)
-            LanWire.writeBytes(output, LanSession.senderTag(sessionKey, transcript))
-            LanWire.writeBytes(output, LanSession.seal(sessionKey, transcript, payload))
+            // Neither encoding nor writing the vault happens before both users
+            // approve. The ready proof is distinct from the receiver's hello.
+            if (!LanTransferConsent.send(
+                    input, output,
+                    LanSession.senderTag(sessionKey, transcript),
+                    LanSession.readyTag(sessionKey, transcript),
+                    approve = { withContext(Dispatchers.Main) { confirmPeer(candidate) } },
+                    payload = {
+                        LanSession.seal(sessionKey, transcript,
+                            VaultIO.encodePlain(vault).toByteArray(Charsets.UTF_8))
+                    }
+                )) return@withContext LanSendOutcome.Cancelled
 
             when (val finalStatus = LanWire.readText(input)) {
                 LanSession.ACK -> LanSendOutcome.Delivered(candidate)
@@ -275,6 +295,7 @@ class LanTransferClient(private val context: Context) {
             Log.d(TAG, "LanTransferClient send error: ${e.message}")
             LanSendOutcome.Failed(e.message ?: "error")
         } finally {
+            if (activeSocket === socket) activeSocket = null
             try {
                 socket.close()
             } catch (_: Throwable) {
@@ -285,6 +306,10 @@ class LanTransferClient(private val context: Context) {
 
 /** Result of one send attempt. */
 sealed interface LanSendOutcome {
+
+    /** A risk dialog was cancelled, or a peer did not approve the transfer. */
+    data object Cancelled : LanSendOutcome
+    data object Incompatible : LanSendOutcome
 
     /** Payload delivered and acknowledged by the receiving device. */
     data class Delivered(val peer: LanPeer) : LanSendOutcome

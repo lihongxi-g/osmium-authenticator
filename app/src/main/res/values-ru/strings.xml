@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Osmium</string>
+    <string name="local_network_permission_title">Доступ к локальной сети</string>
+    <string name="local_network_permission_desc">Разрешите доступ к устройствам поблизости для передачи по LAN и резервного копирования WebDAV на локальный сервер. После отказа доступ можно предоставить в разрешениях приложения.</string>
+    <string name="local_network_open_settings">Разрешения приложения</string>
     <string name="tags_title">Tags</string>
     <string name="tags_empty">No tags yet. Create one to organize your accounts.</string>
     <string name="tags_create">Create tag</string>

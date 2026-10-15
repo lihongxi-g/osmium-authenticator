@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- WebDAV servers are user-defined, including HTTP-only LAN NAS servers.
+         The existing explicit HTTP warning remains. Trust only system CAs;
+         leave Android 17 certificate transparency and ECH defaults enabled. -->
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+    <!-- The app-owned endpoints never need a cleartext downgrade. -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">osmium.im</domain>
+        <domain includeSubdomains="true">github.com</domain>
+        <domain includeSubdomains="true">githubusercontent.com</domain>
+        <domain includeSubdomains="true">android.googleapis.com</domain>
+    </domain-config>
+</network-security-config>

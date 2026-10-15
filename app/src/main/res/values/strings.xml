@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Osmium</string>
+    <string name="local_network_permission_title">Local network access</string>
+    <string name="local_network_permission_desc">Allow Nearby devices access for LAN transfers and WebDAV backups to a local server. If denied, grant it in the system app permissions.</string>
+    <string name="local_network_open_settings">App permissions</string>
     <string name="app_tagline">Privacy-first authenticator</string>
     <string name="tags_title">Tags</string>
     <string name="tags_empty">No tags yet. Create one to organize your accounts.</string>

@@ -39,12 +39,16 @@ import com.safekey.authenticator.MainViewModel
 import com.safekey.authenticator.R
 import com.safekey.authenticator.data.WebDavServerConfig
 import com.safekey.authenticator.model.VaultFile
+import com.safekey.authenticator.network.LocalNetworkAccess
+import com.safekey.authenticator.network.LocalNetworkPermissionException
 import com.safekey.authenticator.network.WebDavClient
 import com.safekey.authenticator.network.WebDavException
 import com.safekey.authenticator.network.WebDavFile
 import com.safekey.authenticator.security.VaultFormatException
 import com.safekey.authenticator.security.VaultIO
 import com.safekey.authenticator.ui.components.AppIcons
+import com.safekey.authenticator.ui.components.LocalNetworkPermissionGate
+import com.safekey.authenticator.ui.components.rememberLocalNetworkPermissionRequest
 import com.safekey.authenticator.ui.components.SimpleTopBar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -76,6 +80,11 @@ fun WebDavScreen(
     var seeded by remember { mutableStateOf(false) }
     var urlError by remember { mutableStateOf(false) }
     var busyLabel by remember { mutableStateOf<String?>(null) }
+    var localNetworkDenied by remember { mutableStateOf(false) }
+    val requestLocalNetwork = rememberLocalNetworkPermissionRequest {
+        localNetworkDenied = true
+        vm.showToast(LocalNetworkAccess.deniedMessage(context))
+    }
 
     // dialogs / flows
     var showBackupDialog by remember { mutableStateOf(false) }
@@ -137,7 +146,12 @@ fun WebDavScreen(
         scope.launch {
             busyLabel = label
             try {
-                withContext(Dispatchers.IO) { block() }
+                withContext(Dispatchers.IO) {
+                    LocalNetworkAccess.checkWebDav(context, currentConfig().baseUrl)
+                    block()
+                }
+            } catch (_: LocalNetworkPermissionException) {
+                requestLocalNetwork { runBusy(label, block) }
             } catch (e: WebDavException) {
                 vm.showToast(e.message ?: context.getString(R.string.export_failed, "WebDAV"))
             } catch (e: VaultFormatException) {
@@ -147,10 +161,13 @@ fun WebDavScreen(
                         else R.string.error_import_format
                     )
                 )
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
             } catch (e: Exception) {
                 vm.showToast(e.message ?: "Error")
+            } finally {
+                busyLabel = null
             }
-            busyLabel = null
         }
     }
 
@@ -190,6 +207,9 @@ fun WebDavScreen(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+                if (localNetworkDenied) {
+                    LocalNetworkPermissionGate { }
+                }
                 Text(
                     text = stringResource(R.string.webdav_intro),
                     style = MaterialTheme.typography.bodyMedium,

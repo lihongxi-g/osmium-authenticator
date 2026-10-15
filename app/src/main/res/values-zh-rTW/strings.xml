@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Osmium</string>
+    <string name="local_network_permission_title">區域網路存取權限</string>
+    <string name="local_network_permission_desc">區域網路傳輸和本機伺服器的 WebDAV 備份需要「附近的裝置」權限。拒絕後可在系統應用程式權限中重新授予。</string>
+    <string name="local_network_open_settings">應用程式權限設定</string>
     <string name="app_tagline">隱私優先驗證器</string>
     <string name="tags_title">標籤</string>
     <string name="tags_empty">還沒有標籤。建立標籤来整理帳戶。</string>

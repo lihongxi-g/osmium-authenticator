@@ -16,7 +16,7 @@ import javax.crypto.spec.PBEKeySpec
 import javax.crypto.spec.SecretKeySpec
 
 /**
- * LAN transfer session — protocol v3.
+ * LAN transfer session — protocol v4 (mutual approval before payload).
  *
  * Threat model. The transfer runs over a shared local network the app does not
  * control: anyone on that network can connect, capture every byte and run a
@@ -51,19 +51,19 @@ import javax.crypto.spec.SecretKeySpec
 internal object LanSession {
 
     /** Protocol marker sent by the sender first. */
-    const val MAGIC = "OSMIUM_TRANSFER_V3"
+    const val MAGIC = "OSMIUM_TRANSFER_V4"
 
     /** Receiver accepted the payload. */
-    const val ACK = "OSMIUM_TRANSFER_ACK3"
+    const val ACK = "OSMIUM_TRANSFER_ACK4"
 
     /** Receiver refused (bad proof, bad payload, wrong state). */
-    const val DENY = "OSMIUM_TRANSFER_DENY3"
+    const val DENY = "OSMIUM_TRANSFER_DENY4"
 
     /** Receiver refused because the sender is on its 24h block list. */
-    const val DENY_BLOCKED = "OSMIUM_TRANSFER_DENY_BLOCKED3"
+    const val DENY_BLOCKED = "OSMIUM_TRANSFER_DENY_BLOCKED4"
 
     /** Sender refused because the receiver is on its 24h block list. */
-    const val DENY_PEER_BLOCKED = "OSMIUM_TRANSFER_DENY_PEER_BLOCKED3"
+    const val DENY_PEER_BLOCKED = "OSMIUM_TRANSFER_DENY_PEER_BLOCKED4"
 
     const val NONCE_BYTES = 32
     const val IV_BYTES = 12
@@ -85,6 +85,7 @@ internal object LanSession {
     private const val AES_GCM = "AES/GCM/NoPadding"
     private const val SENDER_LABEL = "osmium-lan-v3/sender"
     private const val RECEIVER_LABEL = "osmium-lan-v3/receiver"
+    private const val READY_LABEL = "osmium-lan-v4/receiver-ready"
     private const val PAYLOAD_INFO = "osmium-lan-v3/payload"
 
     /** One ephemeral key pair; the private key never leaves the device. */
@@ -200,6 +201,9 @@ internal object LanSession {
 
     fun receiverTag(sessionKey: SecretKeySpec, transcript: ByteArray): ByteArray =
         hmac(sessionKey, RECEIVER_LABEL, transcript)
+
+    fun readyTag(sessionKey: SecretKeySpec, transcript: ByteArray): ByteArray =
+        hmac(sessionKey, READY_LABEL, transcript)
 
     /** Constant-time comparison. */
     fun matches(expected: ByteArray, actual: ByteArray): Boolean =

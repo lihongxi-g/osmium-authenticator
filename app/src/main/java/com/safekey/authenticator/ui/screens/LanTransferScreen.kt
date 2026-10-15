@@ -3,10 +3,7 @@ package com.safekey.authenticator.ui.screens
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.content.pm.PackageManager
-import android.os.Build
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -61,7 +58,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
+
 import com.safekey.authenticator.MainViewModel
 import com.safekey.authenticator.R
 import com.safekey.authenticator.SafeKeyApp
@@ -80,19 +77,19 @@ import com.safekey.authenticator.network.LanTransferServer
 import com.safekey.authenticator.ui.components.AppIcons
 import com.safekey.authenticator.ui.components.CodeField
 import com.safekey.authenticator.ui.components.IconButtonCompat
+import com.safekey.authenticator.ui.components.LocalNetworkPermissionGate
 import com.safekey.authenticator.ui.components.SimpleTopBar
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
+
 
 /**
- * Runtime permission Android 17 (API 37) introduced for local-network traffic.
- * Declared in the manifest already; requested only on platforms that enforce it.
- */
-private const val ANDROID_LOCAL_NETWORK_PERMISSION = "android.permission.ACCESS_LOCAL_NETWORK"
-
-/**
- * LAN transfer (protocol v3).
+ * LAN transfer (protocol v4).
  *
  * The receiving device hosts the session and shows a 12-digit code; the sending
  * device types that code and proves it before any data is accepted. Both sides
@@ -148,26 +145,6 @@ fun LanTransferScreen(
         app.lanBlockRepository.blocks.collect { blocks = it }
     }
 
-    // Silent local-network inspection on entry (no user-visible scanning).
-    LaunchedEffect(Unit) {
-        LanGuard.refresh(context)
-    }
-
-    // Android 17 (API 37) puts local-network traffic behind a runtime permission
-    // for apps targeting 37+. Asking for it here keeps transfers and WebDAV
-    // working once the target SDK is raised; on older platforms the check never
-    // fires, and the permission is optional while we still target 34.
-    val lanPermissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { }
-    LaunchedEffect(Unit) {
-        if (Build.VERSION.SDK_INT >= 37) {
-            val granted = ContextCompat.checkSelfPermission(
-                context, ANDROID_LOCAL_NETWORK_PERMISSION
-            ) == PackageManager.PERMISSION_GRANTED
-            if (!granted) lanPermissionLauncher.launch(ANDROID_LOCAL_NETWORK_PERMISSION)
-        }
-    }
 
     Scaffold(
         topBar = {
@@ -206,23 +183,25 @@ fun LanTransferScreen(
                     )
                 }
 
-                if (selectedTab == 0) {
-                    SendTabContent(
-                        vm = vm,
-                        lan = lan,
-                        blocks = blocks,
-                        onBlockPeer = { onBlockPeer(it) },
-                        onUnblock = { onUnblock(it) }
-                    )
-                } else {
-                    ReceiveTabContent(
-                        vm = vm,
-                        lan = lan,
-                        blocks = blocks,
-                        onVaultReceived = { receivedVault = it },
-                        onBlockPeer = { onBlockPeer(it) },
-                        onUnblock = { onUnblock(it) }
-                    )
+                LocalNetworkPermissionGate {
+                    if (selectedTab == 0) {
+                        SendTabContent(
+                            vm = vm,
+                            lan = lan,
+                            blocks = blocks,
+                            onBlockPeer = { onBlockPeer(it) },
+                            onUnblock = { onUnblock(it) }
+                        )
+                    } else {
+                        ReceiveTabContent(
+                            vm = vm,
+                            lan = lan,
+                            blocks = blocks,
+                            onVaultReceived = { receivedVault = it },
+                            onBlockPeer = { onBlockPeer(it) },
+                            onUnblock = { onUnblock(it) }
+                        )
+                    }
                 }
             }
         }
@@ -252,14 +231,12 @@ private fun SendTabContent(
     var isSending by remember { mutableStateOf(false) }
     var statusText by remember { mutableStateOf("") }
     var errorText by remember { mutableStateOf<String?>(null) }
-    var peer by remember { mutableStateOf<LanPeer?>(null) }
-    var showRiskDialog by remember { mutableStateOf(false) }
-    var localReport by remember { mutableStateOf(LanGuard.report.value) }
+    val confirmRisk = rememberLanRiskConfirmation(lan, onBlockPeer)
 
     val client = remember { LanTransferClient(context) }
 
     LaunchedEffect(Unit) {
-        localReport = LanGuard.refresh(context)
+        LanGuard.refresh(context)
         discoveredDevices.clear()
         client.startDiscovery(
             onDeviceFound = { dev ->
@@ -277,6 +254,7 @@ private fun SendTabContent(
     DisposableEffect(Unit) {
         onDispose {
             client.stopDiscovery()
+            client.cancelTransfer()
         }
     }
 
@@ -484,7 +462,14 @@ private fun SendTabContent(
                 }
 
                 isSending = true
+                val transferCode = codeInput
                 scope.launch {
+                    try {
+                    val selfReport = LanGuard.refresh(context)
+                    if (!confirmRisk(selfReport, null)) {
+                        statusText = lan.cancelled
+                        return@launch
+                    }
                     val pin = vm.pinManager.getPinHashForExport()
                     val export = withContext(Dispatchers.IO) {
                         app.accountRepository.exportVault(
@@ -498,39 +483,37 @@ private fun SendTabContent(
                         return@launch
                     }
                     val deviceId = app.lanBlockRepository.deviceId()
-                    val selfReport = LanGuard.refresh(context)
                     val outcome = client.sendVault(
                         host = targetHost,
                         port = targetPort,
-                        pairingCode = codeInput,
+                        pairingCode = transferCode,
                         vault = export.vault,
                         selfDeviceId = deviceId,
                         selfName = android.os.Build.MODEL ?: "Osmium",
                         selfThreatCodes = selfReport?.codes.orEmpty(),
                         isBlocked = { ip, mac, peerId ->
                             app.lanBlockRepository.findActive(ip, mac, peerId) != null
+                        },
+                        confirmPeer = { candidate ->
+                            val latest = LanGuard.refresh(context)
+                            val newLocalRisk = latest?.codes.orEmpty().any { it !in selfReport?.codes.orEmpty() }
+                            if (candidate.threatCodes.isNotEmpty() || newLocalRisk) {
+                                confirmRisk(latest, candidate)
+                            } else true
                         }
                     )
-                    isSending = false
-                    localReport = LanGuard.report.value ?: localReport
                     when (outcome) {
+                        LanSendOutcome.Cancelled -> statusText = lan.cancelled
+                        LanSendOutcome.Incompatible -> errorText = lan.updateBoth
                         is LanSendOutcome.Delivered -> {
-                            peer = outcome.peer
                             statusText = context.getString(
                                 R.string.lan_status_done_send, export.vault.accounts.size
                             )
-                            if (outcome.peer.threatCodes.isNotEmpty() ||
-                                localReport?.hasThreats == true
-                            ) {
-                                showRiskDialog = true
-                            }
                         }
                         is LanSendOutcome.PeerBlocked -> {
-                            peer = outcome.peer
                             errorText = lan.blockedByMe
                         }
                         is LanSendOutcome.RefusedByPeer -> {
-                            peer = outcome.peer
                             errorText = lan.blockedByPeer
                         }
                         LanSendOutcome.ProofFailed -> {
@@ -541,6 +524,13 @@ private fun SendTabContent(
                                 R.string.lan_error_connection, outcome.message
                             )
                         }
+                    }
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        errorText = context.getString(R.string.lan_error_connection, e.message ?: "Error")
+                    } finally {
+                        isSending = false
                     }
                 }
             },
@@ -559,18 +549,6 @@ private fun SendTabContent(
             Text(stringResource(R.string.lan_connect_btn))
         }
 
-        if (showRiskDialog) {
-            LanRiskDialog(
-                lan = lan,
-                localReport = localReport,
-                peer = peer,
-                onBlock = {
-                    showRiskDialog = false
-                    peer?.let(onBlockPeer)
-                },
-                onDismiss = { showRiskDialog = false }
-            )
-        }
     }
 }
 
@@ -594,20 +572,28 @@ private fun ReceiveTabContent(
     var isTransferring by remember { mutableStateOf(false) }
     var isDone by remember { mutableStateOf(false) }
     var errorText by remember { mutableStateOf<String?>(null) }
-    var peer by remember { mutableStateOf<LanPeer?>(null) }
-    var showRiskDialog by remember { mutableStateOf(false) }
-    var localReport by remember { mutableStateOf(LanGuard.report.value) }
+    val confirmRisk = rememberLanRiskConfirmation(lan, onBlockPeer)
 
     val server = remember { LanTransferServer(context, scope) }
+    var startJob by remember { mutableStateOf<Job?>(null) }
 
     fun startServer() {
+        startJob?.cancel()
+        server.stop()
+        pairingCode = ""
+        port = 0
+        isTransferring = false
         isDone = false
         errorText = null
-        statusText = context.getString(R.string.lan_status_waiting)
-        scope.launch {
+        statusText = lan.waitingSender
+        startJob = scope.launch {
+            try {
             val deviceId = app.lanBlockRepository.deviceId()
             val report = LanGuard.refresh(context)
-            localReport = report
+            if (!confirmRisk(report, null)) {
+                statusText = lan.cancelled
+                return@launch
+            }
             server.start(
                 selfDeviceId = deviceId,
                 selfName = android.os.Build.MODEL ?: "Osmium",
@@ -615,26 +601,29 @@ private fun ReceiveTabContent(
                 isBlocked = { ip, mac, peerId ->
                     app.lanBlockRepository.findActive(ip, mac, peerId) != null
                 },
+                confirmPeer = { sender ->
+                    val latest = LanGuard.refresh(context)
+                    val newLocalRisk = latest?.codes.orEmpty().any { it !in report?.codes.orEmpty() }
+                    if (sender.threatCodes.isNotEmpty() || newLocalRisk) {
+                        confirmRisk(latest, sender)
+                    } else true
+                },
+                onListening = { ip, listeningPort, code ->
+                    localIp = ip
+                    port = listeningPort
+                    pairingCode = code
+                },
                 onClientConnected = {
                     isTransferring = true
                     statusText = context.getString(R.string.lan_status_transferring)
                 },
-                onVaultReceived = { vault, sender ->
+                onVaultReceived = { vault, _ ->
                     isTransferring = false
                     isDone = true
-                    peer = sender
                     // Receiver wording: the accounts came *in* on this device.
                     statusText = context.getString(
                         R.string.lan_status_done_receive, vault.accounts.size
                     )
-                    // Both ends are alerted: warn here and let the user refuse
-                    // this device for the next 24 hours.
-                    if (sender.threatCodes.isNotEmpty() ||
-                        LanGuard.report.value?.hasThreats == true
-                    ) {
-                        localReport = LanGuard.report.value
-                        showRiskDialog = true
-                    }
                     onVaultReceived(vault)
                 },
                 onError = { err ->
@@ -644,13 +633,17 @@ private fun ReceiveTabContent(
                             errorText = context.getString(R.string.lan_error_no_wifi)
                         LanTransferServer.ERR_TOO_MANY_FAILED_ATTEMPTS ->
                             errorText = context.getString(R.string.lan_error_too_many_attempts)
+                        LanTransferServer.ERR_DECLINED -> statusText = lan.cancelled
+                        LanTransferServer.ERR_PROTOCOL -> errorText = lan.updateBoth
                         else -> errorText = err
                     }
                 }
             )
-            localIp = server.localIp
-            port = server.port
-            pairingCode = server.pairingCode
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                errorText = context.getString(R.string.lan_error_connection, e.message ?: "Error")
+            }
         }
     }
 
@@ -660,6 +653,7 @@ private fun ReceiveTabContent(
 
     DisposableEffect(Unit) {
         onDispose {
+            startJob?.cancel()
             server.stop()
         }
     }
@@ -728,11 +722,15 @@ private fun ReceiveTabContent(
                             tint = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     }
-                } else {
+                } else if (startJob?.isActive == true && errorText == null) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(32.dp),
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
+                } else {
+                    TextButton(onClick = { startServer() }) {
+                        Text(stringResource(R.string.refresh))
+                    }
                 }
             }
         }
@@ -858,28 +856,58 @@ private fun ReceiveTabContent(
             modifier = Modifier.padding(top = 16.dp)
         )
 
-        if (showRiskDialog) {
-            LanRiskDialog(
-                lan = lan,
-                localReport = localReport,
-                peer = peer,
-                onBlock = {
-                    showRiskDialog = false
-                    peer?.let(onBlockPeer)
-                },
-                onDismiss = { showRiskDialog = false }
-            )
+    }
+}
+
+private class PendingLanRisk(
+    val report: LanThreatReport?,
+    val peer: LanPeer?,
+    val result: CompletableDeferred<Boolean> = CompletableDeferred()
+)
+
+@Composable
+private fun rememberLanRiskConfirmation(
+    lan: LanStrings,
+    onBlock: (LanPeer) -> Unit
+): suspend (LanThreatReport?, LanPeer?) -> Boolean {
+    var pending by remember { mutableStateOf<PendingLanRisk?>(null) }
+    DisposableEffect(Unit) {
+        onDispose { pending?.result?.complete(false) }
+    }
+    pending?.let { request ->
+        LanRiskDialog(
+            lan, request.report, request.peer,
+            onBlock = {
+                request.result.complete(false)
+                request.peer?.let(onBlock)
+            },
+            onContinue = { request.result.complete(true) },
+            onDismiss = { request.result.complete(false) }
+        )
+    }
+    return { report, peer ->
+        if (report?.hasThreats != true && peer?.threatCodes.isNullOrEmpty()) true
+        else if (pending != null) false
+        else {
+            val request = PendingLanRisk(report, peer)
+            pending = request
+            try {
+                withTimeoutOrNull(90_000) { request.result.await() } ?: false
+            } finally {
+                if (pending === request) pending = null
+            }
         }
     }
 }
 
-/** Both ends are told about risks; the peer can be refused for 24 hours. */
+/** Confirmation is suspended before any vault payload is sent or accepted. */
 @Composable
 private fun LanRiskDialog(
     lan: LanStrings,
     localReport: LanThreatReport?,
     peer: LanPeer?,
     onBlock: () -> Unit,
+    onContinue: () -> Unit,
     onDismiss: () -> Unit
 ) {
     val local = localReport?.threats.orEmpty()
@@ -896,7 +924,7 @@ private fun LanRiskDialog(
             )
         },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 if (local.isEmpty()) {
                     Text(lan.riskNone, style = MaterialTheme.typography.bodyMedium)
                 } else {
@@ -922,13 +950,14 @@ private fun LanRiskDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = onBlock, enabled = peer != null) {
-                Text(lan.blockAction)
+            TextButton(onClick = onContinue) {
+                Text(lan.riskContinue)
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(lan.riskContinue)
+            Column {
+                TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
+                if (peer != null) TextButton(onClick = onBlock) { Text(lan.blockAction) }
             }
         }
     )

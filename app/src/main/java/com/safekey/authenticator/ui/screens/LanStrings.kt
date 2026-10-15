@@ -28,6 +28,9 @@ class LanStrings private constructor(
     val sendCodeHint: String,
     val receiveCodeHint: String,
     val verifying: String,
+    val cancelled: String,
+    val updateBoth: String,
+    val waitingSender: String,
     val riskCodes: Map<String, String>
 ) {
 
@@ -57,6 +60,9 @@ class LanStrings private constructor(
             sendCodeHint = "Enter the 12-digit code shown on the receiving device",
             receiveCodeHint = "Show this code to the sending device",
             verifying = "Verifying…",
+            cancelled = "Transfer cancelled. No accounts were sent.",
+            updateBoth = "Update Osmium on both devices before transferring.",
+            waitingSender = "Waiting for the sending device…",
             riskCodes = mapOf(
                 "wifi_open" to "The Wi-Fi network is open — anyone nearby can read its traffic.",
                 "wifi_wep" to "The Wi-Fi network uses WEP, which is broken.",
@@ -87,6 +93,9 @@ class LanStrings private constructor(
             sendCodeHint = "输入接收方设备上显示的 12 位验证码",
             receiveCodeHint = "把此验证码出示给发送方设备",
             verifying = "正在验证…",
+            cancelled = "传输已取消，未发送任何账户。",
+            updateBoth = "请先将两台设备的 Osmium 都更新到新版再传输。",
+            waitingSender = "等待发送方设备连接…",
             riskCodes = mapOf(
                 "wifi_open" to "当前 Wi-Fi 为开放网络，附近任何人都能读取流量。",
                 "wifi_wep" to "当前 Wi-Fi 使用已失效的 WEP 加密。",

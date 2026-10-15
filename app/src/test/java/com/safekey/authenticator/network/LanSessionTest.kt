@@ -257,4 +257,14 @@ class LanSessionTest {
         assertNotEquals(LanSession.DENY, LanSession.DENY_BLOCKED)
         assertNotEquals(LanSession.ACK, LanSession.DENY_PEER_BLOCKED)
     }
+
+    @Test
+    fun `hello proof cannot be replayed as risk approval`() {
+        val key = javax.crypto.spec.SecretKeySpec(ByteArray(32) { 4 }, "AES")
+        val transcript = "authenticated session".toByteArray()
+        assertFalse(LanSession.matches(LanSession.receiverTag(key, transcript), LanSession.readyTag(key, transcript)))
+        assertFalse(LanSession.matches(LanSession.senderTag(key, transcript), LanSession.readyTag(key, transcript)))
+        assertFalse(LanSession.matches(LanSession.readyTag(key, transcript), LanSession.readyTag(key, "other".toByteArray())))
+        assertNotEquals("OSMIUM_TRANSFER_V3", LanSession.MAGIC)
+    }
 }

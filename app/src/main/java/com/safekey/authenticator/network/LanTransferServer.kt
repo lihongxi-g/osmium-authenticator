@@ -19,11 +19,13 @@ import java.io.DataOutputStream
 import java.net.Inet4Address
 import java.net.NetworkInterface
 import java.net.ServerSocket
+import java.net.Socket
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
- * Receiving side of a LAN transfer (protocol v3).
+ * Receiving side of a LAN transfer (protocol v4).
  *
  * This device hosts the socket and shows the pairing code. A sender has to type
  * that code and prove it for this session (see [LanSession]) before the app
@@ -47,6 +49,8 @@ class LanTransferServer(
         const val SERVICE_TYPE = "_osmium-transfer._tcp."
         const val ERR_TOO_MANY_FAILED_ATTEMPTS = "TOO_MANY_FAILED_ATTEMPTS"
         const val ERR_NO_WIFI = "NO_WIFI"
+        const val ERR_DECLINED = "TRANSFER_DECLINED"
+        const val ERR_PROTOCOL = "PROTOCOL_MISMATCH"
 
         /** A stalled/rogue peer must not pin a handler coroutine forever. */
         const val SOCKET_TIMEOUT_MS = 15_000
@@ -60,6 +64,7 @@ class LanTransferServer(
     private var serverJob: Job? = null
     private val running = AtomicBoolean(false)
     private val attempts = AtomicInteger(0)
+    private val activeSockets = ConcurrentHashMap.newKeySet<Socket>()
 
     var localIp: String = ""
         private set
@@ -77,6 +82,8 @@ class LanTransferServer(
         selfName: String,
         selfThreatCodes: List<String>,
         isBlocked: suspend (ip: String, mac: String?, deviceId: String) -> Boolean,
+        confirmPeer: suspend (LanPeer) -> Boolean,
+        onListening: (String, Int, String) -> Unit,
         onClientConnected: () -> Unit,
         onVaultReceived: (VaultFile, LanPeer) -> Unit,
         onError: (String) -> Unit
@@ -102,6 +109,7 @@ class LanTransferServer(
 
                 withContext(Dispatchers.Main) {
                     registerNsd(port)
+                    onListening(localIp, port, pairingCode)
                 }
 
                 while (running.get()) {
@@ -118,6 +126,7 @@ class LanTransferServer(
                         break
                     }
 
+                    activeSockets.add(socket)
                     launch(Dispatchers.IO) {
                         var failed = false
                         try {
@@ -132,11 +141,8 @@ class LanTransferServer(
                             val hello = readHello(input)
                             if (hello == null) {
                                 failed = true
+                                withContext(Dispatchers.Main) { onError(ERR_PROTOCOL) }
                                 return@launch
-                            }
-
-                            withContext(Dispatchers.Main) {
-                                onClientConnected()
                             }
 
                             // The peer's own claims are checked together with what
@@ -178,18 +184,21 @@ class LanTransferServer(
                                 output, LanSession.receiverTag(sessionKey, transcript)
                             )
 
-                            // Proof that the sender knows the code for THIS session.
-                            val senderTag = LanWire.readKey(input, LanWire.MAX_TAG_BYTES)
-                            if (!LanSession.matches(
-                                    LanSession.senderTag(sessionKey, transcript), senderTag
-                                )
+                            val peer = LanPeer(peerIp, peerMac, hello.deviceId, hello.name, hello.threatCodes)
+                            socket.soTimeout = LanTransferConsent.SOCKET_TIMEOUT_MS
+                            if (!LanTransferConsent.authorize(
+                                    input, output,
+                                    LanSession.senderTag(sessionKey, transcript),
+                                    LanSession.readyTag(sessionKey, transcript)
+                                ) { withContext(Dispatchers.Main) { confirmPeer(peer) } }
                             ) {
-                                AppLog.d("lan: sender proof rejected")
                                 LanWire.writeText(output, LanSession.DENY)
                                 failed = true
+                                withContext(Dispatchers.Main) { onError(ERR_DECLINED) }
                                 return@launch
                             }
-
+                            socket.soTimeout = SOCKET_TIMEOUT_MS
+                            withContext(Dispatchers.Main) { onClientConnected() }
                             val sealed = LanWire.readPayload(input)
                             val plain = LanSession.open(sessionKey, transcript, sealed)
                             if (plain == null) {
@@ -209,13 +218,7 @@ class LanTransferServer(
                             }
 
                             LanWire.writeText(output, LanSession.ACK)
-                            val peer = LanPeer(
-                                ip = peerIp,
-                                mac = peerMac,
-                                deviceId = hello.deviceId,
-                                name = hello.name,
-                                threatCodes = hello.threatCodes
-                            )
+
                             withContext(Dispatchers.Main) {
                                 onVaultReceived(vault, peer)
                             }
@@ -227,6 +230,7 @@ class LanTransferServer(
                             failed = true
                             Log.d(TAG, "Transfer handler error: ${e.message}")
                         } finally {
+                            activeSockets.remove(socket)
                             // Only failed exchanges consume the budget, so a
                             // port scanner or stalled peer cannot kill a
                             // working session; successful transfers never do.
@@ -335,6 +339,8 @@ class LanTransferServer(
         } catch (_: Exception) {
         }
         serverSocket = null
+        activeSockets.forEach { runCatching { it.close() } }
+        activeSockets.clear()
     }
 
     /** Withdraws the mDNS advertisement; safe to call more than once. */

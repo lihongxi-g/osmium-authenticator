@@ -1,19 +1,19 @@
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.serialization")
+    id("org.jetbrains.kotlin.plugin.compose")
     id("com.google.devtools.ksp")
 }
 
 android {
     namespace = "com.safekey.authenticator"
-    compileSdk = 35
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.safekey.authenticator"
         minSdk = 26
-        targetSdk = 34
-        versionCode = 66
+        targetSdk = 37
+        versionCode = 67
         versionName = "2.5.5"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
@@ -38,29 +38,6 @@ android {
         }
     }
 
-    // Per-ABI version codes for the F-Droid build recipe (its convention for
-    // split architectures): base * 10 + digit, ordered armeabi-v7a (1) <
-    // arm64-v8a (2) < x86_64 (3) so clients pick the best installable APK.
-    // Keep the versionCode a plain literal in defaultConfig — the
-    // fdroidserver update checker scans the file for it.
-    // NOTE: configureEach + a plain for loop on purpose — in .kts files the
-    // stdlib Iterable.all((T) -> Boolean) shadows all(Action), and Gradle's
-    // DSL wrappers take receiver lambdas (T.() -> Unit), not (T) -> Unit.
-    val baseVersionCode = defaultConfig.versionCode!!
-    applicationVariants.configureEach {
-        for (output in outputs) {
-            val apkOutput = output as? com.android.build.gradle.api.ApkVariantOutput ?: continue
-            val digit = when (apkOutput.getFilter(com.android.build.VariantOutput.FilterType.ABI)) {
-                "armeabi-v7a" -> 1
-                "arm64-v8a" -> 2
-                "x86_64" -> 3
-                else -> 0
-            }
-            if (digit != 0) {
-                apkOutput.versionCodeOverride = baseVersionCode * 10 + digit
-            }
-        }
-    }
 
     // The dependency-info block that AGP injects into release APKs is
     // rejected by F-Droid ("found extra signing block") and is the only
@@ -88,18 +65,13 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "17"
-    }
+
     buildFeatures {
         compose = true
         buildConfig = true
     }
-    composeOptions {
-        // 1.5.14 is the last of the 1.5.x line; matches Kotlin 1.9.24.
-        kotlinCompilerExtensionVersion = "1.5.14"
-    }
     packaging {
+        jniLibs.useLegacyPackaging = false
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
             // Vendored crypto jars (bcprov/bcpkix/bcutil) carry per-jar
@@ -116,6 +88,33 @@ android {
     }
 }
 
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+    }
+}
+
+// Preserve the existing per-ABI version codes using AGP's public variant API.
+androidComponents {
+    onVariants { variant ->
+        for (output in variant.outputs) {
+            val abi = output.filters.firstOrNull {
+                it.filterType == com.android.build.api.variant.FilterConfiguration.FilterType.ABI
+            }?.identifier
+            val digit = when (abi) {
+                "armeabi-v7a" -> 1
+                "arm64-v8a" -> 2
+                "x86_64" -> 3
+                else -> 0
+            }
+            if (digit != 0) {
+                val baseCode = android.defaultConfig.versionCode!!
+                output.versionCode.set(baseCode * 10 + digit)
+            }
+        }
+    }
+}
+
 dependencies {
     // BOM 2024.09.03 = Compose 1.7.3 (runtime). Upgraded from 2024.01.00
     // (runtime 1.6.0) to fix a ComposerImpl pendingStack underflow crash
@@ -127,7 +126,7 @@ dependencies {
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
-    implementation("androidx.activity:activity-compose:1.8.2")
+    implementation("androidx.activity:activity-compose:1.10.1")
     implementation("androidx.fragment:fragment-ktx:1.6.2")
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
@@ -137,9 +136,10 @@ dependencies {
     // (icons moved to the -android variant in 1.6.0). All icons are self-drawn
     // in AppIcons.kt from official Material Symbols path data instead.
 
-    implementation("androidx.room:room-runtime:2.6.1")
-    implementation("androidx.room:room-ktx:2.6.1")
-    ksp("androidx.room:room-compiler:2.6.1")
+    // KSP2/Kotlin 2-compatible processor; no schema or migration changes.
+    implementation("androidx.room:room-runtime:2.7.2")
+    implementation("androidx.room:room-ktx:2.7.2")
+    ksp("androidx.room:room-compiler:2.7.2")
 
     // QR generation + scanning for account sharing / imports (core only, no camera bloat)
     implementation("com.google.zxing:core:3.5.2")

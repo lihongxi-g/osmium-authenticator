@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Osmium</string>
+    <string name="local_network_permission_title">Accès au réseau local</string>
+    <string name="local_network_permission_desc">Autorisez les appareils à proximité pour les transferts LAN et les sauvegardes WebDAV sur un serveur local. Après un refus, accordez cet accès dans les autorisations de l’application.</string>
+    <string name="local_network_open_settings">Autorisations de l’application</string>
     <string name="tags_title">Tags</string>
     <string name="tags_empty">No tags yet. Create one to organize your accounts.</string>
     <string name="tags_create">Create tag</string>

@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Osmium</string>
+    <string name="local_network_permission_title">ローカルネットワークへのアクセス</string>
+    <string name="local_network_permission_desc">LAN転送とローカルサーバーへのWebDAVバックアップには「付近のデバイス」の許可が必要です。拒否した場合は、システムのアプリ権限設定から許可してください。</string>
+    <string name="local_network_open_settings">アプリの権限設定</string>
     <string name="tags_title">Tags</string>
     <string name="tags_empty">No tags yet. Create one to organize your accounts.</string>
     <string name="tags_create">Create tag</string>

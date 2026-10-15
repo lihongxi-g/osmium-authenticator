@@ -38,6 +38,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,13 +54,20 @@ import com.safekey.authenticator.MainViewModel
 import com.safekey.authenticator.R
 import com.safekey.authenticator.backup.AutoBackupScheduler
 import com.safekey.authenticator.data.AppSettings
+import com.safekey.authenticator.network.LocalNetworkAccess
+import com.safekey.authenticator.network.LocalNetworkPermissionException
 import com.safekey.authenticator.ui.components.AppIcons
+import com.safekey.authenticator.ui.components.LocalNetworkPermissionGate
+import com.safekey.authenticator.ui.components.rememberLocalNetworkPermissionRequest
 import com.safekey.authenticator.ui.components.SettingRow
 import com.safekey.authenticator.ui.components.SimpleTopBar
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Scheduled automatic backup: pick a target (WebDAV server or the phone's
@@ -79,6 +87,28 @@ fun AutoBackupScreen(
     val context = LocalContext.current
     val settings by vm.settings.collectAsState()
     val webDavConfig by vm.webDavConfig.collectAsState()
+    val scope = rememberCoroutineScope()
+    val requestLocalNetwork = rememberLocalNetworkPermissionRequest {
+        vm.showToast(LocalNetworkAccess.deniedMessage(context))
+    }
+
+    fun withWebDavPermission(action: () -> Unit) {
+        val config = webDavConfig ?: return
+        scope.launch {
+            try {
+                withContext(Dispatchers.IO) {
+                    LocalNetworkAccess.checkWebDav(context, config.baseUrl)
+                }
+                action()
+            } catch (_: LocalNetworkPermissionException) {
+                requestLocalNetwork(action)
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                vm.showToast(e.message ?: context.getString(R.string.webdav_error_url))
+            }
+        }
+    }
 
     var showTargetDialog by remember { mutableStateOf(false) }
     var showIntervalDialog by remember { mutableStateOf(false) }
@@ -136,7 +166,11 @@ fun AutoBackupScreen(
             permissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
             return
         }
-        vm.setAutoBackupEnabled(true)
+        if (target == AppSettings.AUTO_BACKUP_TARGET_WEBDAV) {
+            withWebDavPermission { vm.setAutoBackupEnabled(true) }
+        } else {
+            vm.setAutoBackupEnabled(true)
+        }
     }
 
     fun onToggleEnable(enable: Boolean) {
@@ -164,8 +198,15 @@ fun AutoBackupScreen(
             vm.setAutoBackupTarget(AppSettings.AUTO_BACKUP_TARGET_LOCAL)
             vm.showToast(context.getString(R.string.auto_backup_fallback_local))
         }
-        AutoBackupScheduler.runNow(context)
-        vm.showToast(context.getString(R.string.auto_backup_started))
+        val start = {
+            AutoBackupScheduler.runNow(context)
+            vm.showToast(context.getString(R.string.auto_backup_started))
+        }
+        if (settings.autoBackupTarget == AppSettings.AUTO_BACKUP_TARGET_WEBDAV && webDavConfig != null) {
+            withWebDavPermission(start)
+        } else {
+            start()
+        }
     }
 
     fun formatWithTz(millis: Long): String {
@@ -408,7 +449,9 @@ fun AutoBackupScreen(
                         stringResource(
                             R.string.auto_backup_last_failed,
                             formatWithTz(settings.autoBackupLastTime),
-                            settings.autoBackupLastError
+                            if (settings.autoBackupLastError == "LOCAL_NETWORK_PERMISSION")
+                                stringResource(R.string.local_network_permission_desc)
+                            else settings.autoBackupLastError
                         )
                     },
                     style = MaterialTheme.typography.bodyMedium,
@@ -439,6 +482,9 @@ fun AutoBackupScreen(
                     }
                 }
 
+                if (settings.autoBackupLastError == "LOCAL_NETWORK_PERMISSION") {
+                    LocalNetworkPermissionGate { }
+                }
                 Button(
                     onClick = { onRunNow() },
                     modifier = Modifier
@@ -463,7 +509,9 @@ fun AutoBackupScreen(
                         enabled = webDavConfig != null,
                         onClick = {
                             showTargetDialog = false
-                            vm.setAutoBackupTarget(AppSettings.AUTO_BACKUP_TARGET_WEBDAV)
+                            withWebDavPermission {
+                                vm.setAutoBackupTarget(AppSettings.AUTO_BACKUP_TARGET_WEBDAV)
+                            }
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) { Text(stringResource(R.string.auto_backup_target_webdav)) }

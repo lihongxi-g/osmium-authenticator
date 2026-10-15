@@ -4,7 +4,7 @@
  * the full list of modifications applied in this copy.
  *
  * Build script rewritten for the Osmium project: upstream targets Kotlin 2.2.0
- * with a Java 21 toolchain, while this project stays on Kotlin 1.9.24 / JVM 17.
+ * with a Java 21 toolchain, while this project uses Kotlin 2.2.10 / JVM 17.
  * Dependencies mirror upstream versions; guava is switched to the -android
  * variant and coroutines are pinned to the version already used by the app.
  */
@@ -33,6 +33,7 @@ dependencies {
     testImplementation("com.google.testparameterinjector:test-parameter-injector:1.18")
     testImplementation("com.google.truth:truth:1.4.4")
     testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.10.2")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.10.2")
 }
 
 // roots.json lives at the module root and is used in two ways: the upstream
@@ -51,13 +52,13 @@ java {
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-    kotlinOptions { jvmTarget = "17" }
+    compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17) }
 }
 
 // Upstream enables `javaParameters` for the test compilation (used by
 // test-parameter-injector's reflection).
 tasks.named<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>("compileTestKotlin") {
-    kotlinOptions { javaParameters = true }
+    compilerOptions { javaParameters.set(true) }
 }
 
 tasks.test {

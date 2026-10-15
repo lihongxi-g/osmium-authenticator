@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Osmium</string>
+    <string name="local_network_permission_title">स्थानीय नेटवर्क एक्सेस</string>
+    <string name="local_network_permission_desc">LAN ट्रांसफ़र और स्थानीय सर्वर पर WebDAV बैकअप के लिए आस-पास के डिवाइस की अनुमति दें। मना करने के बाद सिस्टम की ऐप अनुमतियों में इसे दोबारा दे सकते हैं।</string>
+    <string name="local_network_open_settings">ऐप अनुमतियाँ</string>
     <string name="tags_title">Tags</string>
     <string name="tags_empty">No tags yet. Create one to organize your accounts.</string>
     <string name="tags_create">Create tag</string>

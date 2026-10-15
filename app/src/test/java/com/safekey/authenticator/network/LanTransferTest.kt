@@ -18,7 +18,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * Wire-level tests of the v3 transfer handshake, mirroring the exact steps
+ * Wire-level tests of the v4 transfer handshake, mirroring the exact steps
  * LanTransferServer (receiver) and LanTransferClient (sender) perform.
  */
 class LanTransferTest {
@@ -51,7 +51,7 @@ class LanTransferTest {
     }
 
     @Test
-    fun `a full v3 transfer delivers the vault`() = runBlocking {
+    fun `a full v4 transfer delivers the vault only after both approvals`() = runBlocking {
         val vault = sampleVault()
         val serverSocket = ServerSocket(0)
         val port = serverSocket.localPort
@@ -90,10 +90,11 @@ class LanTransferTest {
             LanWire.writeText(output, LanWire.codesToText(receiverThreats))
             LanWire.writeBytes(output, LanSession.receiverTag(sessionKey, transcript))
 
-            val senderTag = LanWire.readKey(input, LanWire.MAX_TAG_BYTES)
-            assertTrue(
-                LanSession.matches(LanSession.senderTag(sessionKey, transcript), senderTag)
-            )
+            assertTrue(LanTransferConsent.authorize(
+                input, output,
+                LanSession.senderTag(sessionKey, transcript),
+                LanSession.readyTag(sessionKey, transcript)
+            ) { true })
 
             val sealed = LanWire.readPayload(input)
             val plain = LanSession.open(sessionKey, transcript, sealed)
@@ -137,9 +138,14 @@ class LanTransferTest {
                 LanSession.matches(LanSession.receiverTag(sessionKey, transcript), receiverTag)
             )
 
-            val payload = VaultIO.encodePlain(vault).toByteArray(Charsets.UTF_8)
-            LanWire.writeBytes(output, LanSession.senderTag(sessionKey, transcript))
-            LanWire.writeBytes(output, LanSession.seal(sessionKey, transcript, payload))
+            assertTrue(LanTransferConsent.send(
+                input, output,
+                LanSession.senderTag(sessionKey, transcript),
+                LanSession.readyTag(sessionKey, transcript),
+                approve = { true },
+                payload = { LanSession.seal(sessionKey, transcript,
+                    VaultIO.encodePlain(vault).toByteArray(Charsets.UTF_8)) }
+            ))
 
             val status = LanWire.readText(input)
             socket.close()
