@@ -71,8 +71,7 @@ fun SettingsScreen(
     onOpenPinSetup: () -> Unit,
     onOpenPinVerify: (String) -> Unit,
     onRequireBiometric: ((onSuccess: () -> Unit) -> Unit)? = null,
-    onRequireCredential: ((onSuccess: () -> Unit) -> Unit)? = null,
-    onLanguageChanged: ((String?) -> Unit)? = null
+    onRequireCredential: ((onSuccess: () -> Unit) -> Unit)? = null
 ) {
     val settings by vm.settings.collectAsState()
     val accounts by vm.accounts.collectAsState()
@@ -85,8 +84,6 @@ fun SettingsScreen(
     // Developer-mode "hide entries" set (ids match DeveloperScreen.HIDEABLE_ITEMS)
     val hiddenFeatures = settings.devHiddenFeatures
 
-    var showThemeDialog by remember { mutableStateOf(false) }
-    var showLanguageDialog by remember { mutableStateOf(false) }
     var showDestroyModeDialog by remember { mutableStateOf(false) }
     var showThresholdDialog by remember { mutableStateOf(false) }
     var showOffsetDialog by remember { mutableStateOf(false) }
@@ -161,19 +158,7 @@ fun SettingsScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 },
-                onClick = { showThemeDialog = true }
-            )
-
-            if ("dynamicColor" !in hiddenFeatures) SettingRow(
-                icon = AppIcons.Palette,
-                title = stringResource(R.string.dynamic_color),
-                description = stringResource(R.string.dynamic_color_desc),
-                trailing = {
-                    Switch(
-                        checked = settings.dynamicColor,
-                        onCheckedChange = { vm.setDynamicColor(it) }
-                    )
-                }
+                onClick = { vm.nav.push(Screen.ThemeSettings) }
             )
 
             if ("sort" !in hiddenFeatures) SettingRow(
@@ -212,7 +197,7 @@ fun SettingsScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 },
-                onClick = { showLanguageDialog = true }
+                onClick = { vm.nav.push(Screen.LanguageSettings) }
             )
 
             SectionHeader(stringResource(R.string.settings_security))
@@ -613,89 +598,6 @@ fun SettingsScreen(
 
     // ------------------------------------------------------------ dialogs
 
-    if (showThemeDialog) {
-        AlertDialog(
-            onDismissRequest = { showThemeDialog = false },
-            title = { Text(stringResource(R.string.theme_mode)) },
-            text = {
-                Column {
-                    ThemeOption(stringResource(R.string.theme_system), AppSettings.THEME_SYSTEM, settings.themeMode) {
-                        vm.setThemeMode(it)
-                        showThemeDialog = false
-                    }
-                    ThemeOption(stringResource(R.string.theme_light), AppSettings.THEME_LIGHT, settings.themeMode) {
-                        vm.setThemeMode(it)
-                        showThemeDialog = false
-                    }
-                    ThemeOption(stringResource(R.string.theme_dark), AppSettings.THEME_DARK, settings.themeMode) {
-                        vm.setThemeMode(it)
-                        showThemeDialog = false
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { showThemeDialog = false }) { Text(stringResource(R.string.close)) }
-            }
-        )
-    }
-
-    if (showLanguageDialog) {
-        AlertDialog(
-            onDismissRequest = { showLanguageDialog = false },
-            title = { Text(stringResource(R.string.language)) },
-            text = {
-                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                    ThemeOption(stringResource(R.string.lang_system), "system", com.safekey.authenticator.data.LanguagePrefs.get(context) ?: "system") {
-                        onLanguageChanged?.invoke(null)
-                        showLanguageDialog = false
-                    }
-                    ThemeOption(stringResource(R.string.lang_zh), "zh", com.safekey.authenticator.data.LanguagePrefs.get(context) ?: "system") {
-                        onLanguageChanged?.invoke("zh")
-                        showLanguageDialog = false
-                    }
-                    ThemeOption(stringResource(R.string.lang_zh_tw), "zh-TW", com.safekey.authenticator.data.LanguagePrefs.get(context) ?: "system") {
-                        onLanguageChanged?.invoke("zh-TW")
-                        showLanguageDialog = false
-                    }
-                    ThemeOption(stringResource(R.string.lang_en), "en", com.safekey.authenticator.data.LanguagePrefs.get(context) ?: "system") {
-                        onLanguageChanged?.invoke("en")
-                        showLanguageDialog = false
-                    }
-                    ThemeOption(stringResource(R.string.lang_es), "es", com.safekey.authenticator.data.LanguagePrefs.get(context) ?: "system") {
-                        onLanguageChanged?.invoke("es")
-                        showLanguageDialog = false
-                    }
-                    ThemeOption(stringResource(R.string.lang_ja), "ja", com.safekey.authenticator.data.LanguagePrefs.get(context) ?: "system") {
-                        onLanguageChanged?.invoke("ja")
-                        showLanguageDialog = false
-                    }
-                    ThemeOption(stringResource(R.string.lang_ko), "ko", com.safekey.authenticator.data.LanguagePrefs.get(context) ?: "system") {
-                        onLanguageChanged?.invoke("ko")
-                        showLanguageDialog = false
-                    }
-                    ThemeOption(stringResource(R.string.lang_de), "de", com.safekey.authenticator.data.LanguagePrefs.get(context) ?: "system") {
-                        onLanguageChanged?.invoke("de")
-                        showLanguageDialog = false
-                    }
-                    ThemeOption(stringResource(R.string.lang_ru), "ru", com.safekey.authenticator.data.LanguagePrefs.get(context) ?: "system") {
-                        onLanguageChanged?.invoke("ru")
-                        showLanguageDialog = false
-                    }
-                    ThemeOption(stringResource(R.string.lang_fr), "fr", com.safekey.authenticator.data.LanguagePrefs.get(context) ?: "system") {
-                        onLanguageChanged?.invoke("fr")
-                        showLanguageDialog = false
-                    }
-                    ThemeOption(stringResource(R.string.lang_hi), "hi", com.safekey.authenticator.data.LanguagePrefs.get(context) ?: "system") {
-                        onLanguageChanged?.invoke("hi")
-                        showLanguageDialog = false
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { showLanguageDialog = false }) { Text(stringResource(R.string.close)) }
-            }
-        )
-    }
 
     if (showDestroyModeDialog) {
         AlertDialog(
@@ -808,7 +710,6 @@ fun SettingsScreen(
         )
     }
 }
-
 
 @Composable
 private fun VerifyOptionRow(icon: ImageVector, label: String, onClick: () -> Unit) {

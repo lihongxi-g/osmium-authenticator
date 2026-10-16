@@ -404,7 +404,7 @@
     <string name="auto_backup_last_success">上次备份：%1$s（成功）</string>
     <string name="auto_backup_last_failed">上次备份：%1$s（失败：%2$s）</string>
     <string name="auto_backup_never_run">尚未执行过备份</string>
-    <string name="auto_backup_tz_label">（GMT+8）</string>
+    <string name="auto_backup_tz_label">（%1$s）</string>
     <string name="auto_backup_run_now">立即备份</string>
     <string name="auto_backup_started">备份已开始</string>
     <string name="auto_backup_local_dir_desc">备份文件保存在：下载/Osmium 目录</string>
@@ -429,7 +429,7 @@
     <string name="webdav_http_warning_body">该地址使用 http:// 明文传输，网络上的其他人可能截获内容。仅在可信局域网内使用。确认保存？</string>
     <string name="webdav_http_confirm">仍然保存</string>
     <string name="manual_auto_backup_title">自动备份</string>
-    <string name="manual_auto_backup_body">设置 → 数据 → 自动备份会按计划无人值守地备份：选择目标（WebDAV 服务器或手机本地存储）、间隔天数与每日时间。下次执行时间以 GMT+8 标注显示。\n\n备份文件与手动备份使用同一密码加密导出格式。备份密码用 Android Keystore 密钥加密存储，仅用于加密备份文件。本地备份写入公共的 下载/Osmium 目录；按设置自动保留最近若干份（默认 5 份，最多 10 份）并清理更旧的备份。\n\n自动备份界面会显示上次执行结果。失败（如服务器不可达）会记录并重试一次，下一个计划时间点会再次尝试。</string>
+    <string name="manual_auto_backup_body">设置 → 数据 → 自动备份会按计划无人值守地备份：选择目标（WebDAV 服务器或手机本地存储）、间隔天数与每日时间。下次执行时间按设备本地时区显示。\n\n备份文件与手动备份使用同一密码加密导出格式。备份密码用 Android Keystore 密钥加密存储，仅用于加密备份文件。本地备份写入公共的 下载/Osmium 目录；按设置自动保留最近若干份（默认 5 份，最多 10 份）并清理更旧的备份。\n\n自动备份界面会显示上次执行结果。失败（如服务器不可达）会记录并重试一次，下一个计划时间点会再次尝试。</string>
     <string name="manual_updates_title">更新检查</string>
     <string name="manual_updates_body">开启自动检查更新后（设置 → 关于 → 自动检查更新），Osmium 会在每次打开应用时静默向 GitHub Releases API 查询最新版本。发现新版本时弹窗询问是否前往 GitHub Releases 页面——应用本身不会下载或安装任何内容。\n\n查询不会发送任何账户数据或设备信息，仅请求最新的公开版本信息。网络失败时保持静默。</string>
 

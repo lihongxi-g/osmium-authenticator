@@ -276,10 +276,6 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch { settingsRepo.setDevPlaintextExport(enabled) }
     }
 
-    fun setDevExtraDigits(enabled: Boolean) {
-        viewModelScope.launch { settingsRepo.setDevExtraDigits(enabled) }
-    }
-
     fun setDevHiddenFeatures(ids: Set<String>) {
         viewModelScope.launch { settingsRepo.setDevHiddenFeatures(ids) }
     }

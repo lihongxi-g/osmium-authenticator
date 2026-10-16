@@ -98,7 +98,9 @@ import com.safekey.authenticator.ui.screens.LockScreen
 import com.safekey.authenticator.ui.screens.PinSetupScreen
 import com.safekey.authenticator.ui.screens.PinVerifyScreen
 import com.safekey.authenticator.ui.screens.ScanScreen
+import com.safekey.authenticator.ui.screens.LanguageSettingsScreen
 import com.safekey.authenticator.ui.screens.SettingsScreen
+import com.safekey.authenticator.ui.screens.ThemeSettingsScreen
 import com.safekey.authenticator.ui.screens.TagSettingsScreen
 import com.safekey.authenticator.ui.screens.ThirdPartyImportScreen
 import com.safekey.authenticator.ui.screens.TagsScreen
@@ -998,7 +1000,7 @@ private fun IntegrityNoticeDialog(
                                 ?.toString()
                                 .orEmpty()
                             val parsed = try {
-                                OtpUriParser.parse(clipText, vm.settings.value.devExtraDigits)
+                                OtpUriParser.parse(clipText)
                             } catch (_: Exception) {
                                 null
                             }
@@ -1097,7 +1099,17 @@ private fun IntegrityNoticeDialog(
                                 onError = { msg -> vm.showToast(msg) }
                             )
                         },
-                        onIntegrity = { vm.nav.push(Screen.Integrity) },
+                        onIntegrity = { vm.nav.push(Screen.Integrity) }
+                    )
+
+                    is Screen.ThemeSettings -> ThemeSettingsScreen(
+                        vm = vm,
+                        hiddenFeatures = vm.settings.value.devHiddenFeatures,
+                        onBack = { vm.nav.pop() }
+                    )
+
+                    is Screen.LanguageSettings -> LanguageSettingsScreen(
+                        onBack = { vm.nav.pop() },
                         onLanguageChanged = { lang ->
                             LanguagePrefs.set(this@MainActivity, lang)
                             recreate()

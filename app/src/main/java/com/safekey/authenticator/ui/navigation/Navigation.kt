@@ -16,6 +16,10 @@ sealed class Screen {
     data class Detail(val accountId: String) : Screen()
     object Scan : Screen()
     object Settings : Screen()
+    /** Secondary settings page: theme (design system) options. */
+    object ThemeSettings : Screen()
+    /** Secondary settings page: app language. */
+    object LanguageSettings : Screen()
     object TagSettings : Screen()
     object Export : Screen()
     object Import : Screen()

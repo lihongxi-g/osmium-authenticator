@@ -97,7 +97,7 @@ fun ScanScreen(
                         QrDecode.decodeAsync(bitmap) { raw ->
                             if (raw != null) {
                                 val parsed = try {
-                                    OtpUriParser.parse(raw, vm.settings.value.devExtraDigits)
+                                    OtpUriParser.parse(raw)
                                 } catch (_: Exception) {
                                     null
                                 }
@@ -134,7 +134,7 @@ fun ScanScreen(
                         enabled = confirm == null,
                         onRawCode = { raw ->
                             val parsed = try {
-                                OtpUriParser.parse(raw, vm.settings.value.devExtraDigits)
+                                OtpUriParser.parse(raw)
                             } catch (_: Exception) {
                                 null
                             }

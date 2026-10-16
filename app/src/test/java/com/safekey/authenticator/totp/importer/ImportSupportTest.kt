@@ -56,10 +56,16 @@ class ImportSupportTest {
     }
 
     @Test
-    fun `non 6 or 8 digit totp is rejected but steam is exempt`() {
-        assertEquals(EntryIssue.UNSUPPORTED_DIGITS, ImportSupport.issue(vault(digits = 7)))
-        assertEquals(EntryIssue.UNSUPPORTED_DIGITS, ImportSupport.issue(vault(digits = 5)))
+    fun `four five six seven and eight digit totp can be imported`() {
+        listOf(4, 5, 6, 7, 8).forEach { d ->
+            assertNull("digits=$d", ImportSupport.issue(vault(digits = d)))
+        }
+    }
+
+    @Test
+    fun `digit lengths outside the supported set are rejected but steam is exempt`() {
         assertEquals(EntryIssue.UNSUPPORTED_DIGITS, ImportSupport.issue(vault(digits = 0)))
+        assertEquals(EntryIssue.UNSUPPORTED_DIGITS, ImportSupport.issue(vault(digits = 9)))
         assertNull(ImportSupport.issue(vault(issuer = "Steam", digits = 5)))
     }
 

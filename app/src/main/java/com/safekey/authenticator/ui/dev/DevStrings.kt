@@ -36,8 +36,7 @@ data class DevStrings(
     val reencryptDesc: String,
     val hideFeatures: String,
     val hideFeaturesDesc: String,
-    val extraDigits: String,
-    val extraDigitsDesc: String,
+
     val detailedLogging: String,
     val detailedLoggingDesc: String,
     val exitDevMode: String,
@@ -142,8 +141,7 @@ data class DevStrings(
             reencryptDesc = "Decrypt and re-encrypt every stored field with fresh IVs",
             hideFeatures = "Hide settings entries",
             hideFeaturesDesc = "Hide selected entries from the Settings screen",
-            extraDigits = "Allow 4/5/7-digit codes",
-            extraDigitsDesc = "Accept and generate 4, 5 and 7 digit codes",
+
             detailedLogging = "Detailed detection logging",
             detailedLoggingDesc = "Write device-integrity detection details into the in-app log (off by default)",
             exitDevMode = "Turn off developer mode",
@@ -231,8 +229,7 @@ data class DevStrings(
             reencryptDesc = "用新 IV 重新加密全部已加密字段",
             hideFeatures = "隐藏设置项",
             hideFeaturesDesc = "把选定条目从设置界面隐藏",
-            extraDigits = "支持 4/5/7 位密钥",
-            extraDigitsDesc = "接受并生成 4、5、7 位验证码",
+
             detailedLogging = "检测详细日志",
             detailedLoggingDesc = "将设备完整性检测细节写入应用内日志（默认关闭）",
             exitDevMode = "关闭开发者模式",

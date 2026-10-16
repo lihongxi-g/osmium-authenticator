@@ -2,12 +2,14 @@ package com.safekey.authenticator.backup
 
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import java.time.Instant
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.Calendar
+import java.util.Locale
 import java.util.TimeZone
 
 class AutoBackupSchedulerTest {
@@ -119,4 +121,45 @@ class AutoBackupSchedulerTest {
     private fun atZ(zone: ZoneId, year: Int, month: Int, day: Int, hour: Int, minute: Int): Long =
         ZonedDateTime.of(year, month, day, hour, minute, 0, 0, zone)
             .toInstant().toEpochMilli()
+
+    // ---- the configured hour is wall-clock time in the device's own zone ----
+    // Regression: the screen used to label the schedule as GMT+8 while the hour
+    // the user picks is local, so anyone outside UTC+8 read the wrong time.
+
+    @Test
+    fun wallClockTimeIsInterpretedInTheSystemZone() {
+        TimeZone.setDefault(TimeZone.getTimeZone("America/Los_Angeles"))
+        val zone = ZoneId.of("America/Los_Angeles")
+        val now = atZ(zone, 2026, 8, 16, 2, 0) // 09:00 UTC
+        // 10:00 local (PDT, UTC-7) is 17:00 UTC — never a GMT+8 reading.
+        assertEquals(
+            Instant.parse("2026-08-16T17:00:00Z").toEpochMilli(),
+            AutoBackupScheduler.nextRunMillis(now, 10, 0, 1)
+        )
+    }
+
+    @Test
+    fun anExplicitZoneInterpretsTheWallClockTime() {
+        val kolkata = ZoneId.of("Asia/Kolkata")
+        val now = atZ(kolkata, 2026, 8, 16, 2, 0) // 20:30 UTC the day before
+        // 03:00 IST (UTC+5:30) = 21:30 UTC.
+        assertEquals(
+            Instant.parse("2026-08-15T21:30:00Z").toEpochMilli(),
+            AutoBackupScheduler.nextRunMillis(now, 3, 0, 1, kolkata)
+        )
+    }
+
+    @Test
+    fun zoneLabelIsDerivedFromTheZone() {
+        val previous = Locale.getDefault()
+        try {
+            Locale.setDefault(Locale.US)
+            val east = AutoBackupScheduler.zoneLabel(ZoneId.of("+05:30"))
+            val west = AutoBackupScheduler.zoneLabel(ZoneId.of("-08:00"))
+            assertTrue("empty label", east.isNotBlank())
+            assertTrue("zones share a label: $east / $west", east != west)
+        } finally {
+            Locale.setDefault(previous)
+        }
+    }
 }

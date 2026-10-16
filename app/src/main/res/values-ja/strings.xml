@@ -388,7 +388,7 @@
     <string name="auto_backup_last_success">前回バックアップ：%1$s（成功）</string>
     <string name="auto_backup_last_failed">前回バックアップ：%1$s（失敗：%2$s）</string>
     <string name="auto_backup_never_run">まだバックアップはありません</string>
-    <string name="auto_backup_tz_label">(GMT+8)</string>
+    <string name="auto_backup_tz_label">(%1$s)</string>
     <string name="auto_backup_run_now">今すぐバックアップ</string>
     <string name="auto_backup_started">バックアップを開始しました</string>
     <string name="auto_backup_local_dir_desc">保存先：ダウンロード/Osmium</string>
@@ -413,7 +413,7 @@
     <string name="webdav_http_warning_body">このhttp://アドレスは平文でデータを送信するため、ネットワーク上の他者に読み取られる恐れがあります。信頼できるローカルネットワークでのみ使用してください。それでも保存しますか？</string>
     <string name="webdav_http_confirm">それでも保存</string>
     <string name="manual_auto_backup_title">自動バックアップ</string>
-    <string name="manual_auto_backup_body">設定 → データ → 自動バックアップはスケジュールに従って無人でバックアップします。保存先（WebDAVサーバーまたは端末ローカル）、間隔（日数）、時刻を選べます。次回の実行時刻はGMT+8表記で表示されます。\n\nバックアップは手動バックアップと同じパスワード暗号化エクスポート形式です。パスワードはAndroid Keystoreキーで暗号化して保存され、バックアップファイルの暗号化にのみ使われます。ローカルバックアップは公開フォルダ「ダウンロード/Osmium」に書き込まれ、設定した件数を残して（デフォルト5、最大10）古いものは削除されます。\n\n前回の実行結果は自動バックアップ画面に表示されます。失敗（サーバーに接続できない等）は記録され1回再試行され、次の予定時刻に再び試みます。</string>
+    <string name="manual_auto_backup_body">設定 → データ → 自動バックアップはスケジュールに従って無人でバックアップします。保存先（WebDAVサーバーまたは端末ローカル）、間隔（日数）、時刻を選べます。次回の実行時刻は端末のローカルタイムゾーンで表示されます。\n\nバックアップは手動バックアップと同じパスワード暗号化エクスポート形式です。パスワードはAndroid Keystoreキーで暗号化して保存され、バックアップファイルの暗号化にのみ使われます。ローカルバックアップは公開フォルダ「ダウンロード/Osmium」に書き込まれ、設定した件数を残して（デフォルト5、最大10）古いものは削除されます。\n\n前回の実行結果は自動バックアップ画面に表示されます。失敗（サーバーに接続できない等）は記録され1回再試行され、次の予定時刻に再び試みます。</string>
     <string name="manual_updates_title">更新確認</string>
     <string name="manual_updates_body">自動確認が有効な場合（設定 → このアプリについて → 更新を自動確認）、Osmiumはアプリを開くたびに静かにGitHub Releases APIへ最新バージョンを問い合わせます。新しいバージョンがあると、GitHub Releasesページを開くかどうかを尋ねるダイアログを表示します——アプリが自動でダウンロードやインストールをすることはありません。\n\nアカウントデータや端末情報は送信されず、最新の公開バージョン情報のみを取得します。ネットワークエラー時は何も表示しません。</string>
 

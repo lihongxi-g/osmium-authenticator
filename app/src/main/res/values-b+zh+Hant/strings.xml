@@ -403,7 +403,7 @@
     <string name="auto_backup_last_success">上次備份：%1$s（成功）</string>
     <string name="auto_backup_last_failed">上次備份：%1$s（失敗：%2$s）</string>
     <string name="auto_backup_never_run">尚未執行過備份</string>
-    <string name="auto_backup_tz_label">（GMT+8）</string>
+    <string name="auto_backup_tz_label">（%1$s）</string>
     <string name="auto_backup_run_now">立即備份</string>
     <string name="auto_backup_started">備份已開始</string>
     <string name="auto_backup_local_dir_desc">備份檔案儲存在：下載/Osmium 目錄</string>
@@ -428,7 +428,7 @@
     <string name="webdav_http_warning_body">該位址使用 http:// 明文傳輸，網絡上的其他人可能截獲內容。僅在可信區域網路內使用。確認儲存？</string>
     <string name="webdav_http_confirm">仍然儲存</string>
     <string name="manual_auto_backup_title">自動備份</string>
-    <string name="manual_auto_backup_body">設定 → 数據 → 自動備份會按計劃無人值守地備份：選取目標（WebDAV 伺服器或手机本地儲存）、間隔天数與每日時間。下次執行時間以 GMT+8 標注顯示。\n\n備份檔案與手動備份使用同一密碼加密匯出格式。備份密碼用 Android Keystore 金鑰加密儲存，僅用於加密備份檔案。本地備份寫入公共的 下載/Osmium 目錄；按設定自動保留最近若乾份（預設 5 份，最多 10 份）並清理更舊的備份。\n\n自動備份界面會顯示上次執行結果。失敗（如伺服器不可達）會記錄並重試一次，下一個計劃時間點會再次嘗試。</string>
+    <string name="manual_auto_backup_body">設定 → 数據 → 自動備份會按計劃無人值守地備份：選取目標（WebDAV 伺服器或手机本地儲存）、間隔天数與每日時間。下次執行時間按裝置本地時區顯示。\n\n備份檔案與手動備份使用同一密碼加密匯出格式。備份密碼用 Android Keystore 金鑰加密儲存，僅用於加密備份檔案。本地備份寫入公共的 下載/Osmium 目錄；按設定自動保留最近若乾份（預設 5 份，最多 10 份）並清理更舊的備份。\n\n自動備份界面會顯示上次執行結果。失敗（如伺服器不可達）會記錄並重試一次，下一個計劃時間點會再次嘗試。</string>
     <string name="manual_updates_title">更新檢查</string>
     <string name="manual_updates_body">開啟自動檢查更新后（設定 → 關於 → 自動檢查更新），Osmium 會在每次打開應用時靜默向 GitHub Releases API 查詢最新版本。發現新版本時彈窗詢問是否前往 GitHub Releases 頁面——應用本身不會下載或安裝任何內容。\n\n查詢不會傳送任何帳戶数據或裝置信息，僅請求最新的公開版本信息。網絡失敗時保持靜默。</string>
 

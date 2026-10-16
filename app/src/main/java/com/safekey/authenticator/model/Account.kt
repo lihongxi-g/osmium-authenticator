@@ -37,13 +37,12 @@ data class Account(
         const val ALGO_SHA256 = "SHA256"
         const val ALGO_SHA512 = "SHA512"
         val SUPPORTED_ALGORITHMS = listOf(ALGO_SHA1, ALGO_SHA256, ALGO_SHA512)
-        val SUPPORTED_DIGITS = listOf(6, 8)
-
-        /** Extra code lengths unlocked by developer mode (some services use them). */
-        val DEV_EXTRA_DIGITS = listOf(4, 5, 7)
-
-        /** Code lengths accepted for entry; [devExtra] adds the developer-mode set. */
-        fun digitsSupported(devExtra: Boolean): List<Int> =
-            if (devExtra) listOf(4, 5, 6, 7, 8) else SUPPORTED_DIGITS
+        /**
+         * Code lengths Osmium generates faithfully. RFC 6238 standardises 6 and
+         * 8 digits, and a handful of services issue 4-, 5- or 7-digit codes;
+         * [TotpGenerator] truncates to any of these, so all five are ordinary
+         * supported values (no hidden mode behind them).
+         */
+        val SUPPORTED_DIGITS = listOf(4, 5, 6, 7, 8)
     }
 }

@@ -388,7 +388,7 @@
     <string name="auto_backup_last_success">Letztes Backup: %1$s (erfolgreich)</string>
     <string name="auto_backup_last_failed">Letztes Backup: %1$s (fehlgeschlagen: %2$s)</string>
     <string name="auto_backup_never_run">Noch kein Backup</string>
-    <string name="auto_backup_tz_label">(GMT+8)</string>
+    <string name="auto_backup_tz_label">(%1$s)</string>
     <string name="auto_backup_run_now">Jetzt sichern</string>
     <string name="auto_backup_started">Backup gestartet</string>
     <string name="auto_backup_local_dir_desc">Ablageort: Download/Osmium</string>
@@ -413,7 +413,7 @@
     <string name="webdav_http_warning_body">Diese http://-Adresse überträgt Daten unverschlüsselt — jeder im Netzwerk kann sie lesen. Nur in einem vertrauenswürdigen lokalen Netzwerk verwenden. Trotzdem speichern?</string>
     <string name="webdav_http_confirm">Trotzdem speichern</string>
     <string name="manual_auto_backup_title">Automatisches Backup</string>
-    <string name="manual_auto_backup_body">Einstellungen → Daten → Automatisches Backup führt unbeaufsichtigt Backups nach Plan aus: Ziel (WebDAV-Server oder Telefonspeicher), Intervall in Tagen und Uhrzeit wählen. Die nächste Ausführung wird mit GMT+8 angezeigt.\n\nDie Backups nutzen dasselbe passwortverschlüsselte Exportformat wie manuelle Backups. Das Export-Passwort wird mit dem Android-Keystore-Schlüssel verschlüsselt gespeichert und dient nur zum Verschlüsseln der Backup-Dateien. Lokale Backups landen im öffentlichen Ordner Download/Osmium; eine einstellbare Anzahl bleibt erhalten (Standard 5, max. 10), ältere werden gelöscht.\n\nDas Ergebnis des letzten Laufs wird auf dem Auto-Backup-Bildschirm angezeigt. Ein fehlgeschlagenes Backup (z. B. Server nicht erreichbar) wird dort vermerkt und einmal erneut versucht; der nächste geplante Lauf versucht es wieder.</string>
+    <string name="manual_auto_backup_body">Einstellungen → Daten → Automatisches Backup führt unbeaufsichtigt Backups nach Plan aus: Ziel (WebDAV-Server oder Telefonspeicher), Intervall in Tagen und Uhrzeit wählen. Die nächste Ausführung wird in der Zeitzone des Geräts angezeigt.\n\nDie Backups nutzen dasselbe passwortverschlüsselte Exportformat wie manuelle Backups. Das Export-Passwort wird mit dem Android-Keystore-Schlüssel verschlüsselt gespeichert und dient nur zum Verschlüsseln der Backup-Dateien. Lokale Backups landen im öffentlichen Ordner Download/Osmium; eine einstellbare Anzahl bleibt erhalten (Standard 5, max. 10), ältere werden gelöscht.\n\nDas Ergebnis des letzten Laufs wird auf dem Auto-Backup-Bildschirm angezeigt. Ein fehlgeschlagenes Backup (z. B. Server nicht erreichbar) wird dort vermerkt und einmal erneut versucht; der nächste geplante Lauf versucht es wieder.</string>
     <string name="manual_updates_title">Update-Prüfung</string>
     <string name="manual_updates_body">Ist die automatische Prüfung aktiviert (Einstellungen → Über → Automatische Update-Prüfung), fragt Osmium bei jedem Öffnen still die GitHub-Releases-API nach der neuesten Version. Gibt es eine neuere Version, bietet ein Dialog an, die GitHub-Releases-Seite zu öffnen — heruntergeladen oder installiert wird nie etwas automatisch.\n\nEs werden keine Kontodaten oder Geräteinformationen gesendet; abgefragt wird nur die neueste öffentliche Version. Bei Netzwerkfehlern bleibt die Prüfung still.</string>
 

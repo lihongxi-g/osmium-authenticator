@@ -62,6 +62,7 @@ import com.safekey.authenticator.ui.components.rememberLocalNetworkPermissionReq
 import com.safekey.authenticator.ui.components.SettingRow
 import com.safekey.authenticator.ui.components.SimpleTopBar
 import java.text.SimpleDateFormat
+import java.time.ZoneId
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
@@ -71,8 +72,10 @@ import kotlinx.coroutines.withContext
 
 /**
  * Scheduled automatic backup: pick a target (WebDAV server or the phone's
- * Download/Osmium folder), an interval in days and a time of day. The next
- * run and the last result are shown with an explicit GMT+8 timezone label.
+ * Download/Osmium folder), an interval in days and a time of day. The time of
+ * day is wall-clock time on this device, and the next run plus the last result
+ * are shown with the device's own timezone label (see
+ * [com.safekey.authenticator.backup.AutoBackupScheduler.zoneLabel]).
  *
  * The backup itself runs unattended in [com.safekey.authenticator.backup.AutoBackupWorker]
  * — the export password is stored encrypted with the Android Keystore key
@@ -211,9 +214,9 @@ fun AutoBackupScreen(
 
     fun formatWithTz(millis: Long): String {
         val fmt = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
-        fmt.timeZone = TimeZone.getTimeZone("GMT+8")
+        fmt.timeZone = TimeZone.getTimeZone(ZoneId.systemDefault())
         return fmt.format(Date(millis)) + " " +
-            context.getString(R.string.auto_backup_tz_label)
+            context.getString(R.string.auto_backup_tz_label, AutoBackupScheduler.zoneLabel())
     }
 
     // ---- background-activity status (battery optimization exemption)

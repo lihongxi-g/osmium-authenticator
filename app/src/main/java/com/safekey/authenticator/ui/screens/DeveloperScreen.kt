@@ -311,13 +311,6 @@ fun DeveloperScreen(
                 onClick = { showHideList = true }
             )
 
-            SettingRow(
-                icon = AppIcons.Keyboard,
-                title = dev.extraDigits,
-                description = dev.extraDigitsDesc,
-                trailing = { DevStateText(settings.devExtraDigits, dev) },
-                onClick = { vm.setDevExtraDigits(!settings.devExtraDigits) }
-            )
 
             SettingRow(
                 icon = AppIcons.Info,

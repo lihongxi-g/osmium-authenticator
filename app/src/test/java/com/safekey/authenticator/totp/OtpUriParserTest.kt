@@ -82,26 +82,18 @@ class OtpUriParserTest {
     }
 
     @Test
-    fun `unsupported digits throws`() {
-        expectThrow("otpauth://totp/A:B?secret=$baseSecret&digits=4")
-        expectThrow("otpauth://totp/A:B?secret=$baseSecret&digits=7")
-        expectThrow("otpauth://totp/A:B?secret=$baseSecret&digits=9")
+    fun `four five six seven and eight digit codes all parse`() {
+        listOf(4, 5, 6, 7, 8).forEach { d ->
+            val p = OtpUriParser.parse("otpauth://totp/A:B?secret=$baseSecret&digits=$d")
+            assertEquals("digits=$d", d, p.digits)
+        }
     }
 
     @Test
-    fun `extra digits are accepted only when developer mode enables them`() {
-        listOf(4, 5, 7).forEach { d ->
-            val p = OtpUriParser.parse(
-                "otpauth://totp/A:B?secret=$baseSecret&digits=$d",
-                allowExtraDigits = true
-            )
-            assertEquals(d, p.digits)
+    fun `digit lengths outside the supported set throw`() {
+        listOf(0, 1, 3, 9, 10, 100).forEach { d ->
             expectThrow("otpauth://totp/A:B?secret=$baseSecret&digits=$d")
         }
-        // lengths outside the supported set stay rejected even when enabled
-        expectThrow("otpauth://totp/A:B?secret=$baseSecret&digits=3", allowExtraDigits = true)
-        expectThrow("otpauth://totp/A:B?secret=$baseSecret&digits=9", allowExtraDigits = true)
-        expectThrow("otpauth://totp/A:B?secret=$baseSecret&digits=10", allowExtraDigits = true)
     }
 
     @Test
@@ -131,10 +123,10 @@ class OtpUriParserTest {
         expectThrow("")
     }
 
-    private fun expectThrow(uri: String, allowExtraDigits: Boolean = false) {
+    private fun expectThrow(uri: String) {
         var threw = false
         try {
-            OtpUriParser.parse(uri, allowExtraDigits)
+            OtpUriParser.parse(uri)
         } catch (e: IllegalArgumentException) {
             threw = true
             assertTrue(e.message?.isNotBlank() == true)
@@ -148,8 +140,5 @@ class OtpUriParserTest {
         expectThrow("otpauth://totp/Steam:test?secret=$baseSecret&issuer=Steam&algorithm=SHA1&digits=5&period=30")
     }
 
-    @Test
-    fun `digits 5 without steam issuer rejected`() {
-        expectThrow("otpauth://totp/A:B?secret=$baseSecret&digits=5")
-    }
+
 }

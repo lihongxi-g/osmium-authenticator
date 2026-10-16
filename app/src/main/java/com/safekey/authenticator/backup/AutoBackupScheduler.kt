@@ -10,6 +10,8 @@ import com.safekey.authenticator.data.AppSettings
 import java.time.Instant
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.time.format.TextStyle
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 /**
@@ -29,13 +31,21 @@ object AutoBackupScheduler {
      * Next occurrence of [hour]:[minute] strictly after [now], stepping by
      * [intervalDays] days. Pure function — unit-tested without Android.
      *
-     * Resolves every candidate through the local zone (java.time), so DST
-     * transitions cannot skew the wall-clock time: a nonexistent time in a
-     * spring-forward gap shifts forward, an ambiguous fall-back time keeps
-     * its earlier offset, and day steps preserve the wall-clock hour.
+     * [hour]:[minute] is wall-clock time in [zone] (the device's own zone by
+     * default) — the same zone the UI labels the schedule with, so a user
+     * outside the developer's timezone reads the time they actually picked.
+     * Every candidate is resolved through java.time, so DST transitions cannot
+     * skew it: a nonexistent time in a spring-forward gap shifts forward, an
+     * ambiguous fall-back time keeps its earlier offset, and day steps preserve
+     * the wall-clock hour.
      */
-    fun nextRunMillis(now: Long, hour: Int, minute: Int, intervalDays: Int): Long {
-        val zone = ZoneId.systemDefault()
+    fun nextRunMillis(
+        now: Long,
+        hour: Int,
+        minute: Int,
+        intervalDays: Int,
+        zone: ZoneId = ZoneId.systemDefault()
+    ): Long {
         val nowZoned = Instant.ofEpochMilli(now).atZone(zone)
         var candidate = ZonedDateTime.of(
             nowZoned.toLocalDate().atTime(hour, minute), zone
@@ -45,6 +55,15 @@ object AutoBackupScheduler {
         }
         return candidate.toInstant().toEpochMilli()
     }
+
+    /**
+     * Short, user-visible name of [zone] (an offset like "GMT+05:30" or a
+     * regional abbreviation) used to label the scheduled and last-run times.
+     * Derived from the zone itself — a fixed label would be wrong for every
+     * user in another timezone.
+     */
+    fun zoneLabel(zone: ZoneId = ZoneId.systemDefault()): String =
+        zone.getDisplayName(TextStyle.SHORT, Locale.getDefault())
 
     /**
      * (Re)schedule the backup for the next occurrence. When auto-backup is

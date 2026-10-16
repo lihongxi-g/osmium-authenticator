@@ -42,7 +42,7 @@ data class AppSettings(
     val devModeEnabled: Boolean = false,
     val devDisableRootSecurity: Boolean = false,
     val devPlaintextExport: Boolean = false,
-    val devExtraDigits: Boolean = false,
+
     val devHiddenFeatures: Set<String> = emptySet(),
     // ---- integrity detection logging (2026-09) ----
     val devDetailedLogging: Boolean = false,
@@ -115,7 +115,7 @@ class SettingsRepository(
         val DEV_MODE_ENABLED = booleanPreferencesKey("dev_mode_enabled")
         val DEV_DISABLE_ROOT_SECURITY = booleanPreferencesKey("dev_disable_root_security")
         val DEV_PLAINTEXT_EXPORT = booleanPreferencesKey("dev_plaintext_export")
-        val DEV_EXTRA_DIGITS = booleanPreferencesKey("dev_extra_digits")
+
         val DEV_HIDDEN_FEATURES = stringSetPreferencesKey("dev_hidden_features")
         val DEV_DETAILED_LOGGING = booleanPreferencesKey("dev_detailed_logging")
         val PIN_REMINDER_SILENCED = booleanPreferencesKey("pin_reminder_silenced")
@@ -148,7 +148,7 @@ class SettingsRepository(
             devModeEnabled = prefs[Keys.DEV_MODE_ENABLED] ?: false,
             devDisableRootSecurity = prefs[Keys.DEV_DISABLE_ROOT_SECURITY] ?: false,
             devPlaintextExport = prefs[Keys.DEV_PLAINTEXT_EXPORT] ?: false,
-            devExtraDigits = prefs[Keys.DEV_EXTRA_DIGITS] ?: false,
+
             devHiddenFeatures = prefs[Keys.DEV_HIDDEN_FEATURES] ?: emptySet(),
             devDetailedLogging = prefs[Keys.DEV_DETAILED_LOGGING] ?: false,
             pinReminderSilenced = prefs[Keys.PIN_REMINDER_SILENCED] ?: false
@@ -290,9 +290,6 @@ class SettingsRepository(
         context.dataStore.edit { it[Keys.DEV_PLAINTEXT_EXPORT] = enabled }
     }
 
-    suspend fun setDevExtraDigits(enabled: Boolean) {
-        context.dataStore.edit { it[Keys.DEV_EXTRA_DIGITS] = enabled }
-    }
 
     suspend fun setDevHiddenFeatures(ids: Set<String>) {
         context.dataStore.edit { it[Keys.DEV_HIDDEN_FEATURES] = ids }
