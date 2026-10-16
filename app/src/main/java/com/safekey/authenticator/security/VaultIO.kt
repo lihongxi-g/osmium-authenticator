@@ -1,6 +1,7 @@
 package com.safekey.authenticator.security
 
 import com.safekey.authenticator.model.VaultFile
+import com.safekey.authenticator.model.Account
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -74,10 +75,33 @@ object VaultIO {
         if (root["accounts"] !is JsonArray) {
             throw VaultFormatException(wrongPassword = false)
         }
-        return try {
+        val vault = try {
             json.decodeFromString<VaultFile>(text)
         } catch (e: Exception) {
             throw VaultFormatException(wrongPassword = false, cause = e)
+        }
+        validate(vault)
+        return vault
+    }
+
+    /**
+     * Rejects a vault whose accounts Osmium cannot reproduce faithfully.
+     *
+     * QR links and third-party export files go through the code-length,
+     * algorithm and type checks in [com.safekey.authenticator.totp.OtpUriParser]
+     * and [com.safekey.authenticator.totp.importer.ImportSupport]; a vault file
+     * is the one input that reaches the database without either, and the
+     * generator silently substitutes six digits / HmacSHA1 for anything it does
+     * not know — which would show the user codes that can never match the
+     * service. The file as a whole is refused rather than imported in part, so
+     * a broken account can never enter the database unnoticed.
+     */
+    private fun validate(vault: VaultFile) {
+        for (account in vault.accounts) {
+            val known = account.digits in Account.SUPPORTED_DIGITS &&
+                account.algorithm.uppercase() in Account.SUPPORTED_ALGORITHMS &&
+                (account.type == Account.TYPE_TOTP || account.type == Account.TYPE_HOTP)
+            if (!known) throw VaultFormatException(wrongPassword = false)
         }
     }
 
@@ -117,6 +141,7 @@ object VaultIO {
         if (vault.format != "osmium-vault" && vault.format != "safekey-vault") {
             throw VaultFormatException(wrongPassword = false)
         }
+        validate(vault)
         return vault
     }
 }

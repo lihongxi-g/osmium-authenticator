@@ -117,6 +117,67 @@ class VaultIOTest {
     }
 
     @Test
+    fun `a vault holding a row the generator cannot reproduce is refused`() {
+        // The generator substitutes six digits for any other length and
+        // HmacSHA1 for an unknown algorithm, so importing such a row would
+        // show codes that never match the service. A vault is the one input
+        // that no parser validates, so the whole file is refused instead of
+        // letting a broken account into the database unnoticed.
+        val bad = listOf(
+            sampleVault().copy(accounts = listOf(vaultRow(digits = 9))),
+            sampleVault().copy(accounts = listOf(vaultRow(digits = 0))),
+            sampleVault().copy(accounts = listOf(vaultRow(algorithm = "MD5"))),
+            sampleVault().copy(accounts = listOf(vaultRow(type = "motp")))
+        )
+        for (vault in bad) {
+            assertPlainRefused(vault)
+            assertEnvelopeRefused(vault)
+        }
+    }
+
+    @Test
+    fun `every code length the app itself stores survives the round trip`() {
+        for (digits in listOf(4, 5, 6, 7, 8)) {
+            val vault = sampleVault().copy(accounts = listOf(vaultRow(digits = digits)))
+            val plain = VaultIO.encodePlain(vault).toByteArray(Charsets.UTF_8)
+            assertEquals(digits, VaultIO.decodePlain(plain).accounts[0].digits)
+            val envelope = VaultIO.encrypt(vault, password).toByteArray(Charsets.UTF_8)
+            assertEquals(digits, VaultIO.decrypt(envelope, password).accounts[0].digits)
+        }
+    }
+
+    private fun vaultRow(
+        digits: Int = 6,
+        algorithm: String = "SHA1",
+        type: String = "totp"
+    ) = VaultAccount(
+        issuer = "Google",
+        label = "a@gmail.com",
+        secret = "JBSWY3DPEHPK3PXP",
+        algorithm = algorithm,
+        digits = digits,
+        type = type
+    )
+
+    private fun assertPlainRefused(vault: VaultFile) {
+        try {
+            VaultIO.decodePlain(VaultIO.encodePlain(vault).toByteArray(Charsets.UTF_8))
+            fail("expected VaultFormatException")
+        } catch (e: VaultFormatException) {
+            assertFalse(e.wrongPassword)
+        }
+    }
+
+    private fun assertEnvelopeRefused(vault: VaultFile) {
+        try {
+            VaultIO.decrypt(VaultIO.encrypt(vault, password).toByteArray(Charsets.UTF_8), password)
+            fail("expected VaultFormatException")
+        } catch (e: VaultFormatException) {
+            assertFalse(e.wrongPassword)
+        }
+    }
+
+    @Test
     fun `isPlainVault recognizes plaintext files only`() {
         val plain = VaultIO.encodePlain(sampleVault()).toByteArray(Charsets.UTF_8)
         val envelope = VaultIO.encrypt(sampleVault(), password).toByteArray(Charsets.UTF_8)

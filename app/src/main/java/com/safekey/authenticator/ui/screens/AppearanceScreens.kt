@@ -120,7 +120,13 @@ fun LanguageSettingsScreen(
                 SettingsChoiceRow(
                     title = stringResource(labelRes),
                     selected = current == tag,
-                    onClick = { onLanguageChanged?.invoke(tag.takeIf { it != LANGUAGE_SYSTEM }) }
+                    onClick = {
+                        // Re-applying the current language would recreate the
+                        // Activity for nothing.
+                        if (tag != current) {
+                            onLanguageChanged?.invoke(tag.takeIf { it != LANGUAGE_SYSTEM })
+                        }
+                    }
                 )
             }
         }
