@@ -51,6 +51,17 @@ class Release256FeaturesTest(unittest.TestCase):
         self.assertIn("ThemeSettingsScreen(", activity)
         self.assertIn("LanguageSettingsScreen(", activity)
 
+
+    def test_no_unescaped_apostrophes_in_resources(self):
+        """aapt2 rejects `'` inside a resource value unless it is escaped."""
+        pattern = re.compile(r"<(?:string|item)[^>]*>(.*?)</(?:string|item)>", re.S)
+        for path in sorted((ROOT / "app/src/main/res").glob("values*/strings.xml")):
+            for match in pattern.finditer(path.read_text()):
+                self.assertIsNone(
+                    re.search(r"(?<!\\)'", match.group(1)),
+                    f"{path.parent.name}: {match.group(1)[:60]}",
+                )
+
     def test_version_and_ci_guard_agree(self):
         gradle = (ROOT / "app/build.gradle.kts").read_text()
         version = re.search(r'versionName\s*=\s*"([^"]+)"', gradle)
