@@ -163,7 +163,7 @@ fun DonationScreen(
             }
 
             // ---- Liberapay --------------------------------------------------
-            DonationSectionTitle(stringResource(R.string.donation_liberapay_title))
+            DonationSectionTitle("Liberapay")
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
