@@ -163,11 +163,6 @@ dependencies {
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
 
-    // Shape-morph maths for the expressive loading indicator (Apache-2.0).
-    // Standalone library with no Compose dependency, so it does not force a
-    // Compose/material3 version bump.
-    implementation("androidx.graphics:graphics-shapes:1.0.1")
-
     // Vendored Google Android Key Attestation verifier (see keyattestation/NOTICE).
     implementation(project(":keyattestation"))
 

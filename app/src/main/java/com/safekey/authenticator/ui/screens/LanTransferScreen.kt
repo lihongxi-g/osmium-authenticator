@@ -78,7 +78,6 @@ import com.safekey.authenticator.ui.components.AppIcons
 import com.safekey.authenticator.ui.components.CodeField
 import com.safekey.authenticator.ui.components.IconButtonCompat
 import com.safekey.authenticator.ui.components.LocalNetworkPermissionGate
-import com.safekey.authenticator.ui.components.MorphLoadingIndicator
 import com.safekey.authenticator.ui.components.SimpleTopBar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.CancellationException
@@ -293,7 +292,7 @@ private fun SendTabContent(
                         modifier = Modifier.padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        MorphLoadingIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                        CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
                         Spacer(Modifier.width(12.dp))
                         Text(
                             text = stringResource(R.string.lan_status_searching),
@@ -540,7 +539,7 @@ private fun SendTabContent(
             modifier = Modifier.fillMaxWidth()
         ) {
             if (isSending) {
-                MorphLoadingIndicator(
+                CircularProgressIndicator(
                     modifier = Modifier.size(18.dp),
                     color = MaterialTheme.colorScheme.onPrimary,
                     strokeWidth = 2.dp
@@ -726,7 +725,7 @@ private fun ReceiveTabContent(
                         )
                     }
                 } else if (startJob?.isActive == true && errorText == null) {
-                    MorphLoadingIndicator(
+                    CircularProgressIndicator(
                         modifier = Modifier.size(32.dp),
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
@@ -798,7 +797,7 @@ private fun ReceiveTabContent(
                 modifier = Modifier.padding(vertical = 8.dp)
             ) {
                 if (isTransferring) {
-                    MorphLoadingIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
+                    CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
                     Spacer(Modifier.width(8.dp))
                 } else if (isDone) {
                     Icon(
