@@ -51,6 +51,7 @@ import com.safekey.authenticator.legal.LegalLang
 import com.safekey.authenticator.security.AppLog
 import com.safekey.authenticator.security.ClipboardHelper
 import com.safekey.authenticator.ui.components.AppIcons
+import com.safekey.authenticator.ui.components.MorphLoadingIndicator
 import com.safekey.authenticator.ui.components.SimpleTopBar
 import com.safekey.authenticator.ui.components.UpdateAvailableDialog
 import com.safekey.authenticator.ui.dev.DevStrings
@@ -161,7 +162,7 @@ fun AboutScreen(
                     modifier = Modifier.weight(1f)
                 )
                 if (updateChecking) {
-                    CircularProgressIndicator(
+                    MorphLoadingIndicator(
                         modifier = Modifier.size(16.dp),
                         strokeWidth = 2.dp
                     )
@@ -179,6 +180,7 @@ fun AboutScreen(
             AboutLinkRow(stringResource(R.string.about_terms_title)) { showTerms = true }
             AboutLinkRow(stringResource(R.string.about_privacy_title)) { showPrivacy = true }
             AboutLinkRow(stringResource(R.string.attributions_title)) { vm.nav.push(Screen.Attributions) }
+            AboutLinkRow(stringResource(R.string.donation_entry_title)) { vm.nav.push(Screen.Donation) }
 
             Spacer(Modifier.height(24.dp))
             Divider(color = MaterialTheme.colorScheme.surfaceVariant)
@@ -409,7 +411,7 @@ private fun LegalDialog(
                 when (state) {
                     LegalDocState.Loading -> {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            CircularProgressIndicator(
+                            MorphLoadingIndicator(
                                 modifier = Modifier.size(20.dp),
                                 strokeWidth = 2.dp
                             )

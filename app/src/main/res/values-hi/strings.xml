@@ -538,4 +538,32 @@
     <string name="lan_status_done_receive">Received %1$d accounts</string>
     <string name="pin_reminder_never">Don\'t remind me again</string>
     <string name="pin_reminder_body">This device has no fingerprint or face unlock, so the app cannot verify who is opening it. Set an app PIN to protect your accounts.</string>
+
+    <!-- Voluntarily support development (About -> second-level page) -->
+    <string name="donation_entry_title">विकास में सहयोग करें</string>
+    <string name="donation_title">Osmium का सहयोग करें</string>
+    <string name="donation_intro">Osmium मैं अपने खाली समय में बनाता हूँ और यह सबके लिए मुफ़्त है। अगर यह आपके काम आया है, तो स्वैच्छिक सहयोग प्रोजेक्ट को चलता रखता है — यह ज़रूरी नहीं है और इससे कोई सुविधा अनलॉक नहीं होती।</string>
+    <string name="donation_disclaimer_title">सहयोग देने से पहले पढ़ें</string>
+    <string name="donation_disclaimer_body">· सहयोग एक स्वैच्छिक, बिना शर्त उपहार है, किसी वस्तु या सेवा की खरीद नहीं।
+· बदले में कुछ नहीं: न अतिरिक्त सुविधाएँ, न प्राथमिक सहायता, न कस्टम काम।
+· सहयोग दें या न दें, ऐप एक जैसा काम करता है; सभी सुविधाएँ सबके लिए मुफ़्त हैं।
+· नाबालिग केवल माता-पिता या अभिभावक की सहमति से सहयोग कर सकते हैं।
+· क्रिप्टो ट्रांसफ़र वापस नहीं होते। कॉइन और नेटवर्क (TRC20 / ERC20) स्वयं जाँचें — गलत नेटवर्क पर भेजा धन वापस नहीं मिल सकता।
+· यह चंदा अभियान, क्राउडफ़ंडिंग, निवेश या प्रतिभूति निर्गमन नहीं है और कोई लाभ नहीं दिया जाता।
+· सहयोग देने से GPL-3.0-or-later लाइसेंस के तहत आपके अधिकार नहीं बदलते।
+· कर या रसीद, यदि लागू हो, आपकी अपनी ज़िम्मेदारी है।</string>
+    <string name="donation_liberapay_desc">मुफ़्त सॉफ़्टवेयर के लिए गैर-लाभकारी प्लेटफ़ॉर्म के ज़रिए एक बार या नियमित सहयोग। राशि आप तय करें, कभी भी बंद कर सकते हैं।</string>
+    <string name="donation_liberapay_open">खोलें</string>
+    <string name="donation_crypto_title">क्रिप्टोकरेंसी (Bybit)</string>
+    <string name="donation_network_trc20">USDT — TRC20 (Tron)</string>
+    <string name="donation_network_erc20">USDT — ERC20 (Ethereum)</string>
+    <string name="donation_copied">पता कॉपी हो गया</string>
+    <string name="donation_crypto_warning">केवल USDT भेजें। भेजने से पहले नेटवर्क जाँचें: TRC20 और ERC20 अलग चेन हैं, गलत नेटवर्क पर भेजा धन वापस नहीं मिलता।</string>
+    <string name="donation_wechat_title">WeChat रिवॉर्ड कोड</string>
+    <string name="donation_wechat_desc">बड़ा करने के लिए टैप करें; वहाँ से छवि गैलरी में सहेजी जा सकती है।</string>
+    <string name="donation_save">गैलरी में सहेजें</string>
+    <string name="donation_close">बंद करें</string>
+    <string name="donation_save_ok">गैलरी में सहेजा गया</string>
+    <string name="donation_save_failed">छवि सहेजी नहीं जा सकी</string>
+    <string name="donation_thanks">धन्यवाद — हर सहयोग सचमुच मदद करता है।</string>
 </resources>

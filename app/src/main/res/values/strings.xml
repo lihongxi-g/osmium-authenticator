@@ -555,4 +555,32 @@
     <string name="lan_status_done_receive">Received %1$d accounts</string>
     <string name="pin_reminder_never">Don\'t remind me again</string>
     <string name="pin_reminder_body">This device has no fingerprint or face unlock, so the app cannot verify who is opening it. Set an app PIN to protect your accounts.</string>
+
+    <!-- Voluntarily support development (About -> second-level page) -->
+    <string name="donation_entry_title">Support development</string>
+    <string name="donation_title">Support Osmium</string>
+    <string name="donation_intro">Osmium is built in my spare time and stays free for everyone. If it is useful to you, a voluntary tip keeps the project going - none of this is required, and none of it unlocks anything.</string>
+    <string name="donation_disclaimer_title">Before you donate</string>
+    <string name="donation_disclaimer_body">· A tip is a voluntary, unconditional gift, not a purchase of goods or services.
+· Nothing is promised in return: no extra features, no priority support, no custom work.
+· The app works identically whether you donate or not; every feature is free for everyone.
+· Minors may only donate with the consent of a parent or guardian.
+· Crypto transfers are irreversible. Check the coin and the network (TRC20 / ERC20) yourself - funds sent to the wrong network cannot be recovered.
+· This is not a fundraiser, crowdfunding campaign, investment or securities offering, and no return is offered.
+· Donating does not change your rights under the GPL-3.0-or-later licence.
+· Any taxes or receipts are your own responsibility.</string>
+    <string name="donation_liberapay_desc">One-off or recurring support through a non-profit platform for free software. The amount is up to you and can be cancelled at any time.</string>
+    <string name="donation_liberapay_open">Open</string>
+    <string name="donation_crypto_title">Cryptocurrency (Bybit)</string>
+    <string name="donation_network_trc20">USDT — TRC20 (Tron)</string>
+    <string name="donation_network_erc20">USDT — ERC20 (Ethereum)</string>
+    <string name="donation_copied">Address copied</string>
+    <string name="donation_crypto_warning">Only send USDT. Check the network before sending: TRC20 and ERC20 are different chains, and a transfer to the wrong network cannot be recovered.</string>
+    <string name="donation_wechat_title">WeChat reward code</string>
+    <string name="donation_wechat_desc">Tap to enlarge. The viewer can save the image to your gallery.</string>
+    <string name="donation_save">Save to gallery</string>
+    <string name="donation_close">Close</string>
+    <string name="donation_save_ok">Saved to gallery</string>
+    <string name="donation_save_failed">Could not save the image</string>
+    <string name="donation_thanks">Thank you - every bit genuinely helps.</string>
 </resources>

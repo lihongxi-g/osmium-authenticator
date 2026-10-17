@@ -73,7 +73,7 @@ fun SwipeBackContainer(
                                 onBack()
                                 scope.launch {
                                     settle.snapTo(total)
-                                    settle.animateTo(widthPx, tween(200, easing = FastOutSlowInEasing))
+                                    settle.animateTo(widthPx, AppMotion.spatialFast())
                                     dragPx = 0f
                                     settling = false
                                 }
@@ -81,7 +81,7 @@ fun SwipeBackContainer(
                                 settling = true
                                 scope.launch {
                                     settle.snapTo(total)
-                                    settle.animateTo(0f, tween(200, easing = FastOutSlowInEasing))
+                                    settle.animateTo(0f, AppMotion.spatialFast())
                                     dragPx = 0f
                                     settling = false
                                 }

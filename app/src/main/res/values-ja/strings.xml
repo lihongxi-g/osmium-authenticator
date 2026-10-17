@@ -538,4 +538,32 @@
     <string name="lan_status_done_receive">Received %1$d accounts</string>
     <string name="pin_reminder_never">Don\'t remind me again</string>
     <string name="pin_reminder_body">This device has no fingerprint or face unlock, so the app cannot verify who is opening it. Set an app PIN to protect your accounts.</string>
+
+    <!-- Voluntarily support development (About -> second-level page) -->
+    <string name="donation_entry_title">開発を支援</string>
+    <string name="donation_title">Osmium を支援する</string>
+    <string name="donation_intro">Osmium は余暇に開発していて、誰でも無料で使えます。役に立ったと感じたら、任意のご支援が開発の支えになります。必須ではなく、支援で機能が解放されることもありません。</string>
+    <string name="donation_disclaimer_title">ご支援の前に</string>
+    <string name="donation_disclaimer_body">· ご支援は任意かつ無償の贈与であり、商品やサービスの購入ではありません。
+· 見返りはお約束しません（追加機能・優先サポート・個別開発はいずれもありません）。
+· 支援の有無でアプリの動作は変わりません。すべての機能を誰でも無料で使えます。
+· 未成年の方は保護者の同意を得たうえでご支援ください。
+· 暗号資産の送金は取り消せません。通貨とネットワーク（TRC20 / ERC20）はご自身で確認してください。誤ったネットワークへの送金は返金できません。
+· 本件は募金・クラウドファンディング・投資・有価証券の募集ではなく、収益の約束もありません。
+· ご支援によって GPL-3.0-or-later ライセンス上の権利が変わることはありません。
+· 税金や領収書の扱いはご自身の責任でお願いします。</string>
+    <string name="donation_liberapay_desc">フリーソフトウェア向けの非営利プラットフォームで、単発または継続的に支援できます。金額は自由で、いつでも停止できます。</string>
+    <string name="donation_liberapay_open">開く</string>
+    <string name="donation_crypto_title">暗号資産（Bybit）</string>
+    <string name="donation_network_trc20">USDT — TRC20（Tron）</string>
+    <string name="donation_network_erc20">USDT — ERC20（Ethereum）</string>
+    <string name="donation_copied">アドレスをコピーしました</string>
+    <string name="donation_crypto_warning">送金できるのは USDT のみです。送金前にネットワークを確認してください。TRC20 と ERC20 は別チェーンで、誤ったネットワークへの送金は取り戻せません。</string>
+    <string name="donation_wechat_title">WeChat 投げ銭コード</string>
+    <string name="donation_wechat_desc">タップで拡大表示。表示画面からギャラリーに保存できます。</string>
+    <string name="donation_save">ギャラリーに保存</string>
+    <string name="donation_close">閉じる</string>
+    <string name="donation_save_ok">ギャラリーに保存しました</string>
+    <string name="donation_save_failed">画像を保存できませんでした</string>
+    <string name="donation_thanks">ありがとうございます。どんな支援も本当に助かります。</string>
 </resources>

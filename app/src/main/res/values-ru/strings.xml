@@ -538,4 +538,32 @@
     <string name="lan_status_done_receive">Received %1$d accounts</string>
     <string name="pin_reminder_never">Don\'t remind me again</string>
     <string name="pin_reminder_body">This device has no fingerprint or face unlock, so the app cannot verify who is opening it. Set an app PIN to protect your accounts.</string>
+
+    <!-- Voluntarily support development (About -> second-level page) -->
+    <string name="donation_entry_title">Поддержать разработку</string>
+    <string name="donation_title">Поддержать Osmium</string>
+    <string name="donation_intro">Osmium разрабатывается в свободное время и остаётся бесплатным для всех. Если приложение оказалось полезным, добровольный донат помогает проекту жить дальше - это не обязательно и ничего не разблокирует.</string>
+    <string name="donation_disclaimer_title">Перед донатом</string>
+    <string name="donation_disclaimer_body">· Донат — добровольный и безвозмездный дар, а не покупка товаров или услуг.
+· Взамен ничего не обещается: ни дополнительных функций, ни приоритетной поддержки, ни разработки на заказ.
+· Приложение работает одинаково вне зависимости от доната; все функции бесплатны для всех.
+· Несовершеннолетние могут донатить только с согласия родителей или опекунов.
+· Переводы криптовалюты необратимы. Самостоятельно проверьте монету и сеть (TRC20 / ERC20): средства, отправленные в неверную сеть, вернуть нельзя.
+· Это не сбор пожертвований, не краудфандинг, не инвестиция и не выпуск ценных бумаг; доходность не обещается.
+· Донат не влияет на ваши права по лицензии GPL-3.0-or-later.
+· Налоги и документы, если они применимы, — ваша ответственность.</string>
+    <string name="donation_liberapay_desc">Разовая или регулярная поддержка через некоммерческую платформу для свободного ПО. Сумму выбираете вы, отменить можно в любой момент.</string>
+    <string name="donation_liberapay_open">Открыть</string>
+    <string name="donation_crypto_title">Криптовалюта (Bybit)</string>
+    <string name="donation_network_trc20">USDT — TRC20 (Tron)</string>
+    <string name="donation_network_erc20">USDT — ERC20 (Ethereum)</string>
+    <string name="donation_copied">Адрес скопирован</string>
+    <string name="donation_crypto_warning">Отправляйте только USDT. Перед отправкой проверьте сеть: TRC20 и ERC20 — разные сети, перевод в неверную сеть не восстановить.</string>
+    <string name="donation_wechat_title">Код благодарности WeChat</string>
+    <string name="donation_wechat_desc">Нажмите, чтобы увеличить; из просмотра можно сохранить изображение в галерею.</string>
+    <string name="donation_save">Сохранить в галерею</string>
+    <string name="donation_close">Закрыть</string>
+    <string name="donation_save_ok">Сохранено в галерее</string>
+    <string name="donation_save_failed">Не удалось сохранить изображение</string>
+    <string name="donation_thanks">Спасибо — любая поддержка действительно помогает.</string>
 </resources>

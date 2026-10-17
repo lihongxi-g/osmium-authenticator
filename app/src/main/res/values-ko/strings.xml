@@ -538,4 +538,32 @@
     <string name="lan_status_done_receive">Received %1$d accounts</string>
     <string name="pin_reminder_never">Don\'t remind me again</string>
     <string name="pin_reminder_body">This device has no fingerprint or face unlock, so the app cannot verify who is opening it. Set an app PIN to protect your accounts.</string>
+
+    <!-- Voluntarily support development (About -> second-level page) -->
+    <string name="donation_entry_title">개발 후원</string>
+    <string name="donation_title">Osmium 후원하기</string>
+    <string name="donation_intro">Osmium은 여가 시간에 만들며 누구나 무료로 씁니다. 도움이 되셨다면 자발적인 후원이 프로젝트를 이어가는 힘이 됩니다. 필수가 아니며, 후원으로 무언가가 열리지도 않습니다.</string>
+    <string name="donation_disclaimer_title">후원 전에 읽어 주세요</string>
+    <string name="donation_disclaimer_body">· 후원은 자발적이고 무상인 증여이며, 상품이나 서비스의 구매가 아닙니다.
+· 그 어떤 대가도 약속하지 않습니다(추가 기능, 우선 지원, 맞춤 개발 없음).
+· 후원 여부와 관계없이 앱은 동일하게 동작하며, 모든 기능은 누구나 무료입니다.
+· 미성년자는 보호자의 동의가 있어야 후원할 수 있습니다.
+· 암호화폐 전송은 되돌릴 수 없습니다. 코인과 네트워크(TRC20 / ERC20)를 직접 확인하세요. 잘못된 네트워크로 보낸 자산은 되찾을 수 없습니다.
+· 본 후원은 모금·크라우드펀딩·투자·증권 발행이 아니며 수익을 약속하지 않습니다.
+· 후원은 GPL-3.0-or-later 라이선스상의 권리에 영향을 주지 않습니다.
+· 세금이나 영수증은 후원자 본인의 책임입니다.</string>
+    <string name="donation_liberapay_desc">자유 소프트웨어를 위한 비영리 플랫폼에서 일시적 또는 정기적으로 후원할 수 있습니다. 금액은 자유롭게 정할 수 있고 언제든 중단할 수 있습니다.</string>
+    <string name="donation_liberapay_open">열기</string>
+    <string name="donation_crypto_title">암호화폐(Bybit)</string>
+    <string name="donation_network_trc20">USDT — TRC20 (Tron)</string>
+    <string name="donation_network_erc20">USDT — ERC20 (Ethereum)</string>
+    <string name="donation_copied">주소를 복사했습니다</string>
+    <string name="donation_crypto_warning">USDT만 보낼 수 있습니다. 보내기 전에 네트워크를 확인하세요. TRC20과 ERC20은 서로 다른 체인이며, 잘못된 네트워크로 보낸 자산은 되찾을 수 없습니다.</string>
+    <string name="donation_wechat_title">WeChat 후원 코드</string>
+    <string name="donation_wechat_desc">탭하면 크게 볼 수 있고, 그 화면에서 갤러리에 저장할 수 있습니다.</string>
+    <string name="donation_save">갤러리에 저장</string>
+    <string name="donation_close">닫기</string>
+    <string name="donation_save_ok">갤러리에 저장했습니다</string>
+    <string name="donation_save_failed">이미지를 저장하지 못했습니다</string>
+    <string name="donation_thanks">감사합니다. 작은 후원도 정말 큰 힘이 됩니다.</string>
 </resources>

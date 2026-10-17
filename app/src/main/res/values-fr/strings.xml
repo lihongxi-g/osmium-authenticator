@@ -538,4 +538,32 @@
     <string name="lan_status_done_receive">Received %1$d accounts</string>
     <string name="pin_reminder_never">Don\'t remind me again</string>
     <string name="pin_reminder_body">This device has no fingerprint or face unlock, so the app cannot verify who is opening it. Set an app PIN to protect your accounts.</string>
+
+    <!-- Voluntarily support development (About -> second-level page) -->
+    <string name="donation_entry_title">Soutenir le développement</string>
+    <string name="donation_title">Soutenir Osmium</string>
+    <string name="donation_intro">Osmium est développé sur mon temps libre et reste gratuit pour tout le monde. Si l\'application vous est utile, un don volontaire fait vivre le projet - rien n\'est obligatoire et rien ne débloque de fonctionnalité.</string>
+    <string name="donation_disclaimer_title">Avant de faire un don</string>
+    <string name="donation_disclaimer_body">· Un don est un cadeau volontaire et sans contrepartie, pas l\'achat d\'un bien ou d\'un service.
+· Aucune contrepartie n\'est promise : ni fonctionnalité supplémentaire, ni support prioritaire, ni développement sur mesure.
+· L\'application fonctionne de façon identique avec ou sans don ; toutes les fonctions sont gratuites pour tous.
+· Les mineurs ne peuvent donner qu\'avec l\'accord d\'un parent ou tuteur.
+· Les transferts de cryptomonnaies sont irréversibles. Vérifiez vous-même la monnaie et le réseau (TRC20 / ERC20) : des fonds envoyés sur le mauvais réseau ne peuvent pas être récupérés.
+· Il ne s\'agit ni d\'une collecte, ni d\'un financement participatif, ni d\'un investissement ni d\'une offre de titres, et aucun rendement n\'est promis.
+· Un don ne modifie pas vos droits au titre de la licence GPL-3.0-or-later.
+· Les taxes ou justificatifs éventuels relèvent de votre responsabilité.</string>
+    <string name="donation_liberapay_desc">Soutien ponctuel ou récurrent via une plateforme à but non lucratif dédiée aux logiciels libres. Montant libre, arrêt possible à tout moment.</string>
+    <string name="donation_liberapay_open">Ouvrir</string>
+    <string name="donation_crypto_title">Cryptomonnaies (Bybit)</string>
+    <string name="donation_network_trc20">USDT — TRC20 (Tron)</string>
+    <string name="donation_network_erc20">USDT — ERC20 (Ethereum)</string>
+    <string name="donation_copied">Adresse copiée</string>
+    <string name="donation_crypto_warning">N\'envoyez que de l\'USDT. Vérifiez le réseau avant l\'envoi : TRC20 et ERC20 sont des chaînes différentes, un transfert vers le mauvais réseau est irrécupérable.</string>
+    <string name="donation_wechat_title">Code de pourboire WeChat</string>
+    <string name="donation_wechat_desc">Touchez pour agrandir ; la visionneuse peut enregistrer l\'image dans la galerie.</string>
+    <string name="donation_save">Enregistrer dans la galerie</string>
+    <string name="donation_close">Fermer</string>
+    <string name="donation_save_ok">Enregistré dans la galerie</string>
+    <string name="donation_save_failed">Impossible d\'enregistrer l\'image</string>
+    <string name="donation_thanks">Merci - chaque contribution compte vraiment.</string>
 </resources>

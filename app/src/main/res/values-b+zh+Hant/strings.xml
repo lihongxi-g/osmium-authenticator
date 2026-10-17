@@ -551,4 +551,32 @@
     <string name="lan_status_done_receive">已接收 %1$d 個帳戶</string>
     <string name="pin_reminder_never">之後不再提醒</string>
     <string name="pin_reminder_body">此裝置沒有指紋或人臉辨識，開啟應用程式時無法驗證身分。建議設定應用程式 PIN 以保護帳戶。</string>
+
+    <!-- Voluntarily support development (About -> second-level page) -->
+    <string name="donation_entry_title">贊助開發</string>
+    <string name="donation_title">贊助 Osmium</string>
+    <string name="donation_intro">Osmium 是我利用業餘時間開發的，對所有人免費。如果它幫到了你，自願的贊助能讓專案繼續走下去——這一切都不是必須的，也不會解鎖任何東西。</string>
+    <string name="donation_disclaimer_title">打賞前請先閱讀</string>
+    <string name="donation_disclaimer_body">· 打賞是完全自願、無償的贈與，不是購買商品或服務。
+· 不承諾任何回報：沒有額外功能、沒有優先支援、沒有客製開發。
+· 無論是否打賞，應用功能完全一致，所有功能對所有人免費。
+· 未成年人須在父母或監護人同意後打賞。
+· 加密貨幣轉帳不可撤銷，請自行核對幣種與網路（TRC20 / ERC20）；轉到錯誤網路的資金無法找回。
+· 這不是募捐、群眾募資、投資或證券發行，不提供任何收益承諾。
+· 打賞不影響你在 GPL-3.0-or-later 授權下享有的權利。
+· 如有稅費或憑證問題，由打賞者自行承擔。</string>
+    <string name="donation_liberapay_desc">透過面向自由軟體的非營利平台，定期或一次性支持；金額由你決定，隨時可以停止。</string>
+    <string name="donation_liberapay_open">開啟</string>
+    <string name="donation_crypto_title">加密貨幣（Bybit）</string>
+    <string name="donation_network_trc20">USDT — TRC20（Tron）</string>
+    <string name="donation_network_erc20">USDT — ERC20（Ethereum）</string>
+    <string name="donation_copied">位址已複製</string>
+    <string name="donation_crypto_warning">僅支援 USDT，轉帳前請核對網路：TRC20 與 ERC20 是不同鏈，轉錯網路無法找回。</string>
+    <string name="donation_wechat_title">微信贊賞碼</string>
+    <string name="donation_wechat_desc">點擊查看大圖，可在檢視頁面儲存到相簿。</string>
+    <string name="donation_save">儲存到相簿</string>
+    <string name="donation_close">關閉</string>
+    <string name="donation_save_ok">已儲存到相簿</string>
+    <string name="donation_save_failed">儲存失敗</string>
+    <string name="donation_thanks">謝謝——每一份支持都真的有用。</string>
 </resources>

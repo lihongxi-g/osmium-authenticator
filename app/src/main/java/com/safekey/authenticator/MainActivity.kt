@@ -19,7 +19,6 @@ import androidx.biometric.BiometricPrompt
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
@@ -76,6 +75,7 @@ import com.safekey.authenticator.security.classifyBiometricCode
 import com.safekey.authenticator.security.IntegrityCheck
 import com.safekey.authenticator.security.RootState
 import com.safekey.authenticator.totp.OtpUriParser
+import com.safekey.authenticator.ui.components.AppMotion
 import com.safekey.authenticator.ui.components.SwipeBackContainer
 import com.safekey.authenticator.ui.components.UpdateAvailableDialog
 import com.safekey.authenticator.ui.components.integrityCheckTitle
@@ -86,6 +86,7 @@ import com.safekey.authenticator.ui.screens.DeveloperScreen
 import com.safekey.authenticator.ui.screens.AccountFormScreen
 import com.safekey.authenticator.ui.screens.AccountsScreen
 import com.safekey.authenticator.ui.screens.AttributionsScreen
+import com.safekey.authenticator.ui.screens.DonationScreen
 import com.safekey.authenticator.ui.screens.AutoBackupScreen
 import com.safekey.authenticator.ui.screens.DetailScreen
 import com.safekey.authenticator.ui.screens.ExportScreen
@@ -973,12 +974,20 @@ private fun IntegrityNoticeDialog(
             AnimatedContent(
                 targetState = current,
                 transitionSpec = {
+                    // Expressive motion (spring physics) instead of fixed
+                    // duration tweens: the incoming page settles with a very
+                    // small overshoot, fades use a non-bouncy effects spring so
+                    // text never ghosts. Values = material3 expressive tokens.
                     if (direction > 0) {
-                        (slideInHorizontally(tween(280)) { it / 3 } + fadeIn(tween(220))) togetherWith
-                            (slideOutHorizontally(tween(260)) { -it / 5 } + fadeOut(tween(200)))
+                        (slideInHorizontally(AppMotion.spatial()) { it / 3 } +
+                            fadeIn(AppMotion.effects<Float>())) togetherWith
+                            (slideOutHorizontally(AppMotion.spatialFast()) { -it / 5 } +
+                                fadeOut(AppMotion.effectsFast()))
                     } else {
-                        (slideInHorizontally(tween(280)) { -it / 3 } + fadeIn(tween(220))) togetherWith
-                            (slideOutHorizontally(tween(260)) { it / 5 } + fadeOut(tween(200)))
+                        (slideInHorizontally(AppMotion.spatial()) { -it / 3 } +
+                            fadeIn(AppMotion.effects<Float>())) togetherWith
+                            (slideOutHorizontally(AppMotion.spatialFast()) { it / 5 } +
+                                fadeOut(AppMotion.effectsFast()))
                     }
                 },
                 label = "nav"
@@ -1280,6 +1289,11 @@ private fun IntegrityNoticeDialog(
                     )
 
                     is Screen.Attributions -> AttributionsScreen(
+                        vm = vm,
+                        onBack = { vm.nav.pop() }
+                    )
+
+                    is Screen.Donation -> DonationScreen(
                         vm = vm,
                         onBack = { vm.nav.pop() }
                     )

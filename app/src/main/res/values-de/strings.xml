@@ -538,4 +538,32 @@
     <string name="lan_status_done_receive">Received %1$d accounts</string>
     <string name="pin_reminder_never">Don\'t remind me again</string>
     <string name="pin_reminder_body">This device has no fingerprint or face unlock, so the app cannot verify who is opening it. Set an app PIN to protect your accounts.</string>
+
+    <!-- Voluntarily support development (About -> second-level page) -->
+    <string name="donation_entry_title">Entwicklung unterstützen</string>
+    <string name="donation_title">Osmium unterstützen</string>
+    <string name="donation_intro">Osmium entsteht in meiner Freizeit und bleibt für alle kostenlos. Wenn es dir hilft, hält eine freiwillige Spende das Projekt am Leben - nichts davon ist nötig, und nichts davon schaltet etwas frei.</string>
+    <string name="donation_disclaimer_title">Bitte vor dem Spenden lesen</string>
+    <string name="donation_disclaimer_body">· Eine Spende ist eine freiwillige, zweckfreie Zuwendung und kein Kauf von Waren oder Dienstleistungen.
+· Es wird keine Gegenleistung versprochen: keine Zusatzfunktionen, kein bevorzugter Support, keine Auftragsarbeit.
+· Die App funktioniert unabhängig davon identisch; alle Funktionen sind für alle kostenlos.
+· Minderjährige dürfen nur mit Zustimmung der Eltern oder Erziehungsberechtigten spenden.
+· Krypto-Überweisungen sind unwiderruflich. Prüfe Coin und Netzwerk (TRC20 / ERC20) selbst - Guthaben an ein falsches Netzwerk kann nicht zurückgeholt werden.
+· Dies ist kein Spendenaufruf, kein Crowdfunding, keine Investition und kein Wertpapierangebot; eine Rendite wird nicht zugesagt.
+· Eine Spende ändert nichts an deinen Rechten aus der Lizenz GPL-3.0-or-later.
+· Steuern und Belege, falls relevant, liegen in deiner Verantwortung.</string>
+    <string name="donation_liberapay_desc">Regelmäßige oder einmalige Unterstützung über eine gemeinnützige Plattform für freie Software. Höhe bestimmst du, jederzeit kündbar.</string>
+    <string name="donation_liberapay_open">Öffnen</string>
+    <string name="donation_crypto_title">Kryptowährung (Bybit)</string>
+    <string name="donation_network_trc20">USDT — TRC20 (Tron)</string>
+    <string name="donation_network_erc20">USDT — ERC20 (Ethereum)</string>
+    <string name="donation_copied">Adresse kopiert</string>
+    <string name="donation_crypto_warning">Nur USDT senden. Prüfe vorher das Netzwerk: TRC20 und ERC20 sind verschiedene Chains - eine Überweisung ins falsche Netzwerk ist nicht wiederherstellbar.</string>
+    <string name="donation_wechat_title">WeChat-Trinkgeldcode</string>
+    <string name="donation_wechat_desc">Tippen zum Vergrößern; die Ansicht kann das Bild in der Galerie speichern.</string>
+    <string name="donation_save">In Galerie speichern</string>
+    <string name="donation_close">Schließen</string>
+    <string name="donation_save_ok">In Galerie gespeichert</string>
+    <string name="donation_save_failed">Bild konnte nicht gespeichert werden</string>
+    <string name="donation_thanks">Danke - jeder Beitrag hilft wirklich.</string>
 </resources>

@@ -80,7 +80,7 @@ private fun AnimatedCheckGlyph(replayKey: Long, modifier: Modifier = Modifier) {
         progress.snapTo(0f)
         progress.animateTo(
             targetValue = 1f,
-            animationSpec = tween(durationMillis = 850, easing = FastOutSlowInEasing)
+            animationSpec = AppMotion.spatial()
         )
     }
 

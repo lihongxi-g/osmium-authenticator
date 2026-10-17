@@ -1,9 +1,11 @@
 package com.safekey.authenticator.ui.screens
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -56,7 +58,9 @@ import com.safekey.authenticator.ui.components.AppIcons
 import com.safekey.authenticator.ui.components.CodeCard
 import com.safekey.authenticator.ui.components.FilterChipRow
 import com.safekey.authenticator.ui.components.IconButtonCompat
+import com.safekey.authenticator.ui.components.MorphLoadingIndicator
 import com.safekey.authenticator.ui.components.SimpleTopBar
+import com.safekey.authenticator.ui.components.pressScale
 import kotlin.math.roundToInt
 import androidx.compose.foundation.layout.statusBarsPadding
 import com.safekey.authenticator.tags.TagPresentation
@@ -265,7 +269,7 @@ private fun LoadingState(modifier: Modifier = Modifier) {
         modifier = modifier.padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        CircularProgressIndicator(
+        MorphLoadingIndicator(
             modifier = Modifier.size(20.dp),
             strokeWidth = 2.dp
         )
@@ -361,6 +365,10 @@ private fun AccountList(
         verticalArrangement = Arrangement.spacedBy(ItemSpacingPx)
     ) {
         items(items, key = { it.account.id }) { ui ->
+            // Expressive press feedback: the card dips to 97% while held and
+            // springs back. The interaction source is shared with the clickable
+            // so the press is tracked once.
+            val pressInteraction = remember { MutableInteractionSource() }
             CodeCard(
                 ui = ui,
                 hideCode = hideCodes,
@@ -368,7 +376,10 @@ private fun AccountList(
                 onCopyCode = { onCopyCode(ui) },
                 modifier = Modifier
                     .height(CardHeightPx)
+                    .pressScale(pressInteraction)
                     .combinedClickable(
+                        interactionSource = pressInteraction,
+                        indication = LocalIndication.current,
                         onClick = { onOpen(ui.account) },
                         onLongClick = null,
                         onLongClickLabel = null
