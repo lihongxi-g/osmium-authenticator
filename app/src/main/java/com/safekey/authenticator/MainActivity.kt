@@ -90,6 +90,7 @@ import com.safekey.authenticator.ui.screens.DonationScreen
 import com.safekey.authenticator.ui.screens.AutoBackupScreen
 import com.safekey.authenticator.ui.screens.DetailScreen
 import com.safekey.authenticator.ui.screens.ExportScreen
+import com.safekey.authenticator.ui.screens.ExportToOthersScreen
 import com.safekey.authenticator.ui.screens.FileImportScreen
 import com.safekey.authenticator.ui.screens.GoogleImportScreen
 import com.safekey.authenticator.ui.screens.ImportScreen
