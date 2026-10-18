@@ -5,6 +5,11 @@ package com.safekey.authenticator.totp.importer
  *
  * [find] auto-detects the source format from the file content, so the import
  * UI never has to ask the user which app the export came from.
+ *
+ * Order matters: JSON formats with distinctive keys run before the generic
+ * ones, [OtpUriListImporter] before [CsvOtpImporter] (a link list also carries
+ * "otpauth://"), and [BitwardenImporter] before [CsvOtpImporter] because a
+ * Bitwarden CSV is a special case of a link-carrying CSV.
  */
 object Importers {
 
@@ -12,7 +17,14 @@ object Importers {
     val all: List<AuthenticatorImporter> = listOf(
         AegisImporter,
         TwoFasImporter,
-        RaivoImporter
+        FreeOtpPlusImporter,
+        StratumImporter,
+        BitwardenImporter,
+        ProtonAuthenticatorImporter,
+        RaivoImporter,
+        AndOtpImporter,
+        OtpUriListImporter,
+        CsvOtpImporter
     )
 
     /** First importer whose [AuthenticatorImporter.detect] matches, or null. */

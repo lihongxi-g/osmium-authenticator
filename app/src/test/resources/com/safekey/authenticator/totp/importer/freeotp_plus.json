@@ -1,0 +1,69 @@
+{
+  "tokenOrder": [
+    "0",
+    "1"
+  ],
+  "tokens": [
+    {
+      "type": "TOTP",
+      "algo": "SHA1",
+      "digits": 6,
+      "secret": [
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        48
+      ],
+      "period": 30,
+      "counter": 0,
+      "issuerExt": "GitHub",
+      "label": "octocat"
+    },
+    {
+      "type": "HOTP",
+      "algo": "SHA256",
+      "digits": 8,
+      "secret": [
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        48
+      ],
+      "counter": 7,
+      "issuerExt": "Example",
+      "label": "user"
+    }
+  ]
+}

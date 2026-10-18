@@ -28,7 +28,16 @@ class ImportersTest {
         "2fas_v4.json" to "2fas",
         "2fas_v4_encrypted.json" to "2fas",
         "raivo_sample.json" to "raivo",
-        "raivo_single_object.json" to "raivo"
+        "raivo_single_object.json" to "raivo",
+        "andotp_plain.json" to "andotp",
+        "freeotp_plus.json" to "freeotp",
+        "proton_plain.json" to "proton",
+        "proton_encrypted.json" to "proton",
+        "stratum.json" to "stratum",
+        "bitwarden.json" to "bitwarden",
+        "bitwarden.csv" to "bitwarden",
+        "otpauth_links.txt" to "otpauth_links",
+        "keepassxc.csv" to "csv"
     )
 
     @Test
@@ -60,11 +69,11 @@ class ImportersTest {
 
     @Test
     fun `removed formats are no longer detected`() {
-        // andOTP plaintext exports and LastPass accounts.json are intentionally
-        // unsupported since v2.4.0 — they must not resolve to any importer.
+        // LastPass accounts.json is intentionally unsupported (v2.4.0) and must
+        // not resolve to any importer. andOTP was dropped at the same time but
+        // is supported again: the migration set was widened, so its plaintext
+        // array shape is covered by AndOtpImporterTest instead.
         val removed = listOf(
-            // andOTP plaintext array shape
-            """[{"type":"TOTP","secret":"JBSWY3DPEHPK3PXP","issuer":"GitHub","label":"octocat","digits":6,"period":30,"algorithm":"SHA1"}]""",
             // LastPass accounts.json shape
             """{"accounts":[{"issuerName":"GitHub","userName":"octocat","secret":"JBSWY3DPEHPK3PXP"}]}"""
         )

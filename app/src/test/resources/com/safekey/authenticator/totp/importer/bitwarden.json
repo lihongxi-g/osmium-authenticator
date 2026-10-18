@@ -1,0 +1,40 @@
+{
+  "encrypted": false,
+  "folders": [],
+  "items": [
+    {
+      "id": "1",
+      "type": 1,
+      "name": "GitHub",
+      "login": {
+        "username": "octocat",
+        "password": "x",
+        "totp": "otpauth://totp/GitHub:octocat?secret=GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ&issuer=GitHub"
+      }
+    },
+    {
+      "id": "2",
+      "type": 1,
+      "name": "Password only",
+      "login": {
+        "username": "u",
+        "password": "p"
+      }
+    },
+    {
+      "id": "3",
+      "type": 3,
+      "name": "A note"
+    },
+    {
+      "id": "4",
+      "type": 1,
+      "name": "Steam",
+      "login": {
+        "username": "steamuser",
+        "password": "y",
+        "totp": "steam://GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ"
+      }
+    }
+  ]
+}

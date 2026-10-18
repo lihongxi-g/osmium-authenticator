@@ -1,0 +1,54 @@
+{
+  "Authenticators": [
+    {
+      "Type": 2,
+      "Issuer": "GitHub",
+      "Username": "octocat",
+      "Secret": "GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ",
+      "Algorithm": 0,
+      "Digits": 6,
+      "Period": 30,
+      "Counter": 0
+    },
+    {
+      "Type": 1,
+      "Issuer": "Example",
+      "Username": "hotpuser",
+      "Secret": "GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ",
+      "Algorithm": 1,
+      "Digits": 8,
+      "Period": 30,
+      "Counter": 12
+    },
+    {
+      "Type": 4,
+      "Issuer": "Valve",
+      "Username": "steamuser",
+      "Secret": "GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ",
+      "Algorithm": 0,
+      "Digits": 5,
+      "Period": 30,
+      "Counter": 0
+    },
+    {
+      "Type": 9,
+      "Issuer": "Weird",
+      "Username": "unknown-type",
+      "Secret": "GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ",
+      "Algorithm": 0,
+      "Digits": 6,
+      "Period": 30,
+      "Counter": 0
+    },
+    {
+      "Type": 2,
+      "Issuer": "Legacy",
+      "Username": "md5row",
+      "Secret": "GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ",
+      "Algorithm": 3,
+      "Digits": 6,
+      "Period": 30,
+      "Counter": 0
+    }
+  ]
+}

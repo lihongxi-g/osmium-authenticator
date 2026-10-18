@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "entries": [
+    {
+      "content": {
+        "name": "GitHub",
+        "uri": "otpauth://totp/GitHub:octocat?secret=GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ&issuer=GitHub&algorithm=SHA1&digits=6&period=30"
+      }
+    },
+    {
+      "content": {
+        "name": "Plain entry",
+        "uri": "otpauth://totp/plainentry?secret=GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ"
+      }
+    }
+  ]
+}

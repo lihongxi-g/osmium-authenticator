@@ -1,0 +1,5 @@
+otpauth://totp/GitHub:octocat?secret=GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ&issuer=GitHub&algorithm=SHA1&digits=6&period=30
+otpauth://hotp/Example:user?secret=GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ&counter=7
+
+# a comment line that must be skipped
+steam://GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ

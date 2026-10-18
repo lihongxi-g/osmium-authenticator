@@ -1,0 +1,3 @@
+folder,favorite,type,name,notes,fields,login_uri,login_username,login_password,login_totp
+,0,login,GitHub,,,https://github.com,octocat,x,otpauth://totp/GitHub:octocat?secret=GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ&issuer=GitHub
+,0,login,No otp,,,https://example.com,user,y,
