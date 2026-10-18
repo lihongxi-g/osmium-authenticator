@@ -404,6 +404,20 @@ fun SettingsScreen(
                 }
             )
 
+            if ("export" !in hiddenFeatures) SettingRow(
+                icon = AppIcons.ImportExport,
+                title = stringResource(R.string.export_other_title),
+                description = stringResource(R.string.export_other_desc),
+                onClick = {
+                    // Same identity check as the encrypted export: this writes
+                    // every secret to a PLAINTEXT file.
+                    if (!rootBlocked("feature")) {
+                        pendingNav = { vm.nav.push(Screen.ExportToOthers) }
+                        showVerifyDialog = true
+                    }
+                }
+            )
+
             if ("import" !in hiddenFeatures) SettingRow(
                 icon = AppIcons.FileDownload,
                 title = stringResource(R.string.import_vault),

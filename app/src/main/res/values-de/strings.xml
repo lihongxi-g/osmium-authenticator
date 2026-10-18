@@ -566,4 +566,25 @@
     <string name="donation_save_ok">In Galerie gespeichert</string>
     <string name="donation_save_failed">Bild konnte nicht gespeichert werden</string>
     <string name="donation_thanks">Danke - jeder Beitrag hilft wirklich.</string>
+    <string name="export_other_title">In eine andere Authenticator-App exportieren</string>
+    <string name="export_other_desc">Konten in einem Klartextformat speichern, das andere Apps importieren</string>
+    <string name="export_other_intro">Format wählen. Osmium schreibt eine Klartextdatei — wer sie lesen kann, liest alle Schlüssel darin; löschen Sie sie nach dem Import.</string>
+    <string name="export_other_warning">Achtung: Die Datei ist nicht verschlüsselt und enthält alle Schlüssel.</string>
+    <string name="export_other_fmt_links">otpauth-Links (.txt)</string>
+    <string name="export_other_fmt_links_desc">Ein otpauth://-Link pro Zeile. Aegis, Ente Auth und die meisten Open-Source-Apps lesen das.</string>
+    <string name="export_other_fmt_aegis">Aegis-Tresor (.json)</string>
+    <string name="export_other_fmt_aegis_desc">Klartext-Importformat von Aegis — auch von Stratum akzeptiert.</string>
+    <string name="export_other_fmt_csv">KeePassXC CSV (.csv)</string>
+    <string name="export_other_fmt_csv_desc">Für KeePassXC und Tabellen-Backups; die TOTP-Spalte enthält den vollständigen Link.</string>
+    <string name="export_other_button">Datei exportieren</string>
+    <string name="export_other_done">Datei gespeichert</string>
+    <string name="export_other_fail">Export fehlgeschlagen: %1$s</string>
+    <string name="export_other_empty">Es gibt nichts zu exportieren.</string>
+    <string name="farewell_title">Sie gehen wirklich?</string>
+    <string name="farewell_body">Bevor Sie gehen, das geben Sie auf:\n• Alle Daten bleiben auf dem Gerät: kein Konto, keine Cloud, keine Telemetrie.\n• Verschlüsselte Backups auf Ihren eigenen WebDAV-Server — er sieht nur Chiffrat.\n• Integritätsprüfung mit Hardware-Key-Attestation, versteckte Codes, Selbstzerstörungs-PIN.\n• GPLv3 ohne proprietäre Abhängigkeiten: aus F-Droid installierbar, Zeile für Zeile prüfbar.\nDie meisten Authenticator-Apps erfüllen nicht alle vier Punkte.</string>
+    <string name="farewell_keep">Weiter Osmium nutzen</string>
+    <string name="farewell_leave">Ich steige um</string>
+    <string name="farewell_bye_body">Ich werde besser — warten Sie ab😎\nMach es gut👋 Alles Gute für Sie❤️</string>
+    <string name="farewell_bye_ok">Gut, ich zähle auf Sie</string>
+    <string name="farewell_bye_words">Ein paar Worte an Sie</string>
 </resources>

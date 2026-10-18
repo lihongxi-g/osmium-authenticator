@@ -22,6 +22,8 @@ sealed class Screen {
     object LanguageSettings : Screen()
     object TagSettings : Screen()
     object Export : Screen()
+    /** Plaintext export for users migrating to another authenticator. */
+    object ExportToOthers : Screen()
     object Import : Screen()
     /** WebDAV backup to a user-configured server on the local network. */
     object WebDav : Screen()

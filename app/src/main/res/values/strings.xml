@@ -583,4 +583,25 @@
     <string name="donation_save_ok">Saved to gallery</string>
     <string name="donation_save_failed">Could not save the image</string>
     <string name="donation_thanks">Thank you - every bit genuinely helps.</string>
+    <string name="export_other_title">Export to another authenticator</string>
+    <string name="export_other_desc">Save your accounts in a plaintext format other authenticators can import</string>
+    <string name="export_other_intro">Pick a format. Osmium writes a plain file — anyone who can read the file can read every secret in it, so delete it as soon as the other app has imported it.</string>
+    <string name="export_other_warning">Warning: this file is not encrypted and contains every secret.</string>
+    <string name="export_other_fmt_links">otpauth links (.txt)</string>
+    <string name="export_other_fmt_links_desc">One otpauth:// link per line. Aegis, Ente Auth and most open-source authenticators read this.</string>
+    <string name="export_other_fmt_aegis">Aegis vault (.json)</string>
+    <string name="export_other_fmt_aegis_desc">Plaintext Aegis import format — also accepted by Stratum.</string>
+    <string name="export_other_fmt_csv">KeePassXC CSV (.csv)</string>
+    <string name="export_other_fmt_csv_desc">For KeePassXC and spreadsheet backups; the TOTP column holds the full link.</string>
+    <string name="export_other_button">Export file</string>
+    <string name="export_other_done">File saved</string>
+    <string name="export_other_fail">Export failed: %1$s</string>
+    <string name="export_other_empty">There is nothing to export.</string>
+    <string name="farewell_title">You are really leaving?</string>
+    <string name="farewell_body">Before you go, here is what you give up:\n• Everything stays on the device: no account, no cloud, no telemetry.\n• Encrypted backups to your own WebDAV server — the server only ever sees ciphertext.\n• Device integrity checks with hardware Key Attestation, hidden codes, self-destruct PIN.\n• GPLv3 with no proprietary dependencies: installable from F-Droid, auditable line by line.\nMost authenticators cannot do all four at once.</string>
+    <string name="farewell_keep">Keep using Osmium</string>
+    <string name="farewell_leave">I am leaving</string>
+    <string name="farewell_bye_body">I will get better — wait and see😎\nFarewell👋 May things go well for you, always❤️</string>
+    <string name="farewell_bye_ok">Good, I count on you</string>
+    <string name="farewell_bye_words">A few words for you</string>
 </resources>

@@ -566,4 +566,25 @@
     <string name="donation_save_ok">Сохранено в галерее</string>
     <string name="donation_save_failed">Не удалось сохранить изображение</string>
     <string name="donation_thanks">Спасибо — любая поддержка действительно помогает.</string>
+    <string name="export_other_title">Экспорт в другой аутентификатор</string>
+    <string name="export_other_desc">Сохранить аккаунты в открытом формате для импорта в другие приложения</string>
+    <string name="export_other_intro">Выберите формат. Osmium пишет открытый файл: тот, кто его прочтёт, получит все секреты, поэтому удалите файл сразу после импорта.</string>
+    <string name="export_other_warning">Внимание: файл не зашифрован и содержит все секреты.</string>
+    <string name="export_other_fmt_links">ссылки otpauth (.txt)</string>
+    <string name="export_other_fmt_links_desc">По одной ссылке otpauth:// в строке. Читают Aegis, Ente Auth и большинство открытых приложений.</string>
+    <string name="export_other_fmt_aegis">хранилище Aegis (.json)</string>
+    <string name="export_other_fmt_aegis_desc">Открытый формат импорта Aegis, подходит и для Stratum.</string>
+    <string name="export_other_fmt_csv">CSV для KeePassXC (.csv)</string>
+    <string name="export_other_fmt_csv_desc">Для KeePassXC и табличных копий: в колонке TOTP полная ссылка.</string>
+    <string name="export_other_button">Экспортировать файл</string>
+    <string name="export_other_done">Файл сохранён</string>
+    <string name="export_other_fail">Не удалось экспортировать: %1$s</string>
+    <string name="export_other_empty">Экспортировать нечего.</string>
+    <string name="farewell_title">Вы действительно уходите?</string>
+    <string name="farewell_body">Прежде чем уйти, вот что вы теряете:\n• Все данные остаются на устройстве: без аккаунта, облака и телеметрии.\n• Зашифрованные копии на ваш WebDAV-сервер, который видит только шифротекст.\n• Проверка целостности с аппаратной Key Attestation, скрытые коды, PIN самоуничтожения.\n• GPLv3 без проприетарных компонентов: установка из F-Droid, проверка кода построчно.\nБольшинство аутентификаторов не дают всё это сразу.</string>
+    <string name="farewell_keep">Остаться в Osmium</string>
+    <string name="farewell_leave">Я ухожу</string>
+    <string name="farewell_bye_body">Я стану лучше, вот увидите😎\nПрощайте👋 Пусть всё у вас будет хорошо❤️</string>
+    <string name="farewell_bye_ok">Хорошо, верю в вас</string>
+    <string name="farewell_bye_words">Пара слов для вас</string>
 </resources>

@@ -566,4 +566,25 @@
     <string name="donation_save_ok">ギャラリーに保存しました</string>
     <string name="donation_save_failed">画像を保存できませんでした</string>
     <string name="donation_thanks">ありがとうございます。どんな支援も本当に助かります。</string>
+    <string name="export_other_title">他の認証アプリへエクスポート</string>
+    <string name="export_other_desc">他の認証アプリが読み込める平文形式で保存します</string>
+    <string name="export_other_intro">形式を選んでください。Osmium は平文ファイルを書き出します。読める人は全秘密鍵を読めるため、移行先に読み込ませたらすぐ削除してください。</string>
+    <string name="export_other_warning">注意：このファイルは暗号化されておらず、全秘密鍵を含みます。</string>
+    <string name="export_other_fmt_links">otpauth リンク（.txt）</string>
+    <string name="export_other_fmt_links_desc">1 行に 1 つの otpauth:// リンク。Aegis、Ente Auth など多くのオープンソース認証アプリが読み込めます。</string>
+    <string name="export_other_fmt_aegis">Aegis ボールト（.json）</string>
+    <string name="export_other_fmt_aegis_desc">Aegis の平文インポート形式。Stratum でも読み込めます。</string>
+    <string name="export_other_fmt_csv">KeePassXC CSV（.csv）</string>
+    <string name="export_other_fmt_csv_desc">KeePassXC や表計算ベースのバックアップ向け。TOTP 列に full リンクが入ります。</string>
+    <string name="export_other_button">ファイルを書き出す</string>
+    <string name="export_other_done">ファイルを保存しました</string>
+    <string name="export_other_fail">書き出しに失敗しました: %1$s</string>
+    <string name="export_other_empty">書き出せるアカウントがありません。</string>
+    <string name="farewell_title">本当に離れるのですか？</string>
+    <string name="farewell_body">移行前に、失うものを整理します：\n• データは端末内だけ。アカウント登録もクラウドも計測もありません。\n• 暗号化バックアップは自分の WebDAV へ。サーバーが見るのは暗号文だけです。\n• ハードウェア Key Attestation による完全性チェック、コード非表示、自己破壊 PIN。\n• GPLv3、専有コンポーネントなし。F-Droid から導入でき、行単位で監査できます。\n多くの認証アプリはこの 4 つを同時には満たせません。</string>
+    <string name="farewell_keep">Osmium を使い続ける</string>
+    <string name="farewell_leave">移行します</string>
+    <string name="farewell_bye_body">もっと良くなります。見ていてください😎\nさようなら👋 どうか良いことが続きますように❤️</string>
+    <string name="farewell_bye_ok">はい、期待しています</string>
+    <string name="farewell_bye_words">ひとこと伝えたい</string>
 </resources>

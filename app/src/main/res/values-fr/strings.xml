@@ -566,4 +566,25 @@
     <string name="donation_save_ok">Enregistré dans la galerie</string>
     <string name="donation_save_failed">Impossible d\'enregistrer l\'image</string>
     <string name="donation_thanks">Merci - chaque contribution compte vraiment.</string>
+    <string name="export_other_title">Exporter vers une autre application d authentification</string>
+    <string name="export_other_desc">Enregistrer les comptes dans un format en clair importable ailleurs</string>
+    <string name="export_other_intro">Choisissez un format. Osmium écrit un fichier en clair : quiconque peut le lire obtient toutes les clés, supprimez-le après import.</string>
+    <string name="export_other_warning">Attention : ce fichier n est pas chiffré et contient toutes les clés.</string>
+    <string name="export_other_fmt_links">liens otpauth (.txt)</string>
+    <string name="export_other_fmt_links_desc">Un lien otpauth:// par ligne. Aegis, Ente Auth et la plupart des applications libres le lisent.</string>
+    <string name="export_other_fmt_aegis">coffre Aegis (.json)</string>
+    <string name="export_other_fmt_aegis_desc">Format d import en clair d Aegis, accepté aussi par Stratum.</string>
+    <string name="export_other_fmt_csv">CSV KeePassXC (.csv)</string>
+    <string name="export_other_fmt_csv_desc">Pour KeePassXC et les sauvegardes en tableur ; la colonne TOTP contient le lien complet.</string>
+    <string name="export_other_button">Exporter le fichier</string>
+    <string name="export_other_done">Fichier enregistré</string>
+    <string name="export_other_fail">Échec de l export : %1$s</string>
+    <string name="export_other_empty">Il n y a rien à exporter.</string>
+    <string name="farewell_title">Vous partez vraiment ?</string>
+    <string name="farewell_body">Avant de partir, voici ce que vous abandonnez :\n• Tout reste sur l appareil : pas de compte, pas de cloud, pas de télémétrie.\n• Sauvegardes chiffrées sur votre propre serveur WebDAV, qui ne voit que du chiffré.\n• Contrôle d intégrité avec Key Attestation matérielle, codes masqués, PIN autodestructeur.\n• GPLv3 sans dépendance propriétaire : installable depuis F-Droid, auditable ligne par ligne.\nLa plupart des autenticateurs ne réunissent pas ces quatre points.</string>
+    <string name="farewell_keep">Continuer avec Osmium</string>
+    <string name="farewell_leave">Je m en vais</string>
+    <string name="farewell_bye_body">Je vais m améliorer, vous verrez😎\nAu revoir👋 Que tout aille bien pour vous❤️</string>
+    <string name="farewell_bye_ok">Bien, je compte sur vous</string>
+    <string name="farewell_bye_words">Quelques mots pour vous</string>
 </resources>

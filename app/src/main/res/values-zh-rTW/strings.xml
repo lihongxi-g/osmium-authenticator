@@ -579,4 +579,25 @@
     <string name="donation_save_ok">已儲存到相簿</string>
     <string name="donation_save_failed">儲存失敗</string>
     <string name="donation_thanks">謝謝——每一份支持都真的有用。</string>
+    <string name="export_other_title">匯出到其它驗證器</string>
+    <string name="export_other_desc">以其它驗證器能匯入的明文格式儲存帳戶</string>
+    <string name="export_other_intro">選擇一種格式。Osmium 寫出的是明文檔案——誰能讀到這個檔案，誰就能讀到裡面全部金鑰，匯入完成後請立刻刪除。</string>
+    <string name="export_other_warning">注意：該檔案不加密，包含全部金鑰。</string>
+    <string name="export_other_fmt_links">otpauth 連結（.txt）</string>
+    <string name="export_other_fmt_links_desc">每行一個 otpauth:// 連結，Aegis、Ente Auth 和多数開源驗證器都能讀取。</string>
+    <string name="export_other_fmt_aegis">Aegis 保險庫（.json）</string>
+    <string name="export_other_fmt_aegis_desc">Aegis 明文匯入格式，Stratum 也能使用。</string>
+    <string name="export_other_fmt_csv">KeePassXC CSV（.csv）</string>
+    <string name="export_other_fmt_csv_desc">適合 KeePassXC 和表格類備份，TOTP 欄位裡放的是完整連結。</string>
+    <string name="export_other_button">匯出檔案</string>
+    <string name="export_other_done">檔案已儲存</string>
+    <string name="export_other_fail">匯出失敗：%1$s</string>
+    <string name="export_other_empty">沒有可匯出的帳戶。</string>
+    <string name="farewell_title">真要走了嗎？</string>
+    <string name="farewell_body">走之前，先把要放棄的東西說清楚：\n• 全部資料只留在裝置上：不註冊帳號、不上雲、不收集遙測。\n• 加密備份寫到你自己的 WebDAV，伺服器只見到密文。\n• 裝置完整性檢測（含硬體級 Key Attestation）、隱藏驗證碼、自毀 PIN。\n• GPLv3 開源，無任何專有元件，可從 F-Droid 安裝、逐行審計。\n多数驗證器做不到同時滿足這四條。</string>
+    <string name="farewell_keep">繼續使用</string>
+    <string name="farewell_leave">我要棄用</string>
+    <string name="farewell_bye_body">我會變得更好的，讓你刮目相看😎\n江湖再見👋 願你越來越好，一切順心❤️</string>
+    <string name="farewell_bye_ok">好的，我看好你</string>
+    <string name="farewell_bye_words">贈你幾句良言</string>
 </resources>

@@ -1129,6 +1129,12 @@ private fun IntegrityNoticeDialog(
                         onBack = { vm.nav.pop() }
                     )
 
+                    is Screen.ExportToOthers -> ExportToOthersScreen(
+                        vm = vm,
+                        onDone = { vm.nav.pop() },
+                        onBack = { vm.nav.pop() }
+                    )
+
                     is Screen.Import -> ImportScreen(
                         vm = vm,
                         onDone = { vm.nav.pop() },

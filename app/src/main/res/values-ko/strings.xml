@@ -566,4 +566,25 @@
     <string name="donation_save_ok">갤러리에 저장했습니다</string>
     <string name="donation_save_failed">이미지를 저장하지 못했습니다</string>
     <string name="donation_thanks">감사합니다. 작은 후원도 정말 큰 힘이 됩니다.</string>
+    <string name="export_other_title">다른 인증 앱으로 내보내기</string>
+    <string name="export_other_desc">다른 인증 앱이 가져올 수 있는 평문 형식으로 저장합니다</string>
+    <string name="export_other_intro">형식을 선택하세요. Osmium은 평문 파일을 씁니다. 이 파일을 읽을 수 있는 사람은 모든 비밀키를 읽을 수 있으니, 다른 앱에 가져온 뒤 즉시 삭제하세요.</string>
+    <string name="export_other_warning">주의: 이 파일은 암호화되지 않았고 모든 비밀키를 담고 있습니다.</string>
+    <string name="export_other_fmt_links">otpauth 링크 (.txt)</string>
+    <string name="export_other_fmt_links_desc">한 줄에 otpauth:// 링크 하나. Aegis, Ente Auth 등 대부분의 오픈소스 인증 앱이 읽습니다.</string>
+    <string name="export_other_fmt_aegis">Aegis 보관함 (.json)</string>
+    <string name="export_other_fmt_aegis_desc">Aegis 평문 가져오기 형식이며 Stratum에서도 사용할 수 있습니다.</string>
+    <string name="export_other_fmt_csv">KeePassXC CSV (.csv)</string>
+    <string name="export_other_fmt_csv_desc">KeePassXC와 스프레드시트 백업용. TOTP 열에 전체 링크가 들어갑니다.</string>
+    <string name="export_other_button">파일 내보내기</string>
+    <string name="export_other_done">파일을 저장했습니다</string>
+    <string name="export_other_fail">내보내기 실패: %1$s</string>
+    <string name="export_other_empty">내보낼 계정이 없습니다.</string>
+    <string name="farewell_title">정말 떠나시나요?</string>
+    <string name="farewell_body">떠나기 전에, 포기하는 것을 정리합니다:\n• 모든 데이터는 기기에만 남습니다. 계정도, 클라우드도, 텔레메트리도 없습니다.\n• 암호화 백업은 사용자의 WebDAV로. 서버는 암호문만 봅니다.\n• 하드웨어 Key Attestation 기반 무결성 검사, 코드 숨김, 자폭 PIN.\n• GPLv3, 전용 구성 요소 없음. F-Droid에서 설치하고 한 줄씩 감사할 수 있습니다.\n대부분의 인증 앱은 이 네 가지를 동시에 갖추지 못합니다.</string>
+    <string name="farewell_keep">Osmium 계속 사용</string>
+    <string name="farewell_leave">그만 쓸게요</string>
+    <string name="farewell_bye_body">더 나아질게요, 두고 보세요😎\n안녕히👋 늘 좋은 일만 있기를❤️</string>
+    <string name="farewell_bye_ok">좋아요, 기대할게요</string>
+    <string name="farewell_bye_words">몇 마디 남길게요</string>
 </resources>

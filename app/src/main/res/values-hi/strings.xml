@@ -566,4 +566,25 @@
     <string name="donation_save_ok">गैलरी में सहेजा गया</string>
     <string name="donation_save_failed">छवि सहेजी नहीं जा सकी</string>
     <string name="donation_thanks">धन्यवाद — हर सहयोग सचमुच मदद करता है।</string>
+    <string name="export_other_title">किसी अन्य ऑथेंटिकेटर में निर्यात करें</string>
+    <string name="export_other_desc">अपने खातों को ऐसे सादे टेक्स्ट में सहेजें जिसे अन्य ऐप आयात कर सकें</string>
+    <string name="export_other_intro">एक फ़ॉर्मैट चुनें। Osmium सादा फ़ाइल लिखता है — जो उसे पढ़ सकता है वह हर गुप्त कुंजी पढ़ सकता है, इसलिए आयात के बाद उसे तुरंत हटा दें।</string>
+    <string name="export_other_warning">चेतावनी: यह फ़ाइल एन्क्रिप्टेड नहीं है और इसमें हर गुप्त कुंजी है।</string>
+    <string name="export_other_fmt_links">otpauth लिंक (.txt)</string>
+    <string name="export_other_fmt_links_desc">प्रति पंक्ति एक otpauth:// लिंक। Aegis, Ente Auth और अधिकांश ओपन-सोर्स ऐप इसे पढ़ते हैं।</string>
+    <string name="export_other_fmt_aegis">Aegis वॉल्ट (.json)</string>
+    <string name="export_other_fmt_aegis_desc">Aegis का सादा आयात फ़ॉर्मैट, Stratum भी इसे स्वीकार करता है।</string>
+    <string name="export_other_fmt_csv">KeePassXC CSV (.csv)</string>
+    <string name="export_other_fmt_csv_desc">KeePassXC और स्प्रेडशीट बैकअप के लिए; TOTP कॉलम में पूरा लिंक रहता है।</string>
+    <string name="export_other_button">फ़ाइल निर्यात करें</string>
+    <string name="export_other_done">फ़ाइल सहेजी गई</string>
+    <string name="export_other_fail">निर्यात विफल: %1$s</string>
+    <string name="export_other_empty">निर्यात करने के लिए कुछ नहीं है।</string>
+    <string name="farewell_title">क्या आप सच में जा रहे हैं?</string>
+    <string name="farewell_body">जाने से पहले, यह जान लें कि आप क्या छोड़ रहे हैं:\n• सारा डेटा डिवाइस पर ही रहता है: कोई खाता, क्लाउड या टेलीमेट्री नहीं।\n• एन्क्रिप्टेड बैकअप आपके अपने WebDAV पर — सर्वर को केवल सिफ़रटेक्स्ट दिखता है।\n• हार्डवेयर Key Attestation के साथ डिवाइस जाँच, छिपे कोड, स्वयं-नष्ट PIN।\n• GPLv3, कोई प्रोप्राइटरी निर्भरता नहीं: F-Droid से इंस्टॉल, पंक्ति-दर-पंक्ति ऑडिट योग्य।\nअधिकांश ऑथेंटिकेटर ये चारों एक साथ नहीं दे पाते।</string>
+    <string name="farewell_keep">Osmium इस्तेमाल करते रहें</string>
+    <string name="farewell_leave">मैं जा रहा हूँ</string>
+    <string name="farewell_bye_body">मैं और बेहतर होऊँगा, देखते रहिए😎\nअलविदा👋 आपका हर दिन अच्छा रहे❤️</string>
+    <string name="farewell_bye_ok">ठीक है, मुझे आप पर भरोसा है</string>
+    <string name="farewell_bye_words">आपके लिए कुछ शब्द</string>
 </resources>
