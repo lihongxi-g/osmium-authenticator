@@ -4,8 +4,11 @@ import com.safekey.authenticator.model.Account
 import com.safekey.authenticator.model.VaultAccount
 import com.safekey.authenticator.totp.importer.AegisImporter
 import com.safekey.authenticator.totp.importer.CsvOtpImporter
+import com.safekey.authenticator.totp.importer.ImporterError
+import com.safekey.authenticator.totp.importer.ImporterException
 import com.safekey.authenticator.totp.importer.OtpUriListImporter
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -125,7 +128,9 @@ class ExportersTest {
         // format must stay empty while the structured formats stay valid.
         assertEquals("", Exporters.build(ExportFormat.OTP_LINKS, emptyList()).trim())
         val json = Exporters.build(ExportFormat.AEGIS_JSON, emptyList())
-        assertTrue(json.contains("\"entries\": []"))
+        // an empty Aegis vault must still be a valid, parseable Aegis file
+        val emptyError = assertThrows(ImporterException::class.java) { AegisImporter.parse(json) }
+        assertEquals(ImporterError.EMPTY, emptyError.error)
         assertEquals(1, Exporters.build(ExportFormat.KEEPASS_CSV, emptyList()).trim().lines().size)
     }
 

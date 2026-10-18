@@ -31,12 +31,13 @@ class AndOtpImporterTest {
             ),
             rows[0]
         )
-        // unsupported-by-Osmium rows are still parsed, then flagged by ImportSupport
+        // non-default parameters survive: 7 digits IS supported (4-8 are),
+        // so this row must stay importable rather than be flagged
         assertEquals("SPDX", rows[1].issuer)
         assertEquals("SHA256", rows[1].algorithm)
         assertEquals(7, rows[1].digits)
         assertEquals(20, rows[1].period)
-        assertEquals(EntryIssue.UNSUPPORTED_DIGITS, ImportSupport.issue(rows[1]))
+        assertNull(ImportSupport.issue(rows[1]))
 
         // HOTP keeps its counter, which the merge logic must never rewind
         assertEquals(Account.TYPE_HOTP, rows[3].type)

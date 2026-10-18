@@ -27,9 +27,13 @@ object ProtonAuthenticatorImporter : AuthenticatorImporter {
     override fun detect(content: String): Boolean {
         val c = content.cleanJsonText()
         if (!c.startsWith("{")) return false
-        if ("\"entries\"" !in c) return false
         if ("\"db\"" in c || "\"services\"" in c || "\"tokens\"" in c) return false
-        return "\"content\"" in c || "\"uri\"" in c
+        // Plaintext export: an entries array of {content: {uri}} objects.
+        if ("\"entries\"" in c && ("\"content\"" in c || "\"uri\"" in c)) return true
+        // Password-protected export: salt + Base64 content, NO entries array —
+        // it must still be recognized so the UI can say "export without a
+        // password" instead of "unknown file".
+        return "\"salt\"" in c && "\"content\"" in c
     }
 
     override fun parse(content: String): List<VaultAccount> {
