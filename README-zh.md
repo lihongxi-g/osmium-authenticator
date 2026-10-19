@@ -2,7 +2,7 @@
 
 Osmium 是一款隐私优先的 Android TOTP/HOTP 验证器。本项目基于 GNU GPL v3 或更高版本发布。验证码在设备本地计算；账户数据使用 Android Keystore 中的不可导出密钥加密后才落盘。应用无需注册账号、不收集遥测。
 
-应用每次打开时会从官网 osmium.im 获取最新的用户协议与隐私政策（不发送任何用户数据）；除此之外，网络功能均为可选：用户配置的 WebDAV 备份、GitHub 更新检查，以及用户主动发起的两台设备局域网快捷传输。点击 GitHub、验证实验室等外部链接时，流量由系统浏览器或其他应用处理。
+应用在你打开「设置 → 关于 → 用户协议 / 隐私政策」时才从官网 osmium.im 获取最新版本（不发送任何用户数据）；除此之外，网络功能均为可选：用户配置的 WebDAV 备份、GitHub 更新检查，以及用户主动发起的两台设备局域网快捷传输。点击 GitHub、验证实验室等外部链接时，流量由系统浏览器或其他应用处理。
 
 ## 功能
 
@@ -24,7 +24,7 @@ Osmium 是一款隐私优先的 Android TOTP/HOTP 验证器。本项目基于 GN
 - **开发者模式（默认隐藏；英文 / 简体中文）**——在「关于」页连点标题 7 次并通过身份验证后开启。提供设备完整性检测报告与详细检测日志、KeyStore 加密状态、解除 Root 安全限制、明文导出 / 明文导入、强制重新加密数据库、隐藏设置项、支持 4/5/7 位验证码；危险操作需身份验证 + 免责声明 + 逐字确认短语
 - **时钟校准**——设备时间漂移时手动补偿 TOTP 时钟
 - **10 种语言**——English、简体中文、繁體中文、Español、日本語、한국어、Deutsch、Русский、Français、हिन्दी
-- **内置使用手册**（离线可用）；**用户协议与隐私政策**每次打开应用时从官网获取最新版（获取失败时给出官网链接）
+- **内置使用手册**（离线可用）；**用户协议与隐私政策**在你在「关于」里打开时才从官网获取最新版（获取失败时给出官网链接）
 
 ## ⚠ Steam Guard 使用前必读
 
@@ -36,24 +36,24 @@ Osmium 是一款隐私优先的 Android TOTP/HOTP 验证器。本项目基于 GN
 
 ## 下载
 
-最新正式版：**Osmium v2.5.4**（versionCode 651–653，按架构）。请选择与设备匹配的架构：
+最新正式版：**Osmium v2.5.6**（versionCode 691–693，按架构：691 = armeabi-v7a、692 = arm64-v8a、693 = x86_64）。请选择与设备匹配的架构：
 
 | 文件 | 架构 | 适用设备 | 下载 |
 |---|---|---|---|
-| `osmium-2.5.4-arm64-v8a.apk` | arm64-v8a | 几乎所有现代手机（推荐） | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.5.4/osmium-2.5.4-arm64-v8a.apk) |
-| `osmium-2.5.4-armeabi-v7a.apk` | armeabi-v7a | 老款 32 位手机 | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.5.4/osmium-2.5.4-armeabi-v7a.apk) |
-| `osmium-2.5.4-x86_64.apk` | x86_64 | Android 模拟器 | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.5.4/osmium-2.5.4-x86_64.apk) |
+| `osmium-2.5.6-arm64-v8a.apk` | arm64-v8a | 几乎所有现代手机（推荐） | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.5.6/osmium-2.5.6-arm64-v8a.apk) |
+| `osmium-2.5.6-armeabi-v7a.apk` | armeabi-v7a | 老款 32 位手机 | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.5.6/osmium-2.5.6-armeabi-v7a.apk) |
+| `osmium-2.5.6-x86_64.apk` | x86_64 | Android 模拟器 | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.5.6/osmium-2.5.6-x86_64.apk) |
 
 安装与设备架构不符的包可能无法启动。三个架构使用同一签名证书，SHA-256 指纹为：`B65BB0131CAA22C45D99EA4E2C3E99B3980EAE0DC5647190F41A2878E6D88412`。
 
-APK 的 SHA-256 校验和见 [v2.5.4 发布说明](release-notes-v2.5.4.md) 及 GitHub Release 页面。
+APK 的 SHA-256 校验和见 [v2.5.6 发布说明](release-notes-v2.5.6.md) 及 Release 页面的 `SHA256SUMS.txt`。
 
 ## 隐私与条款
 
 - [隐私政策](PRIVACY-zh.md)（[English](PRIVACY.md)）——官网版：[osmium.im/privacypolicy](https://osmium.im/privacypolicy/)
 - [用户协议](TERMS-zh.md)（[English](TERMS.md)）——官网版：[osmium.im/useragreement](https://osmium.im/useragreement/)
 
-应用内 设置 → 关于 展示的就是官网最新版（每次打开应用时自动获取）。局域网传输和 WebDAV 备份均由用户主动操作触发；局域网传输使用配对码派生的端到端加密，不经过 Osmium 服务器。
+应用内 设置 → 关于 展示的就是官网最新版（打开协议 / 隐私页时才去获取）。局域网传输和 WebDAV 备份均由用户主动操作触发；局域网传输使用配对码派生的端到端加密，不经过 Osmium 服务器。
 
 ## WebDAV 备份教程
 
@@ -70,7 +70,7 @@ APK 的 SHA-256 校验和见 [v2.5.4 发布说明](release-notes-v2.5.4.md) 及 
 ./gradlew testDebugUnitTest
 ```
 
-Release 构建启用 R8 并按 ABI 分包。构建环境：Kotlin 1.9、Jetpack Compose BOM 2024.09.03、`compileSdk 35`、`minSdk 26`、`targetSdk 34`。GitHub Actions 会运行单元测试并构建 Release APK；正式发布资产固定命名为 `osmium-版本号-架构.apk`。
+Release 构建启用 R8 并按 ABI 分包。构建环境：Gradle 9.3.1、AGP 9.1.1、Kotlin 2.2.10、Jetpack Compose BOM 2024.09.03、`compileSdk 37`、`minSdk 26`、`targetSdk 37`。GitHub Actions 会运行单元测试并构建 Release APK；正式发布资产固定命名为 `osmium-版本号-架构.apk`。
 
 ## 内置组件
 

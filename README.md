@@ -2,7 +2,7 @@
 
 Osmium is a privacy-first Android TOTP/HOTP authenticator, released under the GNU GPL v3 or later. Codes are computed on-device; account data is encrypted before it is written using a non-exportable Android Keystore key. No account is required and no telemetry is collected.
 
-The app itself fetches the latest Terms of Use and Privacy Policy from osmium.im each time it opens, so you always see the current versions (no user data is sent). All other network features are optional: user-configured WebDAV backup, GitHub update checks, and user-initiated encrypted transfer between two devices on the same Wi-Fi network. External links such as GitHub and the verification lab are opened by the system browser or another app.
+The app itself fetches the Terms of Use and Privacy Policy from osmium.im when you open them (Settings → About), so you always see the current versions (no user data is sent). All other network features are optional: user-configured WebDAV backup, GitHub update checks, and user-initiated encrypted transfer between two devices on the same Wi-Fi network. External links such as GitHub and the verification lab are opened by the system browser or another app.
 
 ## Features
 
@@ -24,7 +24,7 @@ The app itself fetches the latest Terms of Use and Privacy Policy from osmium.im
 - **Developer mode (hidden; English / Simplified Chinese)** — unlock by tapping the About title seven times and passing verification. Adds the integrity report with a detailed inspection log, Keystore encryption status, lifting root restrictions, plaintext export/import, forced re-encryption of the local database, hiding Settings entries, and 4/5/7-digit codes; dangerous actions require verification, a disclaimer and a typed confirmation phrase
 - **Clock calibration** — manually compensate for device-clock drift
 - **10 languages** — English, 简体中文, 繁體中文, Español, 日本語, 한국어, Deutsch, Русский, Français, हिन्दी
-- **Built-in manual** — available offline; the **Terms of Use and Privacy Policy** are fetched from osmium.im each time the app opens (a website link is shown when they can't be fetched)
+- **Built-in manual** — available offline; the **Terms of Use and Privacy Policy** are fetched from osmium.im when you open them in About (a website link is shown when they can't be fetched)
 
 ## ⚠ Steam Guard — read this first
 
@@ -36,24 +36,24 @@ The live test page at **https://otp.osmium.im** supports TOTP, HOTP and Steam Gu
 
 ## Download
 
-Latest stable release: **Osmium v2.5.4** (`versionCode 651-653, per ABI`). Choose the ABI matching your device:
+Latest stable release: **Osmium v2.5.6** (`versionCode 691-693, per ABI`: 691 = armeabi-v7a, 692 = arm64-v8a, 693 = x86_64). Choose the ABI matching your device:
 
 | File | Architecture | Devices | Download |
 |---|---|---|---|
-| `osmium-2.5.4-arm64-v8a.apk` | arm64-v8a | Virtually all modern phones (recommended) | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.5.4/osmium-2.5.4-arm64-v8a.apk) |
-| `osmium-2.5.4-armeabi-v7a.apk` | armeabi-v7a | Older 32-bit phones | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.5.4/osmium-2.5.4-armeabi-v7a.apk) |
-| `osmium-2.5.4-x86_64.apk` | x86_64 | Android emulators | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.5.4/osmium-2.5.4-x86_64.apk) |
+| `osmium-2.5.6-arm64-v8a.apk` | arm64-v8a | Virtually all modern phones (recommended) | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.5.6/osmium-2.5.6-arm64-v8a.apk) |
+| `osmium-2.5.6-armeabi-v7a.apk` | armeabi-v7a | Older 32-bit phones | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.5.6/osmium-2.5.6-armeabi-v7a.apk) |
+| `osmium-2.5.6-x86_64.apk` | x86_64 | Android emulators | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.5.6/osmium-2.5.6-x86_64.apk) |
 
 Installing an incompatible ABI may prevent the app from starting. All three APKs use the same signing certificate, SHA-256 fingerprint: `B65BB0131CAA22C45D99EA4E2C3E99B3980EAE0DC5647190F41A2878E6D88412`.
 
-APK SHA-256 checksums are listed in the [v2.5.4 release notes](release-notes-v2.5.4.md) and on the GitHub Release page.
+APK SHA-256 checksums are listed in the [v2.5.6 release notes](release-notes-v2.5.6.md) and in `SHA256SUMS.txt` on the GitHub Release page.
 
 ## Privacy & Terms
 
 - [Privacy Policy](PRIVACY.md) ([中文](PRIVACY-zh.md)) — also on the website: [osmium.im/privacypolicy](https://osmium.im/privacypolicy/)
 - [Terms of Use](TERMS.md) ([中文](TERMS-zh.md)) — also on the website: [osmium.im/useragreement](https://osmium.im/useragreement/)
 
-The app shows the current version under Settings → About; it fetches both documents from the website each time it opens. LAN transfer and WebDAV backup are user-initiated; LAN transfer uses pairing-code-derived end-to-end encryption and does not pass through an Osmium server.
+The app shows the current version under Settings → About; it fetches each document from the website when you open it in About. LAN transfer and WebDAV backup are user-initiated; LAN transfer uses pairing-code-derived end-to-end encryption and does not pass through an Osmium server.
 
 ## WebDAV backup guide
 
@@ -70,7 +70,7 @@ Automatic backups run through the Android system scheduler. The app wakes briefl
 ./gradlew testDebugUnitTest
 ```
 
-Release builds are minified with R8 and split by ABI. Build environment: Kotlin 1.9, Jetpack Compose BOM 2024.09.03, `compileSdk 35`, `minSdk 26`, `targetSdk 34`. GitHub Actions runs unit tests and builds Release APKs. Official release assets always use the format `osmium-version-architecture.apk`.
+Release builds are minified with R8 and split by ABI. Build environment: Gradle 9.3.1, AGP 9.1.1, Kotlin 2.2.10, Jetpack Compose BOM 2024.09.03, `compileSdk 37`, `minSdk 26`, `targetSdk 37`. GitHub Actions runs unit tests and builds Release APKs. Official release assets always use the format `osmium-version-architecture.apk`.
 
 ## Embedded components
 
