@@ -36,17 +36,17 @@ The live test page at **https://otp.osmium.im** supports TOTP, HOTP and Steam Gu
 
 ## Download
 
-Latest stable release: **Osmium v2.5.6** (`versionCode 691-693, per ABI`: 691 = armeabi-v7a, 692 = arm64-v8a, 693 = x86_64). Choose the ABI matching your device:
+Latest stable release: **Osmium v2.5.7** (`versionCode 701-703, per ABI`: 701 = armeabi-v7a, 702 = arm64-v8a, 703 = x86_64). Choose the ABI matching your device:
 
 | File | Architecture | Devices | Download |
 |---|---|---|---|
-| `osmium-2.5.6-arm64-v8a.apk` | arm64-v8a | Virtually all modern phones (recommended) | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.5.6/osmium-2.5.6-arm64-v8a.apk) |
-| `osmium-2.5.6-armeabi-v7a.apk` | armeabi-v7a | Older 32-bit phones | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.5.6/osmium-2.5.6-armeabi-v7a.apk) |
-| `osmium-2.5.6-x86_64.apk` | x86_64 | Android emulators | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.5.6/osmium-2.5.6-x86_64.apk) |
+| `osmium-2.5.7-arm64-v8a.apk` | arm64-v8a | Virtually all modern phones (recommended) | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.5.7/osmium-2.5.7-arm64-v8a.apk) |
+| `osmium-2.5.7-armeabi-v7a.apk` | armeabi-v7a | Older 32-bit phones | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.5.7/osmium-2.5.7-armeabi-v7a.apk) |
+| `osmium-2.5.7-x86_64.apk` | x86_64 | Android emulators | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.5.7/osmium-2.5.7-x86_64.apk) |
 
 Installing an incompatible ABI may prevent the app from starting. All three APKs use the same signing certificate, SHA-256 fingerprint: `B65BB0131CAA22C45D99EA4E2C3E99B3980EAE0DC5647190F41A2878E6D88412`.
 
-APK SHA-256 checksums are listed in the [v2.5.6 release notes](release-notes-v2.5.6.md) and in `SHA256SUMS.txt` on the GitHub Release page.
+APK SHA-256 checksums are listed in the [v2.5.7 release notes](release-notes-v2.5.7.md) and in `SHA256SUMS.txt` on the GitHub Release page.
 
 ## Privacy & Terms
 
@@ -61,7 +61,7 @@ Step-by-step setup for WebDAV servers: [WEBDAV-GUIDE.md](WEBDAV-GUIDE.md) ([ф╕нц
 
 ## Battery & background behavior
 
-Automatic backups run through the Android system scheduler. The app wakes briefly for a backup and keeps no persistent background service. Device power policies may defer or block scheduled work; follow the guidance in the README and the in-app Auto backup page.
+Scheduled backups use the Android system scheduler: the app wakes briefly for a backup and keeps no persistent background service. Device power policies may defer or block scheduled work, so an overdue backup is also run when you open the app, and "Back up now" runs immediately inside the app and reports its result. See the in-app Auto backup page for the permission guidance.
 
 ## Building
 

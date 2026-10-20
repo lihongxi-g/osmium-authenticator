@@ -1,0 +1,1 @@
+v2.5.7: automatic backup now runs immediately and reports its result — the saved file name, or the exact reason it failed.
