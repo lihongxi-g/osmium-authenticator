@@ -391,6 +391,11 @@
     <string name="auto_backup_tz_label">(%1$s)</string>
     <string name="auto_backup_run_now">Copiar ahora</string>
     <string name="auto_backup_started">Copia iniciada</string>
+    <string name="auto_backup_running">Copia en curso…</string>
+    <string name="auto_backup_saved_local">Guardado en Download/Osmium: %1$s</string>
+    <string name="auto_backup_saved_webdav">Subido a %1$s: %2$s</string>
+    <string name="auto_backup_failed_toast">Error en la copia: %1$s</string>
+    <string name="auto_backup_skipped_toast">Copia no realizada: %1$s</string>
     <string name="auto_backup_local_dir_desc">Archivos guardados en: Download/Osmium</string>
     <string name="auto_backup_local_permission_desc">Esta versión de Android necesita permiso de almacenamiento — pulsa para conceder</string>
     <string name="auto_backup_webdav_missing">No hay servidor WebDAV configurado — configúralo primero</string>

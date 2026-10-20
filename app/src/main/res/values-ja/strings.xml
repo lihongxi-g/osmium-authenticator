@@ -391,6 +391,11 @@
     <string name="auto_backup_tz_label">(%1$s)</string>
     <string name="auto_backup_run_now">今すぐバックアップ</string>
     <string name="auto_backup_started">バックアップを開始しました</string>
+    <string name="auto_backup_running">バックアップ中…</string>
+    <string name="auto_backup_saved_local">ダウンロード/Osmium に保存しました：%1$s</string>
+    <string name="auto_backup_saved_webdav">%1$s にアップロードしました：%2$s</string>
+    <string name="auto_backup_failed_toast">バックアップに失敗しました：%1$s</string>
+    <string name="auto_backup_skipped_toast">バックアップは実行されませんでした：%1$s</string>
     <string name="auto_backup_local_dir_desc">保存先：ダウンロード/Osmium</string>
     <string name="auto_backup_local_permission_desc">このAndroidバージョンでは保存先への書き込みに権限が必要です——タップして許可</string>
     <string name="auto_backup_webdav_missing">WebDAVサーバーが未設定です。先に設定してください</string>

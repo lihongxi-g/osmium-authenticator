@@ -63,12 +63,19 @@ class Release256FeaturesTest(unittest.TestCase):
                 )
 
     def test_version_and_ci_guard_agree(self):
+        """build.gradle.kts and the CI release tripwire must name one version.
+
+        The tripwire lives in the workflow; deriving it here means a version
+        bump touches two files instead of three, and a half-done bump still
+        fails loudly.
+        """
         gradle = (ROOT / "app/build.gradle.kts").read_text()
         version = re.search(r'versionName\s*=\s*"([^"]+)"', gradle)
         assert version is not None
-        self.assertEqual("2.5.6", version.group(1))
         workflow = (ROOT / ".github/workflows/build.yml").read_text()
-        self.assertRegex(workflow, r'test\s+"\$version"\s*=\s*"2\.5\.6"')
+        pinned = re.search(r'test\s+"\$version"\s*=\s*"([^"]+)"', workflow)
+        assert pinned is not None, "the CI version tripwire is missing"
+        self.assertEqual(pinned.group(1), version.group(1))
 
 
 if __name__ == "__main__":

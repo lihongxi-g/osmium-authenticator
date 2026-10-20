@@ -406,6 +406,11 @@
     <string name="auto_backup_tz_label">（%1$s）</string>
     <string name="auto_backup_run_now">立即備份</string>
     <string name="auto_backup_started">備份已開始</string>
+    <string name="auto_backup_running">備份中…</string>
+    <string name="auto_backup_saved_local">已儲存到 下載/Osmium：%1$s</string>
+    <string name="auto_backup_saved_webdav">已上傳到 %1$s：%2$s</string>
+    <string name="auto_backup_failed_toast">備份失敗：%1$s</string>
+    <string name="auto_backup_skipped_toast">備份未執行：%1$s</string>
     <string name="auto_backup_local_dir_desc">備份檔案儲存在：下載/Osmium 目錄</string>
     <string name="auto_backup_local_permission_desc">此 Android 版本需儲存權限才能寫入此目錄，輕觸授權</string>
     <string name="auto_backup_webdav_missing">尚未配置 WebDAV 伺服器，請先完成配置</string>

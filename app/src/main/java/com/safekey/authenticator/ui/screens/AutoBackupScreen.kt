@@ -52,6 +52,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.safekey.authenticator.MainViewModel
 import com.safekey.authenticator.R
+import com.safekey.authenticator.backup.AutoBackupRunner
 import com.safekey.authenticator.backup.AutoBackupScheduler
 import com.safekey.authenticator.data.AppSettings
 import com.safekey.authenticator.network.LocalNetworkAccess
@@ -90,6 +91,8 @@ fun AutoBackupScreen(
     val context = LocalContext.current
     val settings by vm.settings.collectAsState()
     val webDavConfig by vm.webDavConfig.collectAsState()
+    val backupRunning by vm.autoBackupRunning.collectAsState()
+    val backupOutcome by vm.autoBackupOutcome.collectAsState()
     val scope = rememberCoroutineScope()
     val requestLocalNetwork = rememberLocalNetworkPermissionRequest {
         vm.showToast(LocalNetworkAccess.deniedMessage(context))
@@ -201,15 +204,46 @@ fun AutoBackupScreen(
             vm.setAutoBackupTarget(AppSettings.AUTO_BACKUP_TARGET_LOCAL)
             vm.showToast(context.getString(R.string.auto_backup_fallback_local))
         }
-        val start = {
-            AutoBackupScheduler.runNow(context)
-            vm.showToast(context.getString(R.string.auto_backup_started))
-        }
+        if (backupRunning) return
+        // Runs the backup in this process (not through WorkManager): the
+        // outcome — file name on success, the real reason on failure — comes
+        // back to the screen instead of vanishing into a scheduler queue.
+        val start = { vm.runAutoBackupNow() }
         if (settings.autoBackupTarget == AppSettings.AUTO_BACKUP_TARGET_WEBDAV && webDavConfig != null) {
             withWebDavPermission(start)
         } else {
             start()
         }
+    }
+
+    /** Human-readable label for a skip/error code recorded by the runner. */
+    fun reasonLabel(reason: String): String = when (reason) {
+        "NO_PASSWORD" -> context.getString(R.string.auto_backup_password_missing)
+        "NO_SERVER" -> context.getString(R.string.auto_backup_webdav_not_configured)
+        "LOCAL_NETWORK_PERMISSION" ->
+            context.getString(R.string.local_network_permission_desc)
+        else -> reason
+    }
+
+    fun outcomeText(outcome: AutoBackupRunner.Outcome): String = when (outcome) {
+        is AutoBackupRunner.Outcome.Success ->
+            if (outcome.serverUrl == null) {
+                context.getString(R.string.auto_backup_saved_local, outcome.fileName)
+            } else {
+                context.getString(
+                    R.string.auto_backup_saved_webdav, outcome.serverUrl, outcome.fileName
+                )
+            }
+        is AutoBackupRunner.Outcome.Skipped ->
+            context.getString(R.string.auto_backup_skipped_toast, reasonLabel(outcome.reason))
+        is AutoBackupRunner.Outcome.Failed ->
+            context.getString(R.string.auto_backup_failed_toast, outcome.reason)
+    }
+
+    // Announce the finished run once — the screen may already be gone, so the
+    // toast (app-level, shown by MainActivity) is the reliable channel.
+    LaunchedEffect(backupOutcome) {
+        backupOutcome?.let { vm.showToast(outcomeText(it)) }
     }
 
     fun formatWithTz(millis: Long): String {
@@ -490,11 +524,27 @@ fun AutoBackupScreen(
                 }
                 Button(
                     onClick = { onRunNow() },
+                    enabled = !backupRunning,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
-                    Text(stringResource(R.string.auto_backup_run_now))
+                    Text(
+                        if (backupRunning) stringResource(R.string.auto_backup_running)
+                        else stringResource(R.string.auto_backup_run_now)
+                    )
+                }
+                // Result of the run that was started from this screen: the toast
+                // is transient, this line stays until the next run.
+                backupOutcome?.let { outcome ->
+                    Text(
+                        text = outcomeText(outcome),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (outcome is AutoBackupRunner.Outcome.Success)
+                            MaterialTheme.colorScheme.tertiary
+                        else MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 2.dp)
+                    )
                 }
             }
         }

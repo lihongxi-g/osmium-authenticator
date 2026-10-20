@@ -1,10 +1,8 @@
 package com.safekey.authenticator.backup
 
 import android.content.Context
-import android.os.Build
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkManager
 import com.safekey.authenticator.data.AppSettings
 import java.time.Instant
@@ -106,38 +104,18 @@ object AutoBackupScheduler {
         wm.enqueueUniqueWork(WORK_NAME, ExistingWorkPolicy.KEEP, request)
     }
 
-    /** Trigger a backup right now (the worker re-schedules the next run). */
-    fun runNow(context: Context) {
-        val builder = OneTimeWorkRequestBuilder<AutoBackupWorker>()
-        if (Build.VERSION.SDK_INT >= 31) {
-            // Expedited on Android 8–11 runs as a foreground service and
-            // REQUIRES the worker to implement getForegroundInfo() — without
-            // it the work fails with IllegalStateException. Gate expedited to
-            // Android 12+; older devices run a plain (still immediate) work
-            // request, which is fine because runNow only fires while the app
-            // is in the foreground anyway.
-            builder.setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-        }
-        WorkManager.getInstance(context).enqueueUniqueWork(
-            WORK_NAME,
-            ExistingWorkPolicy.REPLACE,
-            builder.build()
-        )
-    }
-
     /**
-     * Catch-up for frozen schedules: when the last successful run is older
-     * than the configured interval, OEM battery policies have been blocking
-     * the scheduled job — run one now. Never fires when no run has happened
-     * yet (the pending scheduled job still handles the first run).
+     * True when the schedule is overdue by more than one interval: the system
+     * scheduler let it freeze (OEM battery policies), or WorkManager never
+     * executed the pending job. The caller then runs the backup in-process
+     * instead of waiting for the system to get around to it.
+     *
+     * Never true when no run has happened yet — the pending scheduled job
+     * still handles the first run. Pure function, unit-tested.
      */
-    fun maybeCatchUp(context: Context, settings: AppSettings) {
-        if (!settings.autoBackupEnabled) return
-        val last = settings.autoBackupLastTime
-        if (last <= 0L) return
-        val intervalMs = settings.autoBackupIntervalDays * 24L * 3600_000L
-        if (System.currentTimeMillis() - last > intervalMs) {
-            runNow(context)
-        }
+    fun isDue(now: Long, lastRun: Long, intervalDays: Int): Boolean {
+        if (lastRun <= 0L) return false
+        val intervalMs = intervalDays.coerceAtLeast(1) * 24L * 3600_000L
+        return now - lastRun > intervalMs
     }
 }

@@ -35,7 +35,20 @@ class Android17MigrationTest(unittest.TestCase):
         self.assertNotIn("private const val ANDROID_LOCAL_NETWORK_PERMISSION", screen)
 
     def test_webdav_and_worker_check_permission(self):
-        for path in ("ui/screens/WebDavScreen.kt", "backup/AutoBackupWorker.kt"):
+        # The unattended backup pipeline (worker + inline "back up now") lives
+        # in AutoBackupRunner; the LAN gate must be checked there before any
+        # upload leaves the device.
+        for path in (
+            "ui/screens/WebDavScreen.kt",
+            "backup/AutoBackupRunner.kt",
+            "backup/AutoBackupWorker.kt",
+        ):
+            if path.endswith("AutoBackupWorker.kt"):
+                # The worker delegates to the runner instead of duplicating it.
+                self.assertIn(
+                    "AutoBackupRunner.runAndRecord", (SRC / path).read_text(), path
+                )
+                continue
             self.assertIn("LocalNetworkAccess.checkWebDav", (SRC / path).read_text(), path)
 
     def test_ci_installs_api37(self):

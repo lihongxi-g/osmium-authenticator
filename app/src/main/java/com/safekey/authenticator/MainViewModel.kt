@@ -3,6 +3,8 @@ package com.safekey.authenticator
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.safekey.authenticator.backup.AutoBackupRunner
+import com.safekey.authenticator.backup.AutoBackupScheduler
 import com.safekey.authenticator.data.AppSettings
 import com.safekey.authenticator.data.WebDavServerConfig
 import com.safekey.authenticator.integrity.IntegrityLevel
@@ -767,6 +769,63 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     fun setAutoBackupTime(hour: Int, minute: Int) = viewModelScope.launch { settingsRepo.setAutoBackupTime(hour, minute) }
     fun setAutoBackupPassword(password: String) = viewModelScope.launch { settingsRepo.setAutoBackupPassword(password) }
     fun setAutoBackupKeepCount(count: Int) = viewModelScope.launch { settingsRepo.setAutoBackupKeepCount(count) }
+
+    // ------------------------------------------------------- auto backup runs
+
+    private val _autoBackupRunning = MutableStateFlow(false)
+    val autoBackupRunning: StateFlow<Boolean> = _autoBackupRunning
+
+    /** Outcome of the last "back up now", for the inline result and the toast. */
+    private val _autoBackupOutcome = MutableStateFlow<AutoBackupRunner.Outcome?>(null)
+    val autoBackupOutcome: StateFlow<AutoBackupRunner.Outcome?> = _autoBackupOutcome
+
+    /**
+     * Back up immediately, in-process. Deliberately not routed through
+     * WorkManager any more: a scheduled job the system never got around to
+     * looked exactly like a backup that failed silently — the user tapped the
+     * button, saw "backup started" and nothing ever happened. Running the same
+     * [AutoBackupRunner] here reports the real outcome, good or bad.
+     */
+    fun runAutoBackupNow() {
+        if (_autoBackupRunning.value) return
+        viewModelScope.launch {
+            _autoBackupRunning.value = true
+            _autoBackupOutcome.value = null
+            try {
+                _autoBackupOutcome.value =
+                    withContext(Dispatchers.IO) { AutoBackupRunner.runAndRecord(safeKeyApp) }
+            } finally {
+                _autoBackupRunning.value = false
+            }
+        }
+    }
+
+    /**
+     * Catch-up for a frozen schedule: when the last run is overdue by more
+     * than the interval, run one now instead of waiting for the system.
+     */
+    fun catchUpAutoBackupIfDue() {
+        val s = settings.value
+        if (!s.autoBackupEnabled) return
+        if (!AutoBackupScheduler.isDue(
+                System.currentTimeMillis(), s.autoBackupLastTime, s.autoBackupIntervalDays
+            )
+        ) {
+            return
+        }
+        if (_autoBackupRunning.value) return
+        AppLog.d("auto-backup catch-up: schedule overdue, running in-process")
+        viewModelScope.launch {
+            _autoBackupRunning.value = true
+            try {
+                val outcome =
+                    withContext(Dispatchers.IO) { AutoBackupRunner.runAndRecord(safeKeyApp) }
+                AppLog.d("auto-backup catch-up: ${AutoBackupRunner.errorCode(outcome).ifEmpty { "OK" }}")
+            } finally {
+                _autoBackupRunning.value = false
+            }
+        }
+    }
 
     suspend fun setAppPin(pin: String) {
         withContext(Dispatchers.Default) { pinManager.setPin(pin) }

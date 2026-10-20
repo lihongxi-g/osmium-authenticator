@@ -2,6 +2,7 @@ package com.safekey.authenticator.backup
 
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -161,5 +162,45 @@ class AutoBackupSchedulerTest {
         } finally {
             Locale.setDefault(previous)
         }
+    }
+
+    // ---------------------------------------------------- catch-up (isDue)
+
+    private val day = 24L * 3600_000L
+
+    @Test
+    fun neverRunIsNeverDue() {
+        // The pending scheduled job still handles the first run.
+        assertFalse(AutoBackupScheduler.isDue(at(2026, 8, 16, 3, 0), 0L, 1))
+        assertFalse(AutoBackupScheduler.isDue(at(2026, 8, 16, 3, 0), -1L, 1))
+    }
+
+    @Test
+    fun aRunInsideTheIntervalIsNotDue() {
+        val last = at(2026, 8, 16, 3, 0)
+        assertFalse(AutoBackupScheduler.isDue(last + day / 2, last, 1))
+        // Exactly on the boundary is still on time (strictly greater).
+        assertFalse(AutoBackupScheduler.isDue(last + day, last, 1))
+    }
+
+    @Test
+    fun anOverdueRunIsDue() {
+        val last = at(2026, 8, 16, 3, 0)
+        assertTrue(AutoBackupScheduler.isDue(last + day + 1, last, 1))
+        assertTrue(AutoBackupScheduler.isDue(last + 5 * day, last, 4))
+    }
+
+    @Test
+    fun intervalIsClampedToOneDay() {
+        // A stored 0 must not make every launch look overdue.
+        val last = at(2026, 8, 16, 3, 0)
+        assertFalse(AutoBackupScheduler.isDue(last + day / 2, last, 0))
+        assertTrue(AutoBackupScheduler.isDue(last + day + 1, last, 0))
+    }
+
+    @Test
+    fun aClockSkewedIntoTheFutureIsNotDue() {
+        val last = at(2026, 8, 16, 3, 0)
+        assertFalse(AutoBackupScheduler.isDue(last - day, last, 1))
     }
 }

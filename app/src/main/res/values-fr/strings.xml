@@ -391,6 +391,11 @@
     <string name="auto_backup_tz_label">(%1$s)</string>
     <string name="auto_backup_run_now">Sauvegarder maintenant</string>
     <string name="auto_backup_started">Sauvegarde lancée</string>
+    <string name="auto_backup_running">Sauvegarde en cours…</string>
+    <string name="auto_backup_saved_local">Enregistré dans Téléchargement/Osmium : %1$s</string>
+    <string name="auto_backup_saved_webdav">Téléversé vers %1$s : %2$s</string>
+    <string name="auto_backup_failed_toast">Échec de la sauvegarde : %1$s</string>
+    <string name="auto_backup_skipped_toast">Sauvegarde non effectuée : %1$s</string>
     <string name="auto_backup_local_dir_desc">Fichiers enregistrés dans : Téléchargement/Osmium</string>
     <string name="auto_backup_local_permission_desc">Cette version d’Android nécessite une autorisation de stockage — appuyez pour l’accorder</string>
     <string name="auto_backup_webdav_missing">Aucun serveur WebDAV configuré — configurez-en un d’abord</string>

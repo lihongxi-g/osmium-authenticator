@@ -391,6 +391,11 @@
     <string name="auto_backup_tz_label">(%1$s)</string>
     <string name="auto_backup_run_now">अभी बैकअप करें</string>
     <string name="auto_backup_started">बैकअप शुरू हुआ</string>
+    <string name="auto_backup_running">बैकअप जारी है…</string>
+    <string name="auto_backup_saved_local">Download/Osmium में सहेजा गया: %1$s</string>
+    <string name="auto_backup_saved_webdav">%1$s पर अपलोड किया गया: %2$s</string>
+    <string name="auto_backup_failed_toast">बैकअप विफल: %1$s</string>
+    <string name="auto_backup_skipped_toast">बैकअप नहीं चलाया गया: %1$s</string>
     <string name="auto_backup_local_dir_desc">फ़ाइलें यहाँ सहेजी जाती हैं: Download/Osmium</string>
     <string name="auto_backup_local_permission_desc">इस Android संस्करण को स्टोरेज अनुमति चाहिए — देने के लिए टैप करें</string>
     <string name="auto_backup_webdav_missing">कोई WebDAV सर्वर सेट नहीं है — पहले इसे सेट करें</string>

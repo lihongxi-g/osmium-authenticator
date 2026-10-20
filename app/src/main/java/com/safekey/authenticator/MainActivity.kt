@@ -319,9 +319,9 @@ class MainActivity : FragmentActivity() {
                 if (settings.autoBackupEnabled && !destroyed) {
                     AutoBackupScheduler.ensureScheduled(this@MainActivity, settings)
                     // If a scheduled run was frozen overnight (OEM battery
-                    // policies), run one now instead of waiting for the
-                    // system to get around to the overdue job.
-                    AutoBackupScheduler.maybeCatchUp(this@MainActivity, settings)
+                    // policies) or the system scheduler never executed it, run
+                    // one now in-process instead of waiting for the system.
+                    vm.catchUpAutoBackupIfDue()
                 }
             }
         }
