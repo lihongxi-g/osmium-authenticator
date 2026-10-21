@@ -39,6 +39,7 @@ import com.safekey.authenticator.notify.BackupNotifier
 import com.safekey.authenticator.ui.components.AppIcons
 import com.safekey.authenticator.ui.components.SettingRow
 import com.safekey.authenticator.ui.components.SimpleTopBar
+import com.safekey.authenticator.ui.theme.successContentColor
 
 /**
  * Every permission and special access Osmium can ask for, in one place.
@@ -114,7 +115,10 @@ fun PermissionsScreen(onBack: () -> Unit) {
                     PermissionState.DENIED -> stringResource(R.string.permission_denied)
                 }
                 val statusColor = when (item.state) {
-                    PermissionState.GRANTED -> MaterialTheme.colorScheme.tertiary
+                    // Fixed green, not `tertiary`: under Dynamic Color tertiary
+                    // follows the wallpaper and turned yellow, which made a
+                    // granted permission look like a warning.
+                    PermissionState.GRANTED -> successContentColor()
                     PermissionState.NOT_NEEDED -> MaterialTheme.colorScheme.onSurfaceVariant
                     PermissionState.DENIED -> MaterialTheme.colorScheme.error
                 }

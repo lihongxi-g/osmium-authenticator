@@ -26,7 +26,6 @@ import com.safekey.authenticator.tags.TagFilter
 import com.safekey.authenticator.totp.Base32
 import com.safekey.authenticator.totp.TotpGenerator
 import com.safekey.authenticator.ui.navigation.NavigationState
-import com.safekey.authenticator.ui.navigation.Screen
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -771,17 +770,6 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     fun setAutoBackupPassword(password: String) = viewModelScope.launch { settingsRepo.setAutoBackupPassword(password) }
     fun setAutoBackupKeepCount(count: Int) = viewModelScope.launch { settingsRepo.setAutoBackupKeepCount(count) }
     fun setAutoBackupNotify(enabled: Boolean) = viewModelScope.launch { settingsRepo.setAutoBackupNotify(enabled) }
-
-    /**
-     * Screen requested from outside the UI (a notification tap). MainActivity
-     * navigates to it once its own gate — biometric or PIN — has been passed,
-     * so a notification can never skip authentication.
-     */
-    private val _pendingScreen = MutableStateFlow<Screen?>(null)
-    val pendingScreen: StateFlow<Screen?> = _pendingScreen
-
-    fun requestScreen(screen: Screen) { _pendingScreen.value = screen }
-    fun consumePendingScreen() { _pendingScreen.value = null }
 
     // ------------------------------------------------------- auto backup runs
 

@@ -9,6 +9,7 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
 import com.safekey.authenticator.data.AppSettings
 
@@ -59,3 +60,18 @@ fun SafeKeyTheme(
         content = content
     )
 }
+
+// Fixed "yes, this is granted / allowed" green.
+//
+// Deliberately NOT a theme role: `tertiary` follows the wallpaper under Dynamic
+// Color, and on Android 12+ that came out yellow-olive on the user's device, so
+// a granted permission read as a warning. Fixed tones keep "ok" green in every
+// theme, light or dark.
+private val SuccessOnLight = Color(0xFF1B6B33)
+private val SuccessOnDark = Color(0xFF7DD495)
+
+/** Green for positive status text; picks the tone that reads on this theme. */
+@Composable
+fun successContentColor(): Color =
+    if (MaterialTheme.colorScheme.background.luminance() < 0.5f) SuccessOnDark
+    else SuccessOnLight

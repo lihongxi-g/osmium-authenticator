@@ -194,18 +194,15 @@ class MainActivity : FragmentActivity() {
                     pinReminderVisible = true
                 }
             }
-            // Notification tap → the auto-backup page, but only after the app's
-            // own gate has been passed: the gate replaces the whole nav host, so
-            // navigating while locked would just be overwritten, and skipping it
-            // would defeat the point.
-            val pendingScreen by vm.pendingScreen.collectAsState()
-            LaunchedEffect(pendingScreen, locked, pinRequired, destroyed, tamperBlocked) {
-                val target = pendingScreen
-                if (target != null && !locked && !pinRequired && !destroyed && !tamperBlocked) {
-                    vm.consumePendingScreen()
-                    vm.nav.push(target)
-                }
-            }
+            // A screen requested by a notification tap is pushed onto the nav
+            // stack in onCreate/onNewIntent (see handleIntentScreen), i.e. before
+            // any composition. Navigating from a LaunchedEffect that watched the
+            // lock state crashed here: the effect fired in the same frame the
+            // gate handed over to the nav host, so the brand-new AnimatedContent
+            // saw its target change right after its first composition — the
+            // pattern behind the composer group-stack underflow this app already
+            // hit on Compose 1.6. Pushing first means the first composition
+            // starts on the requested screen, with no transition to animate.
             val context = LocalContext.current
             // Keep these UI holders above the lock gate and AnimatedContent.
             // Navigating to a child route, or briefly showing the lock screen,
@@ -351,16 +348,28 @@ class MainActivity : FragmentActivity() {
     }
 
     /**
-     * Remember a screen requested by an external entry point (notification tap)
-     * until the app is unlocked. The extra is cleared so a configuration change
-     * cannot re-trigger the navigation.
+     * Apply a screen requested from outside the UI (a notification tap).
+     *
+     * The push happens HERE — in onCreate before setContent, or in onNewIntent —
+     * and not from a LaunchedEffect watching the lock state. That effect fired in
+     * the very frame the gate handed over to the nav host, so the target state of
+     * the just-created AnimatedContent changed right after its first composition,
+     * which is how this app's composer group-stack crash (IndexOutOfBounds in
+     * ComposerImpl.end) gets triggered. Pushing before composition means the first
+     * composition already starts on the requested screen and nothing animates.
+     *
+     * The gate still protects the screen: it replaces the whole nav host, so the
+     * requested screen is only composed after the app has been unlocked.
+     *
+     * The extra is cleared so a recreation cannot queue the same push twice; the
+     * duplicate guard covers the system redelivering the original Intent.
      */
     private fun handleIntentScreen(intent: Intent?) {
         if (intent?.getStringExtra(BackupNotifier.EXTRA_OPEN_SCREEN) ==
             BackupNotifier.SCREEN_AUTO_BACKUP
         ) {
             intent.removeExtra(BackupNotifier.EXTRA_OPEN_SCREEN)
-            vm.requestScreen(Screen.AutoBackup)
+            if (vm.nav.current != Screen.AutoBackup) vm.nav.push(Screen.AutoBackup)
         }
     }
 
