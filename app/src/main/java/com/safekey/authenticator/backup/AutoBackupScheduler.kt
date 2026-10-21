@@ -32,6 +32,9 @@ object AutoBackupScheduler {
      */
     const val RECENT_SUCCESS_WINDOW_MS = 30L * 60_000L
 
+    /** Floor between a failed attempt and the catch-up retry that follows it. */
+    const val RETRY_GAP_MS = 15L * 60_000L
+
     /**
      * Next occurrence of [hour]:[minute] strictly after [now], stepping by
      * [intervalDays] days. Pure function — unit-tested without Android.
@@ -123,16 +126,29 @@ object AutoBackupScheduler {
     }
 
     /**
-     * True when the schedule is overdue by more than one interval: the system
-     * scheduler let it freeze (OEM battery policies), or WorkManager never
-     * executed the pending job. The caller then runs the backup in-process
-     * instead of waiting for the system to get around to it.
+     * True when the caller should run a catch-up backup now. Two cases:
      *
-     * Never true when no run has happened yet — the pending scheduled job
-     * still handles the first run. Pure function, unit-tested.
+     *  • the last run **succeeded** and lies further back than the interval —
+     *    the system scheduler let the slot pass (OEM battery policies, or a
+     *    WorkManager job that was never delivered);
+     *  • the last run **failed or was skipped** ([lastError] non-empty) — an
+     *    unattended attempt that produced nothing must be retried at the first
+     *    opportunity (the next app start) instead of waiting a whole interval,
+     *    which is what made a single bad night look like a dead feature. The
+     *    [retryGapMs] floor keeps a launch loop from hammering a broken path.
+     *
+     * Never true when no run has happened yet — the first scheduled run still
+     * owns that. Pure function, unit-tested.
      */
-    fun isDue(now: Long, lastRun: Long, intervalDays: Int): Boolean {
+    fun isDue(
+        now: Long,
+        lastRun: Long,
+        lastError: String,
+        intervalDays: Int,
+        retryGapMs: Long = RETRY_GAP_MS
+    ): Boolean {
         if (lastRun <= 0L) return false
+        if (lastError.isNotEmpty()) return now - lastRun >= retryGapMs
         val intervalMs = intervalDays.coerceAtLeast(1) * 24L * 3600_000L
         return now - lastRun > intervalMs
     }

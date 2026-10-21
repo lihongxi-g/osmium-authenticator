@@ -128,15 +128,30 @@ object AutoBackupRunner {
                 "keep=${settings.autoBackupKeepCount}"
         )
 
-        // Root hardening: while the root security restriction is active the
-        // vault does not leave the device (developer mode can lift it). Fails
-        // closed — a scan that could not run at all is an unknown state.
-        val rootReport = RootState.report.value
-            ?: runCatching { IntegrityEngine.scan(app) }.getOrNull()
-        if (!settings.devDisableRootSecurity && rootReport?.compromised != false) {
-            val reason = if (rootReport == null) "INTEGRITY_UNKNOWN" else "ROOT_RESTRICTED"
-            AppLog.d("auto-backup skipped: $reason")
-            return Outcome.Skipped(reason)
+        // Root hardening: the gate exists so the vault does not *leave* the
+        // device while the root restriction is active. Two corrections to how
+        // it used to work (2.5.3–2.5.8), both of which turned every unattended
+        // run into a silent skip:
+        //  • a local backup never leaves the device — it is an encrypted file in
+        //    this phone's Download folder — so an integrity verdict must not
+        //    block it, and the expensive scan is not run for it at all;
+        //  • a scan that produced no verdict (INTEGRITY_UNKNOWN) is not
+        //    evidence of a compromised device, only a missing measurement. For
+        //    the local target that state now simply proceeds; for a target that
+        //    does leave the device it still fails closed.
+        if (!settings.devDisableRootSecurity) {
+            val report = if (local) {
+                RootState.report.value
+            } else {
+                RootState.report.value
+                    ?: runCatching { IntegrityEngine.scan(app) }.getOrNull()
+            }
+            val blocked = if (local) report?.compromised == true else report?.compromised != false
+            if (blocked) {
+                val reason = if (report == null) "INTEGRITY_UNKNOWN" else "ROOT_RESTRICTED"
+                AppLog.d("auto-backup skipped: $reason (integrity verdict unavailable or compromised)")
+                return Outcome.Skipped(reason)
+            }
         }
 
         val password = app.settingsRepository.getAutoBackupPassword()

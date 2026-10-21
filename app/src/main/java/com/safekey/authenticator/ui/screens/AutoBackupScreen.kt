@@ -492,7 +492,11 @@ fun AutoBackupScreen(
                         )
                     },
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    // A failed run states its reason in the error colour: the
+                    // whole point of this line is that it cannot be overlooked.
+                    color = if (settings.autoBackupLastError.isNotEmpty())
+                        MaterialTheme.colorScheme.error
+                    else MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 2.dp)
                 )
 
@@ -514,8 +518,14 @@ fun AutoBackupScreen(
                 // The schedule is overdue: the system has not executed the
                 // scheduled run. Say so instead of looking like a silent no-op.
                 val lastSignal = maxOf(settings.autoBackupLastTime, settings.autoBackupLastAttempt)
+                // Success-only semantics: this line means "the schedule has not
+                // produced a backup yet", not "the last attempt failed" (that
+                // reason is shown right above it).
                 if (AutoBackupScheduler.isDue(
-                        System.currentTimeMillis(), lastSignal, settings.autoBackupIntervalDays
+                        System.currentTimeMillis(),
+                        lastSignal,
+                        "",
+                        settings.autoBackupIntervalDays
                     )
                 ) {
                     Text(

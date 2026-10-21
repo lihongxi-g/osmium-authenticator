@@ -168,40 +168,61 @@ class AutoBackupSchedulerTest {
 
     private val day = 24L * 3600_000L
 
+    /** Success-only shorthand; error cases call the full signature below. */
+    private fun isDue(now: Long, lastRun: Long, intervalDays: Int): Boolean =
+        AutoBackupScheduler.isDue(now, lastRun, "", intervalDays)
+
     @Test
     fun neverRunIsNeverDue() {
         // The pending scheduled job still handles the first run.
-        assertFalse(AutoBackupScheduler.isDue(at(2026, 8, 16, 3, 0), 0L, 1))
-        assertFalse(AutoBackupScheduler.isDue(at(2026, 8, 16, 3, 0), -1L, 1))
+        assertFalse(isDue(at(2026, 8, 16, 3, 0), 0L, 1))
+        assertFalse(isDue(at(2026, 8, 16, 3, 0), -1L, 1))
     }
 
     @Test
     fun aRunInsideTheIntervalIsNotDue() {
         val last = at(2026, 8, 16, 3, 0)
-        assertFalse(AutoBackupScheduler.isDue(last + day / 2, last, 1))
+        assertFalse(isDue(last + day / 2, last, 1))
         // Exactly on the boundary is still on time (strictly greater).
-        assertFalse(AutoBackupScheduler.isDue(last + day, last, 1))
+        assertFalse(isDue(last + day, last, 1))
     }
 
     @Test
     fun anOverdueRunIsDue() {
         val last = at(2026, 8, 16, 3, 0)
-        assertTrue(AutoBackupScheduler.isDue(last + day + 1, last, 1))
-        assertTrue(AutoBackupScheduler.isDue(last + 5 * day, last, 4))
+        assertTrue(isDue(last + day + 1, last, 1))
+        assertTrue(isDue(last + 5 * day, last, 4))
     }
 
     @Test
     fun intervalIsClampedToOneDay() {
         // A stored 0 must not make every launch look overdue.
         val last = at(2026, 8, 16, 3, 0)
-        assertFalse(AutoBackupScheduler.isDue(last + day / 2, last, 0))
-        assertTrue(AutoBackupScheduler.isDue(last + day + 1, last, 0))
+        assertFalse(isDue(last + day / 2, last, 0))
+        assertTrue(isDue(last + day + 1, last, 0))
+    }
+
+    @Test
+    fun aFailedRunIsRetriedAtTheNextOpportunity() {
+        // One bad night (a skipped or failed unattended run) must not cost a
+        // whole interval: the next app start retries it.
+        val failed = at(2026, 8, 16, 3, 0)
+        assertFalse(
+            AutoBackupScheduler.isDue(failed + 5 * 60_000L, failed, "INTEGRITY_UNKNOWN", 1)
+        )
+        assertTrue(
+            AutoBackupScheduler.isDue(
+                failed + AutoBackupScheduler.RETRY_GAP_MS, failed, "INTEGRITY_UNKNOWN", 1
+            )
+        )
+        // Works beyond the interval too: a stale failure is still a retry.
+        assertTrue(AutoBackupScheduler.isDue(failed + day, failed, "IOException: x", 7))
     }
 
     @Test
     fun aClockSkewedIntoTheFutureIsNotDue() {
         val last = at(2026, 8, 16, 3, 0)
-        assertFalse(AutoBackupScheduler.isDue(last - day, last, 1))
+        assertFalse(isDue(last - day, last, 1))
     }
 
     // ------------------------------------------- duplicate-trigger guard

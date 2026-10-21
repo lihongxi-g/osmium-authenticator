@@ -808,7 +808,10 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         val s = settings.value
         if (!s.autoBackupEnabled) return
         if (!AutoBackupScheduler.isDue(
-                System.currentTimeMillis(), s.autoBackupLastTime, s.autoBackupIntervalDays
+                System.currentTimeMillis(),
+                s.autoBackupLastTime,
+                s.autoBackupLastError,
+                s.autoBackupIntervalDays
             )
         ) {
             return
