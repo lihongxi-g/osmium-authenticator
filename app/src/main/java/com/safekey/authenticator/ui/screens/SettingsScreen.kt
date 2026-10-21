@@ -472,17 +472,18 @@ fun SettingsScreen(
                 title = stringResource(R.string.accounts_count, accounts.size)
             )
 
-            SectionHeader(stringResource(R.string.settings_about))
-
-            // Every permission Osmium can ask for, with live status and a
-            // one-tap request — the system permission UI is scattered across the
-            // OS, this is the single place to see and grant them.
+            // Its own section, deliberately not nested under About: this is the
+            // single place to see and grant everything the app asks the system
+            // for, and it does not belong between "version" and "license".
+            SectionHeader(stringResource(R.string.permissions_title))
             SettingRow(
                 icon = AppIcons.Security,
-                title = stringResource(R.string.permissions_title),
+                title = stringResource(R.string.permissions_manage_title),
                 description = stringResource(R.string.permissions_desc),
                 onClick = { vm.nav.push(Screen.Permissions) }
             )
+
+            SectionHeader(stringResource(R.string.settings_about))
 
             if ("log" !in hiddenFeatures) SettingRow(
                 icon = AppIcons.BugReport,

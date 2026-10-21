@@ -604,6 +604,7 @@
     <string name="auto_backup_notify_desc">Avisar cuando termine una copia automática. Las copias manuales nunca avisan.</string>
     <string name="auto_backup_notify_blocked">Las notificaciones del sistema están bloqueadas para Osmium: toca para activarlas</string>
     <string name="permissions_title">Permisos</string>
+    <string name="permissions_manage_title">Gestionar permisos</string>
     <string name="permissions_desc">Todo lo que Osmium puede pedir al sistema. Verde significa concedido; toca una entrada roja para solicitarlo.</string>
     <string name="permission_granted">Concedido</string>
     <string name="permission_denied">No concedido · toca para solicitar</string>

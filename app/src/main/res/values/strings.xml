@@ -621,6 +621,7 @@
     <string name="auto_backup_notify_desc">Notify when an automatic backup finishes. Manual backups never notify.</string>
     <string name="auto_backup_notify_blocked">System notifications are blocked for Osmium — tap to enable</string>
     <string name="permissions_title">Permissions</string>
+    <string name="permissions_manage_title">Manage permissions</string>
     <string name="permissions_desc">Everything Osmium can ask the system for. Green means granted; tap a red entry to request it.</string>
     <string name="permission_granted">Granted</string>
     <string name="permission_denied">Not granted · tap to request</string>

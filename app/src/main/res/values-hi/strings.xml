@@ -604,6 +604,7 @@
     <string name="auto_backup_notify_desc">स्वचालित बैकअप पूरा होने पर सूचित करें। मैनुअल बैकअप कभी सूचित नहीं करते।</string>
     <string name="auto_backup_notify_blocked">Osmium के लिए सिस्टम सूचनाएँ अवरुद्ध हैं — सक्षम करने के लिए टैप करें</string>
     <string name="permissions_title">अनुमतियाँ</string>
+    <string name="permissions_manage_title">अनुमतियाँ प्रबंधित करें</string>
     <string name="permissions_desc">वह सब जो Osmium सिस्टम से माँग सकता है। हरा मतलब दी गई; लाल प्रविष्टि पर टैप करके माँगें।</string>
     <string name="permission_granted">दी गई</string>
     <string name="permission_denied">नहीं दी गई · माँगने के लिए टैप करें</string>

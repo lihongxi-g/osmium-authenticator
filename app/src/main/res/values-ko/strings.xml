@@ -604,6 +604,7 @@
     <string name="auto_backup_notify_desc">자동 백업이 끝나면 알립니다. 수동 백업은 알리지 않습니다.</string>
     <string name="auto_backup_notify_blocked">Osmium의 시스템 알림이 차단되어 있습니다 — 눌러서 활성화</string>
     <string name="permissions_title">권한</string>
+    <string name="permissions_manage_title">권한 관리</string>
     <string name="permissions_desc">Osmium이 시스템에 요청할 수 있는 모든 권한입니다. 초록색은 허용됨, 빨간 항목을 눌러 요청하세요.</string>
     <string name="permission_granted">허용됨</string>
     <string name="permission_denied">허용되지 않음 · 눌러서 요청</string>

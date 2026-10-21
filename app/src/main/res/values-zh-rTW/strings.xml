@@ -617,6 +617,7 @@
     <string name="auto_backup_notify_desc">自動備份結束後傳送通知；手動備份不傳送。</string>
     <string name="auto_backup_notify_blocked">系統通知未允許，備份結果不會提示（點此開啟）</string>
     <string name="permissions_title">權限</string>
+    <string name="permissions_manage_title">權限管理</string>
     <string name="permissions_desc">Osmium 向系統申請的權限都在這裡。綠色代表已授予，點紅色的即可申請。</string>
     <string name="permission_granted">已授予</string>
     <string name="permission_denied">未授予 · 點擊申請</string>

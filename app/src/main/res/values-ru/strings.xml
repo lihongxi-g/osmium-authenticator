@@ -604,6 +604,7 @@
     <string name="auto_backup_notify_desc">Уведомлять по завершении автоматического копирования. Ручное копирование не уведомляет.</string>
     <string name="auto_backup_notify_blocked">Системные уведомления для Osmium заблокированы — нажмите, чтобы включить</string>
     <string name="permissions_title">Разрешения</string>
+    <string name="permissions_manage_title">Управление разрешениями</string>
     <string name="permissions_desc">Всё, что Osmium может запросить у системы. Зелёный — выдано; нажмите на красный пункт, чтобы запросить.</string>
     <string name="permission_granted">Выдано</string>
     <string name="permission_denied">Не выдано · нажмите, чтобы запросить</string>

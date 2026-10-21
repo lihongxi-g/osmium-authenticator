@@ -604,6 +604,7 @@
     <string name="auto_backup_notify_desc">自動バックアップ終了時に通知します。手動バックアップでは通知しません。</string>
     <string name="auto_backup_notify_blocked">Osmium のシステム通知がブロックされています — タップして有効化</string>
     <string name="permissions_title">権限</string>
+    <string name="permissions_manage_title">権限を管理</string>
     <string name="permissions_desc">Osmium がシステムに要求する権限の一覧です。緑は許可済み、赤をタップすると要求できます。</string>
     <string name="permission_granted">許可済み</string>
     <string name="permission_denied">未許可 · タップして要求</string>
