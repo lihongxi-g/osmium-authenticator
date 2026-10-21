@@ -47,6 +47,7 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -56,6 +57,7 @@ import com.safekey.authenticator.backup.AutoBackupRunner
 import com.safekey.authenticator.backup.AutoBackupScheduler
 import com.safekey.authenticator.data.AppSettings
 import com.safekey.authenticator.network.LocalNetworkAccess
+import com.safekey.authenticator.notify.BackupNotifier
 import com.safekey.authenticator.network.LocalNetworkPermissionException
 import com.safekey.authenticator.ui.components.AppIcons
 import com.safekey.authenticator.ui.components.LocalNetworkPermissionGate
@@ -260,12 +262,31 @@ fun AutoBackupScreen(
     }
 
     var bgAllowed by remember { mutableStateOf(isBgAllowed()) }
+    // Mirrors the *system* state: the preference can be on while Android still
+    // refuses to show anything, which must never look like "notifications on".
+    fun notificationsAllowed(): Boolean =
+        NotificationManagerCompat.from(context).areNotificationsEnabled() &&
+            (Build.VERSION.SDK_INT < 33 || ContextCompat.checkSelfPermission(
+                context, "android.permission.POST_NOTIFICATIONS"
+            ) == PackageManager.PERMISSION_GRANTED)
+    var notifyAllowed by remember { mutableStateOf(notificationsAllowed()) }
+    val notificationLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        notifyAllowed = notificationsAllowed()
+        if (granted) {
+            vm.setAutoBackupNotify(true)
+        } else {
+            vm.showToast(context.getString(R.string.auto_backup_notify_blocked))
+        }
+    }
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
                 // Refresh after the user returns from the system dialog.
                 bgAllowed = isBgAllowed()
+                notifyAllowed = notificationsAllowed()
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -462,6 +483,48 @@ fun AutoBackupScreen(
                     },
                     onClick = { showKeepDialog = true }
                 )
+
+                SettingRow(
+                    icon = AppIcons.Notifications,
+                    title = stringResource(R.string.auto_backup_notify_title),
+                    description = stringResource(R.string.auto_backup_notify_desc),
+                    trailing = {
+                        Switch(
+                            checked = settings.autoBackupNotify,
+                            onCheckedChange = { enabled ->
+                                when {
+                                    !enabled -> vm.setAutoBackupNotify(false)
+                                    // Ask the system first: the pref alone shows
+                                    // nothing on API 33+ without the permission.
+                                    Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(
+                                        context, "android.permission.POST_NOTIFICATIONS"
+                                    ) != PackageManager.PERMISSION_GRANTED ->
+                                        notificationLauncher.launch(
+                                            "android.permission.POST_NOTIFICATIONS"
+                                        )
+                                    !notifyAllowed -> {
+                                        vm.showToast(
+                                            context.getString(R.string.auto_backup_notify_blocked)
+                                        )
+                                        BackupNotifier.openNotificationSettings(context)
+                                    }
+                                    else -> vm.setAutoBackupNotify(true)
+                                }
+                            }
+                        )
+                    }
+                )
+
+                if (settings.autoBackupNotify && !notifyAllowed) {
+                    Text(
+                        text = stringResource(R.string.auto_backup_notify_blocked),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier
+                            .clickable { BackupNotifier.openNotificationSettings(context) }
+                            .padding(horizontal = 20.dp, vertical = 4.dp)
+                    )
+                }
 
                 // ---- status block
 

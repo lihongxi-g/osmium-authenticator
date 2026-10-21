@@ -54,6 +54,8 @@ sealed class Screen {
     object Tags : Screen()
     /** Android device integrity report (K1 local checks + K3 key attestation). */
     object Integrity : Screen()
+    /** Every runtime/special permission Osmium asks for, with live status. */
+    object Permissions : Screen()
     /** Hidden developer-mode panel (English / Simplified Chinese only). */
     object Developer : Screen()
 }

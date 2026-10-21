@@ -32,6 +32,9 @@ class SafeKeyApp : Application() {
         }.start()
         AppLog.init(this)
         installCrashHandler()
+        // Notification channels must exist before the first notify(); creating
+        // them on every start is idempotent and survives a user clearing data.
+        runCatching { com.safekey.authenticator.notify.BackupNotifier.ensureChannels(this) }
         AppLog.d("app start v${BuildConfig.VERSION_NAME}")
         val db = AppDatabase.get(this)
         accountDao = db.accountDao()

@@ -15,6 +15,9 @@
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28" />
 
+    <!-- Backup result notifications (runtime permission on Android 13+). -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <!-- Re-arms the scheduled backup alarm after a reboot or an app update
          (AlarmManager alarms do not survive either). -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />

@@ -80,8 +80,10 @@ import com.safekey.authenticator.ui.components.SwipeBackContainer
 import com.safekey.authenticator.ui.components.UpdateAvailableDialog
 import com.safekey.authenticator.ui.components.integrityCheckTitle
 import com.safekey.authenticator.ui.navigation.Screen
+import com.safekey.authenticator.notify.BackupNotifier
 import com.safekey.authenticator.ui.navigation.isRootBlocked
 import com.safekey.authenticator.ui.screens.AboutScreen
+import com.safekey.authenticator.ui.screens.PermissionsScreen
 import com.safekey.authenticator.ui.screens.DeveloperScreen
 import com.safekey.authenticator.ui.screens.AccountFormScreen
 import com.safekey.authenticator.ui.screens.AccountsScreen
@@ -156,6 +158,9 @@ class MainActivity : FragmentActivity() {
         // Anti-repackaging: flag a re-signed APK. The notice blocks the UI
         // until the user acknowledges it — never a silent continue.
         tampered = IntegrityCheck.isTampered(this)
+        // A notification tap names the screen to open. It is only honoured after
+        // the gate below (biometric / PIN) has been passed.
+        handleIntentScreen(intent)
 
         // Block screenshots and the recents thumbnail — no secrets leak.
         window.setFlags(
@@ -187,6 +192,18 @@ class MainActivity : FragmentActivity() {
             LaunchedEffect(foregroundTick, noBiometricCredential, pinSet, settings.pinReminderSilenced) {
                 if (noBiometricCredential && !pinSet && !settings.pinReminderSilenced) {
                     pinReminderVisible = true
+                }
+            }
+            // Notification tap → the auto-backup page, but only after the app's
+            // own gate has been passed: the gate replaces the whole nav host, so
+            // navigating while locked would just be overwritten, and skipping it
+            // would defeat the point.
+            val pendingScreen by vm.pendingScreen.collectAsState()
+            LaunchedEffect(pendingScreen, locked, pinRequired, destroyed, tamperBlocked) {
+                val target = pendingScreen
+                if (target != null && !locked && !pinRequired && !destroyed && !tamperBlocked) {
+                    vm.consumePendingScreen()
+                    vm.nav.push(target)
                 }
             }
             val context = LocalContext.current
@@ -324,6 +341,26 @@ class MainActivity : FragmentActivity() {
                     vm.catchUpAutoBackupIfDue()
                 }
             }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleIntentScreen(intent)
+    }
+
+    /**
+     * Remember a screen requested by an external entry point (notification tap)
+     * until the app is unlocked. The extra is cleared so a configuration change
+     * cannot re-trigger the navigation.
+     */
+    private fun handleIntentScreen(intent: Intent?) {
+        if (intent?.getStringExtra(BackupNotifier.EXTRA_OPEN_SCREEN) ==
+            BackupNotifier.SCREEN_AUTO_BACKUP
+        ) {
+            intent.removeExtra(BackupNotifier.EXTRA_OPEN_SCREEN)
+            vm.requestScreen(Screen.AutoBackup)
         }
     }
 
@@ -1102,6 +1139,10 @@ private fun IntegrityNoticeDialog(
                             )
                         },
                         onIntegrity = { vm.nav.push(Screen.Integrity) }
+                    )
+
+                    is Screen.Permissions -> PermissionsScreen(
+                        onBack = { vm.nav.pop() }
                     )
 
                     is Screen.ThemeSettings -> ThemeSettingsScreen(

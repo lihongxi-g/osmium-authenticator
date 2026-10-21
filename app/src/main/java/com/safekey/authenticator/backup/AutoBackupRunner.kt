@@ -13,6 +13,7 @@ import com.safekey.authenticator.integrity.IntegrityEngine
 import com.safekey.authenticator.network.LocalNetworkAccess
 import com.safekey.authenticator.network.LocalNetworkPermissionException
 import com.safekey.authenticator.network.WebDavClient
+import com.safekey.authenticator.notify.BackupNotifier
 import com.safekey.authenticator.security.AppLog
 import com.safekey.authenticator.security.PinManager
 import com.safekey.authenticator.security.RootState
@@ -78,7 +79,7 @@ object AutoBackupRunner {
      * Run one backup and persist the result for the UI. Expected failures come
      * back as [Outcome.Skipped]/[Outcome.Failed]; only cancellation is thrown.
      */
-    suspend fun runAndRecord(app: SafeKeyApp): Outcome = lock.withLock {
+    suspend fun runAndRecord(app: SafeKeyApp, notify: Boolean = false): Outcome = lock.withLock {
         val settings = app.settingsRepository.settings.first()
         // Written before any work starts: an attempt whose process is killed
         // mid-run still leaves a trace in the UI, which is what tells "the
@@ -97,6 +98,13 @@ object AutoBackupRunner {
             errorCode(outcome), System.currentTimeMillis()
         )
         AppLog.d("auto-backup result: ${errorCode(outcome).ifEmpty { "OK" }}")
+        // Unattended runs tell the user through a notification; a manual
+        // "back up now" does not (the screen already shows the result, and the
+        // user is looking at it).
+        if (notify && settings.autoBackupNotify) {
+            runCatching { BackupNotifier.notifyOutcome(app, outcome) }
+                .onFailure { AppLog.d("backup notification failed: ${it.javaClass.simpleName}") }
+        }
         outcome
     }
 
@@ -117,7 +125,7 @@ object AutoBackupRunner {
             AppLog.d("auto-backup skipped: RECENT_SUCCESS (other trigger already ran)")
             return Outcome.Skipped("RECENT_SUCCESS")
         }
-        return runAndRecord(app)
+        return runAndRecord(app, notify = true)
     }
 
     suspend fun run(app: SafeKeyApp, settings: AppSettings): Outcome {
