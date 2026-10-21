@@ -66,6 +66,21 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     val nav = NavigationState()
 
+    /**
+     * Random-order shuffle, computed once per app launch (see sortMode).
+     *
+     * Declared HERE, above every `stateIn(SharingStarted.Eagerly)` below, on
+     * purpose. Kotlin initialises fields in declaration order, and an Eagerly
+     * stateIn can run its transform *during this constructor*: a warm
+     * SettingsRepository (DataStore already cached in this process) emits
+     * synchronously, so the `sortedAccountUiList` transform ran while the field
+     * was still null — `NullPointerException: List.isEmpty() on a null object
+     * reference`, and only when the sort mode was "random". It hit any ViewModel
+     * built in a warm process, e.g. the notification tap that relaunches the
+     * activity right after an unattended backup read the settings.
+     */
+    private var randomOrder: List<String> = emptyList()
+
     /** Latest device-integrity report (null until the first scan lands). */
     val rootReport: StateFlow<IntegrityReport?> = RootState.report
 
@@ -299,9 +314,6 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
             settingsRepo.setDevPlaintextExport(false)
         }
     }
-
-    /** Random-order shuffle, computed once per app launch (see sortMode). */
-    private var randomOrder: List<String> = emptyList()
 
     private val _selectedTagIds = MutableStateFlow<Set<String>>(emptySet())
     val selectedTagIds: StateFlow<Set<String>> = _selectedTagIds
