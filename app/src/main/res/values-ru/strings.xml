@@ -387,6 +387,8 @@
     <string name="auto_backup_next_run">Следующая копия: %1$s</string>
     <string name="auto_backup_last_success">Последняя копия: %1$s (успешно)</string>
     <string name="auto_backup_last_failed">Последняя копия: %1$s (ошибка: %2$s)</string>
+    <string name="auto_backup_last_attempt">Попытка: %1$s (не завершена)</string>
+    <string name="auto_backup_overdue_hint">Запланированное резервное копирование просрочено и не выполнено: разрешите приложению «автозапуск» и «полную фоновую активность», а также отключите оптимизацию энергосбережения в режиме сна.</string>
     <string name="auto_backup_never_run">Копий ещё не было</string>
     <string name="auto_backup_tz_label">(%1$s)</string>
     <string name="auto_backup_run_now">Скопировать сейчас</string>

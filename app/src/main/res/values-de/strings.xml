@@ -387,6 +387,8 @@
     <string name="auto_backup_next_run">Nächstes Backup: %1$s</string>
     <string name="auto_backup_last_success">Letztes Backup: %1$s (erfolgreich)</string>
     <string name="auto_backup_last_failed">Letztes Backup: %1$s (fehlgeschlagen: %2$s)</string>
+    <string name="auto_backup_last_attempt">Versuch: %1$s (nicht abgeschlossen)</string>
+    <string name="auto_backup_overdue_hint">Die geplante Sicherung ist überfällig und wurde nicht ausgeführt: erlaube Osmium „Autostart“ und „vollständige Hintergrundaktivität“ und schalte die Schlaf-Standby-Optimierung des Systems ab.</string>
     <string name="auto_backup_never_run">Noch kein Backup</string>
     <string name="auto_backup_tz_label">(%1$s)</string>
     <string name="auto_backup_run_now">Jetzt sichern</string>

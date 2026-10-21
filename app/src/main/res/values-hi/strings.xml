@@ -387,6 +387,8 @@
     <string name="auto_backup_next_run">अगला बैकअप: %1$s</string>
     <string name="auto_backup_last_success">पिछला बैकअप: %1$s (सफल)</string>
     <string name="auto_backup_last_failed">पिछला बैकअप: %1$s (विफल: %2$s)</string>
+    <string name="auto_backup_last_attempt">प्रयास: %1$s (पूरा नहीं हुआ)</string>
+    <string name="auto_backup_overdue_hint">निर्धारित बैकअप अतिदेय है और चला नहीं: Osmium के लिए «ऑटो-स्टार्ट» और «पूर्ण बैकग्राउंड गतिविधि» की अनुमति दें और सिस्टम की स्लीप-स्टैंडबाय बैटरी ऑप्टिमाइज़ेशन बंद करें।</string>
     <string name="auto_backup_never_run">अभी तक कोई बैकअप नहीं</string>
     <string name="auto_backup_tz_label">(%1$s)</string>
     <string name="auto_backup_run_now">अभी बैकअप करें</string>

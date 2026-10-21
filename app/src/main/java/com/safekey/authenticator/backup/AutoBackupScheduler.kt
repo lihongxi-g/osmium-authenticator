@@ -26,6 +26,13 @@ object AutoBackupScheduler {
     const val WORK_NAME = "osmium-auto-backup"
 
     /**
+     * Two triggers for one slot (alarm + job) must not write two files. Kept
+     * short on purpose: a wider window would also swallow a run the user just
+     * asked for by moving the backup time to "in a minute".
+     */
+    const val RECENT_SUCCESS_WINDOW_MS = 30L * 60_000L
+
+    /**
      * Next occurrence of [hour]:[minute] strictly after [now], stepping by
      * [intervalDays] days. Pure function — unit-tested without Android.
      *
@@ -64,13 +71,20 @@ object AutoBackupScheduler {
         zone.getDisplayName(TextStyle.SHORT, Locale.getDefault())
 
     /**
-     * (Re)schedule the backup for the next occurrence. When auto-backup is
-     * disabled this cancels any pending work instead.
+     * (Re)schedule the backup for the next occurrence: a WorkManager job (it
+     * survives reboots and runs in Doze maintenance windows) plus an
+     * AlarmManager wake-up ([AutoBackupAlarm], the one that actually fires at
+     * night on phones that freeze background work). Both feed the same
+     * [AutoBackupRunner] and a duplicate trigger is absorbed by
+     * [AutoBackupRunner.runScheduled].
+     *
+     * When auto-backup is disabled both are cancelled.
      */
     fun schedule(context: Context, settings: AppSettings) {
         val wm = WorkManager.getInstance(context)
         if (!settings.autoBackupEnabled) {
             wm.cancelUniqueWork(WORK_NAME)
+            AutoBackupAlarm.cancel(context)
             return
         }
         val now = System.currentTimeMillis()
@@ -85,6 +99,7 @@ object AutoBackupScheduler {
             .setInitialDelay(delay, TimeUnit.MILLISECONDS)
             .build()
         wm.enqueueUniqueWork(WORK_NAME, ExistingWorkPolicy.REPLACE, request)
+        AutoBackupAlarm.schedule(context, settings)
     }
 
     /** Ensure a schedule exists without disturbing a pending one. */
@@ -102,6 +117,9 @@ object AutoBackupScheduler {
             .setInitialDelay((next - now).coerceAtLeast(0L), TimeUnit.MILLISECONDS)
             .build()
         wm.enqueueUniqueWork(WORK_NAME, ExistingWorkPolicy.KEEP, request)
+        // Alarms do not survive reboots, app updates or a clock change, so this
+        // runs on every start (cheap and idempotent: same PendingIntent).
+        AutoBackupAlarm.schedule(context, settings)
     }
 
     /**
@@ -118,4 +136,19 @@ object AutoBackupScheduler {
         val intervalMs = intervalDays.coerceAtLeast(1) * 24L * 3600_000L
         return now - lastRun > intervalMs
     }
+
+    /**
+     * True when the last run already succeeded inside [windowMs]: the alarm and
+     * the WorkManager job target the same scheduled time and either may fire
+     * late, so the second trigger must not write a second file for the same
+     * slot. A failed run does not count — the other trigger may retry it.
+     * Pure function, unit-tested.
+     */
+    fun isRecentSuccess(
+        now: Long,
+        lastRun: Long,
+        lastError: String,
+        windowMs: Long = RECENT_SUCCESS_WINDOW_MS
+    ): Boolean =
+        lastRun > 0L && lastError.isEmpty() && now >= lastRun && now - lastRun < windowMs
 }

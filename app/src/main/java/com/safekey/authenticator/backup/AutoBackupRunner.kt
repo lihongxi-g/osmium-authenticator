@@ -80,6 +80,10 @@ object AutoBackupRunner {
      */
     suspend fun runAndRecord(app: SafeKeyApp): Outcome = lock.withLock {
         val settings = app.settingsRepository.settings.first()
+        // Written before any work starts: an attempt whose process is killed
+        // mid-run still leaves a trace in the UI, which is what tells "the
+        // scheduler never fired" apart from "the run died half way".
+        app.settingsRepository.setAutoBackupAttempt(System.currentTimeMillis())
         val outcome = try {
             run(app, settings)
         } catch (e: kotlinx.coroutines.CancellationException) {
@@ -94,6 +98,26 @@ object AutoBackupRunner {
         )
         AppLog.d("auto-backup result: ${errorCode(outcome).ifEmpty { "OK" }}")
         outcome
+    }
+
+    /**
+     * Entry point for the two scheduled triggers — the WorkManager job and the
+     * alarm, which both aim at the same slot and either may fire late. A slot
+     * that already succeeded inside the dedupe window is absorbed silently:
+     * no second file, no overwritten status. A failed run is retried.
+     */
+    suspend fun runScheduled(app: SafeKeyApp): Outcome {
+        val settings = app.settingsRepository.settings.first()
+        if (AutoBackupScheduler.isRecentSuccess(
+                System.currentTimeMillis(),
+                settings.autoBackupLastTime,
+                settings.autoBackupLastError
+            )
+        ) {
+            AppLog.d("auto-backup skipped: RECENT_SUCCESS (other trigger already ran)")
+            return Outcome.Skipped("RECENT_SUCCESS")
+        }
+        return runAndRecord(app)
     }
 
     suspend fun run(app: SafeKeyApp, settings: AppSettings): Outcome {

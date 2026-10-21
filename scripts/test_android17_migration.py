@@ -46,7 +46,7 @@ class Android17MigrationTest(unittest.TestCase):
             if path.endswith("AutoBackupWorker.kt"):
                 # The worker delegates to the runner instead of duplicating it.
                 self.assertIn(
-                    "AutoBackupRunner.runAndRecord", (SRC / path).read_text(), path
+                    "AutoBackupRunner.runScheduled", (SRC / path).read_text(), path
                 )
                 continue
             self.assertIn("LocalNetworkAccess.checkWebDav", (SRC / path).read_text(), path)

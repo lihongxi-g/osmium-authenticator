@@ -496,6 +496,36 @@ fun AutoBackupScreen(
                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 2.dp)
                 )
 
+                // A run that started and never produced a result (process
+                // killed mid-run) shows up here — the difference between "the
+                // scheduler never fired" and "the run died half way".
+                if (settings.autoBackupLastAttempt > settings.autoBackupLastTime) {
+                    Text(
+                        text = stringResource(
+                            R.string.auto_backup_last_attempt,
+                            formatWithTz(settings.autoBackupLastAttempt)
+                        ),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 2.dp)
+                    )
+                }
+
+                // The schedule is overdue: the system has not executed the
+                // scheduled run. Say so instead of looking like a silent no-op.
+                val lastSignal = maxOf(settings.autoBackupLastTime, settings.autoBackupLastAttempt)
+                if (AutoBackupScheduler.isDue(
+                        System.currentTimeMillis(), lastSignal, settings.autoBackupIntervalDays
+                    )
+                ) {
+                    Text(
+                        text = stringResource(R.string.auto_backup_overdue_hint),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 2.dp)
+                    )
+                }
+
                 if (settings.autoBackupTarget == AppSettings.AUTO_BACKUP_TARGET_LOCAL) {
                     Text(
                         text = stringResource(R.string.auto_backup_local_dir_desc),

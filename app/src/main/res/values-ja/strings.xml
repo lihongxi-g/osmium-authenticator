@@ -387,6 +387,8 @@
     <string name="auto_backup_next_run">次回バックアップ：%1$s</string>
     <string name="auto_backup_last_success">前回バックアップ：%1$s（成功）</string>
     <string name="auto_backup_last_failed">前回バックアップ：%1$s（失敗：%2$s）</string>
+    <string name="auto_backup_last_attempt">前回の試行：%1$s（未完了）</string>
+    <string name="auto_backup_overdue_hint">定時バックアップが期限を過ぎても実行されていません：システム設定で本アプリの「自動起動」と「バックグラウンド動作を完全に許可」を有効にし、システムの「スリープ時の省電力最適化」をオフにしてください。</string>
     <string name="auto_backup_never_run">まだバックアップはありません</string>
     <string name="auto_backup_tz_label">(%1$s)</string>
     <string name="auto_backup_run_now">今すぐバックアップ</string>

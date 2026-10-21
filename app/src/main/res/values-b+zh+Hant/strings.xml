@@ -402,6 +402,8 @@
     <string name="auto_backup_next_run">下次備份：%1$s</string>
     <string name="auto_backup_last_success">上次備份：%1$s（成功）</string>
     <string name="auto_backup_last_failed">上次備份：%1$s（失敗：%2$s）</string>
+    <string name="auto_backup_last_attempt">上次嘗試：%1$s（未完成）</string>
+    <string name="auto_backup_overdue_hint">定時備份已逾期未執行：請在系統設定中允許本應用「自動啟動」與「完全允許背景行為」，並關閉「睡眠待機最佳化」這類省電策略。</string>
     <string name="auto_backup_never_run">尚未執行過備份</string>
     <string name="auto_backup_tz_label">（%1$s）</string>
     <string name="auto_backup_run_now">立即備份</string>

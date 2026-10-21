@@ -35,7 +35,7 @@ class AutoBackupWorker(
         // scheduled run was started at all (the old worker logged nothing).
         AppLog.d("auto-backup worker: attempt=$runAttemptCount")
         return try {
-            val outcome = AutoBackupRunner.runAndRecord(app)
+            val outcome = AutoBackupRunner.runScheduled(app)
             // One retry for transient failures (network blips), then give up —
             // the next scheduled run will try again.
             if (outcome is AutoBackupRunner.Outcome.Failed && runAttemptCount < 1) {

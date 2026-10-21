@@ -36,6 +36,8 @@ data class AppSettings(
     val autoBackupKeepCount: Int = 5,
     val autoBackupLastTime: Long = 0L,
     val autoBackupLastError: String = "",
+    /** When a run last *started* (survives a run that dies without a result). */
+    val autoBackupLastAttempt: Long = 0L,
     val autoCheckUpdates: Boolean = false,
     val tagsEnabled: Boolean = true,
     // ---- root hardening / developer mode (2.4.2) ----
@@ -110,6 +112,7 @@ class SettingsRepository(
         val AUTO_BACKUP_KEEP = intPreferencesKey("auto_backup_keep_count")
         val AUTO_BACKUP_LAST_TIME = longPreferencesKey("auto_backup_last_time")
         val AUTO_BACKUP_LAST_ERROR = stringPreferencesKey("auto_backup_last_error")
+        val AUTO_BACKUP_LAST_ATTEMPT = longPreferencesKey("auto_backup_last_attempt")
         val AUTO_CHECK_UPDATES = booleanPreferencesKey("auto_check_updates")
         val TAGS_ENABLED = booleanPreferencesKey("tags_enabled")
         val DEV_MODE_ENABLED = booleanPreferencesKey("dev_mode_enabled")
@@ -143,6 +146,7 @@ class SettingsRepository(
             autoBackupKeepCount = prefs[Keys.AUTO_BACKUP_KEEP] ?: AppSettings.AUTO_BACKUP_KEEP_DEFAULT,
             autoBackupLastTime = prefs[Keys.AUTO_BACKUP_LAST_TIME] ?: 0L,
             autoBackupLastError = prefs[Keys.AUTO_BACKUP_LAST_ERROR] ?: "",
+            autoBackupLastAttempt = prefs[Keys.AUTO_BACKUP_LAST_ATTEMPT] ?: 0L,
             autoCheckUpdates = prefs[Keys.AUTO_CHECK_UPDATES] ?: false,
             tagsEnabled = prefs[Keys.TAGS_ENABLED] ?: true,
             devModeEnabled = prefs[Keys.DEV_MODE_ENABLED] ?: false,
@@ -250,6 +254,11 @@ class SettingsRepository(
             // Corrupt password record — fall back to null rather than crash
             null
         }
+    }
+
+    /** Mark that a run is starting, before any work happens. */
+    suspend fun setAutoBackupAttempt(time: Long) {
+        context.dataStore.edit { it[Keys.AUTO_BACKUP_LAST_ATTEMPT] = time }
     }
 
     /** Result of the last auto-backup run: empty error = success. */

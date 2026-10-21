@@ -387,6 +387,8 @@
     <string name="auto_backup_next_run">Próxima copia: %1$s</string>
     <string name="auto_backup_last_success">Última copia: %1$s (correcta)</string>
     <string name="auto_backup_last_failed">Última copia: %1$s (falló: %2$s)</string>
+    <string name="auto_backup_last_attempt">Intento: %1$s (sin terminar)</string>
+    <string name="auto_backup_overdue_hint">La copia programada está vencida y no se ejecutó: permite el «inicio automático» y la «actividad en segundo plano completa» para Osmium, y desactiva la optimización de reposo profundo del sistema.</string>
     <string name="auto_backup_never_run">Aún no hay copias</string>
     <string name="auto_backup_tz_label">(%1$s)</string>
     <string name="auto_backup_run_now">Copiar ahora</string>

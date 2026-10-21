@@ -387,6 +387,8 @@
     <string name="auto_backup_next_run">Prochaine sauvegarde : %1$s</string>
     <string name="auto_backup_last_success">Dernière sauvegarde : %1$s (réussie)</string>
     <string name="auto_backup_last_failed">Dernière sauvegarde : %1$s (échec : %2$s)</string>
+    <string name="auto_backup_last_attempt">Tentative : %1$s (inachevée)</string>
+    <string name="auto_backup_overdue_hint">La sauvegarde planifiée est en retard et ne s’est pas exécutée : autorisez le démarrage automatique et l’activité en arrière-plan complète pour Osmium, puis désactivez l’optimisation de veille prolongée du système.</string>
     <string name="auto_backup_never_run">Aucune sauvegarde pour l’instant</string>
     <string name="auto_backup_tz_label">(%1$s)</string>
     <string name="auto_backup_run_now">Sauvegarder maintenant</string>

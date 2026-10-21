@@ -15,6 +15,10 @@
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28" />
 
+    <!-- Re-arms the scheduled backup alarm after a reboot or an app update
+         (AlarmManager alarms do not survive either). -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
     <!-- Lets the app open the system "ignore battery optimizations" dialog
          for the auto-backup feature (scheduled backups need background
          execution). No other background behavior is requested. -->
@@ -76,6 +80,20 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Scheduled backup: fires the alarm, and re-arms it after events that
+             drop a pending AlarmManager alarm (boot, app update, clock change).
+             Not exported: the fire action is an explicit intent from this app. -->
+        <receiver
+            android:name=".backup.AutoBackupReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

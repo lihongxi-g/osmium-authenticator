@@ -203,4 +203,50 @@ class AutoBackupSchedulerTest {
         val last = at(2026, 8, 16, 3, 0)
         assertFalse(AutoBackupScheduler.isDue(last - day, last, 1))
     }
+
+    // ------------------------------------------- duplicate-trigger guard
+
+    @Test
+    fun aRecentSuccessAbsorbsTheSecondTrigger() {
+        // The alarm and the WorkManager job both aim at one slot; whichever
+        // fires second must not write another file.
+        val now = at(2026, 8, 16, 3, 5)
+        assertTrue(
+            AutoBackupScheduler.isRecentSuccess(now, at(2026, 8, 16, 3, 0), "")
+        )
+        assertTrue(
+            AutoBackupScheduler.isRecentSuccess(now, at(2026, 8, 16, 2, 50), "")
+        )
+    }
+
+    @Test
+    fun aRecentFailureIsRetriedNotAbsorbed() {
+        val now = at(2026, 8, 16, 3, 5)
+        assertFalse(
+            AutoBackupScheduler.isRecentSuccess(now, at(2026, 8, 16, 3, 0), "IOException: x")
+        )
+    }
+
+    @Test
+    fun aSuccessOlderThanTheWindowIsNotAbsorbed() {
+        // A late WorkManager run after a successful alarm run is a harmless
+        // second file; a newly chosen backup time must still run.
+        val now = at(2026, 8, 16, 6, 0)
+        assertFalse(
+            AutoBackupScheduler.isRecentSuccess(now, at(2026, 8, 16, 3, 0), "")
+        )
+        // Exactly on the boundary is no longer "recent".
+        assertFalse(
+            AutoBackupScheduler.isRecentSuccess(
+                now, now - AutoBackupScheduler.RECENT_SUCCESS_WINDOW_MS, ""
+            )
+        )
+    }
+
+    @Test
+    fun neverRunOrClockRollbackIsNotAbsorbed() {
+        val now = at(2026, 8, 16, 3, 0)
+        assertFalse(AutoBackupScheduler.isRecentSuccess(now, 0L, ""))
+        assertFalse(AutoBackupScheduler.isRecentSuccess(now, now + day, ""))
+    }
 }
