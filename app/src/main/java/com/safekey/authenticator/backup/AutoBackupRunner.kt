@@ -116,7 +116,14 @@ object AutoBackupRunner {
      */
     suspend fun runScheduled(app: SafeKeyApp): Outcome {
         val settings = app.settingsRepository.settings.first()
-        if (AutoBackupScheduler.isRecentSuccess(
+        // A schedule the user changed after that success means they asked for a
+        // run, so the dedupe window must not absorb it. Without this, setting a
+        // backup time "in a few minutes" right after a successful manual backup
+        // produced nothing at all: the trigger fired, was treated as the second
+        // half of a duplicate pair, and stayed silent.
+        val configChangedSinceSuccess =
+            settings.autoBackupConfigChangedAt > settings.autoBackupLastTime
+        if (!configChangedSinceSuccess && AutoBackupScheduler.isRecentSuccess(
                 System.currentTimeMillis(),
                 settings.autoBackupLastTime,
                 settings.autoBackupLastError

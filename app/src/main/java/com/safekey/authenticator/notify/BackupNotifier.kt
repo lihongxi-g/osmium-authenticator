@@ -31,7 +31,17 @@ import java.util.Locale
  */
 object BackupNotifier {
 
-    const val CHANNEL_SUCCESS = "osmium_backup_success"
+    /**
+     * v2 on purpose. A channel's importance is frozen once it exists, and
+     * IMPORTANCE_LOW is folded into the system's "silent notifications" group on
+     * several OEM builds (seen on ColorOS) — "backup finished" never showed up
+     * in the shade at all. v2 is IMPORTANCE_DEFAULT with the sound removed, so a
+     * 03:00 run still cannot wake anyone but the notification is a real one.
+     */
+    const val CHANNEL_SUCCESS = "osmium_backup_success_v2"
+
+    /** Dead predecessor: its importance cannot be changed, so it is removed. */
+    private const val CHANNEL_SUCCESS_V1 = "osmium_backup_success"
     const val CHANNEL_FAILURE = "osmium_backup_failure"
 
     /** Understood by MainActivity: which screen to open after unlocking. */
@@ -48,9 +58,13 @@ object BackupNotifier {
         val success = NotificationChannel(
             CHANNEL_SUCCESS,
             context.getString(R.string.notify_backup_success_title),
-            NotificationManager.IMPORTANCE_LOW
+            NotificationManager.IMPORTANCE_DEFAULT
         ).apply {
             description = context.getString(R.string.notify_channel_success_desc)
+            // Quiet but listed like a normal notification: no sound, no badge,
+            // no lights, no vibration — a successful 03:00 backup must not wake
+            // anyone, yet the user has to be able to find it in the shade.
+            setSound(null, null)
             setShowBadge(false)
             enableVibration(false)
             enableLights(false)
@@ -63,6 +77,8 @@ object BackupNotifier {
             description = context.getString(R.string.notify_channel_failure_desc)
         }
         manager.createNotificationChannels(listOf(success, failure))
+        // Do not leave two "backup finished" channels behind in system settings.
+        runCatching { manager.deleteNotificationChannel(CHANNEL_SUCCESS_V1) }
     }
 
     /** True when the system will actually show our notifications. */

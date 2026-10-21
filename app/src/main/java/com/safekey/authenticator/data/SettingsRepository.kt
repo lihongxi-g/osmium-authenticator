@@ -40,6 +40,13 @@ data class AppSettings(
     val autoBackupLastAttempt: Long = 0L,
     /** Send a notification when an unattended backup finishes. */
     val autoBackupNotify: Boolean = true,
+    /**
+     * When the schedule was last changed by the user (time / interval / target /
+     * switch). A success recorded *before* this cannot absorb the next run: the
+     * user just asked for one, and swallowing it silently made "I changed the
+     * time and nothing happened" the normal experience.
+     */
+    val autoBackupConfigChangedAt: Long = 0L,
     val autoCheckUpdates: Boolean = false,
     val tagsEnabled: Boolean = true,
     // ---- root hardening / developer mode (2.4.2) ----
@@ -116,6 +123,7 @@ class SettingsRepository(
         val AUTO_BACKUP_LAST_ERROR = stringPreferencesKey("auto_backup_last_error")
         val AUTO_BACKUP_LAST_ATTEMPT = longPreferencesKey("auto_backup_last_attempt")
         val AUTO_BACKUP_NOTIFY = booleanPreferencesKey("auto_backup_notify")
+        val AUTO_BACKUP_CONFIG_CHANGED = longPreferencesKey("auto_backup_config_changed")
         val AUTO_CHECK_UPDATES = booleanPreferencesKey("auto_check_updates")
         val TAGS_ENABLED = booleanPreferencesKey("tags_enabled")
         val DEV_MODE_ENABLED = booleanPreferencesKey("dev_mode_enabled")
@@ -151,6 +159,7 @@ class SettingsRepository(
             autoBackupLastError = prefs[Keys.AUTO_BACKUP_LAST_ERROR] ?: "",
             autoBackupLastAttempt = prefs[Keys.AUTO_BACKUP_LAST_ATTEMPT] ?: 0L,
             autoBackupNotify = prefs[Keys.AUTO_BACKUP_NOTIFY] ?: true,
+            autoBackupConfigChangedAt = prefs[Keys.AUTO_BACKUP_CONFIG_CHANGED] ?: 0L,
             autoCheckUpdates = prefs[Keys.AUTO_CHECK_UPDATES] ?: false,
             tagsEnabled = prefs[Keys.TAGS_ENABLED] ?: true,
             devModeEnabled = prefs[Keys.DEV_MODE_ENABLED] ?: false,
@@ -210,21 +219,31 @@ class SettingsRepository(
     // ------------------------------------------------------- auto backup
 
     suspend fun setAutoBackupEnabled(enabled: Boolean) {
-        context.dataStore.edit { it[Keys.AUTO_BACKUP_ENABLED] = enabled }
+        context.dataStore.edit {
+            it[Keys.AUTO_BACKUP_ENABLED] = enabled
+            it[Keys.AUTO_BACKUP_CONFIG_CHANGED] = System.currentTimeMillis()
+        }
     }
 
     suspend fun setAutoBackupTarget(target: String) {
-        context.dataStore.edit { it[Keys.AUTO_BACKUP_TARGET] = target }
+        context.dataStore.edit {
+            it[Keys.AUTO_BACKUP_TARGET] = target
+            it[Keys.AUTO_BACKUP_CONFIG_CHANGED] = System.currentTimeMillis()
+        }
     }
 
     suspend fun setAutoBackupIntervalDays(days: Int) {
-        context.dataStore.edit { it[Keys.AUTO_BACKUP_INTERVAL] = days.coerceIn(1, 365) }
+        context.dataStore.edit {
+            it[Keys.AUTO_BACKUP_INTERVAL] = days.coerceIn(1, 365)
+            it[Keys.AUTO_BACKUP_CONFIG_CHANGED] = System.currentTimeMillis()
+        }
     }
 
     suspend fun setAutoBackupTime(hour: Int, minute: Int) {
         context.dataStore.edit {
             it[Keys.AUTO_BACKUP_HOUR] = hour.coerceIn(0, 23)
             it[Keys.AUTO_BACKUP_MINUTE] = minute.coerceIn(0, 59)
+            it[Keys.AUTO_BACKUP_CONFIG_CHANGED] = System.currentTimeMillis()
         }
     }
 

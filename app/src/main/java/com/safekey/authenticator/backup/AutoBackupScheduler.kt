@@ -5,6 +5,7 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.safekey.authenticator.data.AppSettings
+import com.safekey.authenticator.security.AppLog
 import java.time.Instant
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -86,6 +87,7 @@ object AutoBackupScheduler {
     fun schedule(context: Context, settings: AppSettings) {
         val wm = WorkManager.getInstance(context)
         if (!settings.autoBackupEnabled) {
+            AppLog.d("auto-backup schedule: disabled → work+alarm cancelled")
             wm.cancelUniqueWork(WORK_NAME)
             AutoBackupAlarm.cancel(context)
             return
@@ -98,6 +100,11 @@ object AutoBackupScheduler {
             intervalDays = settings.autoBackupIntervalDays
         )
         val delay = (next - now).coerceAtLeast(0L)
+        AppLog.d(
+            "auto-backup schedule: ${settings.autoBackupHour}:" +
+                settings.autoBackupMinute.toString().padStart(2, '0') +
+                " every ${settings.autoBackupIntervalDays}d, in ${delay / 60_000} min"
+        )
         val request = OneTimeWorkRequestBuilder<AutoBackupWorker>()
             .setInitialDelay(delay, TimeUnit.MILLISECONDS)
             .build()

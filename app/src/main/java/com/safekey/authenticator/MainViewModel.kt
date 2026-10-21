@@ -827,6 +827,12 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                 s.autoBackupIntervalDays
             )
         ) {
+            // Logged so an exported log can tell "the catch-up looked and found
+            // nothing due" apart from "the catch-up never ran".
+            AppLog.d(
+                "auto-backup catch-up: not due (last=${s.autoBackupLastTime} " +
+                    "attempt=${s.autoBackupLastAttempt} err='${s.autoBackupLastError}')"
+            )
             return
         }
         if (_autoBackupRunning.value) return
