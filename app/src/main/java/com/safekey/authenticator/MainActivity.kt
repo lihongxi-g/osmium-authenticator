@@ -138,6 +138,13 @@ class MainActivity : FragmentActivity() {
     private var pendingUpdate by mutableStateOf<UpdateInfo?>(null)
     private var updateCheckInFlight = false
 
+    // A notification tap asking for the auto-backup page. Held until the app's
+    // own gate has been passed and, when the user enabled it, until identity has
+    // been verified once more — that page can change the backup password.
+    private var notificationEntry by mutableStateOf(false)
+    private var entryAuthPending by mutableStateOf(false)
+    private var entryPinMode by mutableStateOf(false)
+
     // ------------------------------------------------------------ lifecycle
 
     override fun attachBaseContext(newBase: Context) {
@@ -194,15 +201,30 @@ class MainActivity : FragmentActivity() {
                     pinReminderVisible = true
                 }
             }
-            // A screen requested by a notification tap is pushed onto the nav
-            // stack in onCreate/onNewIntent (see handleIntentScreen), i.e. before
-            // any composition. Navigating from a LaunchedEffect that watched the
-            // lock state crashed here: the effect fired in the same frame the
-            // gate handed over to the nav host, so the brand-new AnimatedContent
-            // saw its target change right after its first composition — the
-            // pattern behind the composer group-stack underflow this app already
-            // hit on Compose 1.6. Pushing first means the first composition
-            // starts on the requested screen, with no transition to animate.
+            // A notification tap asks for the auto-backup page. Resolved here
+            // rather than in handleIntentScreen because it depends on settings
+            // that are still loading at onCreate time: the page opens once the
+            // app's own gate has been passed, and — when the user asked for it —
+            // only after a separate identity check, since it can change the
+            // backup password.
+            LaunchedEffect(
+                notificationEntry, locked, pinRequired, destroyed, tamperBlocked,
+                settings.autoBackupNotifyRequireAuth, settings.gateOnOpen, pinSet
+            ) {
+                if (!notificationEntry) return@LaunchedEffect
+                if (locked || pinRequired || destroyed || tamperBlocked) return@LaunchedEffect
+                notificationEntry = false
+                // "Verify on open" has just verified this very entry; a second
+                // prompt back to back is what makes people switch protection off.
+                // With no biometric, no screen lock and no app PIN there is
+                // nothing to ask for, so the page opens instead of dead-ending.
+                val canVerify = canAuthenticateBiometric() || isDeviceSecure() || pinSet
+                if (settings.autoBackupNotifyRequireAuth && !settings.gateOnOpen && canVerify) {
+                    entryAuthPending = true
+                } else if (vm.nav.current != Screen.AutoBackup) {
+                    vm.nav.push(Screen.AutoBackup)
+                }
+            }
             val context = LocalContext.current
             // Keep these UI holders above the lock gate and AnimatedContent.
             // Navigating to a child route, or briefly showing the lock screen,
@@ -260,6 +282,58 @@ class MainActivity : FragmentActivity() {
                             settingsScrollState = settingsScrollState,
                             screenStateHolder = screenStateHolder
                         )
+                    }
+                    // Identity check for a page opened from a notification. It
+                    // sits above the real UI, so no part of that page is visible
+                    // before it passes.
+                    if (entryAuthPending && !locked && !pinRequired &&
+                        !destroyed && !tamperBlocked
+                    ) {
+                        if (entryPinMode) {
+                            val entryPinError by vm.pinError.collectAsState()
+                            PinVerifyScreen(
+                                title = stringResource(R.string.pin_verify_title),
+                                subtitle = stringResource(R.string.pin_verify_subtitle),
+                                error = entryPinError,
+                                remainingAttempts = vm.remainingAttempts(),
+                                onVerify = { pin ->
+                                    if (vm.onPinEntered(pin)) {
+                                        finishNotificationEntry()
+                                    } else {
+                                        vm.checkSelfDestructPin(pin)
+                                    }
+                                },
+                                onCancel = { entryPinMode = false }
+                            )
+                        } else {
+                            NotificationEntryAuthDialog(
+                                canBiometric = canAuthenticateBiometric(),
+                                canCredential = isDeviceSecure(),
+                                hasPin = pinSet,
+                                onBiometric = {
+                                    launchBiometric(
+                                        onSuccess = { finishNotificationEntry() },
+                                        onCancelled = { entryAuthPending = false },
+                                        onError = { msg ->
+                                            vm.showToast(msg)
+                                            entryAuthPending = false
+                                        }
+                                    )
+                                },
+                                onCredential = {
+                                    launchCredential(
+                                        onSuccess = { finishNotificationEntry() },
+                                        onCancelled = { entryAuthPending = false },
+                                        onError = { msg ->
+                                            vm.showToast(msg)
+                                            entryAuthPending = false
+                                        }
+                                    )
+                                },
+                                onPin = { entryPinMode = true },
+                                onCancel = { entryAuthPending = false }
+                            )
+                        }
                     }
                     // Update notification only over the unlocked main UI.
                     val update = pendingUpdate
@@ -350,27 +424,28 @@ class MainActivity : FragmentActivity() {
     /**
      * Apply a screen requested from outside the UI (a notification tap).
      *
-     * The push happens HERE — in onCreate before setContent, or in onNewIntent —
-     * and not from a LaunchedEffect watching the lock state. That effect fired in
-     * the very frame the gate handed over to the nav host, so the target state of
-     * the just-created AnimatedContent changed right after its first composition,
-     * which is how this app's composer group-stack crash (IndexOutOfBounds in
-     * ComposerImpl.end) gets triggered. Pushing before composition means the first
-     * composition already starts on the requested screen and nothing animates.
+     * Only records the request: [notificationEntry] is resolved inside the
+     * composition, because at this point the settings have not been read yet —
+     * and both the lock gate and the optional identity check depend on them.
+     * The page can change the backup password, so it is never pushed straight
+     * from an intent.
      *
-     * The gate still protects the screen: it replaces the whole nav host, so the
-     * requested screen is only composed after the app has been unlocked.
-     *
-     * The extra is cleared so a recreation cannot queue the same push twice; the
-     * duplicate guard covers the system redelivering the original Intent.
+     * The extra is cleared so a recreated activity cannot queue it twice.
      */
     private fun handleIntentScreen(intent: Intent?) {
         if (intent?.getStringExtra(BackupNotifier.EXTRA_OPEN_SCREEN) ==
             BackupNotifier.SCREEN_AUTO_BACKUP
         ) {
             intent.removeExtra(BackupNotifier.EXTRA_OPEN_SCREEN)
-            if (vm.nav.current != Screen.AutoBackup) vm.nav.push(Screen.AutoBackup)
+            notificationEntry = true
         }
+    }
+
+    /** Every identity check for a notification-opened page ends here. */
+    private fun finishNotificationEntry() {
+        entryAuthPending = false
+        entryPinMode = false
+        if (vm.nav.current != Screen.AutoBackup) vm.nav.push(Screen.AutoBackup)
     }
 
     override fun onStart() {
@@ -436,6 +511,52 @@ class MainActivity : FragmentActivity() {
     }
 
     // ------------------------------------------------------------ PIN gate
+
+    /**
+     * Identity check before a notification-opened page is shown. Offers exactly
+     * what the settings screen offers for its own protected entries —
+     * fingerprint, the lock-screen password and the app PIN — and only the ones
+     * this device can actually do right now.
+     */
+    @Composable
+    private fun NotificationEntryAuthDialog(
+        canBiometric: Boolean,
+        canCredential: Boolean,
+        hasPin: Boolean,
+        onBiometric: () -> Unit,
+        onCredential: () -> Unit,
+        onPin: () -> Unit,
+        onCancel: () -> Unit
+    ) {
+        AlertDialog(
+            onDismissRequest = onCancel,
+            title = { Text(stringResource(R.string.verify_title)) },
+            text = {
+                Column {
+                    if (canBiometric) {
+                        TextButton(onClick = onBiometric) {
+                            Text(stringResource(R.string.verify_biometric))
+                        }
+                    }
+                    if (canCredential) {
+                        TextButton(onClick = onCredential) {
+                            Text(stringResource(R.string.verify_credential))
+                        }
+                    }
+                    if (hasPin) {
+                        TextButton(onClick = onPin) {
+                            Text(stringResource(R.string.verify_pin))
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = onCancel) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
 
     @Composable
     private fun PinGate() {

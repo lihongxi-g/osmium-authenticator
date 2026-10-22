@@ -602,6 +602,8 @@
     <string name="notify_backup_private">Osmium : tâche en arrière-plan terminée</string>
     <string name="auto_backup_notify_title">Notifications de sauvegarde</string>
     <string name="auto_backup_notify_desc">Prévenir à la fin d’une sauvegarde automatique. Les sauvegardes manuelles ne notifient jamais.</string>
+    <string name="auto_backup_notify_auth_title">Vérifier avant d’ouvrir</string>
+    <string name="auto_backup_notify_auth_desc">Demander l’empreinte, le verrouillage de l’écran ou le code PIN de l’app quand cette page est ouverte depuis une notification de sauvegarde : le mot de passe de sauvegarde peut y être modifié. Pas de seconde demande si « vérifier à l’ouverture » est actif.</string>
     <string name="auto_backup_notify_blocked">Les notifications système sont bloquées pour Osmium — appuyez pour autoriser</string>
     <string name="permissions_title">Autorisations</string>
     <string name="permissions_manage_title">Gérer les autorisations</string>

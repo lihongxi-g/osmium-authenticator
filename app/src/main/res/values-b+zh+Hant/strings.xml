@@ -615,6 +615,8 @@
     <string name="notify_backup_private">Osmium：背景工作已完成</string>
     <string name="auto_backup_notify_title">備份結果通知</string>
     <string name="auto_backup_notify_desc">自動備份結束後傳送通知；手動備份不傳送。</string>
+    <string name="auto_backup_notify_auth_title">點通知進入前驗證</string>
+    <string name="auto_backup_notify_auth_desc">從備份通知點進來時要求指紋、螢幕鎖定密碼或應用程式 PIN——這個頁面可以改備份密碼。開屏驗證開著時不會重複要求。</string>
     <string name="auto_backup_notify_blocked">系統通知未允許，備份結果不會提示（點此開啟）</string>
     <string name="permissions_title">權限</string>
     <string name="permissions_manage_title">權限管理</string>

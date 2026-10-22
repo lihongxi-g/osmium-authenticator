@@ -602,6 +602,8 @@
     <string name="notify_backup_private">Osmium：バックグラウンド処理が完了しました</string>
     <string name="auto_backup_notify_title">バックアップ通知</string>
     <string name="auto_backup_notify_desc">自動バックアップ終了時に通知します。手動バックアップでは通知しません。</string>
+    <string name="auto_backup_notify_auth_title">通知から開く前に確認</string>
+    <string name="auto_backup_notify_auth_desc">バックアップ通知からこの画面を開くとき、指紋・画面ロック・アプリPINを要求します。この画面ではバックアップのパスワードを変更できます。「起動時に確認」が有効なときは重ねて要求しません。</string>
     <string name="auto_backup_notify_blocked">Osmium のシステム通知がブロックされています — タップして有効化</string>
     <string name="permissions_title">権限</string>
     <string name="permissions_manage_title">権限を管理</string>

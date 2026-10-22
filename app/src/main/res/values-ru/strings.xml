@@ -602,6 +602,8 @@
     <string name="notify_backup_private">Osmium: фоновая задача завершена</string>
     <string name="auto_backup_notify_title">Уведомления о копировании</string>
     <string name="auto_backup_notify_desc">Уведомлять по завершении автоматического копирования. Ручное копирование не уведомляет.</string>
+    <string name="auto_backup_notify_auth_title">Проверка перед открытием</string>
+    <string name="auto_backup_notify_auth_desc">Запрашивать отпечаток, блокировку экрана или PIN приложения при открытии этой страницы из уведомления о резервной копии: здесь можно изменить пароль. Не спрашивается повторно, если включена проверка при запуске.</string>
     <string name="auto_backup_notify_blocked">Системные уведомления для Osmium заблокированы — нажмите, чтобы включить</string>
     <string name="permissions_title">Разрешения</string>
     <string name="permissions_manage_title">Управление разрешениями</string>

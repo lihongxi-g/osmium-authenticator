@@ -619,6 +619,8 @@
     <string name="notify_backup_private">Osmium: background task finished</string>
     <string name="auto_backup_notify_title">Backup notifications</string>
     <string name="auto_backup_notify_desc">Notify when an automatic backup finishes. Manual backups never notify.</string>
+    <string name="auto_backup_notify_auth_title">Verify before opening</string>
+    <string name="auto_backup_notify_auth_desc">Ask for the fingerprint, the screen lock or the app PIN when this page is opened from a backup notification: it can change the backup password. Not asked twice while “verify on open” is on.</string>
     <string name="auto_backup_notify_blocked">System notifications are blocked for Osmium — tap to enable</string>
     <string name="permissions_title">Permissions</string>
     <string name="permissions_manage_title">Manage permissions</string>

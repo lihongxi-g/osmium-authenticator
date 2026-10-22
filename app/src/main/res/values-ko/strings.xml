@@ -602,6 +602,8 @@
     <string name="notify_backup_private">Osmium: 백그라운드 작업 완료</string>
     <string name="auto_backup_notify_title">백업 알림</string>
     <string name="auto_backup_notify_desc">자동 백업이 끝나면 알립니다. 수동 백업은 알리지 않습니다.</string>
+    <string name="auto_backup_notify_auth_title">알림에서 열기 전 확인</string>
+    <string name="auto_backup_notify_auth_desc">백업 알림에서 이 화면을 열 때 지문, 화면 잠금 또는 앱 PIN을 요구합니다. 이 화면에서 백업 비밀번호를 바꿀 수 있습니다. \'앱 열 때 확인\'이 켜져 있으면 다시 묻지 않습니다.</string>
     <string name="auto_backup_notify_blocked">Osmium의 시스템 알림이 차단되어 있습니다 — 눌러서 활성화</string>
     <string name="permissions_title">권한</string>
     <string name="permissions_manage_title">권한 관리</string>

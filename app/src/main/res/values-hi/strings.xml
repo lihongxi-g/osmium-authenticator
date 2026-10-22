@@ -602,6 +602,8 @@
     <string name="notify_backup_private">Osmium: पृष्ठभूमि कार्य पूरा हुआ</string>
     <string name="auto_backup_notify_title">बैकअप सूचनाएँ</string>
     <string name="auto_backup_notify_desc">स्वचालित बैकअप पूरा होने पर सूचित करें। मैनुअल बैकअप कभी सूचित नहीं करते।</string>
+    <string name="auto_backup_notify_auth_title">खोलने से पहले सत्यापन</string>
+    <string name="auto_backup_notify_auth_desc">बैकअप सूचना से यह पेज खोलते समय फ़िंगरप्रिंट, स्क्रीन लॉक या ऐप PIN माँगें — यहाँ बैकअप पासवर्ड बदला जा सकता है। "खोलने पर सत्यापित करें" चालू होने पर दोबारा नहीं पूछा जाएगा।</string>
     <string name="auto_backup_notify_blocked">Osmium के लिए सिस्टम सूचनाएँ अवरुद्ध हैं — सक्षम करने के लिए टैप करें</string>
     <string name="permissions_title">अनुमतियाँ</string>
     <string name="permissions_manage_title">अनुमतियाँ प्रबंधित करें</string>

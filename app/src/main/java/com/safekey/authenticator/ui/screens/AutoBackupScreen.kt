@@ -515,6 +515,18 @@ fun AutoBackupScreen(
                     }
                 )
 
+                SettingRow(
+                    icon = AppIcons.Fingerprint,
+                    title = stringResource(R.string.auto_backup_notify_auth_title),
+                    description = stringResource(R.string.auto_backup_notify_auth_desc),
+                    trailing = {
+                        Switch(
+                            checked = settings.autoBackupNotifyRequireAuth,
+                            onCheckedChange = { vm.setAutoBackupNotifyRequireAuth(it) }
+                        )
+                    }
+                )
+
                 if (settings.autoBackupNotify && !notifyAllowed) {
                     Text(
                         text = stringResource(R.string.auto_backup_notify_blocked),

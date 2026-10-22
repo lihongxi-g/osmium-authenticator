@@ -47,6 +47,14 @@ data class AppSettings(
      * time and nothing happened" the normal experience.
      */
     val autoBackupConfigChangedAt: Long = 0L,
+    /**
+     * Ask for identity verification when the auto-backup page is opened from a
+     * backup notification. That page can change the backup password, so on a
+     * device whose screen is already unlocked a stranger tapping the
+     * notification would otherwise own the backups. Not applied while "verify on
+     * open" is on — the open gate already verified that same entry.
+     */
+    val autoBackupNotifyRequireAuth: Boolean = true,
     val autoCheckUpdates: Boolean = false,
     val tagsEnabled: Boolean = true,
     // ---- root hardening / developer mode (2.4.2) ----
@@ -124,6 +132,7 @@ class SettingsRepository(
         val AUTO_BACKUP_LAST_ATTEMPT = longPreferencesKey("auto_backup_last_attempt")
         val AUTO_BACKUP_NOTIFY = booleanPreferencesKey("auto_backup_notify")
         val AUTO_BACKUP_CONFIG_CHANGED = longPreferencesKey("auto_backup_config_changed")
+        val AUTO_BACKUP_NOTIFY_AUTH = booleanPreferencesKey("auto_backup_notify_auth")
         val AUTO_CHECK_UPDATES = booleanPreferencesKey("auto_check_updates")
         val TAGS_ENABLED = booleanPreferencesKey("tags_enabled")
         val DEV_MODE_ENABLED = booleanPreferencesKey("dev_mode_enabled")
@@ -160,6 +169,7 @@ class SettingsRepository(
             autoBackupLastAttempt = prefs[Keys.AUTO_BACKUP_LAST_ATTEMPT] ?: 0L,
             autoBackupNotify = prefs[Keys.AUTO_BACKUP_NOTIFY] ?: true,
             autoBackupConfigChangedAt = prefs[Keys.AUTO_BACKUP_CONFIG_CHANGED] ?: 0L,
+            autoBackupNotifyRequireAuth = prefs[Keys.AUTO_BACKUP_NOTIFY_AUTH] ?: true,
             autoCheckUpdates = prefs[Keys.AUTO_CHECK_UPDATES] ?: false,
             tagsEnabled = prefs[Keys.TAGS_ENABLED] ?: true,
             devModeEnabled = prefs[Keys.DEV_MODE_ENABLED] ?: false,
@@ -281,6 +291,11 @@ class SettingsRepository(
 
     suspend fun setAutoBackupNotify(enabled: Boolean) {
         context.dataStore.edit { it[Keys.AUTO_BACKUP_NOTIFY] = enabled }
+    }
+
+    /** Identity check before the page is opened from a backup notification. */
+    suspend fun setAutoBackupNotifyRequireAuth(enabled: Boolean) {
+        context.dataStore.edit { it[Keys.AUTO_BACKUP_NOTIFY_AUTH] = enabled }
     }
 
     /** Mark that a run is starting, before any work happens. */

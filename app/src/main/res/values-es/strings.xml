@@ -602,6 +602,8 @@
     <string name="notify_backup_private">Osmium: tarea en segundo plano terminada</string>
     <string name="auto_backup_notify_title">Avisos de copia</string>
     <string name="auto_backup_notify_desc">Avisar cuando termine una copia automática. Las copias manuales nunca avisan.</string>
+    <string name="auto_backup_notify_auth_title">Verificar antes de abrir</string>
+    <string name="auto_backup_notify_auth_desc">Pedir huella, bloqueo de pantalla o PIN de la app al abrir esta página desde una notificación de copia de seguridad: aquí se puede cambiar la contraseña. No se pide otra vez si «verificar al abrir» está activo.</string>
     <string name="auto_backup_notify_blocked">Las notificaciones del sistema están bloqueadas para Osmium: toca para activarlas</string>
     <string name="permissions_title">Permisos</string>
     <string name="permissions_manage_title">Gestionar permisos</string>

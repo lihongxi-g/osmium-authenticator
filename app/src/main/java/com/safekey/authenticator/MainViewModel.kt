@@ -782,6 +782,8 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     fun setAutoBackupPassword(password: String) = viewModelScope.launch { settingsRepo.setAutoBackupPassword(password) }
     fun setAutoBackupKeepCount(count: Int) = viewModelScope.launch { settingsRepo.setAutoBackupKeepCount(count) }
     fun setAutoBackupNotify(enabled: Boolean) = viewModelScope.launch { settingsRepo.setAutoBackupNotify(enabled) }
+    fun setAutoBackupNotifyRequireAuth(enabled: Boolean) =
+        viewModelScope.launch { settingsRepo.setAutoBackupNotifyRequireAuth(enabled) }
 
     // ------------------------------------------------------- auto backup runs
 
