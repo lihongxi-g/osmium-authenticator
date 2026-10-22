@@ -70,7 +70,9 @@ jobs:
             test -s "$source"
             cp "$source" "$target"
           done
-          sha256sum dist/osmium-*.apk | sort > dist/SHA256SUMS.txt
+          # Flat file names so `sha256sum -c SHA256SUMS.txt` works against the
+          # release assets as they are uploaded (no dist/ prefix).
+          (cd dist && sha256sum osmium-*.apk | sort -k2 > SHA256SUMS.txt)
           cp app/build/outputs/apk/release/output-metadata.json dist/
           ls -lh dist
 
