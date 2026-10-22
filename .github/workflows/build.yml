@@ -41,6 +41,7 @@ jobs:
           chmod +x gradlew
           python3 scripts/test_android17_migration.py -v
           python3 scripts/test_lan_risk_order.py -v
+          python3 scripts/check_eager_field_order.py
           ./gradlew testDebugUnitTest :keyattestation:test assembleRelease --stacktrace
 
       - name: Unit test summary
