@@ -14,6 +14,9 @@ Osmium 是一款隐私优先的 Android TOTP/HOTP 验证器。本项目基于 GN
 - **WebDAV 备份**——将加密备份上传到用户自行配置的 WebDAV 服务器（NAS、电脑或另一部手机）并从中恢复；服务器只接收密文
 - **局域网快捷传输**——两台设备连接同一 Wi‑Fi 后，通过 6 位配对码端到端加密传输账户，不经过云端；接收前可预览并选择账户
 - **自动备份**——按计划备份到 WebDAV 或手机的 下载/Osmium 目录；可设置间隔、时间和保留数量
+- **备份结果通知**——定时备份结束后通知结果：成功为静默通知（无声音、无横幅、无角标），失败或被跳过会提醒；锁屏只显示「后台任务完成」，时间与目标需解锁后查看；可随时关闭
+- **权限页面**——设置中集中列出相机、通知、生物识别、局域网、存储（Android 9 及更低）与电池优化豁免的实时状态，可直接发起申请
+- **从通知进入需验证**——点备份通知进入自动备份页面时要求指纹、锁屏密码或应用 PIN（默认开启，可关闭）；该页面可修改备份密码
 - **更新检查**——可选查询 GitHub Releases API；只读取公开版本信息，不发送账户或设备数据，也不会自动下载或安装
 - **Steam Guard**——手动添加 Steam 账户，生成 5 位字母数字验证码
 - **隐藏验证码模式**——验证码以圆点显示，复制不受影响；编辑与分享在关闭该模式前被锁定
@@ -36,17 +39,17 @@ Osmium 是一款隐私优先的 Android TOTP/HOTP 验证器。本项目基于 GN
 
 ## 下载
 
-最新正式版：**Osmium v2.5.6**（versionCode 691–693，按架构：691 = armeabi-v7a、692 = arm64-v8a、693 = x86_64）。请选择与设备匹配的架构：
+最新正式版：**Osmium v2.6.0**（versionCode 771–773，按架构：771 = armeabi-v7a、772 = arm64-v8a、773 = x86_64）。请选择与设备匹配的架构：
 
 | 文件 | 架构 | 适用设备 | 下载 |
 |---|---|---|---|
-| `osmium-2.5.6-arm64-v8a.apk` | arm64-v8a | 几乎所有现代手机（推荐） | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.5.6/osmium-2.5.6-arm64-v8a.apk) |
-| `osmium-2.5.6-armeabi-v7a.apk` | armeabi-v7a | 老款 32 位手机 | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.5.6/osmium-2.5.6-armeabi-v7a.apk) |
-| `osmium-2.5.6-x86_64.apk` | x86_64 | Android 模拟器 | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.5.6/osmium-2.5.6-x86_64.apk) |
+| `osmium-2.6.0-arm64-v8a.apk` | arm64-v8a | 几乎所有现代手机（推荐） | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.6.0/osmium-2.6.0-arm64-v8a.apk) |
+| `osmium-2.6.0-armeabi-v7a.apk` | armeabi-v7a | 老款 32 位手机 | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.6.0/osmium-2.6.0-armeabi-v7a.apk) |
+| `osmium-2.6.0-x86_64.apk` | x86_64 | Android 模拟器 | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.6.0/osmium-2.6.0-x86_64.apk) |
 
 安装与设备架构不符的包可能无法启动。三个架构使用同一签名证书，SHA-256 指纹为：`B65BB0131CAA22C45D99EA4E2C3E99B3980EAE0DC5647190F41A2878E6D88412`。
 
-APK 的 SHA-256 校验和见 [v2.5.6 发布说明](release-notes-v2.5.6.md) 及 Release 页面的 `SHA256SUMS.txt`。
+APK 的 SHA-256 校验和见 [v2.6.0 发布说明](release-notes-v2.6.0.md) 及 Release 页面的 `SHA256SUMS.txt`。
 
 ## 隐私与条款
 
@@ -61,7 +64,7 @@ APK 的 SHA-256 校验和见 [v2.5.6 发布说明](release-notes-v2.5.6.md) 及 
 
 ## 电池与后台行为
 
-自动备份通过 Android 系统调度器执行——应用仅在备份时短暂唤醒，不驻留常驻后台服务。部分机型的省电策略可能推迟或拦截定时备份，请按 README 和应用内自动备份页面提示，为 Osmium 开启自启动及允许后台运行。
+自动备份通过 Android 系统调度器执行——应用仅在备份时短暂唤醒，不驻留常驻后台服务。部分机型的省电策略可能推迟或拦截定时备份，请按 README 和应用内自动备份页面提示，为 Osmium 开启自启动及允许后台运行。从最近任务列表划掉应用，在部分系统上等同于强制停止，会清除已排程的唤醒，直到你再次手动打开应用——这与任何代码逻辑无关，请避免划掉，或为 Osmium 关闭省电限制。备份结果通知同样可能被你或系统关闭。
 
 ## 构建
 

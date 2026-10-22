@@ -1,6 +1,6 @@
 # Terms of Use
 
-*Effective date: October 16, 2026 · Applies to Osmium v2.5.6 and later*
+*Effective date: October 22, 2026 · Applies to Osmium v2.6.0 and later*
 
 *Current version, published at osmium.im. The app reads it when you open About → Terms of Use.*
 
@@ -28,6 +28,8 @@ You may use Osmium for your own two-factor authentication and for devices you co
 Osmium has no account system and no cloud synchronization; all import features run entirely on this device. The app makes no network request at start-up unless you switch on the optional version check. Otherwise it connects only when you use a feature that needs it: the WebDAV server you configure, the GitHub Releases API for the optional version check (off by default; you can switch it on in Settings), the osmium.im website to read the current versions of these Terms of Use and of the Privacy Policy when you open them in About, Google's public attestation status list when you refresh the revocation data on the integrity screen, or the other device during a LAN transfer. LAN transfer uses AES-256-GCM encryption derived from the pairing code and does not pass through an Osmium cloud server.
 
 The current versions of these Terms of Use and of the Privacy Policy are published on the osmium.im website, and the versions published there are the ones that apply. The app reads them when you open the document from About and keeps the copy it read so you can read it again without a connection. If a fetch fails, the app shows a failure notice with a link to the website.
+
+Backup notifications and verification: automatic backups can post a local notification with the result. It can be switched off and it can also be delayed or suppressed by the system and by battery policies, so a notification is a convenience, not proof that a backup ran. The automatic-backup page can change the backup password, so keep "verify before opening from a notification" (on by default) or "verify on open" switched on: with both off, anyone holding your unlocked device can reach that page from the notification and change the backup password.
 
 **Languages:** this document is published in several languages. The English version is the original; the translations are provided for convenience. If a translation conflicts with the English version, the English version prevails.
 

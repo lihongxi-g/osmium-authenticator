@@ -1,6 +1,6 @@
 # Conditions d’utilisation
 
-*Date d’entrée en vigueur : 16 octobre 2026 · S’applique à Osmium v2.5.6 et versions ultérieures*
+*Date d’entrée en vigueur : 22 octobre 2026 · S’applique à Osmium v2.6.0 et versions ultérieures*
 
 *Version actuelle, publiée sur osmium.im. L’application la lit lorsque vous ouvrez À propos → Conditions d’utilisation.*
 
@@ -28,6 +28,8 @@ Vous pouvez utiliser Osmium pour votre propre authentification à deux facteurs 
 Osmium n’a aucun système de compte ni aucune synchronisation cloud ; toutes les fonctions d’import s’exécutent entièrement sur cet appareil. L’application n’effectue aucune requête réseau au démarrage, sauf si vous activez la vérification de version facultative. Sinon, elle ne se connecte que lorsque vous utilisez une fonction qui en a besoin : le serveur WebDAV que vous configurez, l’API GitHub Releases pour la vérification de version facultative (désactivée par défaut ; vous pouvez l’activer dans les paramètres), le site osmium.im pour lire les versions actuelles des présentes Conditions d’utilisation et de la Politique de confidentialité lorsque vous les ouvrez dans « À propos », la liste publique des statuts d’attestation de Google lorsque vous actualisez les données de révocation sur l’écran d’intégrité, ou l’autre appareil pendant un transfert LAN. Le transfert LAN utilise un chiffrement AES-256-GCM dérivé du code d’association et ne passe pas par un serveur cloud Osmium.
 
 Les versions actuelles des présentes Conditions d’utilisation et de la Politique de confidentialité sont publiées sur le site osmium.im, et ce sont les versions qui y sont publiées qui s’appliquent. L’application les lit lorsque vous ouvrez le document depuis « À propos » et conserve la copie qu’elle a lue afin que vous puissiez la relire sans connexion. Si la récupération échoue, l’application affiche un message d’échec avec un lien vers le site web.
+
+Notifications de sauvegarde et vérification : les sauvegardes automatiques peuvent publier une notification locale avec le résultat. Elle peut être désactivée et peut aussi être retardée ou supprimée par le système et par les politiques de batterie : une notification est un confort, pas une preuve qu’une sauvegarde a eu lieu. La page de sauvegarde automatique permet de modifier le mot de passe de sauvegarde ; gardez donc « vérifier avant d’ouvrir depuis une notification » (activé par défaut) ou « vérifier à l’ouverture » activé : si les deux sont désactivés, toute personne ayant votre appareil déverrouillé peut atteindre cette page depuis la notification et modifier le mot de passe.
 
 **Langues :** ce document est publié en plusieurs langues. La version anglaise est l’original ; les traductions sont fournies pour votre commodité. En cas de contradiction entre une traduction et la version anglaise, la version anglaise prévaut.
 

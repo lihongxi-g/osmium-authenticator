@@ -1,6 +1,6 @@
 # Nutzungsbedingungen
 
-*Gültig ab: 16. Oktober 2026 · Gilt für Osmium v2.5.6 und spätere Versionen*
+*Gültig ab: 22. Oktober 2026 · Gilt für Osmium v2.6.0 und spätere Versionen*
 
 *Aktuelle Fassung, veröffentlicht auf osmium.im. Die App liest sie, wenn du sie unter „Über → Nutzungsbedingungen“ öffnest.*
 
@@ -28,6 +28,8 @@ Du darfst Osmium für deine eigene Zwei-Faktor-Authentifizierung und für Gerät
 Osmium hat kein Kontosystem und keine Cloud-Synchronisierung; alle Importfunktionen laufen vollständig auf diesem Gerät. Die App stellt beim Start keine Netzwerkanfrage, es sei denn, du schaltest die optionale Versionsprüfung ein. Ansonsten verbindet sie sich nur, wenn du eine Funktion nutzt, die sie benötigt: den von dir konfigurierten WebDAV-Server, die GitHub-Releases-API für die optionale Versionsprüfung (standardmäßig aus; du kannst sie in den Einstellungen einschalten), die osmium.im-Website, um die aktuellen Fassungen dieser Nutzungsbedingungen und der Datenschutzerklärung zu lesen, wenn du sie unter „Über“ öffnest, Googles öffentliche Statusliste für Attestierungen, wenn du die Sperrdaten auf dem Integritätsbildschirm aktualisierst, oder das andere Gerät während einer LAN-Übertragung. Die LAN-Übertragung verwendet eine vom Kopplungscode abgeleitete AES-256-GCM-Verschlüsselung und läuft nicht über einen Osmium-Cloudserver.
 
 Die aktuellen Fassungen dieser Nutzungsbedingungen und der Datenschutzerklärung werden auf der osmium.im-Website veröffentlicht, und es gelten die dort veröffentlichten Fassungen. Die App liest sie, wenn du das Dokument unter „Über“ öffnest, und behält die gelesene Kopie, damit du sie ohne Verbindung erneut lesen kannst. Schlägt ein Abruf fehl, zeigt die App einen Fehlerhinweis mit einem Link zur Website an.
+
+Backup-Benachrichtigungen und Verifizierung: Automatische Backups können ihr Ergebnis per lokaler Benachrichtigung melden. Diese lässt sich abschalten und kann zudem vom System und von Akku-Richtlinien verzögert oder unterdrückt werden; eine Benachrichtigung ist daher eine Annehmlichkeit und kein Beweis, dass ein Backup gelaufen ist. Die Seite für automatische Backups kann das Backup-Passwort ändern – lassen Sie deshalb „vor dem Öffnen aus einer Benachrichtigung bestätigen“ (standardmäßig an) oder „beim Öffnen bestätigen“ eingeschaltet: Sind beide aus, kann jede Person mit Ihrem entsperrten Gerät über die Benachrichtigung diese Seite erreichen und das Backup-Passwort ändern.
 
 **Sprachfassungen:** Dieses Dokument wird in mehreren Sprachen veröffentlicht. Die englische Fassung ist das Original; die Übersetzungen dienen der Verständlichkeit. Bei Widersprüchen zwischen einer Übersetzung und der englischen Fassung gilt die englische Fassung.
 

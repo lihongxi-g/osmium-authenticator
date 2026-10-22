@@ -1,6 +1,6 @@
 # Términos de uso
 
-*Fecha de entrada en vigor: 16 de octubre de 2026 · Se aplica a Osmium v2.5.6 y versiones posteriores*
+*Fecha de entrada en vigor: 22 de octubre de 2026 · Se aplica a Osmium v2.6.0 y versiones posteriores*
 
 *Versión actual, publicada en osmium.im. La aplicación la lee cuando abres Acerca de → Términos de uso.*
 
@@ -28,6 +28,8 @@ Puedes usar Osmium para tu propia autenticación de dos factores y en los dispos
 Osmium no tiene sistema de cuentas ni sincronización en la nube; todas las funciones de importación se ejecutan íntegramente en este dispositivo. La aplicación no hace ninguna solicitud de red al iniciarse a menos que actives la comprobación de versiones opcional. Por lo demás, solo se conecta cuando usas una función que la necesita: el servidor WebDAV que configures, la API de GitHub Releases para la comprobación de versiones opcional (desactivada por defecto; puedes activarla en Ajustes), el sitio web osmium.im para leer las versiones actuales de estos Términos de uso y de la Política de privacidad cuando las abres en Acerca de, la lista pública de estados de atestación de Google cuando actualizas los datos de revocación en la pantalla de integridad, o el otro dispositivo durante una transferencia LAN. La transferencia LAN usa cifrado AES-256-GCM derivado del código de emparejamiento y no pasa por ningún servidor en la nube de Osmium.
 
 Las versiones actuales de estos Términos de uso y de la Política de privacidad se publican en el sitio web osmium.im, y las versiones publicadas allí son las que se aplican. La aplicación las lee cuando abres el documento desde Acerca de y conserva la copia que leyó para que puedas volver a leerla sin conexión. Si la obtención falla, la aplicación muestra un aviso de error con un enlace al sitio web.
+
+Notificaciones de copia y verificación: las copias automáticas pueden publicar una notificación local con el resultado. Puede desactivarse y también puede ser retrasada o suprimida por el sistema y por las políticas de batería, así que una notificación es una comodidad, no una prueba de que la copia se ejecutó. La página de copia automática puede cambiar la contraseña de la copia, así que mantén activado «verificar antes de abrir desde una notificación» (activado por defecto) o «verificar al abrir»: con ambos desactivados, cualquiera que tenga tu dispositivo desbloqueado puede llegar a esa página desde la notificación y cambiar la contraseña.
 
 **Idiomas:** este documento se publica en varios idiomas. La versión en inglés es el original; las traducciones se ofrecen por comodidad. Si una traducción entra en conflicto con la versión en inglés, prevalece la versión en inglés.
 
