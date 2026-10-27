@@ -56,6 +56,11 @@ data class AppSettings(
      */
     val autoBackupNotifyRequireAuth: Boolean = true,
     val autoCheckUpdates: Boolean = false,
+    /**
+     * Also look at pre-releases (beta / preview builds). Off by default: a
+     * preview is a test build and must never arrive uninvited.
+     */
+    val checkPreviewUpdates: Boolean = false,
     val tagsEnabled: Boolean = true,
     // ---- root hardening / developer mode (2.4.2) ----
     val devModeEnabled: Boolean = false,
@@ -134,6 +139,7 @@ class SettingsRepository(
         val AUTO_BACKUP_CONFIG_CHANGED = longPreferencesKey("auto_backup_config_changed")
         val AUTO_BACKUP_NOTIFY_AUTH = booleanPreferencesKey("auto_backup_notify_auth")
         val AUTO_CHECK_UPDATES = booleanPreferencesKey("auto_check_updates")
+        val CHECK_PREVIEW_UPDATES = booleanPreferencesKey("check_preview_updates")
         val TAGS_ENABLED = booleanPreferencesKey("tags_enabled")
         val DEV_MODE_ENABLED = booleanPreferencesKey("dev_mode_enabled")
         val DEV_DISABLE_ROOT_SECURITY = booleanPreferencesKey("dev_disable_root_security")
@@ -171,6 +177,7 @@ class SettingsRepository(
             autoBackupConfigChangedAt = prefs[Keys.AUTO_BACKUP_CONFIG_CHANGED] ?: 0L,
             autoBackupNotifyRequireAuth = prefs[Keys.AUTO_BACKUP_NOTIFY_AUTH] ?: true,
             autoCheckUpdates = prefs[Keys.AUTO_CHECK_UPDATES] ?: false,
+            checkPreviewUpdates = prefs[Keys.CHECK_PREVIEW_UPDATES] ?: false,
             tagsEnabled = prefs[Keys.TAGS_ENABLED] ?: true,
             devModeEnabled = prefs[Keys.DEV_MODE_ENABLED] ?: false,
             devDisableRootSecurity = prefs[Keys.DEV_DISABLE_ROOT_SECURITY] ?: false,
@@ -321,6 +328,14 @@ class SettingsRepository(
 
     suspend fun setAutoCheckUpdates(enabled: Boolean) {
         context.dataStore.edit { it[Keys.AUTO_CHECK_UPDATES] = enabled }
+    }
+
+    /**
+     * Preview channel: also offer pre-releases. Independent of the stable
+     * switch — a user may want betas only, or stable only, or both.
+     */
+    suspend fun setCheckPreviewUpdates(enabled: Boolean) {
+        context.dataStore.edit { it[Keys.CHECK_PREVIEW_UPDATES] = enabled }
     }
 
     suspend fun setTagsEnabled(enabled: Boolean) {

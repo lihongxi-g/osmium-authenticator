@@ -407,8 +407,12 @@
     <string name="auto_backup_password_saved">Пароль сохранён</string>
     <string name="auto_backup_time_picker_title">Выберите время</string>
     <string name="auto_backup_interval_picker_title">Выберите периодичность</string>
-    <string name="update_check_label">Автопроверка обновлений</string>
-    <string name="update_check_desc">Тихо проверяет новые версии на GitHub при открытии</string>
+    <string name="update_settings_title">Проверка обновлений</string>
+    <string name="update_settings_desc">Автоматически искать новые версии: стабильные, предварительные или обе</string>
+    <string name="update_stable_title">Проверять стабильные обновления</string>
+    <string name="update_stable_desc">Опубликованные версии. Тихо: один запрос к GitHub при открытии приложения</string>
+    <string name="update_preview_title">Проверять предварительные версии</string>
+    <string name="update_preview_desc">Ещё не выпущенные тестовые сборки — могут работать нестабильно. По умолчанию выключено</string>
     <string name="update_available_title">Доступна новая версия</string>
     <string name="update_available_body">Доступна версия %1$s (установлена: %2$s). Открыть GitHub?</string>
     <string name="update_available_notes_title">Что нового</string>

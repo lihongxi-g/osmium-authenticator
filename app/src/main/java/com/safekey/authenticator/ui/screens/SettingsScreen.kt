@@ -518,16 +518,13 @@ fun SettingsScreen(
                 onClick = { vm.nav.push(Screen.About) }
             )
 
+            // Two channels (stable / preview) live on their own page: one row
+            // here, two switches there.
             if ("updates" !in hiddenFeatures) SettingRow(
                 icon = AppIcons.Refresh,
-                title = stringResource(R.string.update_check_label),
-                description = stringResource(R.string.update_check_desc),
-                trailing = {
-                    Switch(
-                        checked = settings.autoCheckUpdates,
-                        onCheckedChange = { vm.setAutoCheckUpdates(it) }
-                    )
-                }
+                title = stringResource(R.string.update_settings_title),
+                description = stringResource(R.string.update_settings_desc),
+                onClick = { vm.nav.push(Screen.UpdateSettings) }
             )
 
             // ------------------------------------------ developer mode (2.4.2)

@@ -681,7 +681,7 @@ private val HIDEABLE_ITEMS: List<Pair<String, Int>> = listOf(
     "autobackup" to R.string.auto_backup_title,
     "log" to R.string.export_log,
     "manual" to R.string.manual_title,
-    "updates" to R.string.update_check_label
+    "updates" to R.string.update_settings_title
 )
 
 @Composable

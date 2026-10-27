@@ -2,6 +2,7 @@ package com.safekey.authenticator.update
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -57,10 +58,83 @@ class UpdateCheckerTest {
     }
 
     @Test
+    fun releasedBuildOutranksItsOwnPreview() {
+        // A user testing "2.6.1-beta" must be offered the final 2.6.1: the
+        // numeric-only compare treated them as equal and never offered it.
+        assertTrue(UpdateChecker.isNewer("2.6.1", "2.6.1-beta"))
+        assertFalse(UpdateChecker.isNewer("2.6.1-beta", "2.6.1"))
+        assertFalse(UpdateChecker.isNewer("2.6.1-beta", "2.6.1-beta"))
+        // A preview of the next version is still newer than the released one.
+        assertTrue(UpdateChecker.isNewer("2.6.2-beta", "2.6.1"))
+    }
+
+    @Test
+    fun previewSuffixesStillOrder() {
+        assertTrue(UpdateChecker.isNewer("2.6.1-beta1", "2.6.1-beta"))
+        assertFalse(UpdateChecker.isNewer("2.6.1-beta", "2.6.1-beta1"))
+        assertTrue(UpdateChecker.isNewer("2.6.1-beta", "2.6.1-alpha"))
+        // Pre-release identifiers compare as text, as semver prescribes.
+        assertFalse(UpdateChecker.isNewer("2.6.1-beta10", "2.6.1-beta2"))
+    }
+
+    @Test
     fun garbageNeverWins() {
         assertFalse(UpdateChecker.isNewer("abc", "2.3.2"))
         assertFalse(UpdateChecker.isNewer("", "2.3.2"))
         assertFalse(UpdateChecker.isNewer("2.3.x", "2.3.2"))
+    }
+
+    // ---------------------------------------------------- update channels
+
+    private fun candidate(tag: String, preview: Boolean = false) =
+        UpdateCandidate(tag = tag, notes = "", url = "https://example.com/$tag", isPreview = preview)
+
+    @Test
+    fun previewChannelOffIgnoresPreReleases() {
+        val releases = listOf(candidate("v2.6.0"), candidate("v2.6.1-beta", preview = true))
+        assertEquals(
+            "v2.6.0",
+            UpdateChecker.newestForChannels(releases, includeStable = true, includePreview = false)?.tag
+        )
+        assertEquals(
+            "v2.6.1-beta",
+            UpdateChecker.newestForChannels(releases, includeStable = true, includePreview = true)?.tag
+        )
+        // Preview only: the stable release is not offered.
+        assertEquals(
+            "v2.6.1-beta",
+            UpdateChecker.newestForChannels(releases, includeStable = false, includePreview = true)?.tag
+        )
+        assertNull(UpdateChecker.newestForChannels(releases, includeStable = false, includePreview = false))
+        assertNull(UpdateChecker.newestForChannels(emptyList(), includeStable = true, includePreview = true))
+    }
+
+    @Test
+    fun newestVersionWinsAcrossChannels() {
+        // An older pre-release must not shadow a newer stable release.
+        val releases = listOf(
+            candidate("v2.6.2"),
+            candidate("v2.6.1-beta", preview = true),
+            candidate("v2.5.9", preview = true)
+        )
+        val newest = UpdateChecker.newestForChannels(
+            releases, includeStable = true, includePreview = true
+        )
+        assertEquals("v2.6.2", newest?.tag)
+        assertFalse(newest?.isPreview ?: true)
+    }
+
+    @Test
+    fun channelChoiceKeepsTheNotesOfTheChosenRelease() {
+        val releases = listOf(
+            candidate("v2.6.0"),
+            UpdateCandidate("v2.6.1-beta", "beta notes", "https://example.com/beta", isPreview = true)
+        )
+        val newest = UpdateChecker.newestForChannels(
+            releases, includeStable = true, includePreview = true
+        )
+        assertEquals("beta notes", newest?.notes)
+        assertTrue(newest?.isPreview ?: false)
     }
 
     // ------------------------------------------------- release notes (update dialog)

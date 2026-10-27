@@ -137,7 +137,16 @@ fun AboutScreen(
                     .clickable(enabled = !updateChecking) {
                         updateChecking = true
                         scope.launch {
-                            val result = withContext(Dispatchers.IO) { UpdateChecker.check() }
+                            // The user asked for a check right now, so the
+                            // stable channel is always queried; preview builds
+                            // are added only when that switch is on.
+                            val includePreview = vm.settings.value.checkPreviewUpdates
+                            val result = withContext(Dispatchers.IO) {
+                                UpdateChecker.check(
+                                    includeStable = true,
+                                    includePreview = includePreview
+                                )
+                            }
                             updateChecking = false
                             when (result) {
                                 is UpdateResult.Found -> updateFound = result.info

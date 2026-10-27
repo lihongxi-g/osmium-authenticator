@@ -407,8 +407,12 @@
     <string name="auto_backup_password_saved">パスワードを保存しました</string>
     <string name="auto_backup_time_picker_title">時刻を選択</string>
     <string name="auto_backup_interval_picker_title">頻度を選択</string>
-    <string name="update_check_label">更新を自動確認</string>
-    <string name="update_check_desc">アプリ起動時にGitHubの新バージョンを静かに確認</string>
+    <string name="update_settings_title">アップデートの確認</string>
+    <string name="update_settings_desc">新しいバージョンを自動で確認します（正式版・プレビュー版を個別に選べます）</string>
+    <string name="update_stable_title">正式版の更新を確認</string>
+    <string name="update_stable_desc">公開済みのバージョン。アプリ起動時にGitHubへ1回だけ静かに問い合わせます</string>
+    <string name="update_preview_title">プレビュー版の更新を確認</string>
+    <string name="update_preview_desc">まだ公開されていないテスト版です。不安定な場合があります（初期設定はオフ）</string>
     <string name="update_available_title">新しいバージョンがあります</string>
     <string name="update_available_body">バージョン%1$sが公開されています（現在：%2$s）。GitHubで確認しますか？</string>
     <string name="update_available_notes_title">更新内容</string>

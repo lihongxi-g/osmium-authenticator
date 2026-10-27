@@ -425,8 +425,12 @@
     <string name="auto_backup_password_saved">Backup password saved</string>
     <string name="auto_backup_time_picker_title">Choose a time</string>
     <string name="auto_backup_interval_picker_title">Choose a frequency</string>
-    <string name="update_check_label">Auto-check for updates</string>
-    <string name="update_check_desc">Silently checks GitHub for new versions when the app opens</string>
+    <string name="update_settings_title">Update checks</string>
+    <string name="update_settings_desc">Automatically look for new versions: stable releases, preview builds, or both</string>
+    <string name="update_stable_title">Check for stable updates</string>
+    <string name="update_stable_desc">Released versions. Silent: one GitHub request when the app opens</string>
+    <string name="update_preview_title">Check for preview builds</string>
+    <string name="update_preview_desc">Beta and test builds that are not released yet — they may be unstable. Off by default</string>
     <string name="update_available_title">New version available</string>
     <string name="update_available_body">Version %1$s is available (installed: %2$s). Open GitHub to see it?</string>
     <string name="update_available_notes_title">What\'s new</string>

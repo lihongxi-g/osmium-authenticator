@@ -407,8 +407,12 @@
     <string name="auto_backup_password_saved">बैकअप पासवर्ड सहेजा गया</string>
     <string name="auto_backup_time_picker_title">समय चुनें</string>
     <string name="auto_backup_interval_picker_title">आवृत्ति चुनें</string>
-    <string name="update_check_label">अपडेट स्वतः जाँचें</string>
-    <string name="update_check_desc">ऐप खुलने पर GitHub पर नया संस्करण चुपचाप जाँचता है</string>
+    <string name="update_settings_title">अपडेट जाँच</string>
+    <string name="update_settings_desc">नए संस्करण अपने आप खोजें: स्थिर, प्रीव्यू या दोनों</string>
+    <string name="update_stable_title">स्थिर अपडेट जाँचें</string>
+    <string name="update_stable_desc">जारी किए गए संस्करण। चुपचाप: ऐप खुलने पर GitHub पर एक अनुरोध</string>
+    <string name="update_preview_title">प्रीव्यू बिल्ड जाँचें</string>
+    <string name="update_preview_desc">अभी जारी नहीं हुए परीक्षण बिल्ड — ये अस्थिर हो सकते हैं। डिफ़ॉल्ट रूप से बंद</string>
     <string name="update_available_title">नया संस्करण उपलब्ध है</string>
     <string name="update_available_body">संस्करण %1$s उपलब्ध है (स्थापित: %2$s)। GitHub खोलें?</string>
     <string name="update_available_notes_title">नया क्या है</string>

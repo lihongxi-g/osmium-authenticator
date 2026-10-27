@@ -407,8 +407,12 @@
     <string name="auto_backup_password_saved">백업 비밀번호 저장됨</string>
     <string name="auto_backup_time_picker_title">시간 선택</string>
     <string name="auto_backup_interval_picker_title">주기 선택</string>
-    <string name="update_check_label">업데이트 자동 확인</string>
-    <string name="update_check_desc">앱을 열 때 GitHub의 새 버전을 조용히 확인</string>
+    <string name="update_settings_title">업데이트 확인</string>
+    <string name="update_settings_desc">새 버전을 자동으로 확인합니다(정식 버전과 프리뷰 버전을 따로 켤 수 있습니다)</string>
+    <string name="update_stable_title">정식 버전 업데이트 확인</string>
+    <string name="update_stable_desc">이미 출시된 버전입니다. 앱을 열 때 GitHub에 한 번만 조용히 요초합니다</string>
+    <string name="update_preview_title">프리뷰 버전 업데이트 확인</string>
+    <string name="update_preview_desc">아직 출시되지 않은 테스트 빌드이며 불안정할 수 있습니다(기본값 깼짐)</string>
     <string name="update_available_title">새 버전 사용 가능</string>
     <string name="update_available_body">버전 %1$s이(가) 출시되었습니다(현재: %2$s). GitHub에서 확인할까요?</string>
     <string name="update_available_notes_title">업데이트 내용</string>

@@ -423,8 +423,12 @@
     <string name="auto_backup_password_saved">备份密码已保存</string>
     <string name="auto_backup_time_picker_title">选择备份时间</string>
     <string name="auto_backup_interval_picker_title">选择备份频率</string>
-    <string name="update_check_label">自动检查更新</string>
-    <string name="update_check_desc">每次打开应用时静默检查 GitHub 上的新版本</string>
+    <string name="update_settings_title">检查更新</string>
+    <string name="update_settings_desc">自动检查新版本：正式版、预览版，可分别开启</string>
+    <string name="update_stable_title">检查正式版更新</string>
+    <string name="update_stable_desc">已正式发布的版本；打开应用时静默请求一次 GitHub</string>
+    <string name="update_preview_title">检查预览版更新</string>
+    <string name="update_preview_desc">尚未正式发布的测试版，可能不稳定；默认关闭</string>
     <string name="update_available_title">发现新版本</string>
     <string name="update_available_body">新版本 %1$s 已发布（当前版本 %2$s）。前往 GitHub 查看？</string>
     <string name="update_available_notes_title">更新内容</string>

@@ -105,6 +105,7 @@ import com.safekey.authenticator.ui.screens.ScanScreen
 import com.safekey.authenticator.ui.screens.LanguageSettingsScreen
 import com.safekey.authenticator.ui.screens.SettingsScreen
 import com.safekey.authenticator.ui.screens.ThemeSettingsScreen
+import com.safekey.authenticator.ui.screens.UpdateSettingsScreen
 import com.safekey.authenticator.ui.screens.TagSettingsScreen
 import com.safekey.authenticator.ui.screens.ThirdPartyImportScreen
 import com.safekey.authenticator.ui.screens.TagsScreen
@@ -948,14 +949,17 @@ class MainActivity : FragmentActivity() {
 
     /**
      * Silent check against the GitHub releases API, run in the background
-     * every time the app comes to the foreground (when the user has
-     * auto-update checks enabled). Failures stay silent; a found update
+     * every time the app comes to the foreground — but only for the channels
+     * the user enabled in Settings → update checks (stable and/or preview;
+     * both off means no request at all). Failures stay silent; a found update
      * sets [pendingUpdate], which the Compose tree shows as a dialog over
      * the unlocked main UI.
      */
     private fun maybeCheckForUpdate() {
         val settings = vm.settings.value
-        if (!settings.autoCheckUpdates || updateCheckInFlight ||
+        val checkStable = settings.autoCheckUpdates
+        val checkPreview = settings.checkPreviewUpdates
+        if ((!checkStable && !checkPreview) || updateCheckInFlight ||
             (tampered && !tamperAcknowledged) ||
             vm.destroyed.value
         ) return
@@ -965,7 +969,9 @@ class MainActivity : FragmentActivity() {
         updateCheckInFlight = true
         lifecycleScope.launch {
             try {
-                val result = withContext(Dispatchers.IO) { UpdateChecker.check() }
+                val result = withContext(Dispatchers.IO) {
+                    UpdateChecker.check(includeStable = checkStable, includePreview = checkPreview)
+                }
                 if (result is UpdateResult.Found) pendingUpdate = result.info
             } finally {
                 updateCheckInFlight = false
@@ -1287,6 +1293,11 @@ private fun IntegrityNoticeDialog(
                             LanguagePrefs.set(this@MainActivity, lang)
                             recreate()
                         }
+                    )
+
+                    is Screen.UpdateSettings -> UpdateSettingsScreen(
+                        vm = vm,
+                        onBack = { vm.nav.pop() }
                     )
 
                     is Screen.TagSettings -> TagSettingsScreen(

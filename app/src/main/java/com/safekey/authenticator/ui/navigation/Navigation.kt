@@ -20,6 +20,8 @@ sealed class Screen {
     object ThemeSettings : Screen()
     /** Secondary settings page: app language. */
     object LanguageSettings : Screen()
+    /** Secondary settings page: which update channels to check (stable / preview). */
+    object UpdateSettings : Screen()
     object TagSettings : Screen()
     object Export : Screen()
     /** Plaintext export for users migrating to another authenticator. */

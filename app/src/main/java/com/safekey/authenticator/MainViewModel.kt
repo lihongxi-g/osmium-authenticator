@@ -775,6 +775,11 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     fun setDestroyMode(mode: String) = viewModelScope.launch { settingsRepo.setDestroyMode(mode) }
     fun setFailThreshold(threshold: Int) = viewModelScope.launch { settingsRepo.setFailThreshold(threshold) }
     fun setAutoCheckUpdates(enabled: Boolean) = viewModelScope.launch { settingsRepo.setAutoCheckUpdates(enabled) }
+
+    /** Preview channel switch (pre-releases). Off by default. */
+    fun setCheckPreviewUpdates(enabled: Boolean) =
+        viewModelScope.launch { settingsRepo.setCheckPreviewUpdates(enabled) }
+
     fun setAutoBackupEnabled(enabled: Boolean) = viewModelScope.launch { settingsRepo.setAutoBackupEnabled(enabled) }
     fun setAutoBackupTarget(target: String) = viewModelScope.launch { settingsRepo.setAutoBackupTarget(target) }
     fun setAutoBackupIntervalDays(days: Int) = viewModelScope.launch { settingsRepo.setAutoBackupIntervalDays(days) }
