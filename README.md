@@ -2,7 +2,7 @@
 
 Osmium is a privacy-first Android TOTP/HOTP authenticator, released under the GNU GPL v3 or later. Codes are computed on-device; account data is encrypted before it is written using a non-exportable Android Keystore key. No account is required and no telemetry is collected.
 
-The app itself fetches the Terms of Use and Privacy Policy from osmium.im when you open them (Settings → About), so you always see the current versions (no user data is sent). All other network features are optional: user-configured WebDAV backup, GitHub update checks, and user-initiated encrypted transfer between two devices on the same Wi-Fi network. External links such as GitHub and the verification lab are opened by the system browser or another app.
+The app itself fetches the Terms of Use and Privacy Policy from osmium.im when you open them (Settings → About), so you always see the current versions (no user data is sent). All other network features are optional: user-configured WebDAV backup, GitHub update checks (a switch each for stable releases and for preview builds, both off by default), and user-initiated encrypted transfer between two devices on the same Wi-Fi network. External links such as GitHub and the verification lab are opened by the system browser or another app.
 
 ## Features
 
@@ -17,7 +17,7 @@ The app itself fetches the Terms of Use and Privacy Policy from osmium.im when y
 - **Backup result notifications** — scheduled runs report their outcome: success is silent (no sound, no banner, no badge), failure or a skipped run alerts; the lock screen shows only that a background task finished, with time and destination revealed after unlocking; can be switched off at any time
 - **Permissions page** — one place under Settings listing live status for camera, notifications, biometrics, local network, storage (Android 9 and older) and the battery-optimisation exemption, with the request one tap away
 - **Verification when opening from a notification** — opening the auto-backup page from a backup notification asks for the fingerprint, screen lock or app PIN (on by default, can be switched off); that page can change the backup password
-- **Update checks** — optionally query the GitHub Releases API for public version information; no account or device data is sent, and the app never downloads or installs updates automatically
+- **Update checks** — optionally query the GitHub Releases API for public version information, on two independent channels (stable releases, or stable plus preview builds; both switches off by default); no account or device data is sent, and the app never downloads or installs updates automatically
 - **Steam Guard** — manually add Steam accounts and generate 5-character alphanumeric codes
 - **Hidden codes mode** — render codes as dots; copying still works, while editing and sharing remain locked
 - **Sort and search** — random, alphabetical, date-added or copy-count order; search by account name or issuer
@@ -39,17 +39,17 @@ The live test page at **https://otp.osmium.im** supports TOTP, HOTP and Steam Gu
 
 ## Download
 
-Latest stable release: **Osmium v2.6.0** (`versionCode 771-773, per ABI`: 771 = armeabi-v7a, 772 = arm64-v8a, 773 = x86_64). Choose the ABI matching your device:
+Latest stable release: **Osmium v2.6.1** (`versionCode 791-793, per ABI`: 791 = armeabi-v7a, 792 = arm64-v8a, 793 = x86_64). Choose the ABI matching your device:
 
 | File | Architecture | Devices | Download |
 |---|---|---|---|
-| `osmium-2.6.0-arm64-v8a.apk` | arm64-v8a | Virtually all modern phones (recommended) | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.6.0/osmium-2.6.0-arm64-v8a.apk) |
-| `osmium-2.6.0-armeabi-v7a.apk` | armeabi-v7a | Older 32-bit phones | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.6.0/osmium-2.6.0-armeabi-v7a.apk) |
-| `osmium-2.6.0-x86_64.apk` | x86_64 | Android emulators | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.6.0/osmium-2.6.0-x86_64.apk) |
+| `osmium-2.6.1-arm64-v8a.apk` | arm64-v8a | Virtually all modern phones (recommended) | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.6.1/osmium-2.6.1-arm64-v8a.apk) |
+| `osmium-2.6.1-armeabi-v7a.apk` | armeabi-v7a | Older 32-bit phones | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.6.1/osmium-2.6.1-armeabi-v7a.apk) |
+| `osmium-2.6.1-x86_64.apk` | x86_64 | Android emulators | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.6.1/osmium-2.6.1-x86_64.apk) |
 
 Installing an incompatible ABI may prevent the app from starting. All three APKs use the same signing certificate, SHA-256 fingerprint: `B65BB0131CAA22C45D99EA4E2C3E99B3980EAE0DC5647190F41A2878E6D88412`.
 
-APK SHA-256 checksums are listed in the [v2.6.0 release notes](release-notes-v2.6.0.md) and in `SHA256SUMS.txt` on the GitHub Release page.
+APK SHA-256 checksums are listed in the [v2.6.1 release notes](release-notes-v2.6.1.md) and in `SHA256SUMS.txt` on the GitHub Release page.
 
 ## Privacy & Terms
 
