@@ -1,6 +1,6 @@
 # Privacy Policy
 
-*Effective date: October 22, 2026 · Applies to Osmium v2.6.0 and later*
+*Effective date: October 28, 2026 · Applies to Osmium v2.6.1 and later*
 
 *Current version, published at osmium.im. The app reads it when you open About → Privacy Policy.*
 
@@ -18,7 +18,7 @@ Network: the app opens a connection only in these cases: (1) legal documents —
 
 Legal documents: when you open Terms of Use or Privacy Policy from About, the app fetches the current versions from osmium.im so that you always see the versions in effect. These requests carry no account, authenticator or device data. If the fetch fails, the app shows a failure notice with a link to the website, and the copy read last time stays available.
 
-Version checks: when the version check is switched on, the app requests https://api.github.com/repos/lihongxi-g/osmium-authenticator/releases/latest to see whether a newer release exists. The request sends only a User-Agent containing the app name and version; no account, authenticator or device data is sent, and failures stay silent. The check is off by default and can be switched off again in Settings.
+Version checks: Settings offers two separate switches — stable releases and preview builds — and both are off by default. With only the stable switch on, the app requests https://api.github.com/repos/lihongxi-g/osmium-authenticator/releases/latest to see whether a newer stable release exists. With the preview switch on, it requests the list of published releases at https://api.github.com/repos/lihongxi-g/osmium-authenticator/releases and picks the newest build the enabled switches allow; preview builds are the releases the developer marks as pre-release on GitHub. Either request sends only a User-Agent containing the app name and version; no account, authenticator or device data is sent, and failures stay silent. Both switches can be turned off again in Settings at any time, and with both off the app makes no version-check request at all.
 
 LAN quick transfer: both devices must be on the same Wi-Fi network, and the receiving device only accepts a sender that proves the 12-digit pairing code shown on its screen. During the handshake the two devices exchange the phone model name, a random identifier generated when the app was installed (never derived from hardware identifiers) and the risk codes described below, all bound into the encrypted session. Before anything is transferred, each device scans its own network link locally to warn you about risks: it reads the system ARP table (/proc/net/arp), the Wi-Fi link's security type and network name, whether an HTTP proxy is configured, whether a VPN is active, and the default gateway's hardware address. Only the resulting risk codes — never the underlying details — are sent to the other device, and both sides must confirm before any account data is sent or accepted. If you refuse a device, it is remembered in a 24-hour block list kept encrypted in the app's private storage. Nothing about a transfer is sent to the developer or to any server.
 
