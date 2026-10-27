@@ -20,7 +20,6 @@ import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
 import java.security.spec.PKCS8EncodedKeySpec
 import java.util.Base64
-import javax.net.ssl.HttpsURLConnection
 import javax.net.ssl.KeyManagerFactory
 import javax.net.ssl.SSLContext
 import javax.net.ssl.TrustManagerFactory
@@ -265,6 +264,8 @@ class WebDavClientTest {
             // Production TLS: platform trust anchors only.
             val e = assertThrows(WebDavException::class.java) { WebDavClient.testConnection(cfg) }
             assertTrue(e.message!!.contains("TLS", ignoreCase = true))
+            // Nothing may reach the server over an unverified connection.
+            assertTrue(tlsServer.methods.isEmpty())
         } finally {
             tlsServer.close()
         }
@@ -276,10 +277,13 @@ class WebDavClientTest {
         try {
             val cfg = WebDavServerConfig("https://localhost:${tlsServer.port}", user, pass)
             // Trusting the certificate is not enough: the name has to match.
+            // Endpoint identification fails the handshake, so no request (and
+            // no credential) ever leaves the device.
             val e = assertThrows(WebDavException::class.java) {
                 WebDavClient.testConnection(cfg, clientTlsTrusting(WRONG_CERT))
             }
-            assertTrue(e.message!!.contains("does not match", ignoreCase = true))
+            assertTrue(e.message!!.contains("TLS", ignoreCase = true))
+            assertTrue(tlsServer.methods.isEmpty())
         } finally {
             tlsServer.close()
         }
@@ -328,9 +332,10 @@ private fun serverContext(certPath: String, keyPath: String): SSLContext {
 }
 
 /**
- * Client side: trusts exactly one certificate, but still uses the platform
- * host name verifier — so the TLS tests exercise both checks the client
- * performs in production.
+ * Client side: trusts exactly one certificate. Host name verification is not
+ * injectable — the client sets endpointIdentificationAlgorithm = "HTTPS", and
+ * these tests prove that path accepts a matching name and rejects a mismatched
+ * one, exactly as Conscrypt does it on the device.
  */
 private fun clientTlsTrusting(certPath: String): WebDavClient.Tls {
     val store = KeyStore.getInstance("PKCS12").apply {
@@ -340,7 +345,7 @@ private fun clientTlsTrusting(certPath: String): WebDavClient.Tls {
     val tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm())
     tmf.init(store)
     val context = SSLContext.getInstance("TLS").apply { init(null, tmf.trustManagers, null) }
-    return WebDavClient.Tls(context.socketFactory, HttpsURLConnection.getDefaultHostnameVerifier())
+    return WebDavClient.Tls(context.socketFactory)
 }
 
 // -------------------------------------------- minimal HTTP/1.1 mock server

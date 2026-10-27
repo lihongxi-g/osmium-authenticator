@@ -18,7 +18,6 @@ import java.net.UnknownHostException
 import java.text.SimpleDateFormat
 import java.util.Base64
 import java.util.Locale
-import javax.net.ssl.HostnameVerifier
 import javax.net.ssl.HttpsURLConnection
 import javax.net.ssl.SSLException
 import javax.net.ssl.SSLSocket
@@ -91,20 +90,22 @@ object WebDavClient {
     private val HEX = "0123456789ABCDEF".toCharArray()
 
     /**
-     * TLS knobs. The app always uses [DEFAULT] — the platform trust anchors and
-     * the platform hostname verifier. It is injectable only so the unit tests
-     * can talk to a local server with a test certificate; it is internal to
-     * this module and no production call site passes anything else.
+     * TLS knobs. The app always uses [DEFAULT] — the platform trust anchors.
+     * It is injectable only so the unit tests can talk to a local server with a
+     * test certificate; it is internal to this module and no production call
+     * site passes anything else.
+     *
+     * Host name verification is not a separate step: the socket is created with
+     * [SSLParameters.endpointIdentificationAlgorithm] = "HTTPS", which both the
+     * JDK and Conscrypt (Android) enforce inside the handshake — Conscrypt's
+     * TrustManagerImpl runs the platform host name check when that algorithm is
+     * set. Doing it that way keeps production and the JVM tests on exactly the
+     * same enforcement path; HttpsURLConnection's default HostnameVerifier, by
+     * contrast, is a stub that rejects everything outside an HttpsURLConnection.
      */
-    internal class Tls(
-        val socketFactory: SSLSocketFactory,
-        val hostnameVerifier: HostnameVerifier
-    ) {
+    internal class Tls(val socketFactory: SSLSocketFactory) {
         companion object {
-            val DEFAULT = Tls(
-                HttpsURLConnection.getDefaultSSLSocketFactory(),
-                HttpsURLConnection.getDefaultHostnameVerifier()
-            )
+            val DEFAULT = Tls(HttpsURLConnection.getDefaultSSLSocketFactory())
         }
     }
 
@@ -253,7 +254,9 @@ object WebDavClient {
             } catch (e: ConnectException) {
                 throw WebDavException("The server is unreachable", e)
             } catch (e: SSLException) {
-                throw WebDavException("TLS error — the server certificate is not trusted", e)
+                throw WebDavException(
+                    "TLS error — the server certificate is not trusted " +
+                        "or does not match the server name", e)
             } catch (e: IOException) {
                 val msg = e.message ?: ""
                 // Android 16+ local-network protection returns EPERM/ECONNABORTED
@@ -358,13 +361,14 @@ object WebDavClient {
             raw.soTimeout = READ_TIMEOUT_MS
             if (target.protocol != "https") return raw
             // Handing the host name to the factory makes the TLS layer send SNI
-            // and resume sessions; the certificate is verified right after.
+            // and resume sessions; endpoint identification makes the handshake
+            // fail if the certificate is not valid for this name.
             val ssl = tls.socketFactory.createSocket(raw, host, port, true) as SSLSocket
             ssl.soTimeout = READ_TIMEOUT_MS
+            val params = ssl.sslParameters
+            params.endpointIdentificationAlgorithm = "HTTPS"
+            ssl.sslParameters = params
             ssl.startHandshake()
-            if (!tls.hostnameVerifier.verify(host, ssl.session)) {
-                throw WebDavException("TLS error — the certificate does not match the server name")
-            }
             return ssl
         } catch (e: Throwable) {
             try {
