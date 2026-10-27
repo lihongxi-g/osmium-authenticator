@@ -28,6 +28,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -74,11 +75,19 @@ fun WebDavScreen(
     val scope = rememberCoroutineScope()
     val savedConfig by vm.webDavConfig.collectAsState()
 
-    var url by remember { mutableStateOf("") }
-    var username by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var seeded by remember { mutableStateOf(false) }
+    // The form fields use rememberSaveable, not remember: with "verify on
+    // open" enabled (the default) going to the background locks the app, and
+    // the lock gate replaces the whole nav host — which destroys this
+    // composable. Plain remember state died there, so a user who switched to
+    // another app to copy the server address and password came back to an
+    // empty form. The SaveableStateProvider in MainNavHost keeps these values.
+    var url by rememberSaveable { mutableStateOf("") }
+    var username by rememberSaveable { mutableStateOf("") }
+    var password by rememberSaveable { mutableStateOf("") }
+    var seeded by rememberSaveable { mutableStateOf(false) }
     var urlError by remember { mutableStateOf(false) }
+    // Deliberately NOT saveable: a restored non-null busyLabel would leave the
+    // whole form disabled forever (the coroutine that clears it is gone).
     var busyLabel by remember { mutableStateOf<String?>(null) }
     var localNetworkDenied by remember { mutableStateOf(false) }
     val requestLocalNetwork = rememberLocalNetworkPermissionRequest {
