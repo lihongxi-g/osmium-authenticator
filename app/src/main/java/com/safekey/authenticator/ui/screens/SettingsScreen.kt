@@ -167,7 +167,7 @@ fun SettingsScreen(
                 description = stringResource(R.string.font_size_desc),
                 trailing = {
                     Text(
-                        text = stringResource(fontSizeLabelRes(settings.fontSize)),
+                        text = "${settings.fontScalePercent}%",
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -640,7 +640,7 @@ fun SettingsScreen(
             onDismissRequest = { showDestroyModeDialog = false },
             title = { Text(stringResource(R.string.destroy_mode)) },
             text = {
-                Column {
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                     Text(
                         text = stringResource(R.string.destroy_warning),
                         style = MaterialTheme.typography.bodySmall,
@@ -672,7 +672,7 @@ fun SettingsScreen(
             onDismissRequest = { showOffsetDialog = false },
             title = { Text(stringResource(R.string.time_offset)) },
             text = {
-                Column {
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                     Text(
                         text = stringResource(R.string.time_offset_hint),
                         style = MaterialTheme.typography.bodySmall,

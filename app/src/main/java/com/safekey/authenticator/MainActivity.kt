@@ -41,6 +41,7 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
@@ -76,6 +77,7 @@ import com.safekey.authenticator.security.classifyBiometricCode
 import com.safekey.authenticator.security.IntegrityCheck
 import com.safekey.authenticator.security.RootState
 import com.safekey.authenticator.totp.OtpUriParser
+import com.safekey.authenticator.ui.components.DialogBodyText
 import com.safekey.authenticator.ui.components.SwipeBackContainer
 import com.safekey.authenticator.ui.components.UpdateAvailableDialog
 import com.safekey.authenticator.ui.components.integrityCheckTitle
@@ -242,7 +244,7 @@ class MainActivity : FragmentActivity() {
             SafeKeyTheme(
                 themeMode = settings.themeMode,
                 dynamicColor = settings.dynamicColor,
-                fontSize = settings.fontSize
+                fontScalePercent = settings.fontScalePercent
             ) {
                 // Screenshot policy follows the user setting (default: blocked).
                 LaunchedEffect(settings.allowScreenshots) {
@@ -499,7 +501,7 @@ class MainActivity : FragmentActivity() {
         AlertDialog(
             onDismissRequest = { },
             title = { Text(stringResource(R.string.tampered_title)) },
-            text = { Text(stringResource(R.string.tampered_message)) },
+            text = { DialogBodyText(stringResource(R.string.tampered_message)) },
             confirmButton = {
                 TextButton(onClick = onContinue) {
                     Text(stringResource(R.string.tampered_continue))
@@ -1001,7 +1003,7 @@ private fun PinReminderDialog(
         onDismissRequest = { onDismiss(silence) },
         title = { Text(stringResource(R.string.app_pin_setup)) },
         text = {
-            Column {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 Text(stringResource(R.string.pin_reminder_body))
                 Spacer(Modifier.height(8.dp))
                 Row(
@@ -1051,7 +1053,7 @@ private fun IntegrityNoticeDialog(
             )
         },
         text = {
-            Column {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 Text(
                     stringResource(
                         if (compromised) R.string.integrity_dialog_body_alert

@@ -1,6 +1,8 @@
 package com.safekey.authenticator.ui.screens
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,14 +15,20 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -34,8 +42,11 @@ import com.safekey.authenticator.data.LanguagePrefs
 import com.safekey.authenticator.ui.components.AppIcons
 import com.safekey.authenticator.ui.components.SettingRow
 import com.safekey.authenticator.ui.components.SimpleTopBar
+import com.safekey.authenticator.ui.theme.AppTypography
 import com.safekey.authenticator.ui.theme.LocalFontScale
 import com.safekey.authenticator.ui.theme.monospaceFamily
+import com.safekey.authenticator.ui.theme.scaledTo
+import kotlin.math.roundToInt
 
 /**
  * Secondary settings pages for appearance.
@@ -143,10 +154,10 @@ fun LanguageSettingsScreen(
 /**
  * Secondary settings page: text size.
  *
- * Four named steps instead of a percentage slider: the platform applies a
- * non-linear font-scale curve above 105%, so a "130%" label would not be the
- * 130% the user actually gets. Names stay true at every system setting. The
- * page re-renders at the chosen step, and that is the live preview.
+ * A percent slider rather than named steps: a name can only be a fixed point
+ * on the line, and the request was to set the size directly. The sample card
+ * is wrapped in its own typography, so dragging previews the result before the
+ * value is saved; releasing the slider saves it.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -155,6 +166,9 @@ fun FontSizeSettingsScreen(
     onBack: () -> Unit
 ) {
     val settings by vm.settings.collectAsState()
+    var draft by remember(settings.fontScalePercent) {
+        mutableFloatStateOf(settings.fontScalePercent.toFloat())
+    }
 
     Scaffold(
         topBar = { SimpleTopBar(title = stringResource(R.string.font_size_title), onBack = onBack) }
@@ -166,14 +180,54 @@ fun FontSizeSettingsScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 8.dp)
         ) {
-            FontSizePreview()
+            // Preview at the value being dragged, not the saved one.
+            val draftScale = draft / 100f
+            CompositionLocalProvider(LocalFontScale provides draftScale) {
+                MaterialTheme(typography = AppTypography.scaledTo(draftScale)) {
+                    FontSizePreview()
+                }
+            }
 
-            FONT_SIZE_CHOICES.forEach { (id, labelRes) ->
-                SettingsChoiceRow(
-                    title = stringResource(labelRes),
-                    selected = settings.fontSize == id,
-                    onClick = { vm.setFontSize(id) }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 20.dp, end = 20.dp, top = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Slider(
+                    value = draft,
+                    onValueChange = { draft = it },
+                    onValueChangeFinished = { vm.setFontScalePercent(draft.roundToInt()) },
+                    valueRange = AppSettings.FONT_SCALE_PERCENT_MIN.toFloat()..AppSettings.FONT_SCALE_PERCENT_MAX.toFloat(),
+                    steps = (AppSettings.FONT_SCALE_PERCENT_MAX - AppSettings.FONT_SCALE_PERCENT_MIN) /
+                        AppSettings.FONT_SCALE_PERCENT_STEP - 1,
+                    modifier = Modifier.weight(1f)
                 )
+                Text(
+                    text = "${draft.roundToInt()}%",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                FONT_PRESETS.forEach { (percent, labelRes) ->
+                    FilterChip(
+                        selected = draft.roundToInt() == percent,
+                        onClick = {
+                            draft = percent.toFloat()
+                            vm.setFontScalePercent(percent)
+                        },
+                        label = { Text(stringResource(labelRes)) }
+                    )
+                }
             }
 
             Text(
@@ -217,17 +271,13 @@ private fun FontSizePreview() {
     }
 }
 
-/** Steps in display order; shared with the settings entry row. */
-internal val FONT_SIZE_CHOICES: List<Pair<String, Int>> = listOf(
-    AppSettings.FONT_SMALL to R.string.font_size_small,
-    AppSettings.FONT_DEFAULT to R.string.font_size_default,
-    AppSettings.FONT_LARGE to R.string.font_size_large,
-    AppSettings.FONT_XLARGE to R.string.font_size_xlarge
+/** Quick jumps on the slider; the labels are the old step names. */
+internal val FONT_PRESETS: List<Pair<Int, Int>> = listOf(
+    90 to R.string.font_size_small,
+    100 to R.string.font_size_default,
+    115 to R.string.font_size_large,
+    130 to R.string.font_size_xlarge
 )
-
-/** Label for a stored step id; used as the trailing value on the entry row. */
-internal fun fontSizeLabelRes(id: String): Int =
-    FONT_SIZE_CHOICES.firstOrNull { it.first == id }?.second ?: R.string.font_size_default
 
 /** Radio-style row shared by the appearance sub-pages. */
 @Composable

@@ -18,8 +18,8 @@ private val Context.dataStore by preferencesDataStore(name = "safekey_settings")
 data class AppSettings(
     val themeMode: String = THEME_SYSTEM,
     val dynamicColor: Boolean = true,
-    /** Text-size step id: FONT_SMALL / FONT_DEFAULT / FONT_LARGE / FONT_XLARGE. */
-    val fontSize: String = FONT_DEFAULT,
+    /** Text scale in percent, 80-200; applied on top of the system font scale. */
+    val fontScalePercent: Int = FONT_SCALE_PERCENT_DEFAULT,
     val gateOnOpen: Boolean = true,
     val allowScreenshots: Boolean = false,
     val hideCodes: Boolean = false,
@@ -85,13 +85,13 @@ data class AppSettings(
         const val THEME_DARK = "dark"
 
         // ---- text size ----
-        const val FONT_SMALL = "small"
-        const val FONT_DEFAULT = "default"
-        const val FONT_LARGE = "large"
-        const val FONT_XLARGE = "xlarge"
+        const val FONT_SCALE_PERCENT_MIN = 80
+        const val FONT_SCALE_PERCENT_MAX = 200
+        const val FONT_SCALE_PERCENT_STEP = 5
+        const val FONT_SCALE_PERCENT_DEFAULT = 100
 
         /**
-         * Ceiling for the combined scale (app step × system font scale).
+         * Ceiling for the combined scale (app percent × system font scale).
          *
          * The PIN keypad is a fixed 72dp circle holding a headlineSmall digit:
          * at 2.0 the 32sp line box is 64dp and still fits, at 2.6 it is 83dp
@@ -101,27 +101,29 @@ data class AppSettings(
          */
         const val FONT_SCALE_MAX_COMPOSITE = 2.0f
 
-        val FONT_IDS = setOf(FONT_SMALL, FONT_DEFAULT, FONT_LARGE, FONT_XLARGE)
-
-        /** App-side multiplier for a stored step id; unknown ids fall back to 1.0. */
-        fun fontScaleOf(id: String): Float = when (id) {
-            FONT_SMALL -> 0.9f
-            FONT_LARGE -> 1.15f
-            FONT_XLARGE -> 1.3f
-            else -> 1f
+        /**
+         * Step ids written by the 2.6.2 test builds. Kept so an install that
+         * already picked a step keeps that size after the slider landed.
+         */
+        fun fontScalePercentOfLegacyStep(id: String): Int = when (id) {
+            "small" -> 90
+            "large" -> 115
+            "xlarge" -> 130
+            else -> FONT_SCALE_PERCENT_DEFAULT
         }
 
         /**
-         * Step multiplier actually applied on top of [systemFontScale].
+         * Percent actually applied on top of [systemFontScale].
          *
-         * Steps at or below 1.0 are returned as they are — "default" must stay
-         * exactly the system size even on a ROM whose scale is above 200%.
-         * Larger steps are capped so the combined scale stops at
+         * Values at or below 100% are returned as they are — the user may
+         * legitimately want smaller text, and "100%" must stay exactly the
+         * system size even on a ROM whose scale is above 200%. Larger values
+         * are capped so the combined scale stops at
          * [FONT_SCALE_MAX_COMPOSITE]; past that point they add nothing rather
          * than shrinking the system's own text.
          */
-        fun effectiveFontScale(id: String, systemFontScale: Float): Float {
-            val step = fontScaleOf(id)
+        fun effectiveFontScale(percent: Int, systemFontScale: Float): Float {
+            val step = percent.coerceIn(FONT_SCALE_PERCENT_MIN, FONT_SCALE_PERCENT_MAX) / 100f
             if (step <= 1f) return step
             return maxOf(1f, minOf(step, FONT_SCALE_MAX_COMPOSITE / systemFontScale))
         }
@@ -154,7 +156,9 @@ class SettingsRepository(
 
     private object Keys {
         val THEME_MODE = stringPreferencesKey("theme_mode")
+        /** Legacy step id from the 2.6.2 test builds; read-only fallback. */
         val FONT_SIZE = stringPreferencesKey("font_size")
+        val FONT_SCALE_PERCENT = intPreferencesKey("font_scale_percent")
         val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
         val GATE_ON_OPEN = booleanPreferencesKey("gate_on_open")
         val ALLOW_SCREENSHOTS = booleanPreferencesKey("allow_screenshots")
@@ -199,7 +203,9 @@ class SettingsRepository(
         AppSettings(
             themeMode = prefs[Keys.THEME_MODE] ?: AppSettings.THEME_SYSTEM,
             dynamicColor = prefs[Keys.DYNAMIC_COLOR] ?: true,
-            fontSize = prefs[Keys.FONT_SIZE] ?: AppSettings.FONT_DEFAULT,
+            fontScalePercent = prefs[Keys.FONT_SCALE_PERCENT]
+                ?: prefs[Keys.FONT_SIZE]?.let { AppSettings.fontScalePercentOfLegacyStep(it) }
+                ?: AppSettings.FONT_SCALE_PERCENT_DEFAULT,
             gateOnOpen = prefs[Keys.GATE_ON_OPEN] ?: true,
             allowScreenshots = prefs[Keys.ALLOW_SCREENSHOTS] ?: false,
             hideCodes = prefs[Keys.HIDE_CODES] ?: false,
@@ -243,11 +249,14 @@ class SettingsRepository(
         context.dataStore.edit { it[Keys.DYNAMIC_COLOR] = enabled }
     }
 
-    /** Unknown step ids are stored as the default rather than as garbage. */
-    suspend fun setFontSize(id: String) {
+    /** Out-of-range values are clamped, not stored. */
+    suspend fun setFontScalePercent(percent: Int) {
         context.dataStore.edit {
-            it[Keys.FONT_SIZE] =
-                if (id in AppSettings.FONT_IDS) id else AppSettings.FONT_DEFAULT
+            it[Keys.FONT_SCALE_PERCENT] =
+                percent.coerceIn(
+                    AppSettings.FONT_SCALE_PERCENT_MIN,
+                    AppSettings.FONT_SCALE_PERCENT_MAX
+                )
         }
     }
 

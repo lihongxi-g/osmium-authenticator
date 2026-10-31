@@ -40,7 +40,7 @@ private val FallbackDark = darkColorScheme(
 fun SafeKeyTheme(
     themeMode: String,
     dynamicColor: Boolean,
-    fontSize: String = AppSettings.FONT_DEFAULT,
+    fontScalePercent: Int = AppSettings.FONT_SCALE_PERCENT_DEFAULT,
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
@@ -62,8 +62,8 @@ fun SafeKeyTheme(
     // fixed 72dp circle and its three-column grid cannot grow sideways, so the
     // text has to stop at a combined 2.0 instead of clipping.
     val systemFontScale = LocalDensity.current.fontScale
-    val fontScale = remember(fontSize, systemFontScale) {
-        AppSettings.effectiveFontScale(fontSize, systemFontScale)
+    val fontScale = remember(fontScalePercent, systemFontScale) {
+        AppSettings.effectiveFontScale(fontScalePercent, systemFontScale)
     }
     val typography = remember(fontScale) { AppTypography.scaledTo(fontScale) }
 
