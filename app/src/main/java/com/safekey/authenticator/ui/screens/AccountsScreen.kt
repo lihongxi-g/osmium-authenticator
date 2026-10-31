@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -62,7 +63,14 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import com.safekey.authenticator.tags.TagPresentation
 
 private val ItemSpacingPx = 8.dp
-private val CardHeightPx = 96.dp
+
+/**
+ * Floor, not a fixed height: the text-size setting can grow the title block
+ * (title + subtitle + tag row) past what 96dp holds, and a fixed height would
+ * clip it. At the default step the content is shorter than this, so the floor
+ * wins and the card looks exactly as before.
+ */
+private val CardMinHeightPx = 96.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -367,7 +375,7 @@ private fun AccountList(
                 showTags = showTags,
                 onCopyCode = { onCopyCode(ui) },
                 modifier = Modifier
-                    .height(CardHeightPx)
+                    .heightIn(min = CardMinHeightPx)
                     .combinedClickable(
                         onClick = { onOpen(ui.account) },
                         onLongClick = null,
