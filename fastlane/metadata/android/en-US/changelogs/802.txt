@@ -1,1 +1,1 @@
-v2.6.2: text size is now a free 80-200% slider, and long translations no longer get cut off in the lock screen, the PIN pad or dialogs.
+v2.6.2: text size is a free 80-200% slider behind a master switch (off = Osmium's default size), and the top-bar double inset that left a blank band on every page is fixed.

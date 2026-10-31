@@ -634,4 +634,7 @@
     <string name="font_size_large">बड़ा</string>
     <string name="font_size_xlarge">सबसे बड़ा</string>
     <string name="font_size_note">सिस्टम टेक्स्ट आकार के ऊपर लागू होता है। कोड और इंटरफ़ेस टेक्स्ट साथ में बड़े होते हैं।</string>
+    <string name="font_size_enable">कस्टम टेक्स्ट आकार</string>
+    <string name="font_size_enable_desc">बंद होने पर Osmium का डिफ़ॉल्ट टेक्स्ट आकार लौट आता है और स्लाइडर लॉक रहता है</string>
+    <string name="font_size_off">बंद</string>
 </resources>

@@ -762,6 +762,8 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     fun setDynamicColor(enabled: Boolean) = viewModelScope.launch { settingsRepo.setDynamicColor(enabled) }
     fun setFontScalePercent(percent: Int) =
         viewModelScope.launch { settingsRepo.setFontScalePercent(percent) }
+    fun setFontScaleEnabled(enabled: Boolean) =
+        viewModelScope.launch { settingsRepo.setFontScaleEnabled(enabled) }
     fun setGateOnOpen(enabled: Boolean) = viewModelScope.launch { settingsRepo.setGateOnOpen(enabled) }
     fun setAllowScreenshots(enabled: Boolean) = viewModelScope.launch { settingsRepo.setAllowScreenshots(enabled) }
     fun setHideCodes(enabled: Boolean) = viewModelScope.launch { settingsRepo.setHideCodes(enabled) }

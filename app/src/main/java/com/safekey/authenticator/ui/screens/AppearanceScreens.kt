@@ -180,8 +180,21 @@ fun FontSizeSettingsScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 8.dp)
         ) {
-            // Preview at the value being dragged, not the saved one.
-            val draftScale = draft / 100f
+            SettingRow(
+                icon = AppIcons.FormatSize,
+                title = stringResource(R.string.font_size_enable),
+                description = stringResource(R.string.font_size_enable_desc),
+                trailing = {
+                    Switch(
+                        checked = settings.fontScaleEnabled,
+                        onCheckedChange = { vm.setFontScaleEnabled(it) }
+                    )
+                }
+            )
+
+            // Preview at the value being dragged, not the saved one; when the
+            // master switch is off the app is at Osmium's default size.
+            val draftScale = if (settings.fontScaleEnabled) draft / 100f else 1f
             CompositionLocalProvider(LocalFontScale provides draftScale) {
                 MaterialTheme(typography = AppTypography.scaledTo(draftScale)) {
                     FontSizePreview()
@@ -201,6 +214,7 @@ fun FontSizeSettingsScreen(
                     valueRange = AppSettings.FONT_SCALE_PERCENT_MIN.toFloat()..AppSettings.FONT_SCALE_PERCENT_MAX.toFloat(),
                     steps = (AppSettings.FONT_SCALE_PERCENT_MAX - AppSettings.FONT_SCALE_PERCENT_MIN) /
                         AppSettings.FONT_SCALE_PERCENT_STEP - 1,
+                    enabled = settings.fontScaleEnabled,
                     modifier = Modifier.weight(1f)
                 )
                 Text(
@@ -225,6 +239,7 @@ fun FontSizeSettingsScreen(
                             draft = percent.toFloat()
                             vm.setFontScalePercent(percent)
                         },
+                        enabled = settings.fontScaleEnabled,
                         label = { Text(stringResource(labelRes)) }
                     )
                 }

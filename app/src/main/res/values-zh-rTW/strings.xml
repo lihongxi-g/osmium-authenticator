@@ -647,4 +647,7 @@
     <string name="font_size_large">大</string>
     <string name="font_size_xlarge">特大</string>
     <string name="font_size_note">在系統字型大小基礎上調整，驗證碼與介面文字一起變化</string>
+    <string name="font_size_enable">自訂字型大小</string>
+    <string name="font_size_enable_desc">關閉後恢復 Osmium 預設字型大小，滑桿無法調整</string>
+    <string name="font_size_off">關閉</string>
 </resources>

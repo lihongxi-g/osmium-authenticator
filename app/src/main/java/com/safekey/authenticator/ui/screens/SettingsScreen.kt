@@ -167,7 +167,8 @@ fun SettingsScreen(
                 description = stringResource(R.string.font_size_desc),
                 trailing = {
                     Text(
-                        text = "${settings.fontScalePercent}%",
+                        text = if (settings.fontScaleEnabled) "${settings.fontScalePercent}%"
+                        else stringResource(R.string.font_size_off),
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

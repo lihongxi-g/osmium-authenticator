@@ -634,4 +634,7 @@
     <string name="font_size_large">Большой</string>
     <string name="font_size_xlarge">Очень большой</string>
     <string name="font_size_note">Применяется поверх системного размера текста. Коды и текст интерфейса увеличиваются вместе.</string>
+    <string name="font_size_enable">Свой размер текста</string>
+    <string name="font_size_enable_desc">Выкл.: возвращается стандартный размер текста Osmium, ползунок заблокирован</string>
+    <string name="font_size_off">Выкл.</string>
 </resources>

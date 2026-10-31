@@ -634,4 +634,7 @@
     <string name="font_size_large">크게</string>
     <string name="font_size_xlarge">가장 크게</string>
     <string name="font_size_note">시스템 글자 크기 위에 적용됩니다. 인증 코드와 화면 글자가 함께 커집니다.</string>
+    <string name="font_size_enable">글자 크기 사용자 지정</string>
+    <string name="font_size_enable_desc">끄면 Osmium 기본 글자 크기로 돌아가고 슬라이더를 조정할 수 없습니다</string>
+    <string name="font_size_off">끔</string>
 </resources>

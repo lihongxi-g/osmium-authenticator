@@ -651,4 +651,7 @@
     <string name="font_size_large">Large</string>
     <string name="font_size_xlarge">Largest</string>
     <string name="font_size_note">Sits on top of the system text size. Codes and interface text grow together.</string>
+    <string name="font_size_enable">Custom text size</string>
+    <string name="font_size_enable_desc">Off restores Osmium\'s default text size and locks the slider</string>
+    <string name="font_size_off">Off</string>
 </resources>

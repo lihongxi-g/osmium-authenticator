@@ -634,4 +634,7 @@
     <string name="font_size_large">大</string>
     <string name="font_size_xlarge">特大</string>
     <string name="font_size_note">システムの文字サイズに合わせて調整します。認証コードと画面の文字が一緒に変わります。</string>
+    <string name="font_size_enable">文字サイズをカスタマイズ</string>
+    <string name="font_size_enable_desc">オフにすると Osmium 既定の文字サイズに戻り、スライダーは調整できません</string>
+    <string name="font_size_off">オフ</string>
 </resources>

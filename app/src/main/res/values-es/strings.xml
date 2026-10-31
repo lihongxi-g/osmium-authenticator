@@ -634,4 +634,7 @@
     <string name="font_size_large">Grande</string>
     <string name="font_size_xlarge">Muy grande</string>
     <string name="font_size_note">Se aplica sobre el tamaño de texto del sistema. Los códigos y el texto de la interfaz crecen juntos.</string>
+    <string name="font_size_enable">Tamaño de texto personalizado</string>
+    <string name="font_size_enable_desc">Desactivado: vuelve al tamaño de texto predeterminado de Osmium y el control queda bloqueado</string>
+    <string name="font_size_off">Desactivado</string>
 </resources>

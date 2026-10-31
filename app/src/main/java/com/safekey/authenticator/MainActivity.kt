@@ -38,6 +38,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
@@ -64,6 +65,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.core.view.WindowCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -182,6 +184,27 @@ class MainActivity : FragmentActivity() {
 
         setContent {
             val settings by vm.settings.collectAsState()
+            // The XML theme's windowLightStatusBar follows the *system* night
+            // mode, but the app can be forced to light or dark. Without this
+            // the status/navigation bar icons keep the system's contrast: dark
+            // icons on a dark app (invisible) or light icons on a light one.
+            val appDarkTheme = when (settings.themeMode) {
+                AppSettings.THEME_LIGHT -> false
+                AppSettings.THEME_DARK -> true
+                else -> isSystemInDarkTheme()
+            }
+            LaunchedEffect(appDarkTheme) {
+                WindowCompat.getInsetsController(window, window.decorView).apply {
+                    isAppearanceLightStatusBars = !appDarkTheme
+                    isAppearanceLightNavigationBars = !appDarkTheme
+                }
+                // Three-button navigation: the system otherwise paints a
+                // translucent scrim behind the nav bar, which reads as a
+                // white/black strip that does not match the app background.
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    window.isNavigationBarContrastEnforced = false
+                }
+            }
             val locked by vm.locked.collectAsState()
             val pinRequired by vm.pinRequired.collectAsState()
             val destroyed by vm.destroyed.collectAsState()
@@ -244,6 +267,7 @@ class MainActivity : FragmentActivity() {
             SafeKeyTheme(
                 themeMode = settings.themeMode,
                 dynamicColor = settings.dynamicColor,
+                fontScaleEnabled = settings.fontScaleEnabled,
                 fontScalePercent = settings.fontScalePercent
             ) {
                 // Screenshot policy follows the user setting (default: blocked).

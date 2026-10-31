@@ -20,6 +20,8 @@ data class AppSettings(
     val dynamicColor: Boolean = true,
     /** Text scale in percent, 80-200; applied on top of the system font scale. */
     val fontScalePercent: Int = FONT_SCALE_PERCENT_DEFAULT,
+    /** Master switch: off means Osmium's own default size, slider locked. */
+    val fontScaleEnabled: Boolean = false,
     val gateOnOpen: Boolean = true,
     val allowScreenshots: Boolean = false,
     val hideCodes: Boolean = false,
@@ -115,14 +117,16 @@ data class AppSettings(
         /**
          * Percent actually applied on top of [systemFontScale].
          *
-         * Values at or below 100% are returned as they are — the user may
-         * legitimately want smaller text, and "100%" must stay exactly the
-         * system size even on a ROM whose scale is above 200%. Larger values
-         * are capped so the combined scale stops at
-         * [FONT_SCALE_MAX_COMPOSITE]; past that point they add nothing rather
-         * than shrinking the system's own text.
+         * The master switch wins: off means Osmium's own default typography
+         * (1.0) no matter what the slider says. Values at or below 100% are
+         * returned as they are — the user may legitimately want smaller text,
+         * and "100%" must stay exactly the system size even on a ROM whose
+         * scale is above 200%. Larger values are capped so the combined scale
+         * stops at [FONT_SCALE_MAX_COMPOSITE]; past that point they add
+         * nothing rather than shrinking the system's own text.
          */
-        fun effectiveFontScale(percent: Int, systemFontScale: Float): Float {
+        fun effectiveFontScale(enabled: Boolean, percent: Int, systemFontScale: Float): Float {
+            if (!enabled) return 1f
             val step = percent.coerceIn(FONT_SCALE_PERCENT_MIN, FONT_SCALE_PERCENT_MAX) / 100f
             if (step <= 1f) return step
             return maxOf(1f, minOf(step, FONT_SCALE_MAX_COMPOSITE / systemFontScale))
@@ -159,6 +163,7 @@ class SettingsRepository(
         /** Legacy step id from the 2.6.2 test builds; read-only fallback. */
         val FONT_SIZE = stringPreferencesKey("font_size")
         val FONT_SCALE_PERCENT = intPreferencesKey("font_scale_percent")
+        val FONT_SCALE_ENABLED = booleanPreferencesKey("font_scale_enabled")
         val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
         val GATE_ON_OPEN = booleanPreferencesKey("gate_on_open")
         val ALLOW_SCREENSHOTS = booleanPreferencesKey("allow_screenshots")
@@ -206,6 +211,7 @@ class SettingsRepository(
             fontScalePercent = prefs[Keys.FONT_SCALE_PERCENT]
                 ?: prefs[Keys.FONT_SIZE]?.let { AppSettings.fontScalePercentOfLegacyStep(it) }
                 ?: AppSettings.FONT_SCALE_PERCENT_DEFAULT,
+            fontScaleEnabled = prefs[Keys.FONT_SCALE_ENABLED] ?: false,
             gateOnOpen = prefs[Keys.GATE_ON_OPEN] ?: true,
             allowScreenshots = prefs[Keys.ALLOW_SCREENSHOTS] ?: false,
             hideCodes = prefs[Keys.HIDE_CODES] ?: false,
@@ -247,6 +253,11 @@ class SettingsRepository(
 
     suspend fun setDynamicColor(enabled: Boolean) {
         context.dataStore.edit { it[Keys.DYNAMIC_COLOR] = enabled }
+    }
+
+    /** Off restores Osmium's own default typography and locks the slider. */
+    suspend fun setFontScaleEnabled(enabled: Boolean) {
+        context.dataStore.edit { it[Keys.FONT_SCALE_ENABLED] = enabled }
     }
 
     /** Out-of-range values are clamped, not stored. */
