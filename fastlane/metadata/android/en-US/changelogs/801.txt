@@ -1,0 +1,1 @@
+v2.6.2: new Text size setting (Small / Default / Large / Largest), plus fixes for account cards and the detail-page code being clipped at large font sizes.
