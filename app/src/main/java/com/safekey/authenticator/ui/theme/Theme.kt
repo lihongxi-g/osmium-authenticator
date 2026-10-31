@@ -42,8 +42,8 @@ fun SafeKeyTheme(
     dynamicColor: Boolean,
     fontScaleEnabled: Boolean = false,
     fontScalePercent: Int = AppSettings.FONT_SCALE_PERCENT_DEFAULT,
-    hapticEnabled: Boolean = false,
-    hapticFollowSystem: Boolean = true,
+    hapticEnabled: Boolean = true,
+    hapticFollowSystem: Boolean = false,
     hapticIntensityPercent: Int = AppSettings.HAPTIC_INTENSITY_DEFAULT,
     content: @Composable () -> Unit
 ) {

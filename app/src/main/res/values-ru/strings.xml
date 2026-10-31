@@ -644,4 +644,6 @@
     <string name="haptic_intensity">Интенсивность</string>
     <string name="haptic_intensity_desc">Потяните, чтобы настроить силу</string>
     <string name="haptic_off">Выкл.</string>
+    <string name="haptic_test">Проверить вибрацию</string>
+    <string name="haptic_test_desc">Один короткий отклик выбранной силы</string>
 </resources>

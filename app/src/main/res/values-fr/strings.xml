@@ -644,4 +644,6 @@
     <string name="haptic_intensity">Intensité</string>
     <string name="haptic_intensity_desc">Faites glisser pour régler la force</string>
     <string name="haptic_off">Désactivé</string>
+    <string name="haptic_test">Tester la vibration</string>
+    <string name="haptic_test_desc">Déclenche une vibration à la force choisie</string>
 </resources>

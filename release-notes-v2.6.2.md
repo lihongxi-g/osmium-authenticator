@@ -53,10 +53,11 @@ This release adds a text-size setting with a free 80%–200% slider, and fixes s
 
 ### New: vibration feedback
 
-- Settings → Appearance → **Vibration feedback**: a master switch, a 0–100% intensity slider, and a "Follow system" switch.
-- With **Follow system** on, the app uses the platform's own haptics: the intensity slider is greyed out and the master switch turns itself off, so the page can never show two contradictory "on" states.
-- With Follow system off, the master switch enables the app's own vibration and the slider sets its strength; intensity drives both amplitude and duration (10–20 ms).
-- It fires in two places: **copying a code** (list card and detail page) and the **PIN keypad**.
+- Settings → Appearance → **Vibration feedback**: a master switch, a 0–100% intensity slider, a "Follow system" switch, and a **Test the vibration** row at the bottom.
+- **On by default**: the app drives the vibrator itself, so a phone whose system touch-feedback switch is off still gets the tick.
+- With **Follow system** on, the platform's touch-feedback switch decides whether the app vibrates; the intensity slider is greyed out and the master switch turns itself off, so the page can never show two contradictory "on" states. Turning the master switch back on clears "Follow system" in the same write — neither switch is a dead end.
+- With Follow system off, the slider sets the strength: intensity drives both amplitude (1–255) and duration (25–60 ms). The earlier 10–20 ms tick was too short to feel on real phones.
+- It fires in two places: **copying a code** (list card and detail page) and the **PIN keypad**. "Test the vibration" fires one tick at the current strength no matter how the switches are set, so the strength can be felt while adjusting it.
 
 ### Fixes: white/black bands at the top and bottom
 
@@ -71,5 +72,5 @@ This release adds a text-size setting with a free 80%–200% slider, and fixes s
 
 ### Other
 
-- 7 new UI strings, added in all 11 languages.
+- 9 new UI strings, added in all 11 languages.
 - No new permissions, no third-party SDKs, no data collection.

@@ -22,9 +22,9 @@ data class AppSettings(
     val fontScalePercent: Int = FONT_SCALE_PERCENT_DEFAULT,
     /** Master switch: off means Osmium's own default size, slider locked. */
     val fontScaleEnabled: Boolean = false,
-    /** Haptics: custom vibration on/off, and whether to defer to the system. */
-    val hapticEnabled: Boolean = false,
-    val hapticFollowSystem: Boolean = true,
+    /** Haptics: the app's own vibration is on by default; the system path is opt-in. */
+    val hapticEnabled: Boolean = true,
+    val hapticFollowSystem: Boolean = false,
     /** Vibration strength, 0-100. */
     val hapticIntensityPercent: Int = HAPTIC_INTENSITY_DEFAULT,
     val gateOnOpen: Boolean = true,
@@ -115,6 +115,12 @@ data class AppSettings(
         const val HAPTIC_INTENSITY_DEFAULT = 60
 
         /**
+         * Intensity used when the tick follows the system: the platform switch
+         * decides *whether*, but the strength still has to be perceptible.
+         */
+        const val HAPTIC_SYSTEM_INTENSITY_PERCENT = 50
+
+        /**
          * Amplitude for [VibrationEffect.createOneShot] on a 1-255 scale.
          * 0% is 1 (the weakest the platform accepts) — the master switch, not
          * a zero amplitude, is what turns the feedback off.
@@ -122,9 +128,14 @@ data class AppSettings(
         fun hapticAmplitude(percent: Int): Int =
             1 + percent.coerceIn(HAPTIC_INTENSITY_MIN, HAPTIC_INTENSITY_MAX) * 254 / 100
 
-        /** Short tick: 10-20 ms, longer the stronger the setting. */
+        /**
+         * Tick length: 25-60 ms, longer the stronger the setting.
+         *
+         * 10-20 ms (the first cut) is below what most phones render as a
+         * noticeable buzz — the tick was effectively invisible.
+         */
         fun hapticDurationMs(percent: Int): Long =
-            10L + percent.coerceIn(HAPTIC_INTENSITY_MIN, HAPTIC_INTENSITY_MAX) / 10L
+            25L + percent.coerceIn(HAPTIC_INTENSITY_MIN, HAPTIC_INTENSITY_MAX) * 35L / 100
 
         /**
          * Step ids written by the 2.6.2 test builds. Kept so an install that
@@ -238,8 +249,8 @@ class SettingsRepository(
                 ?: prefs[Keys.FONT_SIZE]?.let { AppSettings.fontScalePercentOfLegacyStep(it) }
                 ?: AppSettings.FONT_SCALE_PERCENT_DEFAULT,
             fontScaleEnabled = prefs[Keys.FONT_SCALE_ENABLED] ?: false,
-            hapticEnabled = prefs[Keys.HAPTIC_ENABLED] ?: false,
-            hapticFollowSystem = prefs[Keys.HAPTIC_FOLLOW_SYSTEM] ?: true,
+            hapticEnabled = prefs[Keys.HAPTIC_ENABLED] ?: true,
+            hapticFollowSystem = prefs[Keys.HAPTIC_FOLLOW_SYSTEM] ?: false,
             hapticIntensityPercent = (prefs[Keys.HAPTIC_INTENSITY]
                 ?: AppSettings.HAPTIC_INTENSITY_DEFAULT)
                 .coerceIn(AppSettings.HAPTIC_INTENSITY_MIN, AppSettings.HAPTIC_INTENSITY_MAX),
@@ -291,8 +302,16 @@ class SettingsRepository(
         context.dataStore.edit { it[Keys.FONT_SCALE_ENABLED] = enabled }
     }
 
+    /**
+     * Turning our own vibration on is the opposite of following the system, so
+     * the "follow system" switch is cleared in the same transaction. Both
+     * switches can never be on at once, and neither can be a dead end.
+     */
     suspend fun setHapticEnabled(enabled: Boolean) {
-        context.dataStore.edit { it[Keys.HAPTIC_ENABLED] = enabled }
+        context.dataStore.edit {
+            it[Keys.HAPTIC_ENABLED] = enabled
+            if (enabled) it[Keys.HAPTIC_FOLLOW_SYSTEM] = false
+        }
     }
 
     /**

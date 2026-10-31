@@ -661,4 +661,6 @@
     <string name="haptic_intensity">Intensity</string>
     <string name="haptic_intensity_desc">Drag to set how strong the vibration is</string>
     <string name="haptic_off">Off</string>
+    <string name="haptic_test">Test the vibration</string>
+    <string name="haptic_test_desc">Fires one tick at the strength set here</string>
 </resources>

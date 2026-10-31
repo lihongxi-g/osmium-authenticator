@@ -644,4 +644,6 @@
     <string name="haptic_intensity">강도</string>
     <string name="haptic_intensity_desc">드래그하여 진동 강도를 조정합니다</string>
     <string name="haptic_off">끔</string>
+    <string name="haptic_test">진동 테스트</string>
+    <string name="haptic_test_desc">설정한 세기로 한 번 진동합니다</string>
 </resources>

@@ -659,4 +659,6 @@
     <string name="haptic_intensity">强度</string>
     <string name="haptic_intensity_desc">拖动调整震动强弱</string>
     <string name="haptic_off">关闭</string>
+    <string name="haptic_test">试一下震动</string>
+    <string name="haptic_test_desc">按当前强度震一下</string>
 </resources>

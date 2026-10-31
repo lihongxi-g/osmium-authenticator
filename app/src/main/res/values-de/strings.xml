@@ -644,4 +644,6 @@
     <string name="haptic_intensity">Intensität</string>
     <string name="haptic_intensity_desc">Ziehen, um die Stärke einzustellen</string>
     <string name="haptic_off">Aus</string>
+    <string name="haptic_test">Vibration testen</string>
+    <string name="haptic_test_desc">Löst einen Impuls in der eingestellten Stärke aus</string>
 </resources>

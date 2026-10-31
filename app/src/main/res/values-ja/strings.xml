@@ -644,4 +644,6 @@
     <string name="haptic_intensity">強さ</string>
     <string name="haptic_intensity_desc">ドラッグして振動の強さを調整します</string>
     <string name="haptic_off">オフ</string>
+    <string name="haptic_test">振動をテスト</string>
+    <string name="haptic_test_desc">設定した強さで一度振動します</string>
 </resources>

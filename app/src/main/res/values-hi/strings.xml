@@ -644,4 +644,6 @@
     <string name="haptic_intensity">तीव्रता</string>
     <string name="haptic_intensity_desc">ताकत सेट करने के लिए खींचें</string>
     <string name="haptic_off">बंद</string>
+    <string name="haptic_test">कंपन जाँचें</string>
+    <string name="haptic_test_desc">चुनी गई तीव्रता पर एक कंपन होता है</string>
 </resources>

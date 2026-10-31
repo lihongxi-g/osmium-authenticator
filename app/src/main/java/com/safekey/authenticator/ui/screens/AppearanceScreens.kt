@@ -45,6 +45,7 @@ import com.safekey.authenticator.ui.components.SimpleTopBar
 import com.safekey.authenticator.ui.theme.AppTypography
 import com.safekey.authenticator.ui.theme.LocalFontScale
 import com.safekey.authenticator.ui.theme.monospaceFamily
+import com.safekey.authenticator.ui.theme.previewHaptic
 import com.safekey.authenticator.ui.theme.scaledTo
 import kotlin.math.roundToInt
 
@@ -316,6 +317,7 @@ fun HapticSettingsScreen(
         mutableFloatStateOf(settings.hapticIntensityPercent.toFloat())
     }
     val sliderEnabled = settings.hapticEnabled && !settings.hapticFollowSystem
+    val context = LocalContext.current
 
     Scaffold(
         topBar = { SimpleTopBar(title = stringResource(R.string.haptic_title), onBack = onBack) }
@@ -334,8 +336,7 @@ fun HapticSettingsScreen(
                 trailing = {
                     Switch(
                         checked = settings.hapticEnabled,
-                        onCheckedChange = { vm.setHapticEnabled(it) },
-                        enabled = !settings.hapticFollowSystem
+                        onCheckedChange = { vm.setHapticEnabled(it) }
                     )
                 }
             )
@@ -374,7 +375,11 @@ fun HapticSettingsScreen(
             Slider(
                 value = draft,
                 onValueChange = { draft = it },
-                onValueChangeFinished = { vm.setHapticIntensityPercent(draft.roundToInt()) },
+                onValueChangeFinished = {
+                    vm.setHapticIntensityPercent(draft.roundToInt())
+                    // Feel the step that was just picked, without leaving the page.
+                    previewHaptic(context, draft.roundToInt())
+                },
                 valueRange = AppSettings.HAPTIC_INTENSITY_MIN.toFloat()..
                     AppSettings.HAPTIC_INTENSITY_MAX.toFloat(),
                 steps = (AppSettings.HAPTIC_INTENSITY_MAX - AppSettings.HAPTIC_INTENSITY_MIN) /
@@ -390,6 +395,13 @@ fun HapticSettingsScreen(
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
+            )
+
+            SettingRow(
+                icon = AppIcons.Vibration,
+                title = stringResource(R.string.haptic_test),
+                description = stringResource(R.string.haptic_test_desc),
+                onClick = { previewHaptic(context, draft.roundToInt()) }
             )
         }
     }
