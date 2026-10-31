@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,6 +35,7 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import com.safekey.authenticator.R
 import com.safekey.authenticator.ui.components.AppIcons
+import com.safekey.authenticator.ui.components.CenteredScrollColumn
 
 private const val PIN_LENGTH = 6
 
@@ -60,12 +62,9 @@ fun PinPadScreen(
     var verifying by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(horizontal = 32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+    CenteredScrollColumn(
+        modifier = modifier,
+        contentPadding = PaddingValues(horizontal = 32.dp)
     ) {
         Text(
             text = title,

@@ -42,6 +42,7 @@ import com.safekey.authenticator.R
 import com.safekey.authenticator.SafeKeyApp
 import com.safekey.authenticator.totp.exporter.ExportFormat
 import com.safekey.authenticator.totp.exporter.Exporters
+import com.safekey.authenticator.ui.components.DialogBodyText
 import com.safekey.authenticator.ui.components.SimpleTopBar
 import com.safekey.authenticator.ui.components.sendFeedbackWithLog
 import kotlinx.coroutines.Dispatchers
@@ -205,7 +206,9 @@ fun ExportToOthersScreen(
             title = null,
             text = {
                 Column(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState()),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(text = "\uD83D\uDE2D", fontSize = 64.sp, textAlign = TextAlign.Center)
@@ -243,8 +246,8 @@ fun ExportToOthersScreen(
             onDismissRequest = { onDone() },
             title = null,
             text = {
-                Text(
-                    text = stringResource(R.string.farewell_bye_body),
+                DialogBodyText(
+                    stringResource(R.string.farewell_bye_body),
                     style = MaterialTheme.typography.bodyLarge
                 )
             },

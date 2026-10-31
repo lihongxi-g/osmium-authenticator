@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -42,6 +44,7 @@ import com.safekey.authenticator.MainViewModel
 import com.safekey.authenticator.R
 import com.safekey.authenticator.totp.OtpUriParser
 import com.safekey.authenticator.totp.ParsedOtpUri
+import com.safekey.authenticator.ui.components.DialogBodyText
 import com.safekey.authenticator.ui.components.QrCameraPreview
 import com.safekey.authenticator.ui.components.QrDecode
 import com.safekey.authenticator.ui.components.SimpleTopBar
@@ -171,6 +174,7 @@ fun ScanScreen(
                 Column(
                     modifier = Modifier
                         .align(Alignment.Center)
+                        .verticalScroll(rememberScrollState())
                         .padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -241,7 +245,7 @@ fun ScanScreen(
         AlertDialog(
             onDismissRequest = { showPermissionError = false },
             title = { Text(stringResource(R.string.camera_permission_title)) },
-            text = { Text(stringResource(R.string.camera_permission_desc)) },
+            text = { DialogBodyText(stringResource(R.string.camera_permission_desc)) },
             confirmButton = {
                 TextButton(onClick = {
                     showPermissionError = false
