@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -51,7 +50,10 @@ fun SimpleTopBar(
     actions: @Composable RowScope.() -> Unit = {}
 ) {
     TopAppBar(
-        modifier = Modifier.statusBarsPadding(),
+        // TopAppBar already applies TopAppBarDefaults.windowInsets (system bars,
+        // top + horizontal). Adding statusBarsPadding() here doubled the inset:
+        // a status-bar-tall blank band above the title, and every screen's
+        // content pushed down by that much.
         title = {
             Text(
                 text = title,
