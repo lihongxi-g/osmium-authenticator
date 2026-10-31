@@ -627,4 +627,11 @@
     <string name="permission_storage_desc">Écrire les sauvegardes dans le dossier Téléchargements (Android 9 et antérieurs)</string>
     <string name="permission_battery_title">Ignorer l’optimisation de batterie</string>
     <string name="permission_battery_desc">Permet à la sauvegarde planifiée de tourner aussi la nuit</string>
+    <string name="font_size_title">Taille du texte</string>
+    <string name="font_size_desc">Taille du texte dans l\'application</string>
+    <string name="font_size_small">Petit</string>
+    <string name="font_size_default">Standard</string>
+    <string name="font_size_large">Grand</string>
+    <string name="font_size_xlarge">Très grand</string>
+    <string name="font_size_note">S\'ajoute à la taille de texte du système. Les codes et le texte de l\'interface grandissent ensemble.</string>
 </resources>

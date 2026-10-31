@@ -627,4 +627,11 @@
     <string name="permission_storage_desc">Escribir copias en la carpeta Descargas (Android 9 y anteriores)</string>
     <string name="permission_battery_title">Ignorar la optimización de batería</string>
     <string name="permission_battery_desc">Permite que la copia programada se ejecute también de noche</string>
+    <string name="font_size_title">Tamaño del texto</string>
+    <string name="font_size_desc">Tamaño del texto en la app</string>
+    <string name="font_size_small">Pequeño</string>
+    <string name="font_size_default">Estándar</string>
+    <string name="font_size_large">Grande</string>
+    <string name="font_size_xlarge">Muy grande</string>
+    <string name="font_size_note">Se aplica sobre el tamaño de texto del sistema. Los códigos y el texto de la interfaz crecen juntos.</string>
 </resources>

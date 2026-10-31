@@ -94,6 +94,7 @@ import com.safekey.authenticator.ui.screens.DetailScreen
 import com.safekey.authenticator.ui.screens.ExportScreen
 import com.safekey.authenticator.ui.screens.ExportToOthersScreen
 import com.safekey.authenticator.ui.screens.FileImportScreen
+import com.safekey.authenticator.ui.screens.FontSizeSettingsScreen
 import com.safekey.authenticator.ui.screens.GoogleImportScreen
 import com.safekey.authenticator.ui.screens.ImportScreen
 import com.safekey.authenticator.ui.screens.IntegrityScreen
@@ -240,7 +241,8 @@ class MainActivity : FragmentActivity() {
 
             SafeKeyTheme(
                 themeMode = settings.themeMode,
-                dynamicColor = settings.dynamicColor
+                dynamicColor = settings.dynamicColor,
+                fontSize = settings.fontSize
             ) {
                 // Screenshot policy follows the user setting (default: blocked).
                 LaunchedEffect(settings.allowScreenshots) {
@@ -1284,6 +1286,11 @@ private fun IntegrityNoticeDialog(
                     is Screen.ThemeSettings -> ThemeSettingsScreen(
                         vm = vm,
                         hiddenFeatures = vm.settings.value.devHiddenFeatures,
+                        onBack = { vm.nav.pop() }
+                    )
+
+                    is Screen.FontSettings -> FontSizeSettingsScreen(
+                        vm = vm,
                         onBack = { vm.nav.pop() }
                     )
 

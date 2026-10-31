@@ -18,6 +18,8 @@ sealed class Screen {
     object Settings : Screen()
     /** Secondary settings page: theme (design system) options. */
     object ThemeSettings : Screen()
+    /** Secondary settings page: text size (four named steps). */
+    object FontSettings : Screen()
     /** Secondary settings page: app language. */
     object LanguageSettings : Screen()
     /** Secondary settings page: which update channels to check (stable / preview). */

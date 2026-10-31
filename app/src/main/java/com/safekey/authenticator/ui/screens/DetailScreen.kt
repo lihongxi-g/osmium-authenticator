@@ -3,6 +3,7 @@ package com.safekey.authenticator.ui.screens
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -32,6 +33,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -44,6 +46,7 @@ import com.safekey.authenticator.security.ClipboardHelper
 import com.safekey.authenticator.ui.components.AppIcons
 import com.safekey.authenticator.ui.components.IconButtonCompat
 import com.safekey.authenticator.ui.components.SimpleTopBar
+import com.safekey.authenticator.ui.theme.LocalFontScale
 import com.safekey.authenticator.ui.theme.monospaceFamily
 
 /**
@@ -158,17 +161,38 @@ fun DetailScreen(
                             .padding(vertical = 24.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(
-                            text = if (settings.hideCodes) "\u2022\u2022\u2022\u2022\u2022\u2022" else ui.code,
-                            style = MaterialTheme.typography.headlineSmall.copy(
-                                fontFamily = monospaceFamily,
-                                fontSize = 36.sp,
-                                letterSpacing = 4.sp
-                            ),
-                            color = if (ui.remainingSeconds <= 5) MaterialTheme.colorScheme.error
-                            else MaterialTheme.colorScheme.primary,
-                            maxLines = 1
-                        )
+                        // The code is the one piece of text that must never be
+                        // cut, so it does not ride a type token: it gets its own
+                        // size, capped by the width actually available.
+                        val codeText =
+                            if (settings.hideCodes) "\u2022\u2022\u2022\u2022\u2022\u2022" else ui.code
+                        val fontScale = LocalFontScale.current
+                        val chars = codeText.length.coerceAtLeast(1)
+                        BoxWithConstraints(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            // Monospace advance is ~0.62em; the 4sp tracking adds
+                            // 4/36em per gap. Fitting in sp lets the system font
+                            // scale and the density cancel out.
+                            val emUnits = chars * 0.62f + (chars - 1) * (4f / 36f)
+                            val fit = with(LocalDensity.current) { (maxWidth / emUnits).toSp() }
+                            val base = 36.sp * fontScale
+                            // TextUnit is not Comparable; both values are sp here,
+                            // so comparing the numbers is the same thing.
+                            val size = if (fit.value < base.value) fit else base
+                            Text(
+                                text = codeText,
+                                style = MaterialTheme.typography.headlineSmall.copy(
+                                    fontFamily = monospaceFamily,
+                                    fontSize = size,
+                                    letterSpacing = 4.sp * fontScale
+                                ),
+                                color = if (ui.remainingSeconds <= 5) MaterialTheme.colorScheme.error
+                                else MaterialTheme.colorScheme.primary,
+                                maxLines = 1
+                            )
+                        }
                         Spacer(Modifier.height(8.dp))
                         if (ui.isHotp) {
                             Text(

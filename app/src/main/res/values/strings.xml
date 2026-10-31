@@ -644,4 +644,11 @@
     <string name="permission_storage_desc">Write backups to the Download folder (Android 9 and older)</string>
     <string name="permission_battery_title">Ignore battery optimisation</string>
     <string name="permission_battery_desc">Lets the scheduled backup run at night too</string>
+    <string name="font_size_title">Text size</string>
+    <string name="font_size_desc">Text size inside the app</string>
+    <string name="font_size_small">Small</string>
+    <string name="font_size_default">Default</string>
+    <string name="font_size_large">Large</string>
+    <string name="font_size_xlarge">Largest</string>
+    <string name="font_size_note">Sits on top of the system text size. Codes and interface text grow together.</string>
 </resources>

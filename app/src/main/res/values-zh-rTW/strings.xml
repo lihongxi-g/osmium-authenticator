@@ -640,4 +640,11 @@
     <string name="permission_storage_desc">把備份寫入下載目錄（Android 9 及以下）</string>
     <string name="permission_battery_title">忽略電池最佳化</string>
     <string name="permission_battery_desc">讓定時備份在夜間也能執行</string>
+    <string name="font_size_title">字型大小</string>
+    <string name="font_size_desc">調整應用程式內的文字大小</string>
+    <string name="font_size_small">小</string>
+    <string name="font_size_default">標準</string>
+    <string name="font_size_large">大</string>
+    <string name="font_size_xlarge">特大</string>
+    <string name="font_size_note">在系統字型大小基礎上調整，驗證碼與介面文字一起變化</string>
 </resources>

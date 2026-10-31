@@ -627,4 +627,11 @@
     <string name="permission_storage_desc">バックアップをダウンロードフォルダーに保存（Android 9 以前）</string>
     <string name="permission_battery_title">バッテリー最適化を無視</string>
     <string name="permission_battery_desc">定時バックアップを夜間にも実行できるようにします</string>
+    <string name="font_size_title">文字サイズ</string>
+    <string name="font_size_desc">アプリ内の文字サイズを調整します</string>
+    <string name="font_size_small">小</string>
+    <string name="font_size_default">標準</string>
+    <string name="font_size_large">大</string>
+    <string name="font_size_xlarge">特大</string>
+    <string name="font_size_note">システムの文字サイズに合わせて調整します。認証コードと画面の文字が一緒に変わります。</string>
 </resources>

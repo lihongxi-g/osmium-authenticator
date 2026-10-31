@@ -627,4 +627,11 @@
     <string name="permission_storage_desc">Запись копий в папку «Загрузки» (Android 9 и старше)</string>
     <string name="permission_battery_title">Игнорировать оптимизацию батареи</string>
     <string name="permission_battery_desc">Позволяет плановому копированию работать и ночью</string>
+    <string name="font_size_title">Размер текста</string>
+    <string name="font_size_desc">Размер текста в приложении</string>
+    <string name="font_size_small">Маленький</string>
+    <string name="font_size_default">Обычный</string>
+    <string name="font_size_large">Большой</string>
+    <string name="font_size_xlarge">Очень большой</string>
+    <string name="font_size_note">Применяется поверх системного размера текста. Коды и текст интерфейса увеличиваются вместе.</string>
 </resources>

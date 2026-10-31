@@ -627,4 +627,11 @@
     <string name="permission_storage_desc">बैकअप को डाउनलोड फ़ोल्डर में लिखें (Android 9 और पुराने)</string>
     <string name="permission_battery_title">बैटरी ऑप्टिमाइज़ेशन अनदेखा करें</string>
     <string name="permission_battery_desc">निर्धारित बैकअप को रात में भी चलने देता है</string>
+    <string name="font_size_title">टेक्स्ट आकार</string>
+    <string name="font_size_desc">ऐप में टेक्स्ट का आकार</string>
+    <string name="font_size_small">छोटा</string>
+    <string name="font_size_default">मानक</string>
+    <string name="font_size_large">बड़ा</string>
+    <string name="font_size_xlarge">सबसे बड़ा</string>
+    <string name="font_size_note">सिस्टम टेक्स्ट आकार के ऊपर लागू होता है। कोड और इंटरफ़ेस टेक्स्ट साथ में बड़े होते हैं।</string>
 </resources>

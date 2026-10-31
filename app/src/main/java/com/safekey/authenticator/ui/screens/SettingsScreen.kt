@@ -161,6 +161,20 @@ fun SettingsScreen(
                 onClick = { vm.nav.push(Screen.ThemeSettings) }
             )
 
+            if ("fontSize" !in hiddenFeatures) SettingRow(
+                icon = AppIcons.FormatSize,
+                title = stringResource(R.string.font_size_title),
+                description = stringResource(R.string.font_size_desc),
+                trailing = {
+                    Text(
+                        text = stringResource(fontSizeLabelRes(settings.fontSize)),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
+                onClick = { vm.nav.push(Screen.FontSettings) }
+            )
+
             if ("sort" !in hiddenFeatures) SettingRow(
                 icon = AppIcons.SwapVert,
                 title = stringResource(R.string.sort_mode),

@@ -22,6 +22,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.safekey.authenticator.AccountUi
+import com.safekey.authenticator.ui.theme.LocalFontScale
 import com.safekey.authenticator.ui.theme.monospaceFamily
 
 /**
@@ -128,7 +129,7 @@ private fun CodeDisplay(
             text = code,
             style = MaterialTheme.typography.headlineSmall.copy(
                 fontFamily = monospaceFamily,
-                letterSpacing = 2.sp
+                letterSpacing = 2.sp * LocalFontScale.current
             ),
             maxLines = 1,
             color = if (expiring) MaterialTheme.colorScheme.error

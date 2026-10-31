@@ -627,4 +627,11 @@
     <string name="permission_storage_desc">Sicherungen in den Download-Ordner schreiben (Android 9 und älter)</string>
     <string name="permission_battery_title">Akku-Optimierung ignorieren</string>
     <string name="permission_battery_desc">Lässt die geplante Sicherung auch nachts laufen</string>
+    <string name="font_size_title">Textgröße</string>
+    <string name="font_size_desc">Textgröße in der App</string>
+    <string name="font_size_small">Klein</string>
+    <string name="font_size_default">Standard</string>
+    <string name="font_size_large">Groß</string>
+    <string name="font_size_xlarge">Sehr groß</string>
+    <string name="font_size_note">Wird zusätzlich zur Systemschriftgröße angewendet. Codes und Oberflächentext wachsen gemeinsam.</string>
 </resources>

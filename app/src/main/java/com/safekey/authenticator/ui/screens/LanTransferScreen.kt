@@ -79,6 +79,7 @@ import com.safekey.authenticator.ui.components.CodeField
 import com.safekey.authenticator.ui.components.IconButtonCompat
 import com.safekey.authenticator.ui.components.LocalNetworkPermissionGate
 import com.safekey.authenticator.ui.components.SimpleTopBar
+import com.safekey.authenticator.ui.theme.LocalFontScale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
@@ -705,7 +706,7 @@ private fun ReceiveTabContent(
                             style = MaterialTheme.typography.headlineSmall.copy(
                                 fontFamily = FontFamily.Monospace,
                                 fontWeight = FontWeight.Bold,
-                                letterSpacing = 2.sp
+                                letterSpacing = 2.sp * LocalFontScale.current
                             ),
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                         )

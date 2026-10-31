@@ -3,11 +3,15 @@ package com.safekey.authenticator.ui.screens
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
@@ -22,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.safekey.authenticator.MainViewModel
 import com.safekey.authenticator.R
 import com.safekey.authenticator.data.AppSettings
@@ -29,6 +34,8 @@ import com.safekey.authenticator.data.LanguagePrefs
 import com.safekey.authenticator.ui.components.AppIcons
 import com.safekey.authenticator.ui.components.SettingRow
 import com.safekey.authenticator.ui.components.SimpleTopBar
+import com.safekey.authenticator.ui.theme.LocalFontScale
+import com.safekey.authenticator.ui.theme.monospaceFamily
 
 /**
  * Secondary settings pages for appearance.
@@ -132,6 +139,95 @@ fun LanguageSettingsScreen(
         }
     }
 }
+
+/**
+ * Secondary settings page: text size.
+ *
+ * Four named steps instead of a percentage slider: the platform applies a
+ * non-linear font-scale curve above 105%, so a "130%" label would not be the
+ * 130% the user actually gets. Names stay true at every system setting. The
+ * page re-renders at the chosen step, and that is the live preview.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FontSizeSettingsScreen(
+    vm: MainViewModel,
+    onBack: () -> Unit
+) {
+    val settings by vm.settings.collectAsState()
+
+    Scaffold(
+        topBar = { SimpleTopBar(title = stringResource(R.string.font_size_title), onBack = onBack) }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 8.dp)
+        ) {
+            FontSizePreview()
+
+            FONT_SIZE_CHOICES.forEach { (id, labelRes) ->
+                SettingsChoiceRow(
+                    title = stringResource(labelRes),
+                    selected = settings.fontSize == id,
+                    onClick = { vm.setFontSize(id) }
+                )
+            }
+
+            Text(
+                text = stringResource(R.string.font_size_note),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)
+            )
+        }
+    }
+}
+
+/** Sample code + account row, rendered at the step currently in effect. */
+@Composable
+private fun FontSizePreview() {
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 8.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = "123 456",
+                style = MaterialTheme.typography.headlineSmall.copy(
+                    fontFamily = monospaceFamily,
+                    letterSpacing = 2.sp * LocalFontScale.current
+                ),
+                color = MaterialTheme.colorScheme.primary
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = "alice@example.com",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+    }
+}
+
+/** Steps in display order; shared with the settings entry row. */
+internal val FONT_SIZE_CHOICES: List<Pair<String, Int>> = listOf(
+    AppSettings.FONT_SMALL to R.string.font_size_small,
+    AppSettings.FONT_DEFAULT to R.string.font_size_default,
+    AppSettings.FONT_LARGE to R.string.font_size_large,
+    AppSettings.FONT_XLARGE to R.string.font_size_xlarge
+)
+
+/** Label for a stored step id; used as the trailing value on the entry row. */
+internal fun fontSizeLabelRes(id: String): Int =
+    FONT_SIZE_CHOICES.firstOrNull { it.first == id }?.second ?: R.string.font_size_default
 
 /** Radio-style row shared by the appearance sub-pages. */
 @Composable
