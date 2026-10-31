@@ -8,9 +8,12 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import com.safekey.authenticator.data.AppSettings
 
 // Fallback palette (no Dynamic Color support, i.e. Android < 12):
@@ -37,6 +40,7 @@ private val FallbackDark = darkColorScheme(
 fun SafeKeyTheme(
     themeMode: String,
     dynamicColor: Boolean,
+    fontSize: String = AppSettings.FONT_DEFAULT,
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
@@ -54,11 +58,22 @@ fun SafeKeyTheme(
         else -> FallbackLight
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = AppTypography,
-        content = content
-    )
+    // App text step, saturated against the system scale. The PIN keypad is a
+    // fixed 72dp circle and its three-column grid cannot grow sideways, so the
+    // text has to stop at a combined 2.0 instead of clipping.
+    val systemFontScale = LocalDensity.current.fontScale
+    val fontScale = remember(fontSize, systemFontScale) {
+        AppSettings.effectiveFontScale(fontSize, systemFontScale)
+    }
+    val typography = remember(fontScale) { AppTypography.scaledTo(fontScale) }
+
+    CompositionLocalProvider(LocalFontScale provides fontScale) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = typography,
+            content = content
+        )
+    }
 }
 
 // Fixed "yes, this is granted / allowed" green.

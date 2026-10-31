@@ -18,6 +18,8 @@ private val Context.dataStore by preferencesDataStore(name = "safekey_settings")
 data class AppSettings(
     val themeMode: String = THEME_SYSTEM,
     val dynamicColor: Boolean = true,
+    /** Text-size step id: FONT_SMALL / FONT_DEFAULT / FONT_LARGE / FONT_XLARGE. */
+    val fontSize: String = FONT_DEFAULT,
     val gateOnOpen: Boolean = true,
     val allowScreenshots: Boolean = false,
     val hideCodes: Boolean = false,
@@ -82,6 +84,48 @@ data class AppSettings(
         const val THEME_LIGHT = "light"
         const val THEME_DARK = "dark"
 
+        // ---- text size ----
+        const val FONT_SMALL = "small"
+        const val FONT_DEFAULT = "default"
+        const val FONT_LARGE = "large"
+        const val FONT_XLARGE = "xlarge"
+
+        /**
+         * Ceiling for the combined scale (app step × system font scale).
+         *
+         * The PIN keypad is a fixed 72dp circle holding a headlineSmall digit:
+         * at 2.0 the 32sp line box is 64dp and still fits, at 2.6 it is 83dp
+         * and clips. The keypad also cannot grow sideways — three 72dp keys
+         * plus gaps already use 232dp of a 360dp screen — so the text has to
+         * stop growing, not the key.
+         */
+        const val FONT_SCALE_MAX_COMPOSITE = 2.0f
+
+        val FONT_IDS = setOf(FONT_SMALL, FONT_DEFAULT, FONT_LARGE, FONT_XLARGE)
+
+        /** App-side multiplier for a stored step id; unknown ids fall back to 1.0. */
+        fun fontScaleOf(id: String): Float = when (id) {
+            FONT_SMALL -> 0.9f
+            FONT_LARGE -> 1.15f
+            FONT_XLARGE -> 1.3f
+            else -> 1f
+        }
+
+        /**
+         * Step multiplier actually applied on top of [systemFontScale].
+         *
+         * Steps at or below 1.0 are returned as they are — "default" must stay
+         * exactly the system size even on a ROM whose scale is above 200%.
+         * Larger steps are capped so the combined scale stops at
+         * [FONT_SCALE_MAX_COMPOSITE]; past that point they add nothing rather
+         * than shrinking the system's own text.
+         */
+        fun effectiveFontScale(id: String, systemFontScale: Float): Float {
+            val step = fontScaleOf(id)
+            if (step <= 1f) return step
+            return maxOf(1f, minOf(step, FONT_SCALE_MAX_COMPOSITE / systemFontScale))
+        }
+
         const val DESTROY_OFF = "off"
         const val DESTROY_PIN = "destroy_pin"
         const val DESTROY_FAIL_COUNT = "fail_count"
@@ -110,6 +154,7 @@ class SettingsRepository(
 
     private object Keys {
         val THEME_MODE = stringPreferencesKey("theme_mode")
+        val FONT_SIZE = stringPreferencesKey("font_size")
         val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
         val GATE_ON_OPEN = booleanPreferencesKey("gate_on_open")
         val ALLOW_SCREENSHOTS = booleanPreferencesKey("allow_screenshots")
@@ -154,6 +199,7 @@ class SettingsRepository(
         AppSettings(
             themeMode = prefs[Keys.THEME_MODE] ?: AppSettings.THEME_SYSTEM,
             dynamicColor = prefs[Keys.DYNAMIC_COLOR] ?: true,
+            fontSize = prefs[Keys.FONT_SIZE] ?: AppSettings.FONT_DEFAULT,
             gateOnOpen = prefs[Keys.GATE_ON_OPEN] ?: true,
             allowScreenshots = prefs[Keys.ALLOW_SCREENSHOTS] ?: false,
             hideCodes = prefs[Keys.HIDE_CODES] ?: false,
@@ -195,6 +241,14 @@ class SettingsRepository(
 
     suspend fun setDynamicColor(enabled: Boolean) {
         context.dataStore.edit { it[Keys.DYNAMIC_COLOR] = enabled }
+    }
+
+    /** Unknown step ids are stored as the default rather than as garbage. */
+    suspend fun setFontSize(id: String) {
+        context.dataStore.edit {
+            it[Keys.FONT_SIZE] =
+                if (id in AppSettings.FONT_IDS) id else AppSettings.FONT_DEFAULT
+        }
     }
 
     suspend fun setGateOnOpen(enabled: Boolean) {
