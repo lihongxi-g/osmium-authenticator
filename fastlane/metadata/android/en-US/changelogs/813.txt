@@ -1,1 +1,0 @@
-v2.6.2: text size is a free 80-200% slider behind a master switch (off = Osmium's default size), and the top-bar double inset that left a blank band on every page is fixed.

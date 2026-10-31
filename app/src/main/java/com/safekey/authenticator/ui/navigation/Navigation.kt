@@ -20,6 +20,8 @@ sealed class Screen {
     object ThemeSettings : Screen()
     /** Secondary settings page: text size (four named steps). */
     object FontSettings : Screen()
+    /** Secondary settings page: vibration feedback. */
+    object HapticSettings : Screen()
     /** Secondary settings page: app language. */
     object LanguageSettings : Screen()
     /** Secondary settings page: which update channels to check (stable / preview). */

@@ -36,6 +36,7 @@ import kotlinx.coroutines.launch
 import com.safekey.authenticator.R
 import com.safekey.authenticator.ui.components.AppIcons
 import com.safekey.authenticator.ui.components.CenteredScrollColumn
+import com.safekey.authenticator.ui.theme.LocalHapticTick
 
 private const val PIN_LENGTH = 6
 
@@ -167,11 +168,15 @@ fun PinPadScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PinKey(label: String, icon: Boolean, onClick: () -> Unit) {
+    val tick = LocalHapticTick.current
     Surface(
         modifier = Modifier.size(72.dp),
         shape = CircleShape,
         color = MaterialTheme.colorScheme.surfaceVariant,
-        onClick = onClick
+        onClick = {
+            tick()
+            onClick()
+        }
     ) {
         Box(contentAlignment = Alignment.Center) {
             if (icon) {

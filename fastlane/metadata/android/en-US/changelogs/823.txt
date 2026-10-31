@@ -1,0 +1,1 @@
+v2.6.2: text size is a free 80-200% slider behind a master switch, new vibration feedback with adjustable intensity or follow-system, and the top-bar blank band is fixed.

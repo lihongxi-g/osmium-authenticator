@@ -15,10 +15,18 @@
 - 验证码和界面文字一起变化，图标、间距、卡片宽度不变。
 - 合计放大封顶 2.0 倍（应用 × 系统），保证 PIN 键盘（固定 72dp 圆键）和账号卡片不会被撑破。
 
+### 新增：震动反馈
+
+- 设置 → 外观 → **震动反馈**：一个总开关、一个 0–100% 的强度滑块，外加一个「跟随系统」开关。
+- **跟随系统**打开时：使用系统自己的触感设置，强度滑块变灰不可调，震动反馈的总开关自动关闭（不会出现两个开关同时「开」的矛盾状态）。
+- 关掉「跟随系统」后，可以打开总开关并拖动滑块调节强度；强度同时决定振幅和时长（10–20ms）。
+- 震动出现在两个地方：**复制验证码**（列表卡片、详情页）和 **PIN 键盘按键**。
+
 ### 修复：顶部/底部的白边、黑边
 
 - **顶栏被加了两次状态栏高度**：`TopAppBar` 自身已经处理系统栏内边距，外面又套了一层 `statusBarsPadding()`，结果主页面、设置页等所有带顶栏的页面顶部多出一条状态栏高的空白带，内容被整体压下、底部被切。已去掉多余的一层。
 - **状态栏/导航栏图标对比度跟随系统而不是应用主题**：应用强制深色而系统是浅色时，图标会是深色压在深色背景上。现在跟随应用主题切换。
+- **字体大小页两张卡片宽度不一致**：预览卡比上面的开关卡宽 16dp，已统一内边距。
 - **锁屏、PIN 输入页、扫码页的权限说明**：内容超出屏幕时整页可以滑动。之前是居中固定布局，长英文/德文加上大字号会把按钮顶出屏幕，且没有滚动。
 - **系统对话框**（防篡改提示、完整性报告、WebDAV HTTP 警告、备份密码、自毁模式说明、导出告别页等）：正文过长时现在可以在对话框内滚动查看。
 - **账号卡片**：固定 96dp 高改为最小高度 96dp，标题 + 副标题 + 标签行不再被裁；默认字号下外观与之前完全一致。
@@ -43,10 +51,18 @@ This release adds a text-size setting with a free 80%–200% slider, and fixes s
 - Codes and interface text grow together; icons, spacing and card width stay put.
 - The combined scale is capped at 2.0× (app × system) so the PIN keypad (fixed 72dp keys) and the account cards cannot be pushed past what they can hold.
 
+### New: vibration feedback
+
+- Settings → Appearance → **Vibration feedback**: a master switch, a 0–100% intensity slider, and a "Follow system" switch.
+- With **Follow system** on, the app uses the platform's own haptics: the intensity slider is greyed out and the master switch turns itself off, so the page can never show two contradictory "on" states.
+- With Follow system off, the master switch enables the app's own vibration and the slider sets its strength; intensity drives both amplitude and duration (10–20 ms).
+- It fires in two places: **copying a code** (list card and detail page) and the **PIN keypad**.
+
 ### Fixes: white/black bands at the top and bottom
 
 - **The top bar added the status-bar inset twice**: `TopAppBar` already applies the system-bar insets, and `statusBarsPadding()` was wrapped around it again. Every screen with a top bar (accounts, settings, …) therefore had a status-bar-tall blank band above the title, with the content pushed down and cut at the bottom. The extra layer is gone.
 - **Status/navigation bar icons followed the system night mode instead of the app theme**: forcing the app to dark while the system is light gave dark icons on a dark background. They now follow the app theme.
+- **The two cards on the text-size page had different widths**: the preview card was 16dp wider than the switch card above it; the insets now match.
 - **Lock screen, PIN pad and the camera-permission page**: the whole page now scrolls when the content is taller than the screen. These were centred fixed layouts, so a long English or German string at a large text size pushed the buttons off-screen with no way to reach them.
 - **System dialogs** (tamper warning, integrity report, WebDAV HTTP warning, backup password, self-destruct explanation, export farewell): the body now scrolls inside the dialog when it is too long.
 - **Account cards**: fixed 96dp height became a 96dp minimum, so title + subtitle + tag row are no longer clipped; at the default size the card looks exactly as before.

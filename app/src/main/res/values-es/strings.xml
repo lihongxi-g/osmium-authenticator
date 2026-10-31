@@ -637,4 +637,11 @@
     <string name="font_size_enable">Tamaño de texto personalizado</string>
     <string name="font_size_enable_desc">Desactivado: vuelve al tamaño de texto predeterminado de Osmium y el control queda bloqueado</string>
     <string name="font_size_off">Desactivado</string>
+    <string name="haptic_title">Vibración</string>
+    <string name="haptic_desc">Breve vibración al copiar un código y en el teclado del PIN</string>
+    <string name="haptic_follow_system">Seguir el sistema</string>
+    <string name="haptic_follow_desc">Usa la configuración háptica del sistema; la intensidad queda bloqueada y el interruptor superior se apaga</string>
+    <string name="haptic_intensity">Intensidad</string>
+    <string name="haptic_intensity_desc">Arrastra para ajustar la fuerza</string>
+    <string name="haptic_off">Desactivado</string>
 </resources>

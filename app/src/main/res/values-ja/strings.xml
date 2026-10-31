@@ -637,4 +637,11 @@
     <string name="font_size_enable">文字サイズをカスタマイズ</string>
     <string name="font_size_enable_desc">オフにすると Osmium 既定の文字サイズに戻り、スライダーは調整できません</string>
     <string name="font_size_off">オフ</string>
+    <string name="haptic_title">振動フィードバック</string>
+    <string name="haptic_desc">コードのコピーと PIN キーパッドの入力時に短く振動します</string>
+    <string name="haptic_follow_system">システムに従う</string>
+    <string name="haptic_follow_desc">システムの触覚設定を使用します。オンにすると強度は調整できず、上のスイッチは自動的にオフになります</string>
+    <string name="haptic_intensity">強さ</string>
+    <string name="haptic_intensity_desc">ドラッグして振動の強さを調整します</string>
+    <string name="haptic_off">オフ</string>
 </resources>

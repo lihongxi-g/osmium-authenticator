@@ -100,6 +100,7 @@ import com.safekey.authenticator.ui.screens.ExportToOthersScreen
 import com.safekey.authenticator.ui.screens.FileImportScreen
 import com.safekey.authenticator.ui.screens.FontSizeSettingsScreen
 import com.safekey.authenticator.ui.screens.GoogleImportScreen
+import com.safekey.authenticator.ui.screens.HapticSettingsScreen
 import com.safekey.authenticator.ui.screens.ImportScreen
 import com.safekey.authenticator.ui.screens.IntegrityScreen
 import com.safekey.authenticator.ui.screens.LanTransferScreen
@@ -268,7 +269,10 @@ class MainActivity : FragmentActivity() {
                 themeMode = settings.themeMode,
                 dynamicColor = settings.dynamicColor,
                 fontScaleEnabled = settings.fontScaleEnabled,
-                fontScalePercent = settings.fontScalePercent
+                fontScalePercent = settings.fontScalePercent,
+                hapticEnabled = settings.hapticEnabled,
+                hapticFollowSystem = settings.hapticFollowSystem,
+                hapticIntensityPercent = settings.hapticIntensityPercent
             ) {
                 // Screenshot policy follows the user setting (default: blocked).
                 LaunchedEffect(settings.allowScreenshots) {
@@ -1316,6 +1320,11 @@ private fun IntegrityNoticeDialog(
                     )
 
                     is Screen.FontSettings -> FontSizeSettingsScreen(
+                        vm = vm,
+                        onBack = { vm.nav.pop() }
+                    )
+
+                    is Screen.HapticSettings -> HapticSettingsScreen(
                         vm = vm,
                         onBack = { vm.nav.pop() }
                     )

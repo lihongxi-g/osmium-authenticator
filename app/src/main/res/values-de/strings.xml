@@ -637,4 +637,11 @@
     <string name="font_size_enable">Eigene Textgröße</string>
     <string name="font_size_enable_desc">Aus: Osmium nutzt wieder die Standardtextgröße, der Regler ist gesperrt</string>
     <string name="font_size_off">Aus</string>
+    <string name="haptic_title">Vibrationsfeedback</string>
+    <string name="haptic_desc">Kurzes Feedback beim Kopieren eines Codes und auf der PIN-Tastatur</string>
+    <string name="haptic_follow_system">Systemeinstellung folgen</string>
+    <string name="haptic_follow_desc">Nutzt die Haptik des Systems; die Intensität ist gesperrt und der Schalter oben wird ausgeschaltet</string>
+    <string name="haptic_intensity">Intensität</string>
+    <string name="haptic_intensity_desc">Ziehen, um die Stärke einzustellen</string>
+    <string name="haptic_off">Aus</string>
 </resources>

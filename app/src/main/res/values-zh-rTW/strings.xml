@@ -650,4 +650,11 @@
     <string name="font_size_enable">自訂字型大小</string>
     <string name="font_size_enable_desc">關閉後恢復 Osmium 預設字型大小，滑桿無法調整</string>
     <string name="font_size_off">關閉</string>
+    <string name="haptic_title">震動回饋</string>
+    <string name="haptic_desc">複製驗證碼與按 PIN 鍵盤時提供觸感</string>
+    <string name="haptic_follow_system">跟隨系統</string>
+    <string name="haptic_follow_desc">使用系統觸感設定；開啟後強度無法調整，震動回饋會自動關閉</string>
+    <string name="haptic_intensity">強度</string>
+    <string name="haptic_intensity_desc">拖動調整震動強弱</string>
+    <string name="haptic_off">關閉</string>
 </resources>

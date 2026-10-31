@@ -22,6 +22,11 @@ data class AppSettings(
     val fontScalePercent: Int = FONT_SCALE_PERCENT_DEFAULT,
     /** Master switch: off means Osmium's own default size, slider locked. */
     val fontScaleEnabled: Boolean = false,
+    /** Haptics: custom vibration on/off, and whether to defer to the system. */
+    val hapticEnabled: Boolean = false,
+    val hapticFollowSystem: Boolean = true,
+    /** Vibration strength, 0-100. */
+    val hapticIntensityPercent: Int = HAPTIC_INTENSITY_DEFAULT,
     val gateOnOpen: Boolean = true,
     val allowScreenshots: Boolean = false,
     val hideCodes: Boolean = false,
@@ -103,6 +108,24 @@ data class AppSettings(
          */
         const val FONT_SCALE_MAX_COMPOSITE = 2.0f
 
+        // ---- haptics ----
+        const val HAPTIC_INTENSITY_MIN = 0
+        const val HAPTIC_INTENSITY_MAX = 100
+        const val HAPTIC_INTENSITY_STEP = 5
+        const val HAPTIC_INTENSITY_DEFAULT = 60
+
+        /**
+         * Amplitude for [VibrationEffect.createOneShot] on a 1-255 scale.
+         * 0% is 1 (the weakest the platform accepts) — the master switch, not
+         * a zero amplitude, is what turns the feedback off.
+         */
+        fun hapticAmplitude(percent: Int): Int =
+            1 + percent.coerceIn(HAPTIC_INTENSITY_MIN, HAPTIC_INTENSITY_MAX) * 254 / 100
+
+        /** Short tick: 10-20 ms, longer the stronger the setting. */
+        fun hapticDurationMs(percent: Int): Long =
+            10L + percent.coerceIn(HAPTIC_INTENSITY_MIN, HAPTIC_INTENSITY_MAX) / 10L
+
         /**
          * Step ids written by the 2.6.2 test builds. Kept so an install that
          * already picked a step keeps that size after the slider landed.
@@ -164,6 +187,9 @@ class SettingsRepository(
         val FONT_SIZE = stringPreferencesKey("font_size")
         val FONT_SCALE_PERCENT = intPreferencesKey("font_scale_percent")
         val FONT_SCALE_ENABLED = booleanPreferencesKey("font_scale_enabled")
+        val HAPTIC_ENABLED = booleanPreferencesKey("haptic_enabled")
+        val HAPTIC_FOLLOW_SYSTEM = booleanPreferencesKey("haptic_follow_system")
+        val HAPTIC_INTENSITY = intPreferencesKey("haptic_intensity_percent")
         val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
         val GATE_ON_OPEN = booleanPreferencesKey("gate_on_open")
         val ALLOW_SCREENSHOTS = booleanPreferencesKey("allow_screenshots")
@@ -212,6 +238,11 @@ class SettingsRepository(
                 ?: prefs[Keys.FONT_SIZE]?.let { AppSettings.fontScalePercentOfLegacyStep(it) }
                 ?: AppSettings.FONT_SCALE_PERCENT_DEFAULT,
             fontScaleEnabled = prefs[Keys.FONT_SCALE_ENABLED] ?: false,
+            hapticEnabled = prefs[Keys.HAPTIC_ENABLED] ?: false,
+            hapticFollowSystem = prefs[Keys.HAPTIC_FOLLOW_SYSTEM] ?: true,
+            hapticIntensityPercent = (prefs[Keys.HAPTIC_INTENSITY]
+                ?: AppSettings.HAPTIC_INTENSITY_DEFAULT)
+                .coerceIn(AppSettings.HAPTIC_INTENSITY_MIN, AppSettings.HAPTIC_INTENSITY_MAX),
             gateOnOpen = prefs[Keys.GATE_ON_OPEN] ?: true,
             allowScreenshots = prefs[Keys.ALLOW_SCREENSHOTS] ?: false,
             hideCodes = prefs[Keys.HIDE_CODES] ?: false,
@@ -258,6 +289,31 @@ class SettingsRepository(
     /** Off restores Osmium's own default typography and locks the slider. */
     suspend fun setFontScaleEnabled(enabled: Boolean) {
         context.dataStore.edit { it[Keys.FONT_SCALE_ENABLED] = enabled }
+    }
+
+    suspend fun setHapticEnabled(enabled: Boolean) {
+        context.dataStore.edit { it[Keys.HAPTIC_ENABLED] = enabled }
+    }
+
+    /**
+     * Following the system means the app does not apply its own vibration, so
+     * the custom switch is turned off in the same transaction — otherwise the
+     * page would show two contradictory "on" states.
+     */
+    suspend fun setHapticFollowSystem(follow: Boolean) {
+        context.dataStore.edit {
+            it[Keys.HAPTIC_FOLLOW_SYSTEM] = follow
+            if (follow) it[Keys.HAPTIC_ENABLED] = false
+        }
+    }
+
+    suspend fun setHapticIntensityPercent(percent: Int) {
+        context.dataStore.edit {
+            it[Keys.HAPTIC_INTENSITY] = percent.coerceIn(
+                AppSettings.HAPTIC_INTENSITY_MIN,
+                AppSettings.HAPTIC_INTENSITY_MAX
+            )
+        }
     }
 
     /** Out-of-range values are clamped, not stored. */

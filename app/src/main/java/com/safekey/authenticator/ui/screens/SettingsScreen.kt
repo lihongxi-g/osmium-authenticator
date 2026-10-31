@@ -176,6 +176,24 @@ fun SettingsScreen(
                 onClick = { vm.nav.push(Screen.FontSettings) }
             )
 
+            if ("haptic" !in hiddenFeatures) SettingRow(
+                icon = AppIcons.Vibration,
+                title = stringResource(R.string.haptic_title),
+                trailing = {
+                    Text(
+                        text = when {
+                            settings.hapticFollowSystem ->
+                                stringResource(R.string.haptic_follow_system)
+                            settings.hapticEnabled -> "${settings.hapticIntensityPercent}%"
+                            else -> stringResource(R.string.haptic_off)
+                        },
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
+                onClick = { vm.nav.push(Screen.HapticSettings) }
+            )
+
             if ("sort" !in hiddenFeatures) SettingRow(
                 icon = AppIcons.SwapVert,
                 title = stringResource(R.string.sort_mode),

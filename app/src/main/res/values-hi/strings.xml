@@ -637,4 +637,11 @@
     <string name="font_size_enable">कस्टम टेक्स्ट आकार</string>
     <string name="font_size_enable_desc">बंद होने पर Osmium का डिफ़ॉल्ट टेक्स्ट आकार लौट आता है और स्लाइडर लॉक रहता है</string>
     <string name="font_size_off">बंद</string>
+    <string name="haptic_title">कंपन फ़ीडबैक</string>
+    <string name="haptic_desc">कोड कॉपी करने और PIN कीपैड पर छोटा कंपन</string>
+    <string name="haptic_follow_system">सिस्टम के अनुसार</string>
+    <string name="haptic_follow_desc">सिस्टम की हैप्टिक सेटिंग्स का उपयोग करता है; तीव्रता लॉक हो जाती है और ऊपर का स्विच बंद हो जाता है</string>
+    <string name="haptic_intensity">तीव्रता</string>
+    <string name="haptic_intensity_desc">ताकत सेट करने के लिए खींचें</string>
+    <string name="haptic_off">बंद</string>
 </resources>

@@ -637,4 +637,11 @@
     <string name="font_size_enable">Свой размер текста</string>
     <string name="font_size_enable_desc">Выкл.: возвращается стандартный размер текста Osmium, ползунок заблокирован</string>
     <string name="font_size_off">Выкл.</string>
+    <string name="haptic_title">Вибрация</string>
+    <string name="haptic_desc">Короткая вибрация при копировании кода и на клавиатуре PIN</string>
+    <string name="haptic_follow_system">Как в системе</string>
+    <string name="haptic_follow_desc">Использует системные настройки вибрации; интенсивность блокируется, верхний переключатель выключается</string>
+    <string name="haptic_intensity">Интенсивность</string>
+    <string name="haptic_intensity_desc">Потяните, чтобы настроить силу</string>
+    <string name="haptic_off">Выкл.</string>
 </resources>

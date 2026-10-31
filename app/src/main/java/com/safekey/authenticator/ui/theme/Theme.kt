@@ -42,6 +42,9 @@ fun SafeKeyTheme(
     dynamicColor: Boolean,
     fontScaleEnabled: Boolean = false,
     fontScalePercent: Int = AppSettings.FONT_SCALE_PERCENT_DEFAULT,
+    hapticEnabled: Boolean = false,
+    hapticFollowSystem: Boolean = true,
+    hapticIntensityPercent: Int = AppSettings.HAPTIC_INTENSITY_DEFAULT,
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
@@ -67,8 +70,12 @@ fun SafeKeyTheme(
         AppSettings.effectiveFontScale(fontScaleEnabled, fontScalePercent, systemFontScale)
     }
     val typography = remember(fontScale) { AppTypography.scaledTo(fontScale) }
+    val hapticTick = rememberHapticTick(hapticEnabled, hapticFollowSystem, hapticIntensityPercent)
 
-    CompositionLocalProvider(LocalFontScale provides fontScale) {
+    CompositionLocalProvider(
+        LocalFontScale provides fontScale,
+        LocalHapticTick provides hapticTick
+    ) {
         MaterialTheme(
             colorScheme = colorScheme,
             typography = typography,

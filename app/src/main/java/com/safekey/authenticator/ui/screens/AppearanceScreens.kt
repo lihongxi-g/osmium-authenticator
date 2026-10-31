@@ -265,7 +265,9 @@ private fun FontSizePreview() {
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 8.dp)
+            // Same 16dp inset as SettingRow: the preview used 8dp and came out
+            // wider than the switch card above it.
+            .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
@@ -293,6 +295,105 @@ internal val FONT_PRESETS: List<Pair<Int, Int>> = listOf(
     115 to R.string.font_size_large,
     130 to R.string.font_size_xlarge
 )
+
+/**
+ * Secondary settings page: vibration feedback.
+ *
+ * Three controls that must never contradict each other:
+ *  - "Follow system" hands haptics to the platform. Turning it on also turns
+ *    the custom switch off (one transaction in the repository) and locks the
+ *    intensity slider, so the page can never show two "on" states at once.
+ *  - The custom switch is the master for our own VibrationEffect.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HapticSettingsScreen(
+    vm: MainViewModel,
+    onBack: () -> Unit
+) {
+    val settings by vm.settings.collectAsState()
+    var draft by remember(settings.hapticIntensityPercent) {
+        mutableFloatStateOf(settings.hapticIntensityPercent.toFloat())
+    }
+    val sliderEnabled = settings.hapticEnabled && !settings.hapticFollowSystem
+
+    Scaffold(
+        topBar = { SimpleTopBar(title = stringResource(R.string.haptic_title), onBack = onBack) }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 8.dp)
+        ) {
+            SettingRow(
+                icon = AppIcons.Vibration,
+                title = stringResource(R.string.haptic_title),
+                description = stringResource(R.string.haptic_desc),
+                trailing = {
+                    Switch(
+                        checked = settings.hapticEnabled,
+                        onCheckedChange = { vm.setHapticEnabled(it) },
+                        enabled = !settings.hapticFollowSystem
+                    )
+                }
+            )
+
+            SettingRow(
+                icon = AppIcons.Sync,
+                title = stringResource(R.string.haptic_follow_system),
+                description = stringResource(R.string.haptic_follow_desc),
+                trailing = {
+                    Switch(
+                        checked = settings.hapticFollowSystem,
+                        onCheckedChange = { vm.setHapticFollowSystem(it) }
+                    )
+                }
+            )
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 20.dp, end = 20.dp, top = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.haptic_intensity),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f)
+                )
+                Text(
+                    text = "${draft.roundToInt()}%",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Slider(
+                value = draft,
+                onValueChange = { draft = it },
+                onValueChangeFinished = { vm.setHapticIntensityPercent(draft.roundToInt()) },
+                valueRange = AppSettings.HAPTIC_INTENSITY_MIN.toFloat()..
+                    AppSettings.HAPTIC_INTENSITY_MAX.toFloat(),
+                steps = (AppSettings.HAPTIC_INTENSITY_MAX - AppSettings.HAPTIC_INTENSITY_MIN) /
+                    AppSettings.HAPTIC_INTENSITY_STEP - 1,
+                enabled = sliderEnabled,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
+            )
+
+            Text(
+                text = stringResource(R.string.haptic_intensity_desc),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
+            )
+        }
+    }
+}
 
 /** Radio-style row shared by the appearance sub-pages. */
 @Composable

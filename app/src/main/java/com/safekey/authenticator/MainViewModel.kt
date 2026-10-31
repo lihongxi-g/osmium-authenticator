@@ -764,6 +764,12 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch { settingsRepo.setFontScalePercent(percent) }
     fun setFontScaleEnabled(enabled: Boolean) =
         viewModelScope.launch { settingsRepo.setFontScaleEnabled(enabled) }
+    fun setHapticEnabled(enabled: Boolean) =
+        viewModelScope.launch { settingsRepo.setHapticEnabled(enabled) }
+    fun setHapticFollowSystem(follow: Boolean) =
+        viewModelScope.launch { settingsRepo.setHapticFollowSystem(follow) }
+    fun setHapticIntensityPercent(percent: Int) =
+        viewModelScope.launch { settingsRepo.setHapticIntensityPercent(percent) }
     fun setGateOnOpen(enabled: Boolean) = viewModelScope.launch { settingsRepo.setGateOnOpen(enabled) }
     fun setAllowScreenshots(enabled: Boolean) = viewModelScope.launch { settingsRepo.setAllowScreenshots(enabled) }
     fun setHideCodes(enabled: Boolean) = viewModelScope.launch { settingsRepo.setHideCodes(enabled) }

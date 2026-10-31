@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.safekey.authenticator.AccountUi
 import com.safekey.authenticator.ui.theme.LocalFontScale
+import com.safekey.authenticator.ui.theme.LocalHapticTick
 import com.safekey.authenticator.ui.theme.monospaceFamily
 
 /**
@@ -121,9 +122,13 @@ private fun CodeDisplay(
     expiring: Boolean,
     onCopyCode: () -> Unit
 ) {
+    val tick = LocalHapticTick.current
     Column(
         horizontalAlignment = Alignment.End,
-        modifier = Modifier.clickable(onClickLabel = "Copy code") { onCopyCode() }
+        modifier = Modifier.clickable(onClickLabel = "Copy code") {
+            tick()
+            onCopyCode()
+        }
     ) {
         Text(
             text = code,

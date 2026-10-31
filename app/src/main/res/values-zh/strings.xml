@@ -652,4 +652,11 @@
     <string name="font_size_enable">自定义字体大小</string>
     <string name="font_size_enable_desc">关闭后恢复 Osmium 默认字号，滑块不可调节</string>
     <string name="font_size_off">关闭</string>
+    <string name="haptic_title">震动反馈</string>
+    <string name="haptic_desc">复制验证码和按 PIN 键盘时给出触感</string>
+    <string name="haptic_follow_system">跟随系统</string>
+    <string name="haptic_follow_desc">使用系统触感设置；开启后强度不可调，震动反馈会自动关闭</string>
+    <string name="haptic_intensity">强度</string>
+    <string name="haptic_intensity_desc">拖动调整震动强弱</string>
+    <string name="haptic_off">关闭</string>
 </resources>
