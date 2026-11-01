@@ -22,6 +22,8 @@ sealed class Screen {
     object ThemeSettings : Screen()
     /** Third-level settings page: interface typeface (system / Lora). */
     object FontFamilySettings : Screen()
+    /** Fourth-level page: licence and script coverage of the bundled fonts. */
+    object FontNotes : Screen()
     /** Third-level settings page: text size (adjustable percentage). */
     object FontSettings : Screen()
     /** Third-level settings page: vibration feedback. */

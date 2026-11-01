@@ -60,12 +60,13 @@ This release adds a text-size setting with a free 80%–200% slider, and fixes s
 - Releasing the intensity slider fires one tick at the new strength, so it can be felt while adjusting.
 - The ripple is untouched: the tick is layered over the same indication the app already used.
 
-### New: Lora as an optional interface font
+### New: four optional interface fonts
 
-- Settings → Appearance → **Font** offers the **system default** or **Lora**, a serif face. Each row is previewed in its own typeface; the default stays the system font, and switching never restarts the app.
-- Only the typeface changes — sizes, weights and letter spacing are untouched, so no layout moves when the font switches. Verification codes keep their monospace face, so the digits stay evenly spaced and easy to read out.
-- Lora ships the Latin (incl. extended) and Cyrillic subsets plus Vietnamese; Chinese, Japanese, Korean and Hindi text keeps rendering in the system font glyph by glyph. There is no Greek subset. That is the font's coverage, not a bug.
-- **License compliance:** Lora is bundled byte-for-byte as published, under the SIL Open Font License 1.1. The full license text and the upstream FONTLOG travel inside the APK (`assets/licenses/`), the attribution is listed in Settings → About → Attributions, and the repository documents it in `THIRD-PARTY-FONTS.md`. No new permissions, no new dependency.
+- Settings → Appearance → **Font** offers the **system default** plus four bundled serif faces: **Lora**, **Source Serif 4**, **Literata** and **Crimson Pro**. Each row is previewed in the typeface it names, switching is instant, and the page is a plain list — no cards.
+- Only the typeface changes: sizes, weights and letter spacing are untouched, so nothing moves in the layout when the font switches. Verification codes keep their monospace face so the digits stay evenly spaced.
+- **Licence and coverage note move to their own page** (Settings → Appearance → Font → **Font notes**): which scripts each face covers, its licence, and what falls back to the system font.
+- Coverage, measured from the shipped files: Lora (latin/cyrillic/vietnamese), Source Serif 4 (latin/cyrillic/greek/vietnamese), Literata (latin/cyrillic/greek/vietnamese), Crimson Pro (latin/vietnamese — **no Cyrillic**). None of them has CJK, Hangul or Devanagari, so Chinese, Japanese, Korean and Hindi keep rendering in the system font; that is why the setting is a choice, not a replacement.
+- **Licence compliance:** all four are SIL OFL 1.1 and ship byte-for-byte as published, with only the file name lowercased for Android resources. The full licence text of each face is bundled in `assets/licenses/`, every face has an entry in Settings → About → Attributions, and the repository documents them in `THIRD-PARTY-FONTS.md`. No new permissions, no new dependency; the bundled fonts add about 2.3 MB to the APK.
 
 ### Settings: appearance is one page now
 
@@ -86,5 +87,5 @@ This release adds a text-size setting with a free 80%–200% slider, and fixes s
 
 ### Other
 
-- 23 new UI strings, added in all 11 languages.
+- 34 new UI strings, added in all 11 languages.
 - No new permissions, no third-party SDKs, no data collection.

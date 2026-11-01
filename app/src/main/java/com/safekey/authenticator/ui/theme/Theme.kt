@@ -17,7 +17,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.font.FontFamily
 import com.safekey.authenticator.data.AppSettings
 
 // Fallback palette (no Dynamic Color support, i.e. Android < 12):
@@ -73,8 +72,7 @@ fun SafeKeyTheme(
     val fontScale = remember(fontScaleEnabled, fontScalePercent, systemFontScale) {
         AppSettings.effectiveFontScale(fontScaleEnabled, fontScalePercent, systemFontScale)
     }
-    val typeface =
-        if (fontFamily == AppSettings.FONT_FAMILY_LORA) LoraFamily else FontFamily.Default
+    val typeface = interfaceFontFamily(fontFamily)
     val typography = remember(fontScale, typeface) {
         AppTypography.scaledTo(fontScale).withFamily(typeface)
     }

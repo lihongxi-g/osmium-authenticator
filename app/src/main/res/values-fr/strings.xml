@@ -642,6 +642,17 @@
     <string name="font_family_desc">Police de l’interface</string>
     <string name="font_family_system">Police du système</string>
     <string name="font_family_lora">Lora</string>
+    <string name="font_family_source_serif">Source Serif 4</string>
+    <string name="font_family_literata">Literata</string>
+    <string name="font_family_crimson_pro">Crimson Pro</string>
+    <string name="font_notes_title">À propos des polices</string>
+    <string name="font_notes_summary">Licence et jeux de caractères</string>
+    <string name="font_notes_intro">Les polices incluses sont distribuées non modifiées sous SIL Open Font License 1.1. Le texte intégral de chaque licence est fourni dans l’application.</string>
+    <string name="font_notes_no_cyrillic">Pas de cyrillique : le texte russe utilise la police du système.</string>
+    <string name="font_cover_latin">Latin</string>
+    <string name="font_cover_cyrillic">Cyrillique</string>
+    <string name="font_cover_greek">Grec</string>
+    <string name="font_cover_vietnamese">Vietnamien</string>
     <string name="font_family_sample">Aa Bb Cc 0123</string>
     <string name="font_family_note">Lora est fournie non modifiée sous SIL Open Font License 1.1 et couvre le latin et le cyrillique ; le chinois, le japonais, le coréen et l’hindi utilisent la police du système.</string>
     <string name="attributions_lora_desc">Police à empattements de l’interface, incluse non modifiée sous SIL Open Font License 1.1 (texte de licence fourni dans l’app).</string>

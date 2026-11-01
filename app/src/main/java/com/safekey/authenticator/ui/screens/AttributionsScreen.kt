@@ -106,6 +106,21 @@ fun AttributionsScreen(
                 onClick = { open("https://github.com/cyrealtype/Lora-Cyrillic") }
             )
             AttributionCard(
+                title = "Source Serif 4 (SIL OFL 1.1)",
+                description = stringResource(R.string.attributions_lora_desc),
+                onClick = { open("https://github.com/adobe-fonts/source-serif") }
+            )
+            AttributionCard(
+                title = "Literata (SIL OFL 1.1)",
+                description = stringResource(R.string.attributions_lora_desc),
+                onClick = { open("https://github.com/googlefonts/literata") }
+            )
+            AttributionCard(
+                title = "Crimson Pro (SIL OFL 1.1)",
+                description = stringResource(R.string.attributions_lora_desc),
+                onClick = { open("https://github.com/googlefonts/crimson") }
+            )
+            AttributionCard(
                 title = "Android Key Attestation Verifier (Apache-2.0)",
                 description = stringResource(R.string.attributions_keyattestation_desc),
                 onClick = { open("https://github.com/android/keyattestation") }

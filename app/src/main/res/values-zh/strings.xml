@@ -657,6 +657,17 @@
     <string name="font_family_desc">选择应用内使用的字体</string>
     <string name="font_family_system">系统默认</string>
     <string name="font_family_lora">Lora</string>
+    <string name="font_family_source_serif">Source Serif 4</string>
+    <string name="font_family_literata">Literata</string>
+    <string name="font_family_crimson_pro">Crimson Pro</string>
+    <string name="font_notes_title">字体说明</string>
+    <string name="font_notes_summary">许可与字符覆盖</string>
+    <string name="font_notes_intro">内置字体以 SIL 开放字体许可 1.1 原样随应用分发，每款字体的许可证全文都打包在应用内。</string>
+    <string name="font_notes_no_cyrillic">不含西里尔文，俄语文本使用系统字体。</string>
+    <string name="font_cover_latin">拉丁</string>
+    <string name="font_cover_cyrillic">西里尔</string>
+    <string name="font_cover_greek">希腊</string>
+    <string name="font_cover_vietnamese">越南语</string>
     <string name="font_family_sample">Aa Bb Cc 0123</string>
     <string name="font_family_note">Lora 以 SIL 开放字体许可 1.1 原样内置，覆盖拉丁文和西里尔文；中文、日文、韩文和印地文自动使用系统字体。</string>
     <string name="attributions_lora_desc">衬线界面字体，以 SIL 开放字体许可 1.1 原样内置（许可证全文随应用分发）。</string>

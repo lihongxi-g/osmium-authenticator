@@ -642,6 +642,17 @@
     <string name="font_family_desc">इंटरफ़ेस का फ़ॉन्ट</string>
     <string name="font_family_system">सिस्टम डिफ़ॉल्ट</string>
     <string name="font_family_lora">Lora</string>
+    <string name="font_family_source_serif">Source Serif 4</string>
+    <string name="font_family_literata">Literata</string>
+    <string name="font_family_crimson_pro">Crimson Pro</string>
+    <string name="font_notes_title">फ़ॉन्ट नोट्स</string>
+    <string name="font_notes_summary">लाइसेंस और लिपि कवरेज</string>
+    <string name="font_notes_intro">शामिल फ़ॉन्ट SIL Open Font License 1.1 के अंतर्गत बिना बदलाव ऐप के साथ वितरित होते हैं; हर फ़ॉन्ट का पूरा लाइसेंस पाठ ऐप में शामिल है।</string>
+    <string name="font_notes_no_cyrillic">सिरिलिक नहीं — रूसी पाठ सिस्टम फ़ॉन्ट में दिखेगा।</string>
+    <string name="font_cover_latin">लैटिन</string>
+    <string name="font_cover_cyrillic">सिरिलिक</string>
+    <string name="font_cover_greek">ग्रीक</string>
+    <string name="font_cover_vietnamese">वियतनामी</string>
     <string name="font_family_sample">Aa Bb Cc 0123</string>
     <string name="font_family_note">Lora को SIL Open Font License 1.1 के अंतर्गत बिना बदलाव के शामिल किया गया है; यह लैटिन और सिरिलिक लिपियों को कवर करता है, जबकि चीनी, जापानी, कोरियाई और हिन्दी पाठ सिस्टम फ़ॉन्ट में दिखेगा।</string>
     <string name="attributions_lora_desc">इंटरफ़ेस के लिए सेरिफ़ फ़ॉन्ट, SIL Open Font License 1.1 के अंतर्गत बिना बदलाव शामिल (लाइसेंस पाठ ऐप में मौजूद)।</string>

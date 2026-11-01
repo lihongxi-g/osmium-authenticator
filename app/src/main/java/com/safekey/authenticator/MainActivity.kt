@@ -89,6 +89,7 @@ import com.safekey.authenticator.ui.navigation.isRootBlocked
 import com.safekey.authenticator.ui.screens.AboutScreen
 import com.safekey.authenticator.ui.screens.AppearanceSettingsScreen
 import com.safekey.authenticator.ui.screens.FontFamilySettingsScreen
+import com.safekey.authenticator.ui.screens.FontNotesScreen
 import com.safekey.authenticator.ui.screens.PermissionsScreen
 import com.safekey.authenticator.ui.screens.DeveloperScreen
 import com.safekey.authenticator.ui.screens.AccountFormScreen
@@ -1331,6 +1332,8 @@ private fun IntegrityNoticeDialog(
                         vm = vm,
                         onBack = { vm.nav.pop() }
                     )
+
+                    is Screen.FontNotes -> FontNotesScreen(onBack = { vm.nav.pop() })
 
                     is Screen.FontSettings -> FontSizeSettingsScreen(
                         vm = vm,

@@ -10,6 +10,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.sp
 import com.safekey.authenticator.R
+import com.safekey.authenticator.data.AppSettings
 
 /** Monospace font for verification codes. */
 val monospaceFamily = FontFamily.Monospace
@@ -29,6 +30,44 @@ val LoraFamily: FontFamily = FontFamily(
     Font(R.font.lora, weight = FontWeight.SemiBold),
     Font(R.font.lora, weight = FontWeight.Bold)
 )
+
+/** Source Serif 4 (SIL OFL 1.1) — variable `opsz` + `wght`, Greek included. */
+val SourceSerif4Family: FontFamily = FontFamily(
+    Font(R.font.sourceserif4, weight = FontWeight.Normal),
+    Font(R.font.sourceserif4, weight = FontWeight.Medium),
+    Font(R.font.sourceserif4, weight = FontWeight.SemiBold),
+    Font(R.font.sourceserif4, weight = FontWeight.Bold)
+)
+
+/** Literata (SIL OFL 1.1) — variable `opsz` + `wght`, drawn for screen reading. */
+val LiterataFamily: FontFamily = FontFamily(
+    Font(R.font.literata, weight = FontWeight.Normal),
+    Font(R.font.literata, weight = FontWeight.Medium),
+    Font(R.font.literata, weight = FontWeight.SemiBold),
+    Font(R.font.literata, weight = FontWeight.Bold)
+)
+
+/**
+ * Crimson Pro (SIL OFL 1.1) — variable `wght`.
+ *
+ * Latin and Vietnamese only: it has no Cyrillic and no Greek, so Russian text
+ * falls back to the system font while this face is selected.
+ */
+val CrimsonProFamily: FontFamily = FontFamily(
+    Font(R.font.crimsonpro, weight = FontWeight.Normal),
+    Font(R.font.crimsonpro, weight = FontWeight.Medium),
+    Font(R.font.crimsonpro, weight = FontWeight.SemiBold),
+    Font(R.font.crimsonpro, weight = FontWeight.Bold)
+)
+
+/** Stored setting key -> typeface. Unknown keys mean the system font. */
+fun interfaceFontFamily(key: String): FontFamily = when (key) {
+    AppSettings.FONT_FAMILY_LORA -> LoraFamily
+    AppSettings.FONT_FAMILY_SOURCE_SERIF -> SourceSerif4Family
+    AppSettings.FONT_FAMILY_LITERATA -> LiterataFamily
+    AppSettings.FONT_FAMILY_CRIMSON_PRO -> CrimsonProFamily
+    else -> FontFamily.Default
+}
 
 val AppTypography = Typography(
     headlineSmall = TextStyle(

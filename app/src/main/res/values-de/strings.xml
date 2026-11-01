@@ -642,6 +642,17 @@
     <string name="font_family_desc">Schriftart der Oberfläche</string>
     <string name="font_family_system">Systemstandard</string>
     <string name="font_family_lora">Lora</string>
+    <string name="font_family_source_serif">Source Serif 4</string>
+    <string name="font_family_literata">Literata</string>
+    <string name="font_family_crimson_pro">Crimson Pro</string>
+    <string name="font_notes_title">Hinweise zu den Schriften</string>
+    <string name="font_notes_summary">Lizenz und Zeichensätze</string>
+    <string name="font_notes_intro">Die mitgelieferten Schriften werden unverändert unter der SIL Open Font License 1.1 verteilt. Der vollständige Lizenztext jeder Schrift liegt im App-Paket bei.</string>
+    <string name="font_notes_no_cyrillic">Kein Kyrillisch — russischer Text nutzt die Systemschrift.</string>
+    <string name="font_cover_latin">Latein</string>
+    <string name="font_cover_cyrillic">Kyrillisch</string>
+    <string name="font_cover_greek">Griechisch</string>
+    <string name="font_cover_vietnamese">Vietnamesisch</string>
     <string name="font_family_sample">Aa Bb Cc 0123</string>
     <string name="font_family_note">Lora ist unverändert unter der SIL Open Font License 1.1 enthalten und deckt Latein und Kyrillisch ab; Chinesisch, Japanisch, Koreanisch und Hindi nutzen die Systemschrift.</string>
     <string name="attributions_lora_desc">Serifen-Schriftart der Oberfläche, unverändert unter der SIL Open Font License 1.1 enthalten (Lizenztext in der App).</string>

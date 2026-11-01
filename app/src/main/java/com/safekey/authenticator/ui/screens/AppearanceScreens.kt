@@ -16,6 +16,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
@@ -32,6 +33,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
@@ -45,7 +47,10 @@ import com.safekey.authenticator.ui.components.SettingRow
 import com.safekey.authenticator.ui.components.SimpleTopBar
 import com.safekey.authenticator.ui.navigation.Screen
 import com.safekey.authenticator.ui.theme.AppTypography
+import com.safekey.authenticator.ui.theme.CrimsonProFamily
+import com.safekey.authenticator.ui.theme.LiterataFamily
 import com.safekey.authenticator.ui.theme.LoraFamily
+import com.safekey.authenticator.ui.theme.SourceSerif4Family
 import com.safekey.authenticator.ui.theme.LocalFontScale
 import com.safekey.authenticator.ui.theme.monospaceFamily
 import com.safekey.authenticator.ui.theme.previewHaptic
@@ -200,7 +205,8 @@ fun AppearanceSettingsScreen(
  * Third-level settings page: interface typeface.
  *
  * Plain rows, no cards. Each option is drawn in the font it names, so the
- * difference is visible before it is applied.
+ * difference is visible before it is applied. The licence/coverage small print
+ * lives one level down, on [FontNotesScreen], to keep this page to a list.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -221,25 +227,101 @@ fun FontFamilySettingsScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 8.dp)
         ) {
-            FontChoiceRow(
-                title = stringResource(R.string.font_family_system),
-                sample = sample,
-                selected = settings.fontFamily != AppSettings.FONT_FAMILY_LORA,
-                family = FontFamily.Default,
-                onClick = { vm.setFontFamily(AppSettings.FONT_FAMILY_SYSTEM) }
+            FONT_CHOICES.forEach { choice ->
+                FontChoiceRow(
+                    title = stringResource(choice.nameRes),
+                    sample = sample,
+                    selected = settings.fontFamily == choice.key,
+                    family = choice.family,
+                    onClick = { vm.setFontFamily(choice.key) }
+                )
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { vm.nav.push(Screen.FontNotes) }
+                    .padding(horizontal = 16.dp, vertical = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(R.string.font_notes_title),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = stringResource(R.string.font_notes_summary),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Icon(
+                    imageVector = AppIcons.ArrowBack,
+                    contentDescription = null,
+                    modifier = Modifier.rotate(180f),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Fourth-level page: what the bundled fonts are, which scripts each one covers
+ * and under which licence they travel with the app.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FontNotesScreen(onBack: () -> Unit) {
+    Scaffold(
+        topBar = { SimpleTopBar(title = stringResource(R.string.font_notes_title), onBack = onBack) }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.font_notes_intro),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
             )
-            FontChoiceRow(
-                title = stringResource(R.string.font_family_lora),
-                sample = sample,
-                selected = settings.fontFamily == AppSettings.FONT_FAMILY_LORA,
-                family = LoraFamily,
-                onClick = { vm.setFontFamily(AppSettings.FONT_FAMILY_LORA) }
-            )
+
+            FONT_NOTES.forEach { note ->
+                Column(modifier = Modifier.padding(vertical = 10.dp)) {
+                    Text(
+                        text = stringResource(note.nameRes),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    // Resolved one by one: `joinToString` is not inline, so a
+                    // composable call inside its lambda would not compile.
+                    val scriptLabels = mutableListOf<String>()
+                    for (res in note.scripts) scriptLabels.add(stringResource(res))
+                    Text(
+                        text = FONT_LICENSE + " · " + scriptLabels.joinToString(" · "),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    if (note.caveatRes != null) {
+                        Text(
+                            text = stringResource(note.caveatRes),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
+            }
+
             Text(
                 text = stringResource(R.string.font_family_note),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp)
+                modifier = Modifier.padding(top = 14.dp, bottom = 28.dp)
             )
         }
     }
@@ -276,6 +358,53 @@ private fun FontChoiceRow(
         RadioButton(selected = selected, onClick = onClick)
     }
 }
+
+/** Stored key, label and typeface of every interface font choice. */
+private class FontChoice(val key: String, val nameRes: Int, val family: FontFamily)
+
+private val FONT_CHOICES: List<FontChoice> = listOf(
+    FontChoice(AppSettings.FONT_FAMILY_SYSTEM, R.string.font_family_system, FontFamily.Default),
+    FontChoice(AppSettings.FONT_FAMILY_LORA, R.string.font_family_lora, LoraFamily),
+    FontChoice(AppSettings.FONT_FAMILY_SOURCE_SERIF, R.string.font_family_source_serif, SourceSerif4Family),
+    FontChoice(AppSettings.FONT_FAMILY_LITERATA, R.string.font_family_literata, LiterataFamily),
+    FontChoice(AppSettings.FONT_FAMILY_CRIMSON_PRO, R.string.font_family_crimson_pro, CrimsonProFamily)
+)
+
+/** Bundled font, its covered scripts (string resources) and any caveat. */
+private class FontNote(val nameRes: Int, val scripts: List<Int>, val caveatRes: Int? = null)
+
+/** The licence every bundled face uses; SPDX-ish short name, not translated. */
+private const val FONT_LICENSE = "SIL OFL 1.1"
+
+private val FONT_NOTES: List<FontNote> = listOf(
+    FontNote(
+        R.string.font_family_lora,
+        listOf(R.string.font_cover_latin, R.string.font_cover_cyrillic, R.string.font_cover_vietnamese)
+    ),
+    FontNote(
+        R.string.font_family_source_serif,
+        listOf(
+            R.string.font_cover_latin,
+            R.string.font_cover_cyrillic,
+            R.string.font_cover_greek,
+            R.string.font_cover_vietnamese
+        )
+    ),
+    FontNote(
+        R.string.font_family_literata,
+        listOf(
+            R.string.font_cover_latin,
+            R.string.font_cover_cyrillic,
+            R.string.font_cover_greek,
+            R.string.font_cover_vietnamese
+        )
+    ),
+    FontNote(
+        R.string.font_family_crimson_pro,
+        listOf(R.string.font_cover_latin, R.string.font_cover_vietnamese),
+        caveatRes = R.string.font_notes_no_cyrillic
+    )
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

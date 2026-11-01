@@ -112,8 +112,20 @@ data class AppSettings(
         // ---- typeface ----
         /** Follow the platform font. */
         const val FONT_FAMILY_SYSTEM = "system"
-        /** The bundled Lora serif. */
+        /** The bundled serif faces; all four ship under the SIL OFL 1.1. */
         const val FONT_FAMILY_LORA = "lora"
+        const val FONT_FAMILY_SOURCE_SERIF = "sourceserif4"
+        const val FONT_FAMILY_LITERATA = "literata"
+        const val FONT_FAMILY_CRIMSON_PRO = "crimsonpro"
+
+        /** Every value the font setting accepts; anything else stores "system". */
+        val FONT_FAMILY_CHOICES = setOf(
+            FONT_FAMILY_SYSTEM,
+            FONT_FAMILY_LORA,
+            FONT_FAMILY_SOURCE_SERIF,
+            FONT_FAMILY_LITERATA,
+            FONT_FAMILY_CRIMSON_PRO
+        )
 
         // ---- haptics ----
         const val HAPTIC_INTENSITY_MIN = 0
@@ -250,7 +262,9 @@ class SettingsRepository(
                 ?: prefs[Keys.FONT_SIZE]?.let { AppSettings.fontScalePercentOfLegacyStep(it) }
                 ?: AppSettings.FONT_SCALE_PERCENT_DEFAULT,
             fontScaleEnabled = prefs[Keys.FONT_SCALE_ENABLED] ?: false,
-            fontFamily = prefs[Keys.FONT_FAMILY] ?: AppSettings.FONT_FAMILY_SYSTEM,
+            fontFamily = (prefs[Keys.FONT_FAMILY] ?: AppSettings.FONT_FAMILY_SYSTEM)
+                .takeIf { it in AppSettings.FONT_FAMILY_CHOICES }
+                ?: AppSettings.FONT_FAMILY_SYSTEM,
             hapticEnabled = prefs[Keys.HAPTIC_ENABLED] ?: true,
             hapticIntensityPercent = (prefs[Keys.HAPTIC_INTENSITY]
                 ?: AppSettings.HAPTIC_INTENSITY_DEFAULT)
@@ -298,10 +312,10 @@ class SettingsRepository(
         context.dataStore.edit { it[Keys.DYNAMIC_COLOR] = enabled }
     }
 
-    /** "system" or "lora"; anything else falls back to the platform font. */
+    /** One of [AppSettings.FONT_FAMILY_CHOICES]; anything else stores "system". */
     suspend fun setFontFamily(family: String) {
-        val safe = if (family == AppSettings.FONT_FAMILY_LORA) {
-            AppSettings.FONT_FAMILY_LORA
+        val safe = if (family in AppSettings.FONT_FAMILY_CHOICES) {
+            family
         } else {
             AppSettings.FONT_FAMILY_SYSTEM
         }
