@@ -657,7 +657,6 @@
     <string name="font_family_desc">インターフェースの書体</string>
     <string name="font_family_system">システム標準</string>
     <string name="font_family_lora">Lora</string>
-    <string name="font_family_manrope">Manrope</string>
     <string name="font_family_literata">Literata</string>
     <string name="font_notes_title">フォントの説明</string>
     <string name="font_notes_summary">ライセンスと収録文字</string>

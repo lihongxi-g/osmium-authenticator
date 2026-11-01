@@ -657,7 +657,6 @@
     <string name="font_family_desc">인터페이스 글꼴</string>
     <string name="font_family_system">시스템 기본</string>
     <string name="font_family_lora">Lora</string>
-    <string name="font_family_manrope">Manrope</string>
     <string name="font_family_literata">Literata</string>
     <string name="font_notes_title">글꼴 설명</string>
     <string name="font_notes_summary">라이선스와 문자 지원</string>

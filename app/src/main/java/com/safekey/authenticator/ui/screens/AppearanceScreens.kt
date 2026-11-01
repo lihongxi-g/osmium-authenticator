@@ -36,6 +36,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.safekey.authenticator.MainViewModel
@@ -121,11 +122,7 @@ fun AppearanceSettingsScreen(
                 description = stringResource(R.string.font_family_desc),
                 trailing = {
                     Text(
-                        text = if (settings.fontFamily == AppSettings.FONT_FAMILY_LORA) {
-                            stringResource(R.string.font_family_lora)
-                        } else {
-                            stringResource(R.string.font_family_system)
-                        },
+                        text = stringResource(fontFamilyLabelRes(settings.fontFamily)),
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -303,16 +300,18 @@ private fun isChineseUi(context: android.content.Context): Boolean {
 @Composable
 private fun FontUnavailableNotice(onOpenLanguage: () -> Unit) {
     val languageWord = stringResource(R.string.language)
+    val linkColor = MaterialTheme.colorScheme.primary
     val body = stringResource(R.string.font_unavailable_body, languageWord)
     val linkStart = body.indexOf(languageWord)
 
-    val annotated = remember(body, languageWord) {
+    val annotated = remember(body, languageWord, linkColor) {
         buildAnnotatedString {
             append(body)
             if (linkStart >= 0) {
                 addStyle(
                     SpanStyle(
-                        color = Color.Unspecified,
+                        color = linkColor,
+                        fontWeight = FontWeight.Medium,
                         textDecoration = TextDecoration.Underline
                     ),
                     linkStart,
@@ -486,13 +485,19 @@ private fun FontChoiceRow(
     }
 }
 
+/** Label resource for a stored font key — the appearance page shows it as the row value. */
+private fun fontFamilyLabelRes(key: String): Int = when (key) {
+    AppSettings.FONT_FAMILY_LORA -> R.string.font_family_lora
+    AppSettings.FONT_FAMILY_LITERATA -> R.string.font_family_literata
+    else -> R.string.font_family_system
+}
+
 /** Stored key and label of every interface font choice. */
 private class FontChoice(val key: String, val nameRes: Int)
 
 private val FONT_CHOICES: List<FontChoice> = listOf(
     FontChoice(AppSettings.FONT_FAMILY_SYSTEM, R.string.font_family_system),
     FontChoice(AppSettings.FONT_FAMILY_LORA, R.string.font_family_lora),
-    FontChoice(AppSettings.FONT_FAMILY_MANROPE, R.string.font_family_manrope),
     FontChoice(AppSettings.FONT_FAMILY_LITERATA, R.string.font_family_literata)
 )
 
@@ -506,15 +511,6 @@ private val FONT_NOTES: List<FontNote> = listOf(
     FontNote(
         R.string.font_family_lora,
         listOf(R.string.font_cover_latin, R.string.font_cover_cyrillic, R.string.font_cover_vietnamese)
-    ),
-    FontNote(
-        R.string.font_family_manrope,
-        listOf(
-            R.string.font_cover_latin,
-            R.string.font_cover_cyrillic,
-            R.string.font_cover_greek,
-            R.string.font_cover_vietnamese
-        )
     ),
     FontNote(
         R.string.font_family_literata,

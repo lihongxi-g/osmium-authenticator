@@ -13,7 +13,6 @@ class FontWeightTest {
     @Test
     fun `ceiling matches the heaviest file of each face`() {
         assertEquals(700, AppSettings.fontWeightCeiling(AppSettings.FONT_FAMILY_LORA))
-        assertEquals(800, AppSettings.fontWeightCeiling(AppSettings.FONT_FAMILY_MANROPE))
         assertEquals(900, AppSettings.fontWeightCeiling(AppSettings.FONT_FAMILY_LITERATA))
         assertEquals(400, AppSettings.fontWeightCeiling(AppSettings.FONT_FAMILY_SYSTEM))
     }
@@ -21,7 +20,6 @@ class FontWeightTest {
     @Test
     fun `every face offers one stop per hundred from 400 to its ceiling`() {
         assertEquals(listOf(400, 500, 600, 700), AppSettings.fontWeightStops(AppSettings.FONT_FAMILY_LORA))
-        assertEquals(listOf(400, 500, 600, 700, 800), AppSettings.fontWeightStops(AppSettings.FONT_FAMILY_MANROPE))
         assertEquals(
             listOf(400, 500, 600, 700, 800, 900),
             AppSettings.fontWeightStops(AppSettings.FONT_FAMILY_LITERATA)
@@ -33,7 +31,6 @@ class FontWeightTest {
     fun `delta is zero at the baseline and reaches the ceiling`() {
         assertEquals(0, AppSettings.fontWeightDelta(400, AppSettings.FONT_FAMILY_LORA))
         assertEquals(300, AppSettings.fontWeightDelta(700, AppSettings.FONT_FAMILY_LORA))
-        assertEquals(400, AppSettings.fontWeightDelta(800, AppSettings.FONT_FAMILY_MANROPE))
         assertEquals(500, AppSettings.fontWeightDelta(900, AppSettings.FONT_FAMILY_LITERATA))
     }
 
@@ -56,7 +53,6 @@ class FontWeightTest {
     fun `the token hierarchy never inverts`() {
         listOf(
             AppSettings.FONT_FAMILY_LORA,
-            AppSettings.FONT_FAMILY_MANROPE,
             AppSettings.FONT_FAMILY_LITERATA
         ).forEach { key ->
             AppSettings.fontWeightStops(key).forEach { body ->

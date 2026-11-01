@@ -1,6 +1,6 @@
 # Third-party fonts
 
-Osmium bundles three optional interface faces. All three are licensed under the
+Osmium bundles two optional interface faces. Both are licensed under the
 **SIL Open Font License, Version 1.1**, which permits bundling and
 redistribution inside an application as long as the copyright notice and the
 licence travel with the font.
@@ -19,11 +19,9 @@ file.
 | App label | Files (`app/src/main/res/font/`) | Sizes | Scripts |
 |---|---|---|---|
 | Lora | `lora` (400), `lora_medium` (500), `lora_semibold` (600), `lora_bold` (700) | 207 / 132 / 132 / 132 KB | latin, latin-ext, cyrillic, cyrillic-ext, vietnamese |
-| Manrope | `manrope` (400), `manrope_medium` (500), `manrope_semibold` (600), `manrope_bold` (700), `manrope_extrabold` (800) | 154 / 95 / 95 / 95 / 96 KB | latin, latin-ext, cyrillic, cyrillic-ext, greek, vietnamese |
 | Literata | `literata` (400), `literata_medium` (500), `literata_semibold` (600), `literata_bold` (700), `literata_extrabold` (800), `literata_black` (900) | 933 / 525 / 525 / 524 / 523 / 503 KB | latin, latin-ext, cyrillic, cyrillic-ext, greek, greek-ext, vietnamese |
 
-Measured from the shipped files: Lora 778 code points, Manrope 678, Literata
-1163. **None of the three has CJK, Hangul or Devanagari**, so Chinese, Japanese,
+Measured from the shipped files: Lora 778 code points, Literata 1163. **Neither has CJK, Hangul or Devanagari**, so Chinese, Japanese,
 Korean and Hindi text renders with the system font. A Chinese face was bundled
 in an earlier revision of this branch and dropped again: its subset files alone
 weighed 12 MB, and the app explains the gap on the font page instead (with a
@@ -43,7 +41,6 @@ needs only regular + bold.
 - **Lora** — Copyright 2011 The Lora Project Authors
   (<https://github.com/cyrealtype/Lora-Cyrillic>), with Reserved Font Name
   "Lora". Source: Google Fonts `ofl/lora`.
-- **Manrope** — Copyright 2018 The Manrope Project Authors
   (<https://github.com/googlefonts/manrope>). Source: Google Fonts
   `ofl/manrope`.
 - **Literata** — Copyright 2017 The Literata Project Authors
@@ -53,16 +50,14 @@ needs only regular + bold.
 Full licence texts ship inside the APK:
 
 - `app/src/main/assets/licenses/ofl_lora.txt` (+ upstream `FONTLOG`)
-- `app/src/main/assets/licenses/ofl_manrope.txt`
 - `app/src/main/assets/licenses/ofl_literata.txt`
 
 The attribution is also visible in-app: Settings → About → Attributions →
 *Bundled libraries*, one entry per face with a link to its upstream project.
 
-## Why these three
+## Why these two
 
 - **Lora** — a warm, slightly calligraphic serif.
-- **Manrope** — the sans-serif option: compact, geometric, Cyrillic + Greek
   included.
 - **Literata** — drawn for screen reading; the sturdiest Latin face at 11–16 sp.
 

@@ -121,7 +121,6 @@ data class AppSettings(
         const val FONT_FAMILY_SYSTEM = "system"
         /** The bundled faces; all three ship under the SIL OFL 1.1. */
         const val FONT_FAMILY_LORA = "lora"
-        const val FONT_FAMILY_MANROPE = "manrope"
         const val FONT_FAMILY_LITERATA = "literata"
 
         /**
@@ -145,7 +144,6 @@ data class AppSettings(
         /** Boldest file each bundled face ships; the system font has none. */
         fun fontWeightCeiling(key: String): Int = when (key) {
             FONT_FAMILY_LORA -> 700
-            FONT_FAMILY_MANROPE -> 800
             FONT_FAMILY_LITERATA -> 900
             else -> FONT_WEIGHT_BODY_MIN
         }
@@ -179,7 +177,6 @@ data class AppSettings(
         val FONT_FAMILY_CHOICES = setOf(
             FONT_FAMILY_SYSTEM,
             FONT_FAMILY_LORA,
-            FONT_FAMILY_MANROPE,
             FONT_FAMILY_LITERATA
         )
 

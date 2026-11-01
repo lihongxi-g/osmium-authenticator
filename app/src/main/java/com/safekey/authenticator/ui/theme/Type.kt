@@ -34,14 +34,6 @@ val LoraFamily: FontFamily = FontFamily(
     Font(R.font.lora_bold, weight = FontWeight.Bold)
 )
 
-val ManropeFamily: FontFamily = FontFamily(
-    Font(R.font.manrope, weight = FontWeight.Normal),
-    Font(R.font.manrope_medium, weight = FontWeight.Medium),
-    Font(R.font.manrope_semibold, weight = FontWeight.SemiBold),
-    Font(R.font.manrope_bold, weight = FontWeight.Bold),
-    Font(R.font.manrope_extrabold, weight = FontWeight.ExtraBold)
-)
-
 val LiterataFamily: FontFamily = FontFamily(
     Font(R.font.literata, weight = FontWeight.Normal),
     Font(R.font.literata_medium, weight = FontWeight.Medium),
@@ -54,7 +46,6 @@ val LiterataFamily: FontFamily = FontFamily(
 /** Stored setting key -> typeface. Unknown keys mean the system font. */
 fun interfaceFontFamily(key: String): FontFamily = when (key) {
     AppSettings.FONT_FAMILY_LORA -> LoraFamily
-    AppSettings.FONT_FAMILY_MANROPE -> ManropeFamily
     AppSettings.FONT_FAMILY_LITERATA -> LiterataFamily
     else -> FontFamily.Default
 }

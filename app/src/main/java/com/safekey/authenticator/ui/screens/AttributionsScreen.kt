@@ -106,11 +106,6 @@ fun AttributionsScreen(
                 onClick = { open("https://github.com/cyrealtype/Lora-Cyrillic") }
             )
             AttributionCard(
-                title = "Manrope (SIL OFL 1.1)",
-                description = stringResource(R.string.attributions_lora_desc),
-                onClick = { open("https://github.com/googlefonts/manrope") }
-            )
-            AttributionCard(
                 title = "Literata (SIL OFL 1.1)",
                 description = stringResource(R.string.attributions_lora_desc),
                 onClick = { open("https://github.com/googlefonts/literata") }

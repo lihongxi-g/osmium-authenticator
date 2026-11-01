@@ -657,7 +657,6 @@
     <string name="font_family_desc">Police de l’interface</string>
     <string name="font_family_system">Police du système</string>
     <string name="font_family_lora">Lora</string>
-    <string name="font_family_manrope">Manrope</string>
     <string name="font_family_literata">Literata</string>
     <string name="font_notes_title">À propos des polices</string>
     <string name="font_notes_summary">Licence et jeux de caractères</string>

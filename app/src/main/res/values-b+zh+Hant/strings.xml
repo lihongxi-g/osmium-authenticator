@@ -670,7 +670,6 @@
     <string name="font_family_desc">選擇應用程式內使用的字體</string>
     <string name="font_family_system">系統預設</string>
     <string name="font_family_lora">Lora</string>
-    <string name="font_family_manrope">Manrope</string>
     <string name="font_family_literata">Literata</string>
     <string name="font_notes_title">字體說明</string>
     <string name="font_notes_summary">授權與字元涵蓋範圍</string>
