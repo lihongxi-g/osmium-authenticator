@@ -268,12 +268,28 @@ class MainActivity : FragmentActivity() {
             // used to wipe everything the user had typed.
             val screenStateHolder = rememberSaveableStateHolder()
 
+            // None of the bundled faces has Chinese glyphs, so a Chinese UI
+            // always renders with the system font — even if a third-party face
+            // was chosen while the app was in another language.
+            val chineseUi = LanguagePrefs.isChinese(context)
+            val effectiveFontFamily =
+                if (chineseUi) AppSettings.FONT_FAMILY_SYSTEM else settings.fontFamily
+
+            // Make that decision stick: revert the stored choice once, so the
+            // font comes back the way the user left it only after changing the
+            // language back.
+            LaunchedEffect(chineseUi, settings.fontFamily) {
+                if (chineseUi && settings.fontFamily != AppSettings.FONT_FAMILY_SYSTEM) {
+                    vm.setFontFamily(AppSettings.FONT_FAMILY_SYSTEM)
+                }
+            }
+
             SafeKeyTheme(
                 themeMode = settings.themeMode,
                 dynamicColor = settings.dynamicColor,
                 fontScaleEnabled = settings.fontScaleEnabled,
                 fontScalePercent = settings.fontScalePercent,
-                fontFamily = settings.fontFamily,
+                fontFamily = effectiveFontFamily,
                 fontWeightBody = settings.fontWeightBody,
                 hapticEnabled = settings.hapticEnabled,
                 hapticIntensityPercent = settings.hapticIntensityPercent
@@ -1350,6 +1366,11 @@ private fun IntegrityNoticeDialog(
                         onBack = { vm.nav.pop() },
                         onLanguageChanged = { lang ->
                             LanguagePrefs.set(this@MainActivity, lang)
+                            // None of the bundled fonts covers Chinese, so a
+                            // Chinese UI must not keep a third-party face.
+                            if (LanguagePrefs.resolvesToChinese(this@MainActivity, lang)) {
+                                vm.setFontFamily(AppSettings.FONT_FAMILY_SYSTEM)
+                            }
                             recreate()
                         }
                     )

@@ -287,10 +287,8 @@ fun FontFamilySettingsScreen(
 }
 
 /** True when the interface (app choice, else system) is Chinese. */
-private fun isChineseUi(context: android.content.Context): Boolean {
-    val tag = LanguagePrefs.get(context) ?: java.util.Locale.getDefault().language
-    return tag.lowercase().startsWith("zh")
-}
+private fun isChineseUi(context: android.content.Context): Boolean =
+    LanguagePrefs.isChinese(context)
 
 /**
  * Shown instead of the font list on a Chinese UI. The word for "language" is a
@@ -299,15 +297,19 @@ private fun isChineseUi(context: android.content.Context): Boolean {
  */
 @Composable
 private fun FontUnavailableNotice(onOpenLanguage: () -> Unit) {
+    val context = LocalContext.current
     val languageWord = stringResource(R.string.language)
     val linkColor = MaterialTheme.colorScheme.primary
     val body = stringResource(R.string.font_unavailable_body, languageWord)
     val linkStart = body.indexOf(languageWord)
+    // With "follow system" the language page cannot change the interface
+    // language, so the word stays plain text instead of a dead-end link.
+    val linkEnabled = LanguagePrefs.get(context) != null
 
-    val annotated = remember(body, languageWord, linkColor) {
+    val annotated = remember(body, languageWord, linkColor, linkEnabled) {
         buildAnnotatedString {
             append(body)
-            if (linkStart >= 0) {
+            if (linkEnabled && linkStart >= 0) {
                 addStyle(
                     SpanStyle(
                         color = linkColor,
@@ -334,14 +336,18 @@ private fun FontUnavailableNotice(onOpenLanguage: () -> Unit) {
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             onTextLayout = { layout = it },
-            modifier = Modifier.pointerInput(body) {
-                detectTapGestures { position ->
-                    val result = layout ?: return@detectTapGestures
-                    val offset = result.getOffsetForPosition(position)
-                    if (linkStart >= 0 && offset in linkStart until (linkStart + languageWord.length)) {
-                        onOpenLanguage()
+            modifier = if (linkEnabled) {
+                Modifier.pointerInput(body) {
+                    detectTapGestures { position ->
+                        val result = layout ?: return@detectTapGestures
+                        val offset = result.getOffsetForPosition(position)
+                        if (linkStart >= 0 && offset in linkStart until (linkStart + languageWord.length)) {
+                            onOpenLanguage()
+                        }
                     }
                 }
+            } else {
+                Modifier
             }
         )
     }
