@@ -115,10 +115,23 @@ data class AppSettings(
         const val HAPTIC_INTENSITY_DEFAULT = 60
 
         /**
-         * Intensity used when the tick follows the system: the platform switch
-         * decides *whether*, but the strength still has to be perceptible.
+         * Fallback strength when "follow system" is on but the platform exposes
+         * no readable intensity (`haptic_feedback_intensity` is a hidden
+         * setting and some ROMs do not keep it).
          */
-        const val HAPTIC_SYSTEM_INTENSITY_PERCENT = 50
+        const val HAPTIC_SYSTEM_INTENSITY_PERCENT = 60
+
+        /**
+         * Maps the platform's `haptic_feedback_intensity` value onto our 0-100
+         * scale. The setting is hidden API, so its scale is not guaranteed:
+         * AOSP writes 1-5 style levels on some builds and a percentage on
+         * others, and unreadable is -1.
+         */
+        fun hapticSystemIntensity(raw: Int): Int = when {
+            raw <= 0 -> HAPTIC_SYSTEM_INTENSITY_PERCENT
+            raw <= 10 -> (raw * 20).coerceIn(20, 100)
+            else -> raw.coerceIn(1, HAPTIC_INTENSITY_MAX)
+        }
 
         /**
          * Amplitude for [VibrationEffect.createOneShot] on a 1-255 scale.
@@ -303,27 +316,20 @@ class SettingsRepository(
     }
 
     /**
-     * Turning our own vibration on is the opposite of following the system, so
-     * the "follow system" switch is cleared in the same transaction. Both
-     * switches can never be on at once, and neither can be a dead end.
+     * The master switch only decides *whether* the app vibrates. "Follow
+     * system" decides the strength, so the two settings never overwrite each
+     * other.
      */
     suspend fun setHapticEnabled(enabled: Boolean) {
-        context.dataStore.edit {
-            it[Keys.HAPTIC_ENABLED] = enabled
-            if (enabled) it[Keys.HAPTIC_FOLLOW_SYSTEM] = false
-        }
+        context.dataStore.edit { it[Keys.HAPTIC_ENABLED] = enabled }
     }
 
     /**
-     * Following the system means the app does not apply its own vibration, so
-     * the custom switch is turned off in the same transaction — otherwise the
-     * page would show two contradictory "on" states.
+     * Following the system means the platform's haptic intensity decides the
+     * strength and the slider is locked — it does not turn the vibration off.
      */
     suspend fun setHapticFollowSystem(follow: Boolean) {
-        context.dataStore.edit {
-            it[Keys.HAPTIC_FOLLOW_SYSTEM] = follow
-            if (follow) it[Keys.HAPTIC_ENABLED] = false
-        }
+        context.dataStore.edit { it[Keys.HAPTIC_FOLLOW_SYSTEM] = follow }
     }
 
     suspend fun setHapticIntensityPercent(percent: Int) {

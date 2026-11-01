@@ -54,4 +54,23 @@ class HapticSettingsTest {
                 AppSettings.HAPTIC_INTENSITY_MIN..AppSettings.HAPTIC_INTENSITY_MAX
         )
     }
+
+    /**
+     * "Follow system" means the strength comes from the platform, never that
+     * the app stops vibrating.
+     */
+    @Test
+    fun `system intensity is always a strength, never silence`() {
+        // Unreadable / unset (the setting is hidden API and may be missing).
+        assertEquals(AppSettings.HAPTIC_SYSTEM_INTENSITY_PERCENT, AppSettings.hapticSystemIntensity(-1))
+        assertEquals(AppSettings.HAPTIC_SYSTEM_INTENSITY_PERCENT, AppSettings.hapticSystemIntensity(0))
+        // 1-5 style levels.
+        assertEquals(20, AppSettings.hapticSystemIntensity(1))
+        assertEquals(60, AppSettings.hapticSystemIntensity(3))
+        assertEquals(100, AppSettings.hapticSystemIntensity(5))
+        // Already a percentage.
+        assertEquals(40, AppSettings.hapticSystemIntensity(40))
+        assertEquals(100, AppSettings.hapticSystemIntensity(300))
+        (1..100).forEach { assertTrue(AppSettings.hapticSystemIntensity(it) > 0) }
+    }
 }

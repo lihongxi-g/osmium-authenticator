@@ -53,11 +53,12 @@ This release adds a text-size setting with a free 80%–200% slider, and fixes s
 
 ### New: vibration feedback
 
-- Settings → Appearance → **Vibration feedback**: a master switch, a 0–100% intensity slider, a "Follow system" switch, and a **Test the vibration** row at the bottom.
-- **On by default**: the app drives the vibrator itself, so a phone whose system touch-feedback switch is off still gets the tick.
-- With **Follow system** on, the platform's touch-feedback switch decides whether the app vibrates; the intensity slider is greyed out and the master switch turns itself off, so the page can never show two contradictory "on" states. Turning the master switch back on clears "Follow system" in the same write — neither switch is a dead end.
+- Settings → Appearance → **Vibration feedback**: a master switch, a 0–100% intensity slider, and a "Follow system" switch.
+- **Every tap vibrates**: buttons, switches, rows, the PIN keypad, copying a code — the whole app, the way the system's own touch feedback behaves. Scrolling, dragging a slider and the swipe-back gesture are not taps and stay silent.
+- **On by default**, and the app drives the vibrator itself, so a phone whose system touch-feedback switch is off still gets the tick.
+- **"Follow system" follows the system's strength, not its off switch**: with it on, the tick uses the platform's touch-feedback intensity and the slider is greyed out. The master switch stays independent — it alone decides whether the app vibrates.
 - With Follow system off, the slider sets the strength: intensity drives both amplitude (1–255) and duration (25–60 ms). The earlier 10–20 ms tick was too short to feel on real phones.
-- It fires in two places: **copying a code** (list card and detail page) and the **PIN keypad**. "Test the vibration" fires one tick at the current strength no matter how the switches are set, so the strength can be felt while adjusting it.
+- Releasing the intensity slider fires one tick at the new strength, so it can be felt while adjusting.
 
 ### Fixes: white/black bands at the top and bottom
 
@@ -72,5 +73,5 @@ This release adds a text-size setting with a free 80%–200% slider, and fixes s
 
 ### Other
 
-- 9 new UI strings, added in all 11 languages.
+- 7 new UI strings, added in all 11 languages.
 - No new permissions, no third-party SDKs, no data collection.

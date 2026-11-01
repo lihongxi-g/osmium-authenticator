@@ -47,7 +47,6 @@ import com.safekey.authenticator.ui.components.AppIcons
 import com.safekey.authenticator.ui.components.IconButtonCompat
 import com.safekey.authenticator.ui.components.SimpleTopBar
 import com.safekey.authenticator.ui.theme.LocalFontScale
-import com.safekey.authenticator.ui.theme.LocalHapticTick
 import com.safekey.authenticator.ui.theme.monospaceFamily
 
 /**
@@ -71,7 +70,6 @@ fun DetailScreen(
     val settings by vm.settings.collectAsState()
     val ui = uiList.firstOrNull { it.account.id == accountId }
     val context = LocalContext.current
-    val tick = LocalHapticTick.current
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showSecret by remember { mutableStateOf(false) }
     // null | "view" | "edit" — protected action awaiting verification
@@ -156,7 +154,6 @@ fun DetailScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
-                                tick()
                                 ClipboardHelper.copy(context, ui.code)
                                 vm.incrementCopyCount(account.id)
                                 vm.showToast(context.getString(R.string.code_copied))

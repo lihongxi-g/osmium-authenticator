@@ -8,31 +8,21 @@ import android.os.VibratorManager
 import android.provider.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import com.safekey.authenticator.data.AppSettings
 
 /**
- * One short tick, provided by the theme according to the haptic settings.
+ * Builds the tick the app fires on every tap.
  *
- * Call sites do not know whether the tick follows the system switch or the
- * app's own intensity — they just call it.
- */
-val LocalHapticTick = staticCompositionLocalOf<() -> Unit> { {} }
-
-/**
- * Builds the tick used by the app's primary interactions (copying a code, the
- * PIN keypad).
- *
- * Both paths drive the vibrator ourselves, because `performHapticFeedback`
- * turns out to be a coin flip on OEM ROMs: some report the feedback as
- * handled and vibrate nothing, and a ComposeView is not a great carrier for
- * it either. What the two paths differ in is only *who decides*:
- *
- *  - "Follow system": the platform's touch-feedback switch decides whether we
- *    vibrate; the strength is a fixed, perceptible mid value.
- *  - Otherwise the master switch decides, and the slider percentage maps to
- *    both amplitude and duration.
+ * The master switch decides *whether* the app vibrates. When "follow system"
+ * is on, the strength comes from the platform's `haptic_feedback_intensity`
+ * setting instead of the slider: following the system changes how strong the
+ * tick is, never whether there is one.
  */
 @Composable
 fun rememberHapticTick(
@@ -43,12 +33,10 @@ fun rememberHapticTick(
     val context = LocalContext.current
     return remember(enabled, followSystem, intensityPercent) {
         val tick: () -> Unit = {
-            if (followSystem) {
-                if (systemHapticsEnabled(context)) {
-                    vibrateOnce(context, AppSettings.HAPTIC_SYSTEM_INTENSITY_PERCENT)
-                }
-            } else if (enabled) {
-                vibrateOnce(context, intensityPercent)
+            if (enabled) {
+                val percent =
+                    if (followSystem) systemIntensityPercent(context) else intensityPercent
+                vibrateOnce(context, percent)
             }
         }
         tick
@@ -56,10 +44,61 @@ fun rememberHapticTick(
 }
 
 /**
+ * Fires [tick] on every tap inside the subtree, the way the system's touch
+ * feedback behaves for its own controls.
+ *
+ * Observes on the final pass and never consumes an event, so clicks, long
+ * presses, drags and the swipe-back gesture keep working untouched. A pointer
+ * that moves past the touch slop (scrolling a list, dragging the slider) is a
+ * gesture, not a tap, and stays silent.
+ */
+fun Modifier.tapHaptics(tick: () -> Unit): Modifier = pointerInput(tick) {
+    val slop = viewConfiguration.touchSlop
+    awaitPointerEventScope {
+        var downAt: Offset? = null
+        var downTime = 0L
+        var dragged = false
+        while (true) {
+            val event = awaitPointerEvent(PointerEventPass.Final)
+            val change = event.changes.firstOrNull()
+            when (event.type) {
+                PointerEventType.Press -> {
+                    if (event.changes.count { it.pressed } > 1 || change == null) {
+                        // Multi-touch is a pinch/zoom, not a button press.
+                        downAt = null
+                    } else {
+                        downAt = change.position
+                        downTime = System.currentTimeMillis()
+                        dragged = false
+                    }
+                }
+                PointerEventType.Move -> {
+                    val start = downAt
+                    val position = change?.position
+                    if (start != null && position != null &&
+                        (position - start).getDistance() > slop
+                    ) {
+                        dragged = true
+                    }
+                }
+                PointerEventType.Release -> {
+                    val start = downAt
+                    downAt = null
+                    if (start != null && !dragged && System.currentTimeMillis() - downTime <= 1500L) {
+                        tick()
+                    }
+                }
+                else -> Unit
+            }
+        }
+    }
+}
+
+/**
  * Fires one tick at [intensityPercent] whatever the switches say.
  *
- * Backs the "test the vibration" row, so the strength can be felt while it is
- * being adjusted instead of hunting for a code to copy.
+ * Used by the settings page, where the strength should be felt while it is
+ * being adjusted.
  */
 fun previewHaptic(context: Context, intensityPercent: Int) {
     vibrateOnce(context, intensityPercent)
@@ -97,12 +136,16 @@ private fun vibratorOf(context: Context): Vibrator? =
         context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
     }
 
-/** `Settings.System.HAPTIC_FEEDBACK_ENABLED`; unreadable means "assume on". */
-private fun systemHapticsEnabled(context: Context): Boolean =
-    runCatching {
-        Settings.System.getInt(
-            context.contentResolver,
-            Settings.System.HAPTIC_FEEDBACK_ENABLED,
-            1
-        ) != 0
-    }.getOrDefault(true)
+/**
+ * The platform's touch-feedback strength.
+ *
+ * `haptic_feedback_intensity` is a hidden setting: readable on most devices,
+ * absent on some. Anything unreadable falls back to a mid strength rather than
+ * to silence.
+ */
+private fun systemIntensityPercent(context: Context): Int {
+    val raw = runCatching {
+        Settings.System.getInt(context.contentResolver, "haptic_feedback_intensity", -1)
+    }.getOrDefault(-1)
+    return AppSettings.hapticSystemIntensity(raw)
+}

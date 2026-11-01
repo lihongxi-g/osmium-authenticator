@@ -396,13 +396,6 @@ fun HapticSettingsScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
             )
-
-            SettingRow(
-                icon = AppIcons.Vibration,
-                title = stringResource(R.string.haptic_test),
-                description = stringResource(R.string.haptic_test_desc),
-                onClick = { previewHaptic(context, draft.roundToInt()) }
-            )
         }
     }
 }

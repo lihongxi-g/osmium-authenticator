@@ -2,6 +2,8 @@ package com.safekey.authenticator.ui.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -10,6 +12,7 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
@@ -72,15 +75,22 @@ fun SafeKeyTheme(
     val typography = remember(fontScale) { AppTypography.scaledTo(fontScale) }
     val hapticTick = rememberHapticTick(hapticEnabled, hapticFollowSystem, hapticIntensityPercent)
 
-    CompositionLocalProvider(
-        LocalFontScale provides fontScale,
-        LocalHapticTick provides hapticTick
-    ) {
+    CompositionLocalProvider(LocalFontScale provides fontScale) {
         MaterialTheme(
             colorScheme = colorScheme,
-            typography = typography,
-            content = content
-        )
+            typography = typography
+        ) {
+            // Every tap inside the app (buttons, switches, rows, the keypad)
+            // gets the same tick, the way the system's own touch feedback
+            // behaves. Nothing is consumed, so gestures are unaffected.
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .tapHaptics(hapticTick)
+            ) {
+                content()
+            }
+        }
     }
 }
 
