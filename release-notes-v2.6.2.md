@@ -60,14 +60,15 @@ This release adds a text-size setting with a free 80%–200% slider, and fixes s
 - Releasing the intensity slider fires one tick at the new strength, so it can be felt while adjusting.
 - The ripple is untouched: the tick is layered over the same indication the app already used.
 
-### New: three optional interface fonts
+### New: four optional interface fonts
 
-- Settings → Appearance → **Font** offers the **system default** plus three bundled faces: **Lora** (serif), **Manrope** (sans) and **Literata** (serif for screen reading). Each row is previewed in the typeface it names, switching is instant, and the page is a plain list — no cards.
+- Settings → Appearance → **Font** offers the **system default** plus four bundled faces: **Lora** (serif), **Manrope** (sans), **Literata** (serif for screen reading) and **Noto Serif SC / 思源宋体** (the Chinese option). Each row is previewed in the typeface it names, switching is instant, and the page is a plain list — no cards.
 - Only the typeface changes: sizes, weights and letter spacing are untouched, so nothing moves in the layout when the font switches. Verification codes keep their monospace face so the digits stay evenly spaced.
 - **Licence and coverage note live on their own page** (Settings → Appearance → Font → **Font notes**): which scripts each face covers, its licence, and what falls back to the system font.
-- Coverage, measured from the shipped files: Lora 778 code points (latin/cyrillic/vietnamese), Manrope 678 (latin/cyrillic/greek/vietnamese), Literata 1163 (latin/cyrillic/greek/vietnamese). None of them has CJK, Hangul or Devanagari, so Chinese, Japanese, Korean and Hindi keep rendering in the system font; that is why the setting is a choice, not a replacement.
-- Manrope's variable file defaults to ExtraLight, so every weight is pinned explicitly (400–700); otherwise the whole interface would render hairline-thin.
-- **Licence compliance:** all three are SIL OFL 1.1 and ship byte-for-byte as published, with only the file name lowercased for Android resources. The full licence text of each face is bundled in `assets/licenses/`, every face has an entry in Settings → About → Attributions, and the repository documents them in `THIRD-PARTY-FONTS.md`. No new permissions, no new dependency; the bundled fonts add about 1.3 MB to the APK.
+- Coverage, measured from the shipped files: Lora 778 code points (latin/cyrillic/vietnamese), Manrope 678 (latin/cyrillic/greek/vietnamese), Literata 1163 (latin/cyrillic/greek/vietnamese), Noto Serif SC subset 9823 (latin/cyrillic/greek plus **GB2312 简体 and Big5 level-1 繁體**). The three Latin faces have no CJK, so Chinese, Japanese, Korean and Hindi fall back to the system font when one of them is selected; Noto Serif SC is the face that renders Chinese natively.
+- **Noto Serif SC is a reproducible subset** (24 MB upstream → 7.48 MB here): GB2312 + Big5 level-1 + every character the app's own strings use. `scripts/build_han_serif_subset.py` rebuilds it from the published variable font.
+- Manrope's variable file defaults to ExtraLight, so every weight is pinned explicitly (400–700); otherwise the interface would render hairline-thin.
+- **Licence compliance:** all four are SIL OFL 1.1. The three Latin faces ship byte-for-byte as published (only the file name lowercased); the Chinese face is a subset, which the licence permits. Full licence text of each face is bundled in `assets/licenses/`, every face has an entry in Settings → About → Attributions, and the repository documents them in `THIRD-PARTY-FONTS.md`. No new permissions, no new dependency.
 
 ### Settings: appearance is one page now
 

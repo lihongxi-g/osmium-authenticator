@@ -644,6 +644,7 @@
     <string name="font_family_lora">Lora</string>
     <string name="font_family_manrope">Manrope</string>
     <string name="font_family_literata">Literata</string>
+    <string name="font_family_hanserif">Noto Serif SC</string>
     <string name="font_notes_title">Notas sobre las fuentes</string>
     <string name="font_notes_summary">Licencia y cobertura de escrituras</string>
     <string name="font_notes_intro">Las fuentes incluidas se distribuyen sin modificar bajo la SIL Open Font License 1.1. El texto completo de cada licencia va dentro de la app.</string>
@@ -651,6 +652,7 @@
     <string name="font_cover_cyrillic">Cirílico</string>
     <string name="font_cover_greek">Griego</string>
     <string name="font_cover_vietnamese">Vietnamita</string>
+    <string name="font_cover_han">Chino</string>
     <string name="font_family_sample">Aa Bb Cc 0123</string>
     <string name="font_family_note">Lora se incluye sin modificar bajo la SIL Open Font License 1.1 y cubre latín y cirílico; el chino, el japonés, el coreano y el hindi usan la fuente del sistema.</string>
     <string name="attributions_lora_desc">Tipografía serif de la interfaz, incluida sin modificar bajo la SIL Open Font License 1.1 (el texto de la licencia va en la app).</string>

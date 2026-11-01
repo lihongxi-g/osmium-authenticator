@@ -116,13 +116,16 @@ data class AppSettings(
         const val FONT_FAMILY_LORA = "lora"
         const val FONT_FAMILY_MANROPE = "manrope"
         const val FONT_FAMILY_LITERATA = "literata"
+        /** Noto Serif SC (思源宋体) subset: the only face that covers Chinese. */
+        const val FONT_FAMILY_HAN_SERIF = "hanserif"
 
         /** Every value the font setting accepts; anything else stores "system". */
         val FONT_FAMILY_CHOICES = setOf(
             FONT_FAMILY_SYSTEM,
             FONT_FAMILY_LORA,
             FONT_FAMILY_MANROPE,
-            FONT_FAMILY_LITERATA
+            FONT_FAMILY_LITERATA,
+            FONT_FAMILY_HAN_SERIF
         )
 
         // ---- haptics ----

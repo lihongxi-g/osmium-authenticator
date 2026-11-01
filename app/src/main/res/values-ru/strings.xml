@@ -644,6 +644,7 @@
     <string name="font_family_lora">Lora</string>
     <string name="font_family_manrope">Manrope</string>
     <string name="font_family_literata">Literata</string>
+    <string name="font_family_hanserif">Noto Serif SC</string>
     <string name="font_notes_title">О шрифтах</string>
     <string name="font_notes_summary">Лицензия и поддержка письменностей</string>
     <string name="font_notes_intro">Встроенные шрифты распространяются без изменений по лицензии SIL Open Font License 1.1; полный текст лицензии каждого шрифта входит в состав приложения.</string>
@@ -651,6 +652,7 @@
     <string name="font_cover_cyrillic">Кириллица</string>
     <string name="font_cover_greek">Греческий</string>
     <string name="font_cover_vietnamese">Вьетнамский</string>
+    <string name="font_cover_han">Китайский</string>
     <string name="font_family_sample">Aa Bb Cc 0123</string>
     <string name="font_family_note">Lora включён без изменений по лицензии SIL Open Font License 1.1 и покрывает латиницу и кириллицу; китайский, японский, корейский и хинди отображаются системным шрифтом.</string>
     <string name="attributions_lora_desc">Шрифт интерфейса с засечками, включён без изменений по SIL Open Font License 1.1 (текст лицензии в приложении).</string>

@@ -657,6 +657,7 @@
     <string name="font_family_lora">Lora</string>
     <string name="font_family_manrope">Manrope</string>
     <string name="font_family_literata">Literata</string>
+    <string name="font_family_hanserif">思源宋體</string>
     <string name="font_notes_title">字體說明</string>
     <string name="font_notes_summary">授權與字元涵蓋範圍</string>
     <string name="font_notes_intro">內建字型以 SIL 開放字型授權 1.1 原樣隨應用程式提供，每款字型的授權全文都包含在應用程式內。</string>
@@ -664,6 +665,7 @@
     <string name="font_cover_cyrillic">西里爾</string>
     <string name="font_cover_greek">希臘</string>
     <string name="font_cover_vietnamese">越南語</string>
+    <string name="font_cover_han">中文</string>
     <string name="font_family_sample">Aa Bb Cc 0123</string>
     <string name="font_family_note">Lora 以 SIL 開放字型授權 1.1 原樣內建，涵蓋拉丁文與西里爾文；中文、日文、韓文與印地文會改用系統字型。</string>
     <string name="attributions_lora_desc">襯線介面字型，以 SIL 開放字型授權 1.1 原樣內建（授權全文隨應用程式提供）。</string>

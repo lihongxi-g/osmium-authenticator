@@ -111,6 +111,11 @@ fun AttributionsScreen(
                 onClick = { open("https://github.com/googlefonts/manrope") }
             )
             AttributionCard(
+                title = "Noto Serif SC / 思源宋体 (SIL OFL 1.1)",
+                description = stringResource(R.string.attributions_lora_desc),
+                onClick = { open("https://github.com/adobe-fonts/source-han-serif") }
+            )
+            AttributionCard(
                 title = "Literata (SIL OFL 1.1)",
                 description = stringResource(R.string.attributions_lora_desc),
                 onClick = { open("https://github.com/googlefonts/literata") }

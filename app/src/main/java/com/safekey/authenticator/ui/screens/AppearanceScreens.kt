@@ -47,6 +47,7 @@ import com.safekey.authenticator.ui.components.SettingRow
 import com.safekey.authenticator.ui.components.SimpleTopBar
 import com.safekey.authenticator.ui.navigation.Screen
 import com.safekey.authenticator.ui.theme.AppTypography
+import com.safekey.authenticator.ui.theme.HanSerifFamily
 import com.safekey.authenticator.ui.theme.LiterataFamily
 import com.safekey.authenticator.ui.theme.ManropeFamily
 import com.safekey.authenticator.ui.theme.LoraFamily
@@ -358,7 +359,8 @@ private val FONT_CHOICES: List<FontChoice> = listOf(
     FontChoice(AppSettings.FONT_FAMILY_SYSTEM, R.string.font_family_system, FontFamily.Default),
     FontChoice(AppSettings.FONT_FAMILY_LORA, R.string.font_family_lora, LoraFamily),
     FontChoice(AppSettings.FONT_FAMILY_MANROPE, R.string.font_family_manrope, ManropeFamily),
-    FontChoice(AppSettings.FONT_FAMILY_LITERATA, R.string.font_family_literata, LiterataFamily)
+    FontChoice(AppSettings.FONT_FAMILY_LITERATA, R.string.font_family_literata, LiterataFamily),
+    FontChoice(AppSettings.FONT_FAMILY_HAN_SERIF, R.string.font_family_hanserif, HanSerifFamily)
 )
 
 /** Bundled font and the scripts it covers (string resources). */
@@ -388,6 +390,15 @@ private val FONT_NOTES: List<FontNote> = listOf(
             R.string.font_cover_cyrillic,
             R.string.font_cover_greek,
             R.string.font_cover_vietnamese
+        )
+    ),
+    FontNote(
+        R.string.font_family_hanserif,
+        listOf(
+            R.string.font_cover_latin,
+            R.string.font_cover_cyrillic,
+            R.string.font_cover_greek,
+            R.string.font_cover_han
         )
     )
 )

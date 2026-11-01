@@ -55,11 +55,28 @@ val LiterataFamily: FontFamily = FontFamily(
     Font(R.font.literata, weight = FontWeight.Bold)
 )
 
+/**
+ * Noto Serif SC / 思源宋体 (SIL Open Font License 1.1) — a subset of the
+ * variable font (wght 200-900) carrying GB2312, Big5 level-1 and the Latin,
+ * Cyrillic, Greek and punctuation the app uses.
+ *
+ * This is the only bundled face that covers Chinese, so selecting it brings its
+ * own Latin design (Source Serif family) rather than pairing with a second
+ * face.
+ */
+val HanSerifFamily: FontFamily = FontFamily(
+    Font(R.font.hanserif, weight = FontWeight.Normal),
+    Font(R.font.hanserif, weight = FontWeight.Medium),
+    Font(R.font.hanserif, weight = FontWeight.SemiBold),
+    Font(R.font.hanserif, weight = FontWeight.Bold)
+)
+
 /** Stored setting key -> typeface. Unknown keys mean the system font. */
 fun interfaceFontFamily(key: String): FontFamily = when (key) {
     AppSettings.FONT_FAMILY_LORA -> LoraFamily
     AppSettings.FONT_FAMILY_MANROPE -> ManropeFamily
     AppSettings.FONT_FAMILY_LITERATA -> LiterataFamily
+    AppSettings.FONT_FAMILY_HAN_SERIF -> HanSerifFamily
     else -> FontFamily.Default
 }
 

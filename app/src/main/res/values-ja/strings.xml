@@ -644,6 +644,7 @@
     <string name="font_family_lora">Lora</string>
     <string name="font_family_manrope">Manrope</string>
     <string name="font_family_literata">Literata</string>
+    <string name="font_family_hanserif">Noto Serif SC</string>
     <string name="font_notes_title">フォントの説明</string>
     <string name="font_notes_summary">ライセンスと収録文字</string>
     <string name="font_notes_intro">同梱フォントは SIL Open Font License 1.1 の下で改変せずに配布しています。各フォントのライセンス全文はアプリ内に収録されています。</string>
@@ -651,6 +652,7 @@
     <string name="font_cover_cyrillic">キリル文字</string>
     <string name="font_cover_greek">ギリシャ文字</string>
     <string name="font_cover_vietnamese">ベトナム語</string>
+    <string name="font_cover_han">中国語</string>
     <string name="font_family_sample">Aa Bb Cc 0123</string>
     <string name="font_family_note">Lora は SIL Open Font License 1.1 の下で改変せずに同梱しています。ラテン文字とキリル文字に対応し、中国語・日本語・韓国語・ヒンディー語はシステムフォントで表示されます。</string>
     <string name="attributions_lora_desc">セリフ体のインターフェース書体。SIL Open Font License 1.1 の下で改変せず同梱（ライセンス全文はアプリ内に収録）。</string>
