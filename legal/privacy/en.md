@@ -1,6 +1,6 @@
 # Privacy Policy
 
-*Effective date: October 28, 2026 · Applies to Osmium v2.6.1 and later*
+*Effective date: November 1, 2026 · Applies to Osmium v2.6.2 and later*
 
 *Current version, published at osmium.im. The app reads it when you open About → Privacy Policy.*
 
@@ -11,6 +11,10 @@ Storage: authenticator secrets, account names, issuers, tags and tag colors are 
 Device integrity: at launch Osmium checks the device locally — an early boot-time snapshot, system, mount, kernel, boot-state and app-signature checks, cross-checks between them, and hardware-backed key attestation (TEE certificate chain, verified-boot chain and boot hash) verified on this device with Google's official verifier against Google root certificates bundled inside the app. Root-manager detection asks Android about a short, fixed list of well-known root-manager package names; the app does not enumerate the apps installed on your device. All of these checks run entirely on this device, make no network requests, and their results are never stored or transmitted — they appear on the integrity screen, and a suspicious or compromised result shows a reminder once per app open. An installed root-manager app is treated as a hint, not as proof. Detailed detection logging is off by default and writes local log lines only when you enable it in developer mode. Developer mode can hide this feature; once hidden, the app no longer runs these checks at launch and no longer shows the reminder.
 
 Attestation revocation data: the app ships a snapshot of Google's attestation revocation status list, taken when the app was built. If you tap refresh on the integrity screen, it downloads a fresh copy from https://android.googleapis.com/attestation/status and stores it in the app's private storage, replacing the previous copy only after the download parses successfully. The request carries no account, authenticator or device data; as with any HTTP request the server sees the usual connection metadata such as your IP address. If the refresh fails or your network blocks it, the previous data stays in use and attestation verification keeps working offline.
+
+Export: exporting to another authenticator happens entirely on this device. You either save a plaintext file to a location you choose (otpauth links, Aegis JSON or KeePassXC CSV), or — for the Google Authenticator option — the app renders the selected accounts as QR codes on the screen and writes nothing to disk. Nothing is uploaded, and no server is contacted. A plaintext export is readable without any password, so delete the file or close the screen once the transfer is done.
+
+Fonts: the optional interface fonts (Lora, Literata) are bundled inside the app and rendered offline; choosing one triggers no network request and collects nothing.
 
 Import: importing from Google Authenticator QR codes and from Aegis, 2FAS and Raivo OTP export files happens entirely on this device. The selected file is read into memory to build the import preview; it is not copied, uploaded or sent anywhere. Only the entries you confirm are saved into the encrypted vault; everything else is discarded. A backup file whose entries use code parameters the app cannot reproduce faithfully (a code length or algorithm outside the supported set) is refused as a whole, so a damaged or edited file can never add an account that shows codes the service would reject.
 

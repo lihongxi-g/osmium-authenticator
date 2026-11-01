@@ -1,12 +1,12 @@
 # Terms of Use
 
-*Effective date: October 28, 2026 · Applies to Osmium v2.6.1 and later*
+*Effective date: November 1, 2026 · Applies to Osmium v2.6.2 and later*
 
 *Current version, published at osmium.im. The app reads it when you open About → Terms of Use.*
 
 By installing or using Osmium, you agree to the following terms.
 
-Osmium is free and open source software released under the GNU General Public License version 3 or later (GPL-3.0-or-later; see LICENSE/COPYING).
+Osmium is free and open source software released under the GNU General Public License version 3 or later (GPL-3.0-or-later; see LICENSE/COPYING). Two optional interface fonts (Lora, Literata) are bundled under the SIL Open Font License 1.1 and credited in About → Attributions.
 
 The software is provided "as is", without warranty of any kind. To the maximum extent permitted by law, the developer is not liable for damages arising from its use.
 
@@ -18,6 +18,7 @@ Osmium generates TOTP and HOTP codes with 4, 5, 6, 7 or 8 digits and supports SH
 - Keep your own backups. Uninstalling the app or clearing its data permanently deletes local accounts and settings. Automatic backups depend on Android and manufacturer scheduling and may be deferred or blocked by power-saving policies.
 - Import only files you trust. Osmium imports from Google Authenticator transfer QR codes and from export files of Aegis, 2FAS and Raivo OTP. Review every entry in the preview before importing, confirm the file really came from the authenticator you intend to leave, and delete export files after use - they contain your secrets in plaintext. A backup file whose entries use code parameters Osmium cannot reproduce faithfully (a code length or algorithm outside the supported set) is refused as a whole rather than imported in part.
 - Review received data. LAN quick transfer requires both devices on the same Wi-Fi network: the receiving device shows a 12-digit pairing code and the sending device must enter it before anything is transferred. Each device then shows the network risks it detected - on itself and on the other device - and nothing is sent or accepted until both sides confirm; cancelling the dialog aborts the transfer. Share the code only with the device you are sending from, and confirm the entries in the import preview. Both devices must run a version that speaks the same transfer protocol.
+- Export is plaintext. Exporting to another authenticator writes the selected accounts into a plaintext file, and exporting to Google Authenticator shows them as QR codes on the screen. Neither is encrypted: anyone who opens the file or scans those codes gets every secret in it. Finish the transfer, then delete the file or close the screen, and never share a screenshot of the codes.
 - The self-destruct PIN is irreversible. Keep your device clock accurate and follow applicable law and network rules for the servers and devices you configure.
 - Preview builds. The optional preview channel offers releases the developer marks as pre-release on GitHub. They carry newer, less-tested code and can misbehave; keep your own backup before installing one, and expect the stable release of the same version to be offered once it exists.
 - Rooted devices. When Osmium detects that the device is rooted, it forces on its protections (verification on open, screenshot blocking, hidden codes) and disables LAN quick transfer, WebDAV backup, automatic backups, self-destruct configuration and third-party import. These restrictions can only be lifted in Developer mode. Root detection runs locally on the device and is best-effort.

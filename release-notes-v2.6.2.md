@@ -97,3 +97,13 @@ This release adds a text-size setting with a free 80%–200% slider, and fixes s
 
 - 49 new UI strings, added in all 11 languages.
 - No new permissions, no third-party SDKs, no data collection.
+
+### APK checksums (SHA-256)
+
+```
+fbdfc189c34813917444e6ce73413c9b3fbc0d80024de3ddf5ba023573bc8b42  osmium-2.6.2-arm64-v8a.apk
+3fff470d29a0c351b30f440f805de6cc08884c5108accedc56b8373174e0a789  osmium-2.6.2-armeabi-v7a.apk
+bd27ce31f1cabb95065cb787d8166415d0da7a135e611f8e99875f159be31cab  osmium-2.6.2-x86_64.apk
+```
+
+The same list ships as `SHA256SUMS.txt` on the release page (`sha256sum -c SHA256SUMS.txt`). All three APKs are signed with the certificate `B65BB0131CAA22C45D99EA4E2C3E99B3980EAE0DC5647190F41A2878E6D88412`, the same key as v2.6.1 and the F-Droid builds, so they upgrade in place.
