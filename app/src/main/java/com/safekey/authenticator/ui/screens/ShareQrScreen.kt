@@ -1,7 +1,5 @@
 package com.safekey.authenticator.ui.screens
 
-import android.graphics.Bitmap
-import android.graphics.Color as AndroidColor
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -29,13 +27,10 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.google.zxing.BarcodeFormat
-import com.google.zxing.EncodeHintType
-import com.google.zxing.qrcode.QRCodeWriter
-import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import com.safekey.authenticator.MainViewModel
 import com.safekey.authenticator.R
 import com.safekey.authenticator.totp.toOtpUri
+import com.safekey.authenticator.ui.components.renderQrBitmap
 import com.safekey.authenticator.ui.components.SimpleTopBar
 
 /**
@@ -58,7 +53,7 @@ fun ShareQrScreen(
         val account = ui?.account
         if (account == null) return@Scaffold
         val uri = remember(account.secret) { account.toOtpUri() }
-        val qrBitmap = remember(uri) { renderQr(uri, 640) }
+        val qrBitmap = remember(uri) { renderQrBitmap(uri, 640) }
 
         Column(
             modifier = Modifier
@@ -97,20 +92,4 @@ fun ShareQrScreen(
             )
         }
     }
-}
-
-/** Renders a QR code to a Bitmap. Runs in remember — 640px encode is fast. */
-private fun renderQr(content: String, sizePx: Int): Bitmap {
-    val hints = mapOf(
-        EncodeHintType.ERROR_CORRECTION to ErrorCorrectionLevel.M,
-        EncodeHintType.MARGIN to 2
-    )
-    val matrix = QRCodeWriter().encode(content, BarcodeFormat.QR_CODE, sizePx, sizePx, hints)
-    val bitmap = Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888)
-    for (y in 0 until sizePx) {
-        for (x in 0 until sizePx) {
-            bitmap.setPixel(x, y, if (matrix[x, y]) AndroidColor.BLACK else AndroidColor.WHITE)
-        }
-    }
-    return bitmap
 }

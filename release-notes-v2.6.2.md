@@ -71,6 +71,14 @@ This release adds a text-size setting with a free 80%–200% slider, and fixes s
 - Manrope's published file defaults to ExtraLight and so does Noto Serif SC. Both shipped copies have their `wght` axis re-based to start at 400, and every weight is also pinned explicitly (400–700) through variation settings — otherwise the interface would render hairline-thin.
 - **Licence compliance:** all four are SIL OFL 1.1. The three Latin faces ship byte-for-byte as published (only the file name lowercased); the Chinese face is a subset, which the licence permits. Full licence text of each face is bundled in `assets/licenses/`, every face has an entry in Settings → About → Attributions, and the repository documents them in `THIRD-PARTY-FONTS.md`. No new permissions, no new dependency.
 
+### New: export straight into Google Authenticator
+
+- Settings → Export to another authenticator now has a fourth option: **Google Authenticator (QR codes)**. It shows the migration QR codes Google Authenticator scans under *Transfer accounts → Import accounts*; nothing is written to a file.
+- The payload is the `otpauth-migration://offline?data=…` protobuf that Osmium already *parses* when importing from Google Authenticator. The encoder is hand-written (varint + length-delimited, no protobuf dependency) and its correctness is proven by round-tripping through our own parser in unit tests.
+- Accounts are batched **10 per QR code**, with page navigation when there are more; Google Authenticator's importer reads one batch per scan.
+- Accounts the migration format cannot carry are listed before the scan instead of being dropped silently: **TOTP with a period other than 30 s** (the schema has no period field — Google Authenticator would quietly compute different codes), **Steam Guard** (custom alphabet), and entries with an unsupported algorithm, digit count or secret.
+- No new dependency: QR encoding uses the zxing core already in the app, and the format is the same one we already decode.
+
 ### Settings: appearance is one page now
 
 - The main settings list had six appearance rows (theme, text size, vibration, sort order, tags, language). It now has a single **Appearance** row showing the current theme; opening it lists all six, and each of those opens the page that adjusts it.
@@ -90,5 +98,5 @@ This release adds a text-size setting with a free 80%–200% slider, and fixes s
 
 ### Other
 
-- 34 new UI strings, added in all 11 languages.
+- 49 new UI strings, added in all 11 languages.
 - No new permissions, no third-party SDKs, no data collection.

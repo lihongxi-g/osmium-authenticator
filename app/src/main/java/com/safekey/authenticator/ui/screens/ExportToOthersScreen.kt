@@ -48,6 +48,18 @@ import com.safekey.authenticator.ui.components.sendFeedbackWithLog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.window.Dialog
+import com.safekey.authenticator.totp.GoogleMigrationEncoder
+import com.safekey.authenticator.ui.components.AppIcons
+import com.safekey.authenticator.ui.components.renderQrBitmap
 
 /**
  * "Export to another authenticator" — the deliberate exit door.
@@ -82,6 +94,9 @@ fun ExportToOthersScreen(
     var error by remember { mutableStateOf<String?>(null) }
     /** Shown after the file was written successfully. */
     var showGoodbye by remember { mutableStateOf(false) }
+    /** Non-null while the Google Authenticator QR dialog is open. */
+    var googleTransfer by remember { mutableStateOf<GoogleMigrationEncoder.Result?>(null) }
+    var preparingGoogle by remember { mutableStateOf(false) }
 
     fun write(uri: Uri?) {
         vm.setTransferPickerActive(false)
@@ -117,6 +132,44 @@ fun ExportToOthersScreen(
     val csvLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument(ExportFormat.KEEPASS_CSV.mimeType), onPicked
     )
+
+    /**
+     * Reads the vault the same way the file export does — the QR carries raw
+     * secrets, so it goes through the identical plaintext path rather than a
+     * second, laxer one.
+     */
+    fun startGoogleTransfer() {
+        error = null
+        preparingGoogle = true
+        scope.launch {
+            try {
+                val accounts = withContext(Dispatchers.IO) {
+                    val app = context.applicationContext as SafeKeyApp
+                    val pin = vm.pinManager.getPinHashForExport()
+                    val export = app.accountRepository.exportVault(pin?.first ?: "", pin?.second ?: "")
+                    if (export.dropped > 0) {
+                        throw IllegalStateException("${export.dropped} accounts could not be decrypted")
+                    }
+                    export.vault.accounts
+                }
+                val result = withContext(Dispatchers.Default) {
+                    GoogleMigrationEncoder.build(
+                        accounts = accounts,
+                        batchId = (System.currentTimeMillis() and 0x7FFFFFFF).toInt()
+                    )
+                }
+                if (result.isEmpty) {
+                    error = context.getString(R.string.ga_transfer_nothing)
+                } else {
+                    googleTransfer = result
+                }
+            } catch (e: Exception) {
+                error = context.getString(R.string.export_other_fail, e.message ?: "Error")
+            } finally {
+                preparingGoogle = false
+            }
+        }
+    }
 
     fun startExport() {
         error = null
@@ -187,6 +240,11 @@ fun ExportToOthersScreen(
                 )
             }
 
+            GoogleTransferCard(
+                enabled = !preparingGoogle && leaving,
+                onClick = { startGoogleTransfer() }
+            )
+
             error?.let {
                 Text(text = it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.error)
             }
@@ -198,6 +256,10 @@ fun ExportToOthersScreen(
             ) { Text(stringResource(R.string.export_other_button)) }
             Spacer(Modifier.height(8.dp))
         }
+    }
+
+    googleTransfer?.let { result ->
+        GoogleTransferDialog(result = result, onClose = { googleTransfer = null })
     }
 
     if (showFarewell) {
@@ -305,4 +367,154 @@ private fun FormatCard(
             }
         }
     }
+}
+
+/**
+ * Entry point for the Google Authenticator transfer: unlike the three file
+ * formats, this one shows QR codes and writes nothing to disk.
+ */
+@Composable
+private fun GoogleTransferCard(enabled: Boolean, onClick: () -> Unit) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .selectable(selected = false, enabled = enabled, onClick = onClick)
+                .padding(12.dp)
+        ) {
+            Icon(
+                imageVector = AppIcons.QrCodeScanner,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(Modifier.width(12.dp))
+            Column {
+                Text(
+                    text = stringResource(R.string.export_other_fmt_google),
+                    style = MaterialTheme.typography.titleSmall
+                )
+                Text(
+                    text = stringResource(R.string.export_other_fmt_google_desc),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Shows the migration QR codes, one batch per page, and spells out which
+ * accounts the format cannot carry — a silent drop would look like a successful
+ * transfer until the missing codes are needed.
+ */
+@Composable
+private fun GoogleTransferDialog(
+    result: GoogleMigrationEncoder.Result,
+    onClose: () -> Unit
+) {
+    var index by remember(result) { mutableStateOf(0) }
+    val uri = result.uris.getOrNull(index) ?: return
+
+    Dialog(onDismissRequest = onClose) {
+        Card {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+                    .padding(20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = stringResource(R.string.ga_transfer_title),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(Modifier.height(8.dp))
+
+                val bitmap = remember(uri) { renderQrBitmap(uri, 720) }
+                Image(
+                    bitmap = bitmap.asImageBitmap(),
+                    contentDescription = stringResource(R.string.ga_transfer_qr_desc),
+                    modifier = Modifier
+                        .size(260.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color.White)
+                        .padding(8.dp)
+                )
+
+                if (result.uris.size > 1) {
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = stringResource(
+                            R.string.ga_transfer_page,
+                            index + 1,
+                            result.uris.size
+                        ),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        TextButton(
+                            onClick = { if (index > 0) index-- },
+                            enabled = index > 0
+                        ) { Text("‹") }
+                        Text(
+                            text = "${result.exported.size}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        TextButton(
+                            onClick = { if (index < result.uris.lastIndex) index++ },
+                            enabled = index < result.uris.lastIndex
+                        ) { Text("›") }
+                    }
+                }
+
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    text = stringResource(R.string.ga_transfer_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
+                )
+
+                if (result.skipped.isNotEmpty()) {
+                    Spacer(Modifier.height(12.dp))
+                    Text(
+                        text = stringResource(R.string.ga_transfer_skipped_title),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    result.skipped.forEach { skipped ->
+                        Text(
+                            text = stringResource(
+                                R.string.ga_transfer_skipped_line,
+                                skipped.account.issuer.ifBlank { skipped.account.label },
+                                stringResource(reasonRes(skipped.reason))
+                            ),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
+
+                Spacer(Modifier.height(12.dp))
+                TextButton(onClick = onClose) { Text(stringResource(R.string.ga_transfer_close)) }
+            }
+        }
+    }
+}
+
+private fun reasonRes(reason: GoogleMigrationEncoder.SkipReason): Int = when (reason) {
+    GoogleMigrationEncoder.SkipReason.PERIOD -> R.string.ga_transfer_reason_period
+    GoogleMigrationEncoder.SkipReason.STEAM -> R.string.ga_transfer_reason_steam
+    GoogleMigrationEncoder.SkipReason.OTHER -> R.string.ga_transfer_reason_other
 }
