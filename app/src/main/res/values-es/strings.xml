@@ -654,6 +654,9 @@
     <string name="font_cover_vietnamese">Vietnamita</string>
     <string name="font_cover_han">Chino</string>
     <string name="font_family_sample">Aa Bb Cc 0123</string>
+    <string name="font_weight_title">Grosor</string>
+    <string name="font_weight_desc">Texto más grueso; el límite depende de la fuente</string>
+    <string name="font_weight_system_hint">Solo las fuentes incluidas lo admiten; la del sistema no cambia</string>
     <string name="font_family_note">Lora se incluye sin modificar bajo la SIL Open Font License 1.1 y cubre latín y cirílico; el chino, el japonés, el coreano y el hindi usan la fuente del sistema.</string>
     <string name="attributions_lora_desc">Tipografía serif de la interfaz, incluida sin modificar bajo la SIL Open Font License 1.1 (el texto de la licencia va en la app).</string>
     <string name="haptic_title">Vibración</string>

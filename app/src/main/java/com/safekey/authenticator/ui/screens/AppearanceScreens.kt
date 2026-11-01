@@ -47,11 +47,8 @@ import com.safekey.authenticator.ui.components.SettingRow
 import com.safekey.authenticator.ui.components.SimpleTopBar
 import com.safekey.authenticator.ui.navigation.Screen
 import com.safekey.authenticator.ui.theme.AppTypography
-import com.safekey.authenticator.ui.theme.HanSerifFamily
-import com.safekey.authenticator.ui.theme.LiterataFamily
-import com.safekey.authenticator.ui.theme.ManropeFamily
-import com.safekey.authenticator.ui.theme.LoraFamily
 import com.safekey.authenticator.ui.theme.LocalFontScale
+import com.safekey.authenticator.ui.theme.interfaceFontFamily
 import com.safekey.authenticator.ui.theme.monospaceFamily
 import com.safekey.authenticator.ui.theme.previewHaptic
 import com.safekey.authenticator.ui.theme.scaledTo
@@ -228,14 +225,23 @@ fun FontFamilySettingsScreen(
                 .padding(horizontal = 8.dp)
         ) {
             FONT_CHOICES.forEach { choice ->
+                val preview = remember(choice.key, settings.fontWeightBoost) {
+                    interfaceFontFamily(choice.key, settings.fontWeightBoost)
+                }
                 FontChoiceRow(
                     title = stringResource(choice.nameRes),
                     sample = sample,
                     selected = settings.fontFamily == choice.key,
-                    family = choice.family,
+                    family = preview,
                     onClick = { vm.setFontFamily(choice.key) }
                 )
             }
+
+            FontWeightRow(
+                boost = settings.fontWeightBoost,
+                enabled = settings.fontFamily != AppSettings.FONT_FAMILY_SYSTEM,
+                onChange = { vm.setFontWeightBoost(it) }
+            )
 
             Row(
                 modifier = Modifier
@@ -320,6 +326,51 @@ fun FontNotesScreen(onBack: () -> Unit) {
     }
 }
 
+/**
+ * Weight slider: adds 0-150 to every type token. Only the bundled variable
+ * faces can do this, so it is disabled (with a hint) on the platform font.
+ */
+@Composable
+private fun FontWeightRow(boost: Int, enabled: Boolean, onChange: (Int) -> Unit) {
+    var draft by remember(boost) { mutableFloatStateOf(boost.toFloat()) }
+
+    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = stringResource(R.string.font_weight_title),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.weight(1f)
+            )
+            Text(
+                text = "${400 + draft.roundToInt()}",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        Slider(
+            value = draft,
+            onValueChange = { draft = it },
+            onValueChangeFinished = {
+                onChange(AppSettings.snapFontWeightBoost(draft.roundToInt()))
+            },
+            valueRange = AppSettings.FONT_WEIGHT_BOOST_MIN.toFloat()..
+                AppSettings.FONT_WEIGHT_BOOST_MAX.toFloat(),
+            steps = (AppSettings.FONT_WEIGHT_BOOST_MAX - AppSettings.FONT_WEIGHT_BOOST_MIN) /
+                AppSettings.FONT_WEIGHT_BOOST_STEP - 1,
+            enabled = enabled,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Text(
+            text = stringResource(
+                if (enabled) R.string.font_weight_desc else R.string.font_weight_system_hint
+            ),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
 /** One selectable typeface, previewed in its own face. */
 @Composable
 private fun FontChoiceRow(
@@ -352,15 +403,15 @@ private fun FontChoiceRow(
     }
 }
 
-/** Stored key, label and typeface of every interface font choice. */
-private class FontChoice(val key: String, val nameRes: Int, val family: FontFamily)
+/** Stored key and label of every interface font choice. */
+private class FontChoice(val key: String, val nameRes: Int)
 
 private val FONT_CHOICES: List<FontChoice> = listOf(
-    FontChoice(AppSettings.FONT_FAMILY_SYSTEM, R.string.font_family_system, FontFamily.Default),
-    FontChoice(AppSettings.FONT_FAMILY_LORA, R.string.font_family_lora, LoraFamily),
-    FontChoice(AppSettings.FONT_FAMILY_MANROPE, R.string.font_family_manrope, ManropeFamily),
-    FontChoice(AppSettings.FONT_FAMILY_LITERATA, R.string.font_family_literata, LiterataFamily),
-    FontChoice(AppSettings.FONT_FAMILY_HAN_SERIF, R.string.font_family_hanserif, HanSerifFamily)
+    FontChoice(AppSettings.FONT_FAMILY_SYSTEM, R.string.font_family_system),
+    FontChoice(AppSettings.FONT_FAMILY_LORA, R.string.font_family_lora),
+    FontChoice(AppSettings.FONT_FAMILY_MANROPE, R.string.font_family_manrope),
+    FontChoice(AppSettings.FONT_FAMILY_LITERATA, R.string.font_family_literata),
+    FontChoice(AppSettings.FONT_FAMILY_HAN_SERIF, R.string.font_family_hanserif)
 )
 
 /** Bundled font and the scripts it covers (string resources). */

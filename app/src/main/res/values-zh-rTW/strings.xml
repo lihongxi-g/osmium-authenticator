@@ -667,6 +667,9 @@
     <string name="font_cover_vietnamese">越南語</string>
     <string name="font_cover_han">中文</string>
     <string name="font_family_sample">Aa Bb Cc 0123</string>
+    <string name="font_weight_title">字重</string>
+    <string name="font_weight_desc">調大讓文字更粗，上限取決於字型本身</string>
+    <string name="font_weight_system_hint">只有內建字型支援調整，系統預設字型維持原樣</string>
     <string name="font_family_note">Lora 以 SIL 開放字型授權 1.1 原樣內建，涵蓋拉丁文與西里爾文；中文、日文、韓文與印地文會改用系統字型。</string>
     <string name="attributions_lora_desc">襯線介面字型，以 SIL 開放字型授權 1.1 原樣內建（授權全文隨應用程式提供）。</string>
     <string name="haptic_title">震動回饋</string>

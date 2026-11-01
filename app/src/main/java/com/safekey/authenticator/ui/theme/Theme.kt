@@ -46,6 +46,7 @@ fun SafeKeyTheme(
     fontScaleEnabled: Boolean = false,
     fontScalePercent: Int = AppSettings.FONT_SCALE_PERCENT_DEFAULT,
     fontFamily: String = AppSettings.FONT_FAMILY_SYSTEM,
+    fontWeightBoost: Int = AppSettings.FONT_WEIGHT_BOOST_DEFAULT,
     hapticEnabled: Boolean = true,
     hapticIntensityPercent: Int = AppSettings.HAPTIC_INTENSITY_DEFAULT,
     content: @Composable () -> Unit
@@ -72,7 +73,9 @@ fun SafeKeyTheme(
     val fontScale = remember(fontScaleEnabled, fontScalePercent, systemFontScale) {
         AppSettings.effectiveFontScale(fontScaleEnabled, fontScalePercent, systemFontScale)
     }
-    val typeface = interfaceFontFamily(fontFamily)
+    val typeface = remember(fontFamily, fontWeightBoost) {
+        interfaceFontFamily(fontFamily, fontWeightBoost)
+    }
     val typography = remember(fontScale, typeface) {
         AppTypography.scaledTo(fontScale).withFamily(typeface)
     }

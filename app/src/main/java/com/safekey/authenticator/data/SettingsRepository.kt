@@ -22,8 +22,10 @@ data class AppSettings(
     val fontScalePercent: Int = FONT_SCALE_PERCENT_DEFAULT,
     /** Master switch: off means Osmium's own default size, slider locked. */
     val fontScaleEnabled: Boolean = false,
-    /** Interface typeface: the platform font or the bundled Lora serif. */
+    /** Interface typeface: the platform font or one of the bundled faces. */
     val fontFamily: String = FONT_FAMILY_SYSTEM,
+    /** Extra weight added to every type token, 0-150 (variable fonts only). */
+    val fontWeightBoost: Int = FONT_WEIGHT_BOOST_DEFAULT,
     /** Haptics: the app's own vibration is on by default; the system path is opt-in. */
     val hapticEnabled: Boolean = true,
     /** Vibration strength, 0-100. */
@@ -119,6 +121,19 @@ data class AppSettings(
         /** Noto Serif SC (思源宋体) subset: the only face that covers Chinese. */
         const val FONT_FAMILY_HAN_SERIF = "hanserif"
 
+        /** Extra weight on top of the type tokens; only variable faces can use it. */
+        const val FONT_WEIGHT_BOOST_MIN = 0
+        const val FONT_WEIGHT_BOOST_MAX = 150
+        const val FONT_WEIGHT_BOOST_STEP = 25
+        const val FONT_WEIGHT_BOOST_DEFAULT = 0
+
+        /** Rounds a raw slider value onto the step grid. */
+        fun snapFontWeightBoost(value: Int): Int {
+            val clamped = value.coerceIn(FONT_WEIGHT_BOOST_MIN, FONT_WEIGHT_BOOST_MAX)
+            return FONT_WEIGHT_BOOST_MIN +
+                (clamped - FONT_WEIGHT_BOOST_MIN) / FONT_WEIGHT_BOOST_STEP * FONT_WEIGHT_BOOST_STEP
+        }
+
         /** Every value the font setting accepts; anything else stores "system". */
         val FONT_FAMILY_CHOICES = setOf(
             FONT_FAMILY_SYSTEM,
@@ -213,6 +228,7 @@ class SettingsRepository(
         val FONT_SCALE_PERCENT = intPreferencesKey("font_scale_percent")
         val FONT_SCALE_ENABLED = booleanPreferencesKey("font_scale_enabled")
         val FONT_FAMILY = stringPreferencesKey("font_family")
+        val FONT_WEIGHT_BOOST = intPreferencesKey("font_weight_boost")
         val HAPTIC_ENABLED = booleanPreferencesKey("haptic_enabled")
         val HAPTIC_INTENSITY = intPreferencesKey("haptic_intensity_percent")
         val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
@@ -266,6 +282,9 @@ class SettingsRepository(
             fontFamily = (prefs[Keys.FONT_FAMILY] ?: AppSettings.FONT_FAMILY_SYSTEM)
                 .takeIf { it in AppSettings.FONT_FAMILY_CHOICES }
                 ?: AppSettings.FONT_FAMILY_SYSTEM,
+            fontWeightBoost = (prefs[Keys.FONT_WEIGHT_BOOST]
+                ?: AppSettings.FONT_WEIGHT_BOOST_DEFAULT)
+                .coerceIn(AppSettings.FONT_WEIGHT_BOOST_MIN, AppSettings.FONT_WEIGHT_BOOST_MAX),
             hapticEnabled = prefs[Keys.HAPTIC_ENABLED] ?: true,
             hapticIntensityPercent = (prefs[Keys.HAPTIC_INTENSITY]
                 ?: AppSettings.HAPTIC_INTENSITY_DEFAULT)
@@ -311,6 +330,16 @@ class SettingsRepository(
 
     suspend fun setDynamicColor(enabled: Boolean) {
         context.dataStore.edit { it[Keys.DYNAMIC_COLOR] = enabled }
+    }
+
+    /** 0-150 extra weight; clamped, ignored for the platform font. */
+    suspend fun setFontWeightBoost(boost: Int) {
+        context.dataStore.edit {
+            it[Keys.FONT_WEIGHT_BOOST] = boost.coerceIn(
+                AppSettings.FONT_WEIGHT_BOOST_MIN,
+                AppSettings.FONT_WEIGHT_BOOST_MAX
+            )
+        }
     }
 
     /** One of [AppSettings.FONT_FAMILY_CHOICES]; anything else stores "system". */

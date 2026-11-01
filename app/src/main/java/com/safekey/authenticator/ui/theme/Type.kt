@@ -1,10 +1,12 @@
 package com.safekey.authenticator.ui.theme
 
 import androidx.compose.material3.Typography
+import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
@@ -15,68 +17,39 @@ import com.safekey.authenticator.data.AppSettings
 /** Monospace font for verification codes. */
 val monospaceFamily = FontFamily.Monospace
 
+@OptIn(ExperimentalTextApi::class)
+private fun variableFamily(resId: Int, maxWeight: Int, boost: Int): FontFamily {
+    fun settingsFor(base: Int): FontVariation.Settings {
+        val weight = (base + boost).coerceIn(100, maxWeight)
+        return FontVariation.Settings(FontVariation.weight(weight))
+    }
+
+    // Every weight is bound explicitly: Manrope and Noto Serif SC both default
+    // to their ExtraLight instance, so a plain file binding would render the
+    // whole interface hairline-thin.
+    return FontFamily(
+        Font(resId, weight = FontWeight.Normal, variationSettings = settingsFor(400)),
+        Font(resId, weight = FontWeight.Medium, variationSettings = settingsFor(500)),
+        Font(resId, weight = FontWeight.SemiBold, variationSettings = settingsFor(600)),
+        Font(resId, weight = FontWeight.Bold, variationSettings = settingsFor(700))
+    )
+}
+
 /**
- * Lora (SIL Open Font License 1.1) — the optional serif interface font.
+ * Stored setting key -> typeface, with [boost] added to every weight.
  *
- * One variable file covers 400-700. The published subsets are latin, latin-ext,
- * cyrillic, cyrillic-ext and vietnamese — there is no Greek subset (only the
- * math symbols ΓΔΠΩμπ are present) and no CJK, Hangul or Devanagari, so those
- * scripts fall back to the system font glyph by glyph. Expected, not a
- * bundling mistake.
- */
-val LoraFamily: FontFamily = FontFamily(
-    Font(R.font.lora, weight = FontWeight.Normal),
-    Font(R.font.lora, weight = FontWeight.Medium),
-    Font(R.font.lora, weight = FontWeight.SemiBold),
-    Font(R.font.lora, weight = FontWeight.Bold)
-)
-
-/**
- * Manrope (SIL Open Font License 1.1) — variable `wght` 200-800.
+ * The bundled faces are variable fonts, so a boost of 0-150 thickens the whole
+ * interface without swapping files. The platform font is not variable, so it
+ * ignores the boost. Unknown keys mean the system font.
  *
- * The file's default instance is ExtraLight, so the four declared weights
- * matter: `Font(...)` binds each one to its own `wght` axis value, which is
- * what keeps the interface from rendering hairline-thin.
+ * Callers should `remember` the result: a new FontFamily instance per
+ * recomposition would defeat Compose's text caching.
  */
-val ManropeFamily: FontFamily = FontFamily(
-    Font(R.font.manrope, weight = FontWeight.Normal),
-    Font(R.font.manrope, weight = FontWeight.Medium),
-    Font(R.font.manrope, weight = FontWeight.SemiBold),
-    Font(R.font.manrope, weight = FontWeight.Bold)
-)
-
-/**
- * Literata (SIL OFL 1.1) — variable `opsz` + `wght`, drawn for screen reading.
- */
-val LiterataFamily: FontFamily = FontFamily(
-    Font(R.font.literata, weight = FontWeight.Normal),
-    Font(R.font.literata, weight = FontWeight.Medium),
-    Font(R.font.literata, weight = FontWeight.SemiBold),
-    Font(R.font.literata, weight = FontWeight.Bold)
-)
-
-/**
- * Noto Serif SC / 思源宋体 (SIL Open Font License 1.1) — a subset of the
- * variable font (wght 200-900) carrying GB2312, Big5 level-1 and the Latin,
- * Cyrillic, Greek and punctuation the app uses.
- *
- * This is the only bundled face that covers Chinese, so selecting it brings its
- * own Latin design (Source Serif family) rather than pairing with a second
- * face.
- */
-val HanSerifFamily: FontFamily = FontFamily(
-    Font(R.font.hanserif, weight = FontWeight.Normal),
-    Font(R.font.hanserif, weight = FontWeight.Medium),
-    Font(R.font.hanserif, weight = FontWeight.SemiBold),
-    Font(R.font.hanserif, weight = FontWeight.Bold)
-)
-
-/** Stored setting key -> typeface. Unknown keys mean the system font. */
-fun interfaceFontFamily(key: String): FontFamily = when (key) {
-    AppSettings.FONT_FAMILY_LORA -> LoraFamily
-    AppSettings.FONT_FAMILY_MANROPE -> ManropeFamily
-    AppSettings.FONT_FAMILY_LITERATA -> LiterataFamily
-    AppSettings.FONT_FAMILY_HAN_SERIF -> HanSerifFamily
+fun interfaceFontFamily(key: String, boost: Int = 0): FontFamily = when (key) {
+    AppSettings.FONT_FAMILY_LORA -> variableFamily(R.font.lora, 700, boost)
+    AppSettings.FONT_FAMILY_MANROPE -> variableFamily(R.font.manrope, 800, boost)
+    AppSettings.FONT_FAMILY_LITERATA -> variableFamily(R.font.literata, 900, boost)
+    AppSettings.FONT_FAMILY_HAN_SERIF -> variableFamily(R.font.hanserif, 900, boost)
     else -> FontFamily.Default
 }
 
