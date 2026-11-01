@@ -47,10 +47,9 @@ import com.safekey.authenticator.ui.components.SettingRow
 import com.safekey.authenticator.ui.components.SimpleTopBar
 import com.safekey.authenticator.ui.navigation.Screen
 import com.safekey.authenticator.ui.theme.AppTypography
-import com.safekey.authenticator.ui.theme.CrimsonProFamily
 import com.safekey.authenticator.ui.theme.LiterataFamily
+import com.safekey.authenticator.ui.theme.ManropeFamily
 import com.safekey.authenticator.ui.theme.LoraFamily
-import com.safekey.authenticator.ui.theme.SourceSerif4Family
 import com.safekey.authenticator.ui.theme.LocalFontScale
 import com.safekey.authenticator.ui.theme.monospaceFamily
 import com.safekey.authenticator.ui.theme.previewHaptic
@@ -307,13 +306,6 @@ fun FontNotesScreen(onBack: () -> Unit) {
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    if (note.caveatRes != null) {
-                        Text(
-                            text = stringResource(note.caveatRes),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    }
                 }
             }
 
@@ -365,13 +357,12 @@ private class FontChoice(val key: String, val nameRes: Int, val family: FontFami
 private val FONT_CHOICES: List<FontChoice> = listOf(
     FontChoice(AppSettings.FONT_FAMILY_SYSTEM, R.string.font_family_system, FontFamily.Default),
     FontChoice(AppSettings.FONT_FAMILY_LORA, R.string.font_family_lora, LoraFamily),
-    FontChoice(AppSettings.FONT_FAMILY_SOURCE_SERIF, R.string.font_family_source_serif, SourceSerif4Family),
-    FontChoice(AppSettings.FONT_FAMILY_LITERATA, R.string.font_family_literata, LiterataFamily),
-    FontChoice(AppSettings.FONT_FAMILY_CRIMSON_PRO, R.string.font_family_crimson_pro, CrimsonProFamily)
+    FontChoice(AppSettings.FONT_FAMILY_MANROPE, R.string.font_family_manrope, ManropeFamily),
+    FontChoice(AppSettings.FONT_FAMILY_LITERATA, R.string.font_family_literata, LiterataFamily)
 )
 
-/** Bundled font, its covered scripts (string resources) and any caveat. */
-private class FontNote(val nameRes: Int, val scripts: List<Int>, val caveatRes: Int? = null)
+/** Bundled font and the scripts it covers (string resources). */
+private class FontNote(val nameRes: Int, val scripts: List<Int>)
 
 /** The licence every bundled face uses; SPDX-ish short name, not translated. */
 private const val FONT_LICENSE = "SIL OFL 1.1"
@@ -382,7 +373,7 @@ private val FONT_NOTES: List<FontNote> = listOf(
         listOf(R.string.font_cover_latin, R.string.font_cover_cyrillic, R.string.font_cover_vietnamese)
     ),
     FontNote(
-        R.string.font_family_source_serif,
+        R.string.font_family_manrope,
         listOf(
             R.string.font_cover_latin,
             R.string.font_cover_cyrillic,
@@ -398,11 +389,6 @@ private val FONT_NOTES: List<FontNote> = listOf(
             R.string.font_cover_greek,
             R.string.font_cover_vietnamese
         )
-    ),
-    FontNote(
-        R.string.font_family_crimson_pro,
-        listOf(R.string.font_cover_latin, R.string.font_cover_vietnamese),
-        caveatRes = R.string.font_notes_no_cyrillic
     )
 )
 

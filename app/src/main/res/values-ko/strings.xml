@@ -642,13 +642,11 @@
     <string name="font_family_desc">인터페이스 글꼴</string>
     <string name="font_family_system">시스템 기본</string>
     <string name="font_family_lora">Lora</string>
-    <string name="font_family_source_serif">Source Serif 4</string>
+    <string name="font_family_manrope">Manrope</string>
     <string name="font_family_literata">Literata</string>
-    <string name="font_family_crimson_pro">Crimson Pro</string>
     <string name="font_notes_title">글꼴 설명</string>
     <string name="font_notes_summary">라이선스와 문자 지원</string>
     <string name="font_notes_intro">포함된 글꼴은 SIL Open Font License 1.1에 따라 수정 없이 배포되며, 각 글꼴의 라이선스 전문이 앱에 포함되어 있습니다.</string>
-    <string name="font_notes_no_cyrillic">키릴 문자 없음 — 러시아어는 시스템 글꼴로 표시됩니다.</string>
     <string name="font_cover_latin">라틴 문자</string>
     <string name="font_cover_cyrillic">키릴 문자</string>
     <string name="font_cover_greek">그리스 문자</string>

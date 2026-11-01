@@ -112,19 +112,17 @@ data class AppSettings(
         // ---- typeface ----
         /** Follow the platform font. */
         const val FONT_FAMILY_SYSTEM = "system"
-        /** The bundled serif faces; all four ship under the SIL OFL 1.1. */
+        /** The bundled faces; all three ship under the SIL OFL 1.1. */
         const val FONT_FAMILY_LORA = "lora"
-        const val FONT_FAMILY_SOURCE_SERIF = "sourceserif4"
+        const val FONT_FAMILY_MANROPE = "manrope"
         const val FONT_FAMILY_LITERATA = "literata"
-        const val FONT_FAMILY_CRIMSON_PRO = "crimsonpro"
 
         /** Every value the font setting accepts; anything else stores "system". */
         val FONT_FAMILY_CHOICES = setOf(
             FONT_FAMILY_SYSTEM,
             FONT_FAMILY_LORA,
-            FONT_FAMILY_SOURCE_SERIF,
-            FONT_FAMILY_LITERATA,
-            FONT_FAMILY_CRIMSON_PRO
+            FONT_FAMILY_MANROPE,
+            FONT_FAMILY_LITERATA
         )
 
         // ---- haptics ----

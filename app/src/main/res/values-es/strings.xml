@@ -642,13 +642,11 @@
     <string name="font_family_desc">Tipografía de la interfaz</string>
     <string name="font_family_system">Predeterminada del sistema</string>
     <string name="font_family_lora">Lora</string>
-    <string name="font_family_source_serif">Source Serif 4</string>
+    <string name="font_family_manrope">Manrope</string>
     <string name="font_family_literata">Literata</string>
-    <string name="font_family_crimson_pro">Crimson Pro</string>
     <string name="font_notes_title">Notas sobre las fuentes</string>
     <string name="font_notes_summary">Licencia y cobertura de escrituras</string>
     <string name="font_notes_intro">Las fuentes incluidas se distribuyen sin modificar bajo la SIL Open Font License 1.1. El texto completo de cada licencia va dentro de la app.</string>
-    <string name="font_notes_no_cyrillic">Sin cirílico: el texto en ruso usa la fuente del sistema.</string>
     <string name="font_cover_latin">Latín</string>
     <string name="font_cover_cyrillic">Cirílico</string>
     <string name="font_cover_greek">Griego</string>
