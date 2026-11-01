@@ -12,3 +12,6 @@ captures/
 .cxx/
 __pycache__/
 *.pyc
+
+# Kotlin compiler session dir (build scratch)
+.kotlin/

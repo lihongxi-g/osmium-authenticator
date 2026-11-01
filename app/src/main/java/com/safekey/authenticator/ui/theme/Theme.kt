@@ -1,16 +1,22 @@
 package com.safekey.authenticator.ui.theme
 
 import android.os.Build
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import com.safekey.authenticator.data.AppSettings
 
 // Fallback palette (no Dynamic Color support, i.e. Android < 12):
@@ -37,6 +43,12 @@ private val FallbackDark = darkColorScheme(
 fun SafeKeyTheme(
     themeMode: String,
     dynamicColor: Boolean,
+    fontScaleEnabled: Boolean = false,
+    fontScalePercent: Int = AppSettings.FONT_SCALE_PERCENT_DEFAULT,
+    fontFamily: String = AppSettings.FONT_FAMILY_SYSTEM,
+    fontWeightBody: Int = AppSettings.FONT_WEIGHT_BODY_DEFAULT,
+    hapticEnabled: Boolean = true,
+    hapticIntensityPercent: Int = AppSettings.HAPTIC_INTENSITY_DEFAULT,
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
@@ -54,11 +66,42 @@ fun SafeKeyTheme(
         else -> FallbackLight
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = AppTypography,
-        content = content
-    )
+    // App text step, saturated against the system scale. The PIN keypad is a
+    // fixed 72dp circle and its three-column grid cannot grow sideways, so the
+    // text has to stop at a combined 2.0 instead of clipping.
+    val systemFontScale = LocalDensity.current.fontScale
+    val fontScale = remember(fontScaleEnabled, fontScalePercent, systemFontScale) {
+        AppSettings.effectiveFontScale(fontScaleEnabled, fontScalePercent, systemFontScale)
+    }
+    val typeface = remember(fontFamily) { interfaceFontFamily(fontFamily) }
+    // The slider moves the type tokens, not a font axis: the bundled faces ship
+    // fixed weight files, so the change always lands on real glyphs.
+    val weightDelta = remember(fontFamily, fontWeightBody) {
+        AppSettings.fontWeightDelta(fontWeightBody, fontFamily)
+    }
+    val typography = remember(fontScale, typeface, weightDelta) {
+        AppTypography.scaledTo(fontScale).withFamily(typeface).withWeightDelta(weightDelta)
+    }
+    val hapticTick = rememberHapticTick(hapticEnabled, hapticIntensityPercent)
+    val latestTick = rememberUpdatedState(hapticTick)
+
+    CompositionLocalProvider(LocalFontScale provides fontScale) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = typography
+        ) {
+            // Clickable surfaces get the tick through the indication, so only
+            // real controls vibrate (buttons, switches, rows, the keypad,
+            // dialog actions) while the ripple keeps drawing exactly as before.
+            val base = ripple()
+            val indication = remember(base, latestTick) {
+                HapticIndication({ latestTick.value() }, base)
+            }
+            CompositionLocalProvider(LocalIndication provides indication) {
+                content()
+            }
+        }
+    }
 }
 
 // Fixed "yes, this is granted / allowed" green.

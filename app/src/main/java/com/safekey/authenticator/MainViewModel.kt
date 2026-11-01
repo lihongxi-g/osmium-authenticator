@@ -760,6 +760,20 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     fun setThemeMode(mode: String) = viewModelScope.launch { settingsRepo.setThemeMode(mode) }
     fun setDynamicColor(enabled: Boolean) = viewModelScope.launch { settingsRepo.setDynamicColor(enabled) }
+    fun setFontScalePercent(percent: Int) =
+        viewModelScope.launch { settingsRepo.setFontScalePercent(percent) }
+    fun setFontScaleEnabled(enabled: Boolean) =
+        viewModelScope.launch { settingsRepo.setFontScaleEnabled(enabled) }
+    fun setFontFamily(family: String) =
+        viewModelScope.launch { settingsRepo.setFontFamily(family) }
+
+    fun setFontWeightBody(weight: Int) =
+        viewModelScope.launch { settingsRepo.setFontWeightBody(weight) }
+
+    fun setHapticEnabled(enabled: Boolean) =
+        viewModelScope.launch { settingsRepo.setHapticEnabled(enabled) }
+    fun setHapticIntensityPercent(percent: Int) =
+        viewModelScope.launch { settingsRepo.setHapticIntensityPercent(percent) }
     fun setGateOnOpen(enabled: Boolean) = viewModelScope.launch { settingsRepo.setGateOnOpen(enabled) }
     fun setAllowScreenshots(enabled: Boolean) = viewModelScope.launch { settingsRepo.setAllowScreenshots(enabled) }
     fun setHideCodes(enabled: Boolean) = viewModelScope.launch { settingsRepo.setHideCodes(enabled) }

@@ -1,27 +1,29 @@
 package com.safekey.authenticator.ui.screens
 
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.safekey.authenticator.R
 import com.safekey.authenticator.ui.components.AppIcons
+import com.safekey.authenticator.ui.components.CenteredScrollColumn
 
 /**
  * Full-screen lock gate. Rendered instead of the app content while the
  * biometric lock is engaged — no account data exists in this composition.
+ *
+ * Scrolls when the translation and the text size together need more room than
+ * the screen has; a centred column without it cut the unlock buttons off.
  */
 @Composable
 fun LockScreen(
@@ -31,14 +33,11 @@ fun LockScreen(
     onUsePin: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center
+    CenteredScrollColumn(
+        modifier = modifier,
+        contentPadding = PaddingValues(32.dp)
     ) {
-        androidx.compose.material3.Icon(
+        Icon(
             imageVector = AppIcons.Security,
             contentDescription = null,
             modifier = Modifier.size(64.dp),

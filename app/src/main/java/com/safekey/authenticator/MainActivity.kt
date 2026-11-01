@@ -38,9 +38,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
@@ -63,6 +65,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.core.view.WindowCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -76,6 +79,7 @@ import com.safekey.authenticator.security.classifyBiometricCode
 import com.safekey.authenticator.security.IntegrityCheck
 import com.safekey.authenticator.security.RootState
 import com.safekey.authenticator.totp.OtpUriParser
+import com.safekey.authenticator.ui.components.DialogBodyText
 import com.safekey.authenticator.ui.components.SwipeBackContainer
 import com.safekey.authenticator.ui.components.UpdateAvailableDialog
 import com.safekey.authenticator.ui.components.integrityCheckTitle
@@ -83,6 +87,9 @@ import com.safekey.authenticator.ui.navigation.Screen
 import com.safekey.authenticator.notify.BackupNotifier
 import com.safekey.authenticator.ui.navigation.isRootBlocked
 import com.safekey.authenticator.ui.screens.AboutScreen
+import com.safekey.authenticator.ui.screens.AppearanceSettingsScreen
+import com.safekey.authenticator.ui.screens.FontFamilySettingsScreen
+import com.safekey.authenticator.ui.screens.FontNotesScreen
 import com.safekey.authenticator.ui.screens.PermissionsScreen
 import com.safekey.authenticator.ui.screens.DeveloperScreen
 import com.safekey.authenticator.ui.screens.AccountFormScreen
@@ -94,7 +101,9 @@ import com.safekey.authenticator.ui.screens.DetailScreen
 import com.safekey.authenticator.ui.screens.ExportScreen
 import com.safekey.authenticator.ui.screens.ExportToOthersScreen
 import com.safekey.authenticator.ui.screens.FileImportScreen
+import com.safekey.authenticator.ui.screens.FontSizeSettingsScreen
 import com.safekey.authenticator.ui.screens.GoogleImportScreen
+import com.safekey.authenticator.ui.screens.HapticSettingsScreen
 import com.safekey.authenticator.ui.screens.ImportScreen
 import com.safekey.authenticator.ui.screens.IntegrityScreen
 import com.safekey.authenticator.ui.screens.LanTransferScreen
@@ -179,6 +188,27 @@ class MainActivity : FragmentActivity() {
 
         setContent {
             val settings by vm.settings.collectAsState()
+            // The XML theme's windowLightStatusBar follows the *system* night
+            // mode, but the app can be forced to light or dark. Without this
+            // the status/navigation bar icons keep the system's contrast: dark
+            // icons on a dark app (invisible) or light icons on a light one.
+            val appDarkTheme = when (settings.themeMode) {
+                AppSettings.THEME_LIGHT -> false
+                AppSettings.THEME_DARK -> true
+                else -> isSystemInDarkTheme()
+            }
+            LaunchedEffect(appDarkTheme) {
+                WindowCompat.getInsetsController(window, window.decorView).apply {
+                    isAppearanceLightStatusBars = !appDarkTheme
+                    isAppearanceLightNavigationBars = !appDarkTheme
+                }
+                // Three-button navigation: the system otherwise paints a
+                // translucent scrim behind the nav bar, which reads as a
+                // white/black strip that does not match the app background.
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    window.isNavigationBarContrastEnforced = false
+                }
+            }
             val locked by vm.locked.collectAsState()
             val pinRequired by vm.pinRequired.collectAsState()
             val destroyed by vm.destroyed.collectAsState()
@@ -238,9 +268,31 @@ class MainActivity : FragmentActivity() {
             // used to wipe everything the user had typed.
             val screenStateHolder = rememberSaveableStateHolder()
 
+            // None of the bundled faces has Chinese glyphs, so a Chinese UI
+            // always renders with the system font — even if a third-party face
+            // was chosen while the app was in another language.
+            val chineseUi = LanguagePrefs.isChinese(context)
+            val effectiveFontFamily =
+                if (chineseUi) AppSettings.FONT_FAMILY_SYSTEM else settings.fontFamily
+
+            // Make that decision stick: revert the stored choice once, so the
+            // font comes back the way the user left it only after changing the
+            // language back.
+            LaunchedEffect(chineseUi, settings.fontFamily) {
+                if (chineseUi && settings.fontFamily != AppSettings.FONT_FAMILY_SYSTEM) {
+                    vm.setFontFamily(AppSettings.FONT_FAMILY_SYSTEM)
+                }
+            }
+
             SafeKeyTheme(
                 themeMode = settings.themeMode,
-                dynamicColor = settings.dynamicColor
+                dynamicColor = settings.dynamicColor,
+                fontScaleEnabled = settings.fontScaleEnabled,
+                fontScalePercent = settings.fontScalePercent,
+                fontFamily = effectiveFontFamily,
+                fontWeightBody = settings.fontWeightBody,
+                hapticEnabled = settings.hapticEnabled,
+                hapticIntensityPercent = settings.hapticIntensityPercent
             ) {
                 // Screenshot policy follows the user setting (default: blocked).
                 LaunchedEffect(settings.allowScreenshots) {
@@ -497,7 +549,7 @@ class MainActivity : FragmentActivity() {
         AlertDialog(
             onDismissRequest = { },
             title = { Text(stringResource(R.string.tampered_title)) },
-            text = { Text(stringResource(R.string.tampered_message)) },
+            text = { DialogBodyText(stringResource(R.string.tampered_message)) },
             confirmButton = {
                 TextButton(onClick = onContinue) {
                     Text(stringResource(R.string.tampered_continue))
@@ -999,7 +1051,7 @@ private fun PinReminderDialog(
         onDismissRequest = { onDismiss(silence) },
         title = { Text(stringResource(R.string.app_pin_setup)) },
         text = {
-            Column {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 Text(stringResource(R.string.pin_reminder_body))
                 Spacer(Modifier.height(8.dp))
                 Row(
@@ -1049,7 +1101,7 @@ private fun IntegrityNoticeDialog(
             )
         },
         text = {
-            Column {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 Text(
                     stringResource(
                         if (compromised) R.string.integrity_dialog_body_alert
@@ -1281,9 +1333,32 @@ private fun IntegrityNoticeDialog(
                         onBack = { vm.nav.pop() }
                     )
 
+                    is Screen.Appearance -> AppearanceSettingsScreen(
+                        vm = vm,
+                        hiddenFeatures = vm.settings.value.devHiddenFeatures,
+                        onBack = { vm.nav.pop() }
+                    )
+
                     is Screen.ThemeSettings -> ThemeSettingsScreen(
                         vm = vm,
                         hiddenFeatures = vm.settings.value.devHiddenFeatures,
+                        onBack = { vm.nav.pop() }
+                    )
+
+                    is Screen.FontFamilySettings -> FontFamilySettingsScreen(
+                        vm = vm,
+                        onBack = { vm.nav.pop() }
+                    )
+
+                    is Screen.FontNotes -> FontNotesScreen(onBack = { vm.nav.pop() })
+
+                    is Screen.FontSettings -> FontSizeSettingsScreen(
+                        vm = vm,
+                        onBack = { vm.nav.pop() }
+                    )
+
+                    is Screen.HapticSettings -> HapticSettingsScreen(
+                        vm = vm,
                         onBack = { vm.nav.pop() }
                     )
 
@@ -1291,6 +1366,11 @@ private fun IntegrityNoticeDialog(
                         onBack = { vm.nav.pop() },
                         onLanguageChanged = { lang ->
                             LanguagePrefs.set(this@MainActivity, lang)
+                            // None of the bundled fonts covers Chinese, so a
+                            // Chinese UI must not keep a third-party face.
+                            if (LanguagePrefs.resolvesToChinese(this@MainActivity, lang)) {
+                                vm.setFontFamily(AppSettings.FONT_FAMILY_SYSTEM)
+                            }
                             recreate()
                         }
                     )

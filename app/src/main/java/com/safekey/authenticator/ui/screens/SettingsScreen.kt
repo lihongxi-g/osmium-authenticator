@@ -57,6 +57,13 @@ import com.safekey.authenticator.ui.components.integrityLevelLabel
 import com.safekey.authenticator.ui.dev.DevStrings
 import com.safekey.authenticator.ui.navigation.Screen
 
+/**
+ * Developer-mode ids that live on the appearance page. The main list shows the
+ * single entry row as long as at least one of them is still visible.
+ */
+private val APPEARANCE_FEATURES =
+    listOf("theme", "fontFamily", "fontSize", "haptic", "sort", "tags", "language")
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
@@ -144,9 +151,12 @@ fun SettingsScreen(
         ) {
             SectionHeader(stringResource(R.string.settings_appearance))
 
-            if ("theme" !in hiddenFeatures) SettingRow(
-                icon = if (settings.themeMode == AppSettings.THEME_DARK) AppIcons.DarkMode else AppIcons.LightMode,
-                title = stringResource(R.string.theme_mode),
+            // Appearance is one page now: its rows had grown to six here, and
+            // each of them is a page of its own one level down.
+            if (APPEARANCE_FEATURES.any { it !in hiddenFeatures }) SettingRow(
+                icon = AppIcons.Palette,
+                title = stringResource(R.string.settings_appearance),
+                description = stringResource(R.string.appearance_desc),
                 trailing = {
                     Text(
                         text = when (settings.themeMode) {
@@ -158,46 +168,7 @@ fun SettingsScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 },
-                onClick = { vm.nav.push(Screen.ThemeSettings) }
-            )
-
-            if ("sort" !in hiddenFeatures) SettingRow(
-                icon = AppIcons.SwapVert,
-                title = stringResource(R.string.sort_mode),
-                description = stringResource(R.string.sort_mode_desc),
-                onClick = { vm.nav.push(Screen.SortOrder) }
-            )
-
-            if ("tags" !in hiddenFeatures) SettingRow(
-                icon = AppIcons.Palette,
-                title = stringResource(R.string.tags_title),
-                description = stringResource(R.string.tags_settings_desc),
-                onClick = { vm.nav.push(Screen.TagSettings) }
-            )
-
-            if ("language" !in hiddenFeatures) SettingRow(
-                icon = AppIcons.Language,
-                title = stringResource(R.string.language),
-                trailing = {
-                    Text(
-                        text = when (com.safekey.authenticator.data.LanguagePrefs.get(context)) {
-                            "zh" -> stringResource(R.string.lang_zh)
-                            "zh-TW", "zh-Hant" -> stringResource(R.string.lang_zh_tw)
-                            "en" -> stringResource(R.string.lang_en)
-                            "es" -> stringResource(R.string.lang_es)
-                            "ja" -> stringResource(R.string.lang_ja)
-                            "ko" -> stringResource(R.string.lang_ko)
-                            "de" -> stringResource(R.string.lang_de)
-                            "ru" -> stringResource(R.string.lang_ru)
-                            "fr" -> stringResource(R.string.lang_fr)
-                            "hi" -> stringResource(R.string.lang_hi)
-                            else -> stringResource(R.string.lang_system)
-                        },
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                },
-                onClick = { vm.nav.push(Screen.LanguageSettings) }
+                onClick = { vm.nav.push(Screen.Appearance) }
             )
 
             SectionHeader(stringResource(R.string.settings_security))
@@ -626,7 +597,7 @@ fun SettingsScreen(
             onDismissRequest = { showDestroyModeDialog = false },
             title = { Text(stringResource(R.string.destroy_mode)) },
             text = {
-                Column {
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                     Text(
                         text = stringResource(R.string.destroy_warning),
                         style = MaterialTheme.typography.bodySmall,
@@ -658,7 +629,7 @@ fun SettingsScreen(
             onDismissRequest = { showOffsetDialog = false },
             title = { Text(stringResource(R.string.time_offset)) },
             text = {
-                Column {
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                     Text(
                         text = stringResource(R.string.time_offset_hint),
                         style = MaterialTheme.typography.bodySmall,

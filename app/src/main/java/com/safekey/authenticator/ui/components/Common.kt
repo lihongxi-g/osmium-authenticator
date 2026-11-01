@@ -1,14 +1,20 @@
 package com.safekey.authenticator.ui.components
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -25,6 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /**
@@ -43,7 +50,10 @@ fun SimpleTopBar(
     actions: @Composable RowScope.() -> Unit = {}
 ) {
     TopAppBar(
-        modifier = Modifier.statusBarsPadding(),
+        // TopAppBar already applies TopAppBarDefaults.windowInsets (system bars,
+        // top + horizontal). Adding statusBarsPadding() here doubled the inset:
+        // a status-bar-tall blank band above the title, and every screen's
+        // content pushed down by that much.
         title = {
             Text(
                 text = title,
@@ -159,4 +169,55 @@ fun SettingRow(
             if (trailing != null) trailing()
         }
     }
+}
+
+/**
+ * Full-screen column that centres its content when it fits and scrolls when it
+ * does not.
+ *
+ * The lock screen and the PIN pad are centred columns with no scroll: a long
+ * English or German translation at a large text size pushed the keypad or the
+ * buttons off-screen, and there was no way to reach them.
+ */
+@Composable
+fun CenteredScrollColumn(
+    modifier: Modifier = Modifier,
+    contentPadding: PaddingValues = PaddingValues(0.dp),
+    horizontalAlignment: Alignment.Horizontal = Alignment.CenterHorizontally,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    BoxWithConstraints(modifier = modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .heightIn(min = maxHeight)
+                .padding(contentPadding),
+            horizontalAlignment = horizontalAlignment,
+            verticalArrangement = Arrangement.Center,
+            content = content
+        )
+    }
+}
+
+/**
+ * Body text for dialogs.
+ *
+ * Material 3 gives the text slot a bounded height but no scroll, so a long
+ * English or German paragraph was simply cut off with no way to reach the
+ * rest. This scrolls once the text is taller than [maxHeight].
+ */
+@Composable
+fun DialogBodyText(
+    text: String,
+    style: TextStyle = MaterialTheme.typography.bodyMedium,
+    maxHeight: Dp = 360.dp
+) {
+    Text(
+        text = text,
+        style = style,
+        modifier = Modifier
+            .heightIn(max = maxHeight)
+            .verticalScroll(rememberScrollState())
+    )
 }

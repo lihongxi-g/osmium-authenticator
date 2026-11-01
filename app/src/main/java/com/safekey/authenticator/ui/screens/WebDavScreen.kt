@@ -48,6 +48,7 @@ import com.safekey.authenticator.network.WebDavFile
 import com.safekey.authenticator.security.VaultFormatException
 import com.safekey.authenticator.security.VaultIO
 import com.safekey.authenticator.ui.components.AppIcons
+import com.safekey.authenticator.ui.components.DialogBodyText
 import com.safekey.authenticator.ui.components.LocalNetworkPermissionGate
 import com.safekey.authenticator.ui.components.rememberLocalNetworkPermissionRequest
 import com.safekey.authenticator.ui.components.SimpleTopBar
@@ -334,7 +335,7 @@ fun WebDavScreen(
         AlertDialog(
             onDismissRequest = { showHttpWarning = false },
             title = { Text(stringResource(R.string.webdav_http_warning_title)) },
-            text = { Text(stringResource(R.string.webdav_http_warning_body)) },
+            text = { DialogBodyText(stringResource(R.string.webdav_http_warning_body)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -542,7 +543,10 @@ private fun BackupPasswordDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.webdav_backup_password_title)) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 Text(
                     text = stringResource(R.string.webdav_backup_password_desc),
                     style = MaterialTheme.typography.bodyMedium,
@@ -606,7 +610,10 @@ private fun RestorePasswordDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.import_password_title)) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 Text(
                     text = stringResource(R.string.webdav_restore_password_desc),
                     style = MaterialTheme.typography.bodyMedium,

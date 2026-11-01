@@ -722,7 +722,7 @@ fun AutoBackupScreen(
             onDismissRequest = { showIntervalDialog = false },
             title = { Text(stringResource(R.string.auto_backup_interval_picker_title)) },
             text = {
-                Column {
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                     listOf(1, 2, 3, 7, 14, 30).forEach { days ->
                         TextButton(
                             onClick = {
@@ -756,7 +756,7 @@ fun AutoBackupScreen(
             onDismissRequest = { showKeepDialog = false },
             title = { Text(stringResource(R.string.auto_backup_keep_picker_title)) },
             text = {
-                Column {
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                     (1..AppSettings.AUTO_BACKUP_KEEP_MAX).forEach { count ->
                         TextButton(
                             onClick = {
@@ -835,7 +835,10 @@ private fun AutoBackupPasswordDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.auto_backup_password_label)) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 Text(
                     text = stringResource(R.string.auto_backup_password_desc),
                     style = MaterialTheme.typography.bodyMedium,

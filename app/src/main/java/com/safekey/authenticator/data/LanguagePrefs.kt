@@ -26,4 +26,19 @@ object LanguagePrefs {
         val lang = get(context) ?: return null
         return Locale.forLanguageTag(lang)
     }
+
+    /** The tag actually in effect — the stored choice, or the system language. */
+    fun effectiveTag(context: Context): String =
+        get(context) ?: Locale.getDefault().language
+
+    /**
+     * True when the interface is Chinese. "Follow system" counts only when the
+     * system language is Chinese.
+     */
+    fun isChinese(context: Context): Boolean =
+        effectiveTag(context).lowercase().startsWith("zh")
+
+    /** The tag a language choice would result in ([tag] null = follow system). */
+    fun resolvesToChinese(context: Context, tag: String?): Boolean =
+        (tag ?: Locale.getDefault().language).lowercase().startsWith("zh")
 }

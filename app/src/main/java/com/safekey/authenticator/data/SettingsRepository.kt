@@ -18,6 +18,23 @@ private val Context.dataStore by preferencesDataStore(name = "safekey_settings")
 data class AppSettings(
     val themeMode: String = THEME_SYSTEM,
     val dynamicColor: Boolean = true,
+    /** Text scale in percent, 80-200; applied on top of the system font scale. */
+    val fontScalePercent: Int = FONT_SCALE_PERCENT_DEFAULT,
+    /** Master switch: off means Osmium's own default size, slider locked. */
+    val fontScaleEnabled: Boolean = false,
+    /** Interface typeface: the platform font or one of the bundled faces. */
+    val fontFamily: String = FONT_FAMILY_SYSTEM,
+    /**
+     * Weight as a percentage of the face's available range, 0-100. 0 keeps the
+     * design weights, 100 pushes every token to that face's ceiling — so the
+     * same slider position means "as bold as this font goes" regardless of
+     * whether the font tops out at 700 or 900.
+     */
+    val fontWeightBody: Int = FONT_WEIGHT_BODY_DEFAULT,
+    /** Haptics: the app's own vibration is on by default; the system path is opt-in. */
+    val hapticEnabled: Boolean = true,
+    /** Vibration strength, 0-100. */
+    val hapticIntensityPercent: Int = HAPTIC_INTENSITY_DEFAULT,
     val gateOnOpen: Boolean = true,
     val allowScreenshots: Boolean = false,
     val hideCodes: Boolean = false,
@@ -82,6 +99,139 @@ data class AppSettings(
         const val THEME_LIGHT = "light"
         const val THEME_DARK = "dark"
 
+        // ---- text size ----
+        const val FONT_SCALE_PERCENT_MIN = 80
+        const val FONT_SCALE_PERCENT_MAX = 200
+        const val FONT_SCALE_PERCENT_STEP = 5
+        const val FONT_SCALE_PERCENT_DEFAULT = 100
+
+        /**
+         * Ceiling for the combined scale (app percent × system font scale).
+         *
+         * The PIN keypad is a fixed 72dp circle holding a headlineSmall digit:
+         * at 2.0 the 32sp line box is 64dp and still fits, at 2.6 it is 83dp
+         * and clips. The keypad also cannot grow sideways — three 72dp keys
+         * plus gaps already use 232dp of a 360dp screen — so the text has to
+         * stop growing, not the key.
+         */
+        const val FONT_SCALE_MAX_COMPOSITE = 2.0f
+
+        // ---- typeface ----
+        /** Follow the platform font. */
+        const val FONT_FAMILY_SYSTEM = "system"
+        /** The bundled faces; all three ship under the SIL OFL 1.1. */
+        const val FONT_FAMILY_LORA = "lora"
+        const val FONT_FAMILY_LITERATA = "literata"
+
+        /**
+         * Weight slider, as a percentage of each face's available range, so a
+         * given position is the same *visual* idea on every font: 0% = design
+         * weight, 100% = that face's boldest.
+         */
+        /**
+         * Weight slider: the **absolute weight of body text**, snapped to the
+         * files each face ships (400, 500, ... up to that face's ceiling).
+         *
+         * Every slider stop is a real file, so a changed position always means
+         * visibly heavier glyphs — the previous percentage/variable-axis
+         * approach could land between files and look like nothing happened.
+         */
+        const val FONT_WEIGHT_BODY_MIN = 400
+        const val FONT_WEIGHT_BODY_MAX = 900
+        const val FONT_WEIGHT_BODY_STEP = 100
+        const val FONT_WEIGHT_BODY_DEFAULT = 400
+
+        /** Boldest file each bundled face ships; the system font has none. */
+        fun fontWeightCeiling(key: String): Int = when (key) {
+            FONT_FAMILY_LORA -> 700
+            FONT_FAMILY_LITERATA -> 900
+            else -> FONT_WEIGHT_BODY_MIN
+        }
+
+        /** Body weight clamped into what [key] can actually render. */
+        fun clampFontWeightBody(weight: Int, key: String): Int =
+            weight.coerceIn(FONT_WEIGHT_BODY_MIN, fontWeightCeiling(key))
+
+        /**
+         * How far every type token moves: the difference between the chosen
+         * body weight and the design baseline. Tokens keep their relative
+         * order, so a title never ends up lighter than body text.
+         */
+        fun fontWeightDelta(weight: Int, key: String): Int =
+            clampFontWeightBody(weight, key) - FONT_WEIGHT_BODY_MIN
+
+        /** Slider stops for [key], e.g. 400/500/600/700 for Lora. */
+        fun fontWeightStops(key: String): List<Int> {
+            val ceiling = fontWeightCeiling(key)
+            return (FONT_WEIGHT_BODY_MIN..ceiling step FONT_WEIGHT_BODY_STEP).toList()
+        }
+
+        /** Rounds a raw slider value onto [key]'s stop grid. */
+        fun snapFontWeightBody(value: Int, key: String): Int {
+            val stops = fontWeightStops(key)
+            val clamped = value.coerceIn(stops.first(), stops.last())
+            return stops.minByOrNull { kotlin.math.abs(it - clamped) } ?: stops.first()
+        }
+
+        /** Every value the font setting accepts; anything else stores "system". */
+        val FONT_FAMILY_CHOICES = setOf(
+            FONT_FAMILY_SYSTEM,
+            FONT_FAMILY_LORA,
+            FONT_FAMILY_LITERATA
+        )
+
+        // ---- haptics ----
+        const val HAPTIC_INTENSITY_MIN = 0
+        const val HAPTIC_INTENSITY_MAX = 100
+        const val HAPTIC_INTENSITY_STEP = 5
+        const val HAPTIC_INTENSITY_DEFAULT = 60
+
+        /**
+         * Amplitude for [VibrationEffect.createOneShot] on a 1-255 scale.
+         * 0% is 1 (the weakest the platform accepts) — the master switch, not
+         * a zero amplitude, is what turns the feedback off.
+         */
+        fun hapticAmplitude(percent: Int): Int =
+            1 + percent.coerceIn(HAPTIC_INTENSITY_MIN, HAPTIC_INTENSITY_MAX) * 254 / 100
+
+        /**
+         * Tick length: 25-60 ms, longer the stronger the setting.
+         *
+         * 10-20 ms (the first cut) is below what most phones render as a
+         * noticeable buzz — the tick was effectively invisible.
+         */
+        fun hapticDurationMs(percent: Int): Long =
+            25L + percent.coerceIn(HAPTIC_INTENSITY_MIN, HAPTIC_INTENSITY_MAX) * 35L / 100
+
+        /**
+         * Step ids written by the 2.6.2 test builds. Kept so an install that
+         * already picked a step keeps that size after the slider landed.
+         */
+        fun fontScalePercentOfLegacyStep(id: String): Int = when (id) {
+            "small" -> 90
+            "large" -> 115
+            "xlarge" -> 130
+            else -> FONT_SCALE_PERCENT_DEFAULT
+        }
+
+        /**
+         * Percent actually applied on top of [systemFontScale].
+         *
+         * The master switch wins: off means Osmium's own default typography
+         * (1.0) no matter what the slider says. Values at or below 100% are
+         * returned as they are — the user may legitimately want smaller text,
+         * and "100%" must stay exactly the system size even on a ROM whose
+         * scale is above 200%. Larger values are capped so the combined scale
+         * stops at [FONT_SCALE_MAX_COMPOSITE]; past that point they add
+         * nothing rather than shrinking the system's own text.
+         */
+        fun effectiveFontScale(enabled: Boolean, percent: Int, systemFontScale: Float): Float {
+            if (!enabled) return 1f
+            val step = percent.coerceIn(FONT_SCALE_PERCENT_MIN, FONT_SCALE_PERCENT_MAX) / 100f
+            if (step <= 1f) return step
+            return maxOf(1f, minOf(step, FONT_SCALE_MAX_COMPOSITE / systemFontScale))
+        }
+
         const val DESTROY_OFF = "off"
         const val DESTROY_PIN = "destroy_pin"
         const val DESTROY_FAIL_COUNT = "fail_count"
@@ -110,6 +260,14 @@ class SettingsRepository(
 
     private object Keys {
         val THEME_MODE = stringPreferencesKey("theme_mode")
+        /** Legacy step id from the 2.6.2 test builds; read-only fallback. */
+        val FONT_SIZE = stringPreferencesKey("font_size")
+        val FONT_SCALE_PERCENT = intPreferencesKey("font_scale_percent")
+        val FONT_SCALE_ENABLED = booleanPreferencesKey("font_scale_enabled")
+        val FONT_FAMILY = stringPreferencesKey("font_family")
+        val FONT_WEIGHT_BODY = intPreferencesKey("font_weight_body")
+        val HAPTIC_ENABLED = booleanPreferencesKey("haptic_enabled")
+        val HAPTIC_INTENSITY = intPreferencesKey("haptic_intensity_percent")
         val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
         val GATE_ON_OPEN = booleanPreferencesKey("gate_on_open")
         val ALLOW_SCREENSHOTS = booleanPreferencesKey("allow_screenshots")
@@ -154,6 +312,19 @@ class SettingsRepository(
         AppSettings(
             themeMode = prefs[Keys.THEME_MODE] ?: AppSettings.THEME_SYSTEM,
             dynamicColor = prefs[Keys.DYNAMIC_COLOR] ?: true,
+            fontScalePercent = prefs[Keys.FONT_SCALE_PERCENT]
+                ?: prefs[Keys.FONT_SIZE]?.let { AppSettings.fontScalePercentOfLegacyStep(it) }
+                ?: AppSettings.FONT_SCALE_PERCENT_DEFAULT,
+            fontScaleEnabled = prefs[Keys.FONT_SCALE_ENABLED] ?: false,
+            fontFamily = (prefs[Keys.FONT_FAMILY] ?: AppSettings.FONT_FAMILY_SYSTEM)
+                .takeIf { it in AppSettings.FONT_FAMILY_CHOICES }
+                ?: AppSettings.FONT_FAMILY_SYSTEM,
+            fontWeightBody = (prefs[Keys.FONT_WEIGHT_BODY] ?: AppSettings.FONT_WEIGHT_BODY_DEFAULT)
+                .coerceIn(AppSettings.FONT_WEIGHT_BODY_MIN, AppSettings.FONT_WEIGHT_BODY_MAX),
+            hapticEnabled = prefs[Keys.HAPTIC_ENABLED] ?: true,
+            hapticIntensityPercent = (prefs[Keys.HAPTIC_INTENSITY]
+                ?: AppSettings.HAPTIC_INTENSITY_DEFAULT)
+                .coerceIn(AppSettings.HAPTIC_INTENSITY_MIN, AppSettings.HAPTIC_INTENSITY_MAX),
             gateOnOpen = prefs[Keys.GATE_ON_OPEN] ?: true,
             allowScreenshots = prefs[Keys.ALLOW_SCREENSHOTS] ?: false,
             hideCodes = prefs[Keys.HIDE_CODES] ?: false,
@@ -195,6 +366,60 @@ class SettingsRepository(
 
     suspend fun setDynamicColor(enabled: Boolean) {
         context.dataStore.edit { it[Keys.DYNAMIC_COLOR] = enabled }
+    }
+
+    /** Absolute body weight (400-900); clamped, ignored by the platform font. */
+    suspend fun setFontWeightBody(weight: Int) {
+        context.dataStore.edit {
+            it[Keys.FONT_WEIGHT_BODY] = weight.coerceIn(
+                AppSettings.FONT_WEIGHT_BODY_MIN,
+                AppSettings.FONT_WEIGHT_BODY_MAX
+            )
+        }
+    }
+
+    /** One of [AppSettings.FONT_FAMILY_CHOICES]; anything else stores "system". */
+    suspend fun setFontFamily(family: String) {
+        val safe = if (family in AppSettings.FONT_FAMILY_CHOICES) {
+            family
+        } else {
+            AppSettings.FONT_FAMILY_SYSTEM
+        }
+        context.dataStore.edit { it[Keys.FONT_FAMILY] = safe }
+    }
+
+    /** Off restores Osmium's own default typography and locks the slider. */
+    suspend fun setFontScaleEnabled(enabled: Boolean) {
+        context.dataStore.edit { it[Keys.FONT_SCALE_ENABLED] = enabled }
+    }
+
+    /**
+     * The master switch only decides *whether* the app vibrates. "Follow
+     * system" decides the strength, so the two settings never overwrite each
+     * other.
+     */
+    suspend fun setHapticEnabled(enabled: Boolean) {
+        context.dataStore.edit { it[Keys.HAPTIC_ENABLED] = enabled }
+    }
+
+    suspend fun setHapticIntensityPercent(percent: Int) {
+        context.dataStore.edit {
+            it[Keys.HAPTIC_INTENSITY] = percent.coerceIn(
+                AppSettings.HAPTIC_INTENSITY_MIN,
+                AppSettings.HAPTIC_INTENSITY_MAX
+            )
+        }
+    }
+
+    /** Out-of-range values are clamped, not stored. */
+    suspend fun setFontScalePercent(percent: Int) {
+        context.dataStore.edit {
+            it[Keys.FONT_SCALE_PERCENT] =
+                percent.coerceIn(
+                    AppSettings.FONT_SCALE_PERCENT_MIN,
+                    AppSettings.FONT_SCALE_PERCENT_MAX
+                )
+        }
     }
 
     suspend fun setGateOnOpen(enabled: Boolean) {

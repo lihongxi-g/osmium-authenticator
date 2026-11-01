@@ -101,6 +101,16 @@ fun AttributionsScreen(
                 modifier = Modifier.padding(top = 20.dp, bottom = 4.dp)
             )
             AttributionCard(
+                title = "Lora (SIL OFL 1.1)",
+                description = stringResource(R.string.attributions_lora_desc),
+                onClick = { open("https://github.com/cyrealtype/Lora-Cyrillic") }
+            )
+            AttributionCard(
+                title = "Literata (SIL OFL 1.1)",
+                description = stringResource(R.string.attributions_lora_desc),
+                onClick = { open("https://github.com/googlefonts/literata") }
+            )
+            AttributionCard(
                 title = "Android Key Attestation Verifier (Apache-2.0)",
                 description = stringResource(R.string.attributions_keyattestation_desc),
                 onClick = { open("https://github.com/android/keyattestation") }
