@@ -59,9 +59,9 @@ APK 的 SHA-256 校验和见 [v2.6.2 发布说明](release-notes-v2.6.2.md) 及 
 
 Osmium 已上架 F-Droid：**https://f-droid.org/packages/com.safekey.authenticator/**
 
-F-Droid 分发的是开发者自己签名的同一批安装包——配方直接指向 GitHub Release 的 APK 并钉死签名证书，因此 GitHub 版与 F-Droid 版可以互相覆盖升级，不需要卸载重装。对 2FA 应用来说这点很关键：卸载意味着本地账户全丢。
+F-Droid 用同一份源码构建、并使用同一张签名证书（配方钉死了签名密钥），所以两边是同一个应用：在两个渠道之间切换属于覆盖升级，不用卸载——对 2FA 应用来说这点很关键，卸载意味着本地账户全丢。需要注意两边版本号规则不同：GitHub 用下表里的 versionCode（2.6.2 为 821–823），F-Droid 自己推导一套（2.6.1 为 791–793），GitHub 的号更高。因此从 F-Droid 换到 GitHub 是升级；反向换回去要等 F-Droid 那边的构建追上来。
 
-F-Droid 的索引按它自己的节奏刷新，新版本可能要几天才会出现；[包页面](https://f-droid.org/packages/com.safekey.authenticator/)上显示的就是当前真正能安装的版本。
+F-Droid 的索引按它自己的节奏刷新，新版本可能要几天才会出现；[包页面](https://f-droid.org/packages/com.safekey.authenticator/)上显示的就是当前真正能安装的版本——截至目前是 **2.6.1**。
 
 ## 隐私与条款
 

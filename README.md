@@ -59,9 +59,9 @@ APK SHA-256 checksums are listed in the [v2.6.2 release notes](release-notes-v2.
 
 Osmium is on F-Droid: **https://f-droid.org/packages/com.safekey.authenticator/**
 
-F-Droid ships the same builds the developer signs — the recipe points at the GitHub Release APKs and pins the signing certificate — so the GitHub and F-Droid versions can replace each other without uninstalling. For a 2FA app that matters: uninstalling deletes every local account.
+F-Droid builds from the same source and signs with the same certificate as the GitHub release (the recipe pins the signing key), so the two are the same app — moving between them is an in-place update, and for a 2FA app that matters because uninstalling deletes every local account. Note that the two channels number their versions differently: GitHub uses the versionCode below (821–823 for 2.6.2), F-Droid derives its own (791–793 for 2.6.1), and the GitHub number is the higher one. Switching from F-Droid to GitHub therefore upgrades; switching back to F-Droid waits until an F-Droid build catches up.
 
-F-Droid's index refreshes on its own schedule, so a brand-new release can take a few days to appear there; the [package page](https://f-droid.org/packages/com.safekey.authenticator/) always shows the version actually installable right now.
+F-Droid's index refreshes on its own schedule, so a brand-new release can take a few days to appear there; the [package page](https://f-droid.org/packages/com.safekey.authenticator/) always shows the version actually installable right now. As of this release it offers **2.6.1**.
 
 ## Privacy & Terms
 
