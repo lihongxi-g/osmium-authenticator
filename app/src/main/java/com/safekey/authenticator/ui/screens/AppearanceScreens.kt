@@ -225,9 +225,7 @@ fun FontFamilySettingsScreen(
                 .padding(horizontal = 8.dp)
         ) {
             FONT_CHOICES.forEach { choice ->
-                val preview = remember(choice.key, settings.fontWeightPercent) {
-                    interfaceFontFamily(choice.key, settings.fontWeightPercent)
-                }
+                val preview = remember(choice.key) { interfaceFontFamily(choice.key) }
                 FontChoiceRow(
                     title = stringResource(choice.nameRes),
                     sample = sample,

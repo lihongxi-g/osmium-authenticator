@@ -12,7 +12,7 @@ class FontWeightTest {
         assertEquals(700, AppSettings.fontWeightCeiling(AppSettings.FONT_FAMILY_LORA))
         assertEquals(800, AppSettings.fontWeightCeiling(AppSettings.FONT_FAMILY_MANROPE))
         assertEquals(900, AppSettings.fontWeightCeiling(AppSettings.FONT_FAMILY_LITERATA))
-        assertEquals(900, AppSettings.fontWeightCeiling(AppSettings.FONT_FAMILY_HAN_SERIF))
+        assertEquals(700, AppSettings.fontWeightCeiling(AppSettings.FONT_FAMILY_HAN_SERIF))
         assertEquals(400, AppSettings.fontWeightCeiling(AppSettings.FONT_FAMILY_SYSTEM))
     }
 
@@ -30,6 +30,14 @@ class FontWeightTest {
         listOf(700, 800, 900).forEach { ceiling ->
             assertEquals(ceiling, AppSettings.bodyWeightAt(100, ceiling))
             assertEquals(ceiling, AppSettings.fontWeightAt(600, 100, ceiling))
+        }
+    }
+
+    @Test
+    fun `delta is zero at rest and reaches the ceiling at full`() {
+        listOf(700, 800, 900).forEach { ceiling ->
+            assertEquals(0, AppSettings.fontWeightDelta(0, ceiling))
+            assertEquals(ceiling - 400, AppSettings.fontWeightDelta(100, ceiling))
         }
     }
 

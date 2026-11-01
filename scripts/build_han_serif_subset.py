@@ -25,6 +25,7 @@ import urllib.request
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "app/src/main/res/font/hanserif.ttf")
+OUT_BOLD = os.path.join(ROOT, "app/src/main/res/font/hanserif_bold.ttf")
 RES = os.path.join(ROOT, "app/src/main/res")
 UPSTREAM = "https://raw.githubusercontent.com/google/fonts/main/ofl/notoserifsc/NotoSerifSC%5Bwght%5D.ttf"
 
@@ -105,13 +106,20 @@ def main() -> int:
         # font's own default is Regular 400. If a platform ever ignores the
         # variation settings, the text still renders at a normal weight instead
         # of hairline-thin.
-        print("pinning wght default to 400 (400:900)")
+        # Ship fixed instances instead of a variable file: axis settings were
+        # silently ignored by the platform, so the weight slider did nothing.
+        print("instancing wght=400 (regular) and wght=700 (bold)")
         subprocess.run([
             sys.executable, "-m", "fontTools.varLib.instancer", subset,
-            "wght=400:900", "-o", OUT,
+            "wght=400", "-o", OUT,
+        ], check=True)
+        subprocess.run([
+            sys.executable, "-m", "fontTools.varLib.instancer", subset,
+            "wght=700", "-o", OUT_BOLD,
         ], check=True)
 
-    print(f"done: {os.path.getsize(OUT) / 1024 / 1024:.2f} MB")
+    print(f"done: {os.path.getsize(OUT) / 1024 / 1024:.2f} MB regular, "
+          f"{os.path.getsize(OUT_BOLD) / 1024 / 1024:.2f} MB bold")
     return 0
 
 

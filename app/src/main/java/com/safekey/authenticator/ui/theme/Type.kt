@@ -1,12 +1,10 @@
 package com.safekey.authenticator.ui.theme
 
 import androidx.compose.material3.Typography
-import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
@@ -17,44 +15,49 @@ import com.safekey.authenticator.data.AppSettings
 /** Monospace font for verification codes. */
 val monospaceFamily = FontFamily.Monospace
 
-@OptIn(ExperimentalTextApi::class)
-private fun variableFamily(resId: Int, ceiling: Int, percent: Int): FontFamily {
-    fun settingsFor(base: Int): FontVariation.Settings {
-        val weight = AppSettings.fontWeightAt(base, percent, ceiling)
-        return FontVariation.Settings(FontVariation.weight(weight))
-    }
-
-    // Every weight is bound explicitly: Manrope and Noto Serif SC both default
-    // to their ExtraLight instance, so a plain file binding would render the
-    // whole interface hairline-thin.
-    return FontFamily(
-        Font(resId, weight = FontWeight.Normal, variationSettings = settingsFor(400)),
-        Font(resId, weight = FontWeight.Medium, variationSettings = settingsFor(500)),
-        Font(resId, weight = FontWeight.SemiBold, variationSettings = settingsFor(600)),
-        Font(resId, weight = FontWeight.Bold, variationSettings = settingsFor(700))
-    )
-}
-
 /**
- * Stored setting key -> typeface, thickened by [percent] of that face's range.
+ * The bundled faces ship as **static instances**, one file per weight.
  *
- * The bundled faces are variable fonts but they do not share a ceiling (Lora
- * tops out at 700, Manrope at 800, Literata and Noto Serif SC at 900), so the
- * percentage is resolved per font: 100% always means "as bold as this face
- * goes". The platform font is not variable, so it ignores the setting.
+ * Earlier revisions used the variable files and bound each weight through
+ * `FontVariation` settings. That silently does nothing here: with Noto Serif
+ * SC's default instance being ExtraLight, the interface rendered hairline-thin
+ * even with 400 requested, which proves the axis settings never reached the
+ * platform. Shipping fixed instances removes the whole question — Compose picks
+ * a file by weight and cannot fall back to "ignore the axis".
  *
- * Callers should `remember` the result: a new FontFamily instance per
- * recomposition would defeat Compose's text caching.
+ * The slider then moves the *type tokens* (see [withWeightDelta]) rather than a
+ * font axis, so the effect is the same on every face.
  */
-fun interfaceFontFamily(key: String, percent: Int = 0): FontFamily = when (key) {
-    AppSettings.FONT_FAMILY_LORA ->
-        variableFamily(R.font.lora, AppSettings.fontWeightCeiling(key), percent)
-    AppSettings.FONT_FAMILY_MANROPE ->
-        variableFamily(R.font.manrope, AppSettings.fontWeightCeiling(key), percent)
-    AppSettings.FONT_FAMILY_LITERATA ->
-        variableFamily(R.font.literata, AppSettings.fontWeightCeiling(key), percent)
-    AppSettings.FONT_FAMILY_HAN_SERIF ->
-        variableFamily(R.font.hanserif, AppSettings.fontWeightCeiling(key), percent)
+val LoraFamily: FontFamily = FontFamily(
+    Font(R.font.lora, weight = FontWeight.Normal),
+    Font(R.font.lora_semibold, weight = FontWeight.SemiBold),
+    Font(R.font.lora_bold, weight = FontWeight.Bold)
+)
+
+val ManropeFamily: FontFamily = FontFamily(
+    Font(R.font.manrope, weight = FontWeight.Normal),
+    Font(R.font.manrope_semibold, weight = FontWeight.SemiBold),
+    Font(R.font.manrope_extrabold, weight = FontWeight.ExtraBold)
+)
+
+val LiterataFamily: FontFamily = FontFamily(
+    Font(R.font.literata, weight = FontWeight.Normal),
+    Font(R.font.literata_semibold, weight = FontWeight.SemiBold),
+    Font(R.font.literata_black, weight = FontWeight.Black)
+)
+
+/** Noto Serif SC / 思源宋体 — regular + bold; heavier requests synthesise. */
+val HanSerifFamily: FontFamily = FontFamily(
+    Font(R.font.hanserif, weight = FontWeight.Normal),
+    Font(R.font.hanserif_bold, weight = FontWeight.Bold)
+)
+
+/** Stored setting key -> typeface. Unknown keys mean the system font. */
+fun interfaceFontFamily(key: String): FontFamily = when (key) {
+    AppSettings.FONT_FAMILY_LORA -> LoraFamily
+    AppSettings.FONT_FAMILY_MANROPE -> ManropeFamily
+    AppSettings.FONT_FAMILY_LITERATA -> LiterataFamily
+    AppSettings.FONT_FAMILY_HAN_SERIF -> HanSerifFamily
     else -> FontFamily.Default
 }
 
@@ -179,6 +182,40 @@ private fun TextUnit.scaledBy(scale: Float): TextUnit =
  * Only the typeface changes: sizes, weights and letter spacing are the ones
  * the design already uses, so switching the font cannot shift the layout.
  */
+/**
+ * Every token's weight raised by [delta] (clamped to 100-900).
+ *
+ * This is what the weight slider drives. Tokens keep their relative order, so
+ * body text never overtakes a title, and because the faces ship fixed weight
+ * files the change always lands on real glyphs.
+ */
+internal fun Typography.withWeightDelta(delta: Int): Typography {
+    if (delta == 0) return this
+
+    fun TextStyle.heavier(): TextStyle {
+        val base = (fontWeight ?: FontWeight.Normal).weight
+        return copy(fontWeight = FontWeight((base + delta).coerceIn(100, 900)))
+    }
+
+    return Typography(
+        displayLarge = displayLarge.heavier(),
+        displayMedium = displayMedium.heavier(),
+        displaySmall = displaySmall.heavier(),
+        headlineLarge = headlineLarge.heavier(),
+        headlineMedium = headlineMedium.heavier(),
+        headlineSmall = headlineSmall.heavier(),
+        titleLarge = titleLarge.heavier(),
+        titleMedium = titleMedium.heavier(),
+        titleSmall = titleSmall.heavier(),
+        bodyLarge = bodyLarge.heavier(),
+        bodyMedium = bodyMedium.heavier(),
+        bodySmall = bodySmall.heavier(),
+        labelLarge = labelLarge.heavier(),
+        labelMedium = labelMedium.heavier(),
+        labelSmall = labelSmall.heavier()
+    )
+}
+
 internal fun Typography.withFamily(family: FontFamily): Typography {
     if (family == FontFamily.Default) return this
 

@@ -142,9 +142,15 @@ data class AppSettings(
         fun fontWeightCeiling(key: String): Int = when (key) {
             FONT_FAMILY_LORA -> 700
             FONT_FAMILY_MANROPE -> 800
-            FONT_FAMILY_LITERATA, FONT_FAMILY_HAN_SERIF -> 900
+            FONT_FAMILY_LITERATA -> 900
+            // Regular + Bold files; anything heavier is synthesised.
+            FONT_FAMILY_HAN_SERIF -> 700
             else -> 400
         }
+
+        /** How much the slider adds to every token at [percent] of [ceiling]. */
+        fun fontWeightDelta(percent: Int, ceiling: Int): Int =
+            bodyWeightAt(percent, ceiling) - FONT_WEIGHT_PERCENT_BASE
 
         /**
          * Weight for one type token at [percent] of [ceiling].
