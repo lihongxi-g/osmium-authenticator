@@ -638,6 +638,13 @@
     <string name="font_size_enable">Tamaño de texto personalizado</string>
     <string name="font_size_enable_desc">Desactivado: vuelve al tamaño de texto predeterminado de Osmium y el control queda bloqueado</string>
     <string name="font_size_off">Desactivado</string>
+    <string name="font_family_title">Tipografía</string>
+    <string name="font_family_desc">Tipografía de la interfaz</string>
+    <string name="font_family_system">Predeterminada del sistema</string>
+    <string name="font_family_lora">Lora</string>
+    <string name="font_family_sample">Aa Bb Cc 0123</string>
+    <string name="font_family_note">Lora se incluye sin modificar bajo la SIL Open Font License 1.1 y cubre latín, cirílico y griego; otros alfabetos usan la fuente del sistema.</string>
+    <string name="attributions_lora_desc">Tipografía serif de la interfaz, incluida sin modificar bajo la SIL Open Font License 1.1 (el texto de la licencia va en la app).</string>
     <string name="haptic_title">Vibración</string>
     <string name="haptic_desc">Una vibración corta al tocar botones y otros controles</string>
     <string name="haptic_intensity">Intensidad</string>

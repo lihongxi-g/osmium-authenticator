@@ -764,6 +764,9 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch { settingsRepo.setFontScalePercent(percent) }
     fun setFontScaleEnabled(enabled: Boolean) =
         viewModelScope.launch { settingsRepo.setFontScaleEnabled(enabled) }
+    fun setFontFamily(family: String) =
+        viewModelScope.launch { settingsRepo.setFontFamily(family) }
+
     fun setHapticEnabled(enabled: Boolean) =
         viewModelScope.launch { settingsRepo.setHapticEnabled(enabled) }
     fun setHapticIntensityPercent(percent: Int) =

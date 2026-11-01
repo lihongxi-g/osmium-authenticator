@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontFamily
 import com.safekey.authenticator.data.AppSettings
 
 // Fallback palette (no Dynamic Color support, i.e. Android < 12):
@@ -45,6 +46,7 @@ fun SafeKeyTheme(
     dynamicColor: Boolean,
     fontScaleEnabled: Boolean = false,
     fontScalePercent: Int = AppSettings.FONT_SCALE_PERCENT_DEFAULT,
+    fontFamily: String = AppSettings.FONT_FAMILY_SYSTEM,
     hapticEnabled: Boolean = true,
     hapticIntensityPercent: Int = AppSettings.HAPTIC_INTENSITY_DEFAULT,
     content: @Composable () -> Unit
@@ -71,7 +73,11 @@ fun SafeKeyTheme(
     val fontScale = remember(fontScaleEnabled, fontScalePercent, systemFontScale) {
         AppSettings.effectiveFontScale(fontScaleEnabled, fontScalePercent, systemFontScale)
     }
-    val typography = remember(fontScale) { AppTypography.scaledTo(fontScale) }
+    val typeface =
+        if (fontFamily == AppSettings.FONT_FAMILY_LORA) LoraFamily else FontFamily.Default
+    val typography = remember(fontScale, typeface) {
+        AppTypography.scaledTo(fontScale).withFamily(typeface)
+    }
     val hapticTick = rememberHapticTick(hapticEnabled, hapticIntensityPercent)
     val latestTick = rememberUpdatedState(hapticTick)
 

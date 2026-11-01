@@ -33,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.safekey.authenticator.MainViewModel
@@ -44,6 +45,7 @@ import com.safekey.authenticator.ui.components.SettingRow
 import com.safekey.authenticator.ui.components.SimpleTopBar
 import com.safekey.authenticator.ui.navigation.Screen
 import com.safekey.authenticator.ui.theme.AppTypography
+import com.safekey.authenticator.ui.theme.LoraFamily
 import com.safekey.authenticator.ui.theme.LocalFontScale
 import com.safekey.authenticator.ui.theme.monospaceFamily
 import com.safekey.authenticator.ui.theme.previewHaptic
@@ -101,6 +103,24 @@ fun AppearanceSettingsScreen(
                     )
                 },
                 onClick = { vm.nav.push(Screen.ThemeSettings) }
+            )
+
+            if ("fontFamily" !in hiddenFeatures) SettingRow(
+                icon = AppIcons.TextFields,
+                title = stringResource(R.string.font_family_title),
+                description = stringResource(R.string.font_family_desc),
+                trailing = {
+                    Text(
+                        text = if (settings.fontFamily == AppSettings.FONT_FAMILY_LORA) {
+                            stringResource(R.string.font_family_lora)
+                        } else {
+                            stringResource(R.string.font_family_system)
+                        },
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
+                onClick = { vm.nav.push(Screen.FontFamilySettings) }
             )
 
             if ("fontSize" !in hiddenFeatures) SettingRow(
@@ -173,6 +193,87 @@ fun AppearanceSettingsScreen(
                 onClick = { vm.nav.push(Screen.LanguageSettings) }
             )
         }
+    }
+}
+
+/**
+ * Third-level settings page: interface typeface.
+ *
+ * Plain rows, no cards. Each option is drawn in the font it names, so the
+ * difference is visible before it is applied.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FontFamilySettingsScreen(
+    vm: MainViewModel,
+    onBack: () -> Unit
+) {
+    val settings by vm.settings.collectAsState()
+    val sample = stringResource(R.string.font_family_sample)
+
+    Scaffold(
+        topBar = { SimpleTopBar(title = stringResource(R.string.font_family_title), onBack = onBack) }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 8.dp)
+        ) {
+            FontChoiceRow(
+                title = stringResource(R.string.font_family_system),
+                sample = sample,
+                selected = settings.fontFamily != AppSettings.FONT_FAMILY_LORA,
+                family = FontFamily.Default,
+                onClick = { vm.setFontFamily(AppSettings.FONT_FAMILY_SYSTEM) }
+            )
+            FontChoiceRow(
+                title = stringResource(R.string.font_family_lora),
+                sample = sample,
+                selected = settings.fontFamily == AppSettings.FONT_FAMILY_LORA,
+                family = LoraFamily,
+                onClick = { vm.setFontFamily(AppSettings.FONT_FAMILY_LORA) }
+            )
+            Text(
+                text = stringResource(R.string.font_family_note),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp)
+            )
+        }
+    }
+}
+
+/** One selectable typeface, previewed in its own face. */
+@Composable
+private fun FontChoiceRow(
+    title: String,
+    sample: String,
+    selected: Boolean,
+    family: FontFamily,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge.copy(fontFamily = family),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = sample,
+                style = MaterialTheme.typography.bodyMedium.copy(fontFamily = family),
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        RadioButton(selected = selected, onClick = onClick)
     }
 }
 

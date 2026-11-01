@@ -61,7 +61,8 @@ import com.safekey.authenticator.ui.navigation.Screen
  * Developer-mode ids that live on the appearance page. The main list shows the
  * single entry row as long as at least one of them is still visible.
  */
-private val APPEARANCE_FEATURES = listOf("theme", "fontSize", "haptic", "sort", "tags", "language")
+private val APPEARANCE_FEATURES =
+    listOf("theme", "fontFamily", "fontSize", "haptic", "sort", "tags", "language")
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

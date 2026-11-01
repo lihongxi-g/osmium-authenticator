@@ -3,14 +3,30 @@ package com.safekey.authenticator.ui.theme
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.sp
+import com.safekey.authenticator.R
 
 /** Monospace font for verification codes. */
 val monospaceFamily = FontFamily.Monospace
+
+/**
+ * Lora (SIL Open Font License 1.1) — the optional serif interface font.
+ *
+ * One variable file covers 400-700. Lora ships Latin, Cyrillic and Greek only,
+ * so CJK, Devanagari and Hangul text falls back to the system font glyph by
+ * glyph — that is expected, not a bundling mistake.
+ */
+val LoraFamily: FontFamily = FontFamily(
+    Font(R.font.lora, weight = FontWeight.Normal),
+    Font(R.font.lora, weight = FontWeight.Medium),
+    Font(R.font.lora, weight = FontWeight.SemiBold),
+    Font(R.font.lora, weight = FontWeight.Bold)
+)
 
 val AppTypography = Typography(
     headlineSmall = TextStyle(
@@ -126,3 +142,33 @@ internal fun Typography.scaledTo(scale: Float): Typography {
 
 private fun TextUnit.scaledBy(scale: Float): TextUnit =
     if (type == TextUnitType.Sp) this * scale else this
+
+/**
+ * The same type tokens rendered in [family].
+ *
+ * Only the typeface changes: sizes, weights and letter spacing are the ones
+ * the design already uses, so switching the font cannot shift the layout.
+ */
+internal fun Typography.withFamily(family: FontFamily): Typography {
+    if (family == FontFamily.Default) return this
+
+    fun TextStyle.inFamily(): TextStyle = copy(fontFamily = family)
+
+    return Typography(
+        displayLarge = displayLarge.inFamily(),
+        displayMedium = displayMedium.inFamily(),
+        displaySmall = displaySmall.inFamily(),
+        headlineLarge = headlineLarge.inFamily(),
+        headlineMedium = headlineMedium.inFamily(),
+        headlineSmall = headlineSmall.inFamily(),
+        titleLarge = titleLarge.inFamily(),
+        titleMedium = titleMedium.inFamily(),
+        titleSmall = titleSmall.inFamily(),
+        bodyLarge = bodyLarge.inFamily(),
+        bodyMedium = bodyMedium.inFamily(),
+        bodySmall = bodySmall.inFamily(),
+        labelLarge = labelLarge.inFamily(),
+        labelMedium = labelMedium.inFamily(),
+        labelSmall = labelSmall.inFamily()
+    )
+}

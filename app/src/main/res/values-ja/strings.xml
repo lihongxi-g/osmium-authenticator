@@ -638,6 +638,13 @@
     <string name="font_size_enable">文字サイズをカスタマイズ</string>
     <string name="font_size_enable_desc">オフにすると Osmium 既定の文字サイズに戻り、スライダーは調整できません</string>
     <string name="font_size_off">オフ</string>
+    <string name="font_family_title">フォント</string>
+    <string name="font_family_desc">インターフェースの書体</string>
+    <string name="font_family_system">システム標準</string>
+    <string name="font_family_lora">Lora</string>
+    <string name="font_family_sample">Aa Bb Cc 0123</string>
+    <string name="font_family_note">Lora は SIL Open Font License 1.1 の下で改変せずに同梱しています。ラテン文字・キリル文字・ギリシャ文字に対応し、それ以外はシステムフォントで表示されます。</string>
+    <string name="attributions_lora_desc">セリフ体のインターフェース書体。SIL Open Font License 1.1 の下で改変せず同梱（ライセンス全文はアプリ内に収録）。</string>
     <string name="haptic_title">振動フィードバック</string>
     <string name="haptic_desc">ボタンなどの操作時に短く振動します</string>
     <string name="haptic_intensity">強さ</string>

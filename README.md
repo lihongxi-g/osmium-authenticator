@@ -82,3 +82,6 @@ The device-integrity feature embeds a pinned, source-level copy of Google's [and
 ## License
 
 GPL-3.0-or-later. See [LICENSE](LICENSE) or [COPYING](COPYING).
+
+The optional interface font, **Lora**, is bundled unmodified under the SIL Open
+Font License 1.1; see [THIRD-PARTY-FONTS.md](THIRD-PARTY-FONTS.md).

@@ -88,6 +88,7 @@ import com.safekey.authenticator.notify.BackupNotifier
 import com.safekey.authenticator.ui.navigation.isRootBlocked
 import com.safekey.authenticator.ui.screens.AboutScreen
 import com.safekey.authenticator.ui.screens.AppearanceSettingsScreen
+import com.safekey.authenticator.ui.screens.FontFamilySettingsScreen
 import com.safekey.authenticator.ui.screens.PermissionsScreen
 import com.safekey.authenticator.ui.screens.DeveloperScreen
 import com.safekey.authenticator.ui.screens.AccountFormScreen
@@ -271,6 +272,7 @@ class MainActivity : FragmentActivity() {
                 dynamicColor = settings.dynamicColor,
                 fontScaleEnabled = settings.fontScaleEnabled,
                 fontScalePercent = settings.fontScalePercent,
+                fontFamily = settings.fontFamily,
                 hapticEnabled = settings.hapticEnabled,
                 hapticIntensityPercent = settings.hapticIntensityPercent
             ) {
@@ -1322,6 +1324,11 @@ private fun IntegrityNoticeDialog(
                     is Screen.ThemeSettings -> ThemeSettingsScreen(
                         vm = vm,
                         hiddenFeatures = vm.settings.value.devHiddenFeatures,
+                        onBack = { vm.nav.pop() }
+                    )
+
+                    is Screen.FontFamilySettings -> FontFamilySettingsScreen(
+                        vm = vm,
                         onBack = { vm.nav.pop() }
                     )
 

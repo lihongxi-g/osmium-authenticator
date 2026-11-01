@@ -663,6 +663,7 @@ fun DeveloperScreen(
 private val HIDEABLE_ITEMS: List<Pair<String, Int>> = listOf(
     "theme" to R.string.theme_mode,
     "dynamicColor" to R.string.dynamic_color,
+    "fontFamily" to R.string.font_family_title,
     "fontSize" to R.string.font_size_title,
     "haptic" to R.string.haptic_title,
     "sort" to R.string.sort_mode,

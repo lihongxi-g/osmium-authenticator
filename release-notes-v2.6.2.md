@@ -60,6 +60,13 @@ This release adds a text-size setting with a free 80%–200% slider, and fixes s
 - Releasing the intensity slider fires one tick at the new strength, so it can be felt while adjusting.
 - The ripple is untouched: the tick is layered over the same indication the app already used.
 
+### New: Lora as an optional interface font
+
+- Settings → Appearance → **Font** offers the **system default** or **Lora**, a serif face. Each row is previewed in its own typeface; the default stays the system font, and switching never restarts the app.
+- Only the typeface changes — sizes, weights and letter spacing are untouched, so no layout moves when the font switches. Verification codes keep their monospace face, so the digits stay evenly spaced and easy to read out.
+- Lora ships Latin, Cyrillic and Greek; Chinese, Japanese, Korean and Hindi text keeps rendering in the system font glyph by glyph. That is the font's coverage, not a bug.
+- **License compliance:** Lora is bundled byte-for-byte as published, under the SIL Open Font License 1.1. The full license text and the upstream FONTLOG travel inside the APK (`assets/licenses/`), the attribution is listed in Settings → About → Attributions, and the repository documents it in `THIRD-PARTY-FONTS.md`. No new permissions, no new dependency.
+
 ### Settings: appearance is one page now
 
 - The main settings list had six appearance rows (theme, text size, vibration, sort order, tags, language). It now has a single **Appearance** row showing the current theme; opening it lists all six, and each of those opens the page that adjusts it.
@@ -79,5 +86,5 @@ This release adds a text-size setting with a free 80%–200% slider, and fixes s
 
 ### Other
 
-- 5 new UI strings, added in all 11 languages.
+- 23 new UI strings, added in all 11 languages.
 - No new permissions, no third-party SDKs, no data collection.

@@ -638,6 +638,13 @@
     <string name="font_size_enable">Eigene Textgröße</string>
     <string name="font_size_enable_desc">Aus: Osmium nutzt wieder die Standardtextgröße, der Regler ist gesperrt</string>
     <string name="font_size_off">Aus</string>
+    <string name="font_family_title">Schrift</string>
+    <string name="font_family_desc">Schriftart der Oberfläche</string>
+    <string name="font_family_system">Systemstandard</string>
+    <string name="font_family_lora">Lora</string>
+    <string name="font_family_sample">Aa Bb Cc 0123</string>
+    <string name="font_family_note">Lora ist unverändert unter der SIL Open Font License 1.1 enthalten und deckt Latein, Kyrillisch und Griechisch ab; andere Schriften nutzen die Systemschrift.</string>
+    <string name="attributions_lora_desc">Serifen-Schriftart der Oberfläche, unverändert unter der SIL Open Font License 1.1 enthalten (Lizenztext in der App).</string>
     <string name="haptic_title">Vibrationsfeedback</string>
     <string name="haptic_desc">Ein kurzer Impuls beim Tippen auf Schaltflächen und andere Bedienelemente</string>
     <string name="haptic_intensity">Intensität</string>

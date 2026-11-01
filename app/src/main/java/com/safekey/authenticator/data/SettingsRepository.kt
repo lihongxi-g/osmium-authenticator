@@ -22,6 +22,8 @@ data class AppSettings(
     val fontScalePercent: Int = FONT_SCALE_PERCENT_DEFAULT,
     /** Master switch: off means Osmium's own default size, slider locked. */
     val fontScaleEnabled: Boolean = false,
+    /** Interface typeface: the platform font or the bundled Lora serif. */
+    val fontFamily: String = FONT_FAMILY_SYSTEM,
     /** Haptics: the app's own vibration is on by default; the system path is opt-in. */
     val hapticEnabled: Boolean = true,
     /** Vibration strength, 0-100. */
@@ -107,6 +109,12 @@ data class AppSettings(
          */
         const val FONT_SCALE_MAX_COMPOSITE = 2.0f
 
+        // ---- typeface ----
+        /** Follow the platform font. */
+        const val FONT_FAMILY_SYSTEM = "system"
+        /** The bundled Lora serif. */
+        const val FONT_FAMILY_LORA = "lora"
+
         // ---- haptics ----
         const val HAPTIC_INTENSITY_MIN = 0
         const val HAPTIC_INTENSITY_MAX = 100
@@ -191,6 +199,7 @@ class SettingsRepository(
         val FONT_SIZE = stringPreferencesKey("font_size")
         val FONT_SCALE_PERCENT = intPreferencesKey("font_scale_percent")
         val FONT_SCALE_ENABLED = booleanPreferencesKey("font_scale_enabled")
+        val FONT_FAMILY = stringPreferencesKey("font_family")
         val HAPTIC_ENABLED = booleanPreferencesKey("haptic_enabled")
         val HAPTIC_INTENSITY = intPreferencesKey("haptic_intensity_percent")
         val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
@@ -241,6 +250,7 @@ class SettingsRepository(
                 ?: prefs[Keys.FONT_SIZE]?.let { AppSettings.fontScalePercentOfLegacyStep(it) }
                 ?: AppSettings.FONT_SCALE_PERCENT_DEFAULT,
             fontScaleEnabled = prefs[Keys.FONT_SCALE_ENABLED] ?: false,
+            fontFamily = prefs[Keys.FONT_FAMILY] ?: AppSettings.FONT_FAMILY_SYSTEM,
             hapticEnabled = prefs[Keys.HAPTIC_ENABLED] ?: true,
             hapticIntensityPercent = (prefs[Keys.HAPTIC_INTENSITY]
                 ?: AppSettings.HAPTIC_INTENSITY_DEFAULT)
@@ -286,6 +296,16 @@ class SettingsRepository(
 
     suspend fun setDynamicColor(enabled: Boolean) {
         context.dataStore.edit { it[Keys.DYNAMIC_COLOR] = enabled }
+    }
+
+    /** "system" or "lora"; anything else falls back to the platform font. */
+    suspend fun setFontFamily(family: String) {
+        val safe = if (family == AppSettings.FONT_FAMILY_LORA) {
+            AppSettings.FONT_FAMILY_LORA
+        } else {
+            AppSettings.FONT_FAMILY_SYSTEM
+        }
+        context.dataStore.edit { it[Keys.FONT_FAMILY] = safe }
     }
 
     /** Off restores Osmium's own default typography and locks the slider. */
