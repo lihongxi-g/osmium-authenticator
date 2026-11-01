@@ -18,9 +18,9 @@ import com.safekey.authenticator.data.AppSettings
 val monospaceFamily = FontFamily.Monospace
 
 @OptIn(ExperimentalTextApi::class)
-private fun variableFamily(resId: Int, maxWeight: Int, boost: Int): FontFamily {
+private fun variableFamily(resId: Int, ceiling: Int, percent: Int): FontFamily {
     fun settingsFor(base: Int): FontVariation.Settings {
-        val weight = (base + boost).coerceIn(100, maxWeight)
+        val weight = AppSettings.fontWeightAt(base, percent, ceiling)
         return FontVariation.Settings(FontVariation.weight(weight))
     }
 
@@ -36,20 +36,25 @@ private fun variableFamily(resId: Int, maxWeight: Int, boost: Int): FontFamily {
 }
 
 /**
- * Stored setting key -> typeface, with [boost] added to every weight.
+ * Stored setting key -> typeface, thickened by [percent] of that face's range.
  *
- * The bundled faces are variable fonts, so a boost of 0-150 thickens the whole
- * interface without swapping files. The platform font is not variable, so it
- * ignores the boost. Unknown keys mean the system font.
+ * The bundled faces are variable fonts but they do not share a ceiling (Lora
+ * tops out at 700, Manrope at 800, Literata and Noto Serif SC at 900), so the
+ * percentage is resolved per font: 100% always means "as bold as this face
+ * goes". The platform font is not variable, so it ignores the setting.
  *
  * Callers should `remember` the result: a new FontFamily instance per
  * recomposition would defeat Compose's text caching.
  */
-fun interfaceFontFamily(key: String, boost: Int = 0): FontFamily = when (key) {
-    AppSettings.FONT_FAMILY_LORA -> variableFamily(R.font.lora, 700, boost)
-    AppSettings.FONT_FAMILY_MANROPE -> variableFamily(R.font.manrope, 800, boost)
-    AppSettings.FONT_FAMILY_LITERATA -> variableFamily(R.font.literata, 900, boost)
-    AppSettings.FONT_FAMILY_HAN_SERIF -> variableFamily(R.font.hanserif, 900, boost)
+fun interfaceFontFamily(key: String, percent: Int = 0): FontFamily = when (key) {
+    AppSettings.FONT_FAMILY_LORA ->
+        variableFamily(R.font.lora, AppSettings.fontWeightCeiling(key), percent)
+    AppSettings.FONT_FAMILY_MANROPE ->
+        variableFamily(R.font.manrope, AppSettings.fontWeightCeiling(key), percent)
+    AppSettings.FONT_FAMILY_LITERATA ->
+        variableFamily(R.font.literata, AppSettings.fontWeightCeiling(key), percent)
+    AppSettings.FONT_FAMILY_HAN_SERIF ->
+        variableFamily(R.font.hanserif, AppSettings.fontWeightCeiling(key), percent)
     else -> FontFamily.Default
 }
 

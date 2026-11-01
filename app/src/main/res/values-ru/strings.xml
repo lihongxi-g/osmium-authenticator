@@ -655,7 +655,7 @@
     <string name="font_cover_han">Китайский</string>
     <string name="font_family_sample">Aa Bb Cc 0123</string>
     <string name="font_weight_title">Насыщенность</string>
-    <string name="font_weight_desc">Более жирный текст; предел зависит от шрифта</string>
+    <string name="font_weight_desc">Доля доступной насыщенности: 100 % — максимум для этого шрифта, и у каждого шрифта свой предел</string>
     <string name="font_weight_system_hint">Поддерживают только встроенные шрифты; системный остаётся как есть</string>
     <string name="font_family_note">Lora включён без изменений по лицензии SIL Open Font License 1.1 и покрывает латиницу и кириллицу; китайский, японский, корейский и хинди отображаются системным шрифтом.</string>
     <string name="attributions_lora_desc">Шрифт интерфейса с засечками, включён без изменений по SIL Open Font License 1.1 (текст лицензии в приложении).</string>

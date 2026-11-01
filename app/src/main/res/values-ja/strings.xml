@@ -655,7 +655,7 @@
     <string name="font_cover_han">中国語</string>
     <string name="font_family_sample">Aa Bb Cc 0123</string>
     <string name="font_weight_title">太さ</string>
-    <string name="font_weight_desc">太くします。上限はフォントによります</string>
+    <string name="font_weight_desc">このフォントが出せる太さの割合です。100% が最太で、上限はフォントごとに異なります</string>
     <string name="font_weight_system_hint">同梱フォントのみ対応します。システムフォントは変わりません</string>
     <string name="font_family_note">Lora は SIL Open Font License 1.1 の下で改変せずに同梱しています。ラテン文字とキリル文字に対応し、中国語・日本語・韓国語・ヒンディー語はシステムフォントで表示されます。</string>
     <string name="attributions_lora_desc">セリフ体のインターフェース書体。SIL Open Font License 1.1 の下で改変せず同梱（ライセンス全文はアプリ内に収録）。</string>

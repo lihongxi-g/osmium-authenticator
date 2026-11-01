@@ -655,7 +655,7 @@
     <string name="font_cover_han">चीनी</string>
     <string name="font_family_sample">Aa Bb Cc 0123</string>
     <string name="font_weight_title">मोटाई</string>
-    <string name="font_weight_desc">मोटा टेक्स्ट; अधिकतम सीमा फ़ॉन्ट पर निर्भर है</string>
+    <string name="font_weight_desc">इस फ़ॉन्ट की अधिकतम मोटाई का प्रतिशत: 100% उसकी सबसे मोटी स्थिति है, हर फ़ॉन्ट की सीमा अलग होती है</string>
     <string name="font_weight_system_hint">केवल शामिल फ़ॉन्ट इसे सपोर्ट करते हैं; सिस्टम फ़ॉन्ट वैसा ही रहता है</string>
     <string name="font_family_note">Lora को SIL Open Font License 1.1 के अंतर्गत बिना बदलाव के शामिल किया गया है; यह लैटिन और सिरिलिक लिपियों को कवर करता है, जबकि चीनी, जापानी, कोरियाई और हिन्दी पाठ सिस्टम फ़ॉन्ट में दिखेगा।</string>
     <string name="attributions_lora_desc">इंटरफ़ेस के लिए सेरिफ़ फ़ॉन्ट, SIL Open Font License 1.1 के अंतर्गत बिना बदलाव शामिल (लाइसेंस पाठ ऐप में मौजूद)।</string>

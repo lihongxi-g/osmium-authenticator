@@ -655,7 +655,7 @@
     <string name="font_cover_han">Chinesisch</string>
     <string name="font_family_sample">Aa Bb Cc 0123</string>
     <string name="font_weight_title">Stärke</string>
-    <string name="font_weight_desc">Dickerer Text; die Obergrenze hängt von der Schrift ab</string>
+    <string name="font_weight_desc">Anteil der Stärke, die diese Schrift erreicht: 100 % ist ihr Maximum; jede Schrift hat eine andere Obergrenze</string>
     <string name="font_weight_system_hint">Nur die mitgelieferten Schriften unterstützen das; die Systemschrift bleibt unverändert</string>
     <string name="font_family_note">Lora ist unverändert unter der SIL Open Font License 1.1 enthalten und deckt Latein und Kyrillisch ab; Chinesisch, Japanisch, Koreanisch und Hindi nutzen die Systemschrift.</string>
     <string name="attributions_lora_desc">Serifen-Schriftart der Oberfläche, unverändert unter der SIL Open Font License 1.1 enthalten (Lizenztext in der App).</string>

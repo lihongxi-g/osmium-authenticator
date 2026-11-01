@@ -225,8 +225,8 @@ fun FontFamilySettingsScreen(
                 .padding(horizontal = 8.dp)
         ) {
             FONT_CHOICES.forEach { choice ->
-                val preview = remember(choice.key, settings.fontWeightBoost) {
-                    interfaceFontFamily(choice.key, settings.fontWeightBoost)
+                val preview = remember(choice.key, settings.fontWeightPercent) {
+                    interfaceFontFamily(choice.key, settings.fontWeightPercent)
                 }
                 FontChoiceRow(
                     title = stringResource(choice.nameRes),
@@ -238,9 +238,10 @@ fun FontFamilySettingsScreen(
             }
 
             FontWeightRow(
-                boost = settings.fontWeightBoost,
+                percent = settings.fontWeightPercent,
+                ceiling = AppSettings.fontWeightCeiling(settings.fontFamily),
                 enabled = settings.fontFamily != AppSettings.FONT_FAMILY_SYSTEM,
-                onChange = { vm.setFontWeightBoost(it) }
+                onChange = { vm.setFontWeightPercent(it) }
             )
 
             Row(
@@ -327,12 +328,15 @@ fun FontNotesScreen(onBack: () -> Unit) {
 }
 
 /**
- * Weight slider: adds 0-150 to every type token. Only the bundled variable
- * faces can do this, so it is disabled (with a hint) on the platform font.
+ * Weight slider, expressed as a percentage of the selected face's range so the
+ * same position means the same idea on every font (100% = as bold as that face
+ * goes). The label shows the weight a normal paragraph lands on. Only the
+ * bundled variable faces can do this, so it is disabled — with a hint — on the
+ * platform font.
  */
 @Composable
-private fun FontWeightRow(boost: Int, enabled: Boolean, onChange: (Int) -> Unit) {
-    var draft by remember(boost) { mutableFloatStateOf(boost.toFloat()) }
+private fun FontWeightRow(percent: Int, ceiling: Int, enabled: Boolean, onChange: (Int) -> Unit) {
+    var draft by remember(percent) { mutableFloatStateOf(percent.toFloat()) }
 
     Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -343,7 +347,7 @@ private fun FontWeightRow(boost: Int, enabled: Boolean, onChange: (Int) -> Unit)
                 modifier = Modifier.weight(1f)
             )
             Text(
-                text = "${400 + draft.roundToInt()}",
+                text = "${AppSettings.bodyWeightAt(draft.roundToInt(), ceiling)}",
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -352,12 +356,12 @@ private fun FontWeightRow(boost: Int, enabled: Boolean, onChange: (Int) -> Unit)
             value = draft,
             onValueChange = { draft = it },
             onValueChangeFinished = {
-                onChange(AppSettings.snapFontWeightBoost(draft.roundToInt()))
+                onChange(AppSettings.snapFontWeightPercent(draft.roundToInt()))
             },
-            valueRange = AppSettings.FONT_WEIGHT_BOOST_MIN.toFloat()..
-                AppSettings.FONT_WEIGHT_BOOST_MAX.toFloat(),
-            steps = (AppSettings.FONT_WEIGHT_BOOST_MAX - AppSettings.FONT_WEIGHT_BOOST_MIN) /
-                AppSettings.FONT_WEIGHT_BOOST_STEP - 1,
+            valueRange = AppSettings.FONT_WEIGHT_PERCENT_MIN.toFloat()..
+                AppSettings.FONT_WEIGHT_PERCENT_MAX.toFloat(),
+            steps = (AppSettings.FONT_WEIGHT_PERCENT_MAX - AppSettings.FONT_WEIGHT_PERCENT_MIN) /
+                AppSettings.FONT_WEIGHT_PERCENT_STEP - 1,
             enabled = enabled,
             modifier = Modifier.fillMaxWidth()
         )

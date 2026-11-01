@@ -655,7 +655,7 @@
     <string name="font_cover_han">Chinois</string>
     <string name="font_family_sample">Aa Bb Cc 0123</string>
     <string name="font_weight_title">Graisse</string>
-    <string name="font_weight_desc">Texte plus épais ; la limite dépend de la police</string>
+    <string name="font_weight_desc">Pourcentage de la graisse que cette police peut atteindre : 100 % est son maximum, et chaque police a sa propre limite</string>
     <string name="font_weight_system_hint">Seules les polices incluses le permettent ; celle du système reste inchangée</string>
     <string name="font_family_note">Lora est fournie non modifiée sous SIL Open Font License 1.1 et couvre le latin et le cyrillique ; le chinois, le japonais, le coréen et l’hindi utilisent la police du système.</string>
     <string name="attributions_lora_desc">Police à empattements de l’interface, incluse non modifiée sous SIL Open Font License 1.1 (texte de licence fourni dans l’app).</string>

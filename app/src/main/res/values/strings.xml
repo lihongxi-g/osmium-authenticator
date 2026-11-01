@@ -672,7 +672,7 @@
     <string name="font_cover_han">Chinese</string>
     <string name="font_family_sample">Aa Bb Cc 0123</string>
     <string name="font_weight_title">Weight</string>
-    <string name="font_weight_desc">Thicker text; the upper limit depends on the font itself</string>
+    <string name="font_weight_desc">Percentage of the weight this font can reach: 100% is as bold as it goes, and each font has its own ceiling</string>
     <string name="font_weight_system_hint">Only the bundled fonts support this; the system font stays as it is</string>
     <string name="font_family_note">Lora is bundled unmodified under the SIL Open Font License 1.1 and covers Latin and Cyrillic; Chinese, Japanese, Korean and Hindi text falls back to the system font.</string>
     <string name="attributions_lora_desc">Serif interface font, bundled unmodified under the SIL Open Font License 1.1 (the license text ships with the app).</string>

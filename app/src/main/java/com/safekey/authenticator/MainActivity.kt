@@ -274,7 +274,7 @@ class MainActivity : FragmentActivity() {
                 fontScaleEnabled = settings.fontScaleEnabled,
                 fontScalePercent = settings.fontScalePercent,
                 fontFamily = settings.fontFamily,
-                fontWeightBoost = settings.fontWeightBoost,
+                fontWeightPercent = settings.fontWeightPercent,
                 hapticEnabled = settings.hapticEnabled,
                 hapticIntensityPercent = settings.hapticIntensityPercent
             ) {
