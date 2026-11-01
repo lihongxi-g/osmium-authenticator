@@ -93,12 +93,22 @@ def main() -> int:
         with open(text_file, "w", encoding="utf-8") as f:
             f.write(charset)
         print(f"subsetting {len(charset)} characters -> {OUT}")
+        subset = os.path.join(tmp, "subset.ttf")
         subprocess.run([
             sys.executable, "-m", "fontTools.subset", src,
             f"--text-file={text_file}",
             "--layout-features=*",
             "--drop-tables+=DSIG",
-            f"--output-file={OUT}",
+            f"--output-file={subset}",
+        ], check=True)
+        # Upstream defaults to the ExtraLight instance; pin the axis so the
+        # font's own default is Regular 400. If a platform ever ignores the
+        # variation settings, the text still renders at a normal weight instead
+        # of hairline-thin.
+        print("pinning wght default to 400 (400:900)")
+        subprocess.run([
+            sys.executable, "-m", "fontTools.varLib.instancer", subset,
+            "wght=400:900", "-o", OUT,
         ], check=True)
 
     print(f"done: {os.path.getsize(OUT) / 1024 / 1024:.2f} MB")

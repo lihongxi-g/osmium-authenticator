@@ -38,7 +38,8 @@ Devanagari either.
   locales, plus **GB2312** (6763 hanzi, Simplified), **Big5 level-1** (5401
   hanzi, Traditional), Latin-1 + Latin Extended-A/B + Latin Extended
   Additional, Greek, Cyrillic, CJK punctuation and the fullwidth block.
-  Result: 9823 code points, 7.48 MB, `wght` axis preserved.
+  Result: 9823 code points, ~7.5 MB, `wght` axis preserved and re-based to
+  400–900 so the default instance is Regular rather than ExtraLight.
 - The upstream file has **no U+1E9E (ẞ)**; German text with a capital sharp S
   falls back to the system font for that single glyph. Everything else in the
   app's German strings is covered.

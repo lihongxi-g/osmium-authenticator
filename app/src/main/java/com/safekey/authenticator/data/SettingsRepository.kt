@@ -24,7 +24,7 @@ data class AppSettings(
     val fontScaleEnabled: Boolean = false,
     /** Interface typeface: the platform font or one of the bundled faces. */
     val fontFamily: String = FONT_FAMILY_SYSTEM,
-    /** Extra weight added to every type token, 0-150 (variable fonts only). */
+    /** Extra weight added to every type token, 0-400 (variable fonts only). */
     val fontWeightBoost: Int = FONT_WEIGHT_BOOST_DEFAULT,
     /** Haptics: the app's own vibration is on by default; the system path is opt-in. */
     val hapticEnabled: Boolean = true,
@@ -123,8 +123,8 @@ data class AppSettings(
 
         /** Extra weight on top of the type tokens; only variable faces can use it. */
         const val FONT_WEIGHT_BOOST_MIN = 0
-        const val FONT_WEIGHT_BOOST_MAX = 150
-        const val FONT_WEIGHT_BOOST_STEP = 25
+        const val FONT_WEIGHT_BOOST_MAX = 400
+        const val FONT_WEIGHT_BOOST_STEP = 50
         const val FONT_WEIGHT_BOOST_DEFAULT = 0
 
         /** Rounds a raw slider value onto the step grid. */
@@ -332,7 +332,7 @@ class SettingsRepository(
         context.dataStore.edit { it[Keys.DYNAMIC_COLOR] = enabled }
     }
 
-    /** 0-150 extra weight; clamped, ignored for the platform font. */
+    /** 0-400 extra weight; clamped, ignored for the platform font. */
     suspend fun setFontWeightBoost(boost: Int) {
         context.dataStore.edit {
             it[Keys.FONT_WEIGHT_BOOST] = boost.coerceIn(
