@@ -658,7 +658,7 @@
     <string name="font_family_system">系统默认</string>
     <string name="font_family_lora">Lora</string>
     <string name="font_family_sample">Aa Bb Cc 0123</string>
-    <string name="font_family_note">Lora 以 SIL 开放字体许可 1.1 原样内置，覆盖拉丁、西里尔和希腊文；其他文字自动使用系统字体。</string>
+    <string name="font_family_note">Lora 以 SIL 开放字体许可 1.1 原样内置，覆盖拉丁文和西里尔文；中文、日文、韩文和印地文自动使用系统字体。</string>
     <string name="attributions_lora_desc">衬线界面字体，以 SIL 开放字体许可 1.1 原样内置（许可证全文随应用分发）。</string>
     <string name="haptic_title">震动反馈</string>
     <string name="haptic_desc">点击按钮等控件时给出触感</string>

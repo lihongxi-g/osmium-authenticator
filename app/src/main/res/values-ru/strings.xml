@@ -643,7 +643,7 @@
     <string name="font_family_system">Системный</string>
     <string name="font_family_lora">Lora</string>
     <string name="font_family_sample">Aa Bb Cc 0123</string>
-    <string name="font_family_note">Lora включён без изменений по лицензии SIL Open Font License 1.1 и покрывает латиницу, кириллицу и греческий; остальные письменности отображаются системным шрифтом.</string>
+    <string name="font_family_note">Lora включён без изменений по лицензии SIL Open Font License 1.1 и покрывает латиницу и кириллицу; китайский, японский, корейский и хинди отображаются системным шрифтом.</string>
     <string name="attributions_lora_desc">Шрифт интерфейса с засечками, включён без изменений по SIL Open Font License 1.1 (текст лицензии в приложении).</string>
     <string name="haptic_title">Вибрация</string>
     <string name="haptic_desc">Короткий отклик при нажатии кнопок и других элементов</string>

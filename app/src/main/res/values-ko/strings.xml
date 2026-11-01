@@ -643,7 +643,7 @@
     <string name="font_family_system">시스템 기본</string>
     <string name="font_family_lora">Lora</string>
     <string name="font_family_sample">Aa Bb Cc 0123</string>
-    <string name="font_family_note">Lora는 SIL Open Font License 1.1에 따라 수정 없이 포함되어 있으며 라틴·키릴·그리스 문자를 지원합니다. 그 외 문자는 시스템 글꼴로 표시됩니다.</string>
+    <string name="font_family_note">Lora는 SIL Open Font License 1.1에 따라 수정 없이 포함되어 있으며 라틴·키릴 문자를 지원합니다. 중국어·일본어·한국어·힌디어는 시스템 글꼴로 표시됩니다.</string>
     <string name="attributions_lora_desc">인터페이스용 세리프 글꼴. SIL Open Font License 1.1에 따라 수정 없이 포함 (라이선스 전문은 앱에 포함).</string>
     <string name="haptic_title">진동 피드백</string>
     <string name="haptic_desc">버튼 등 컨트롤을 누를 때 짧게 진동합니다</string>

@@ -17,9 +17,11 @@ val monospaceFamily = FontFamily.Monospace
 /**
  * Lora (SIL Open Font License 1.1) — the optional serif interface font.
  *
- * One variable file covers 400-700. Lora ships Latin, Cyrillic and Greek only,
- * so CJK, Devanagari and Hangul text falls back to the system font glyph by
- * glyph — that is expected, not a bundling mistake.
+ * One variable file covers 400-700. The published subsets are latin, latin-ext,
+ * cyrillic, cyrillic-ext and vietnamese — there is no Greek subset (only the
+ * math symbols ΓΔΠΩμπ are present) and no CJK, Hangul or Devanagari, so those
+ * scripts fall back to the system font glyph by glyph. Expected, not a
+ * bundling mistake.
  */
 val LoraFamily: FontFamily = FontFamily(
     Font(R.font.lora, weight = FontWeight.Normal),

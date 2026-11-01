@@ -64,7 +64,7 @@ This release adds a text-size setting with a free 80%–200% slider, and fixes s
 
 - Settings → Appearance → **Font** offers the **system default** or **Lora**, a serif face. Each row is previewed in its own typeface; the default stays the system font, and switching never restarts the app.
 - Only the typeface changes — sizes, weights and letter spacing are untouched, so no layout moves when the font switches. Verification codes keep their monospace face, so the digits stay evenly spaced and easy to read out.
-- Lora ships Latin, Cyrillic and Greek; Chinese, Japanese, Korean and Hindi text keeps rendering in the system font glyph by glyph. That is the font's coverage, not a bug.
+- Lora ships the Latin (incl. extended) and Cyrillic subsets plus Vietnamese; Chinese, Japanese, Korean and Hindi text keeps rendering in the system font glyph by glyph. There is no Greek subset. That is the font's coverage, not a bug.
 - **License compliance:** Lora is bundled byte-for-byte as published, under the SIL Open Font License 1.1. The full license text and the upstream FONTLOG travel inside the APK (`assets/licenses/`), the attribution is listed in Settings → About → Attributions, and the repository documents it in `THIRD-PARTY-FONTS.md`. No new permissions, no new dependency.
 
 ### Settings: appearance is one page now

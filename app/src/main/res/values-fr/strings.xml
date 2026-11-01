@@ -643,7 +643,7 @@
     <string name="font_family_system">Police du système</string>
     <string name="font_family_lora">Lora</string>
     <string name="font_family_sample">Aa Bb Cc 0123</string>
-    <string name="font_family_note">Lora est fournie non modifiée sous SIL Open Font License 1.1 et couvre le latin, le cyrillique et le grec ; les autres écritures utilisent la police du système.</string>
+    <string name="font_family_note">Lora est fournie non modifiée sous SIL Open Font License 1.1 et couvre le latin et le cyrillique ; le chinois, le japonais, le coréen et l’hindi utilisent la police du système.</string>
     <string name="attributions_lora_desc">Police à empattements de l’interface, incluse non modifiée sous SIL Open Font License 1.1 (texte de licence fourni dans l’app).</string>
     <string name="haptic_title">Retour vibratoire</string>
     <string name="haptic_desc">Une courte vibration en touchant les boutons et autres contrôles</string>

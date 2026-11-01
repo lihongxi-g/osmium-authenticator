@@ -20,7 +20,10 @@
 The license is also shown in-app: Settings → About → Attributions → *Bundled
 libraries* → "Lora (SIL OFL 1.1)".
 
-Lora covers Latin, Cyrillic and Greek. CJK, Devanagari and Hangul are not part
-of the font, so those scripts render with the system font when Lora is
-selected — that is expected behaviour, and the reason the setting is labelled a
-choice rather than a replacement.
+Lora covers the **latin**, **latin-ext**, **cyrillic**, **cyrillic-ext** and
+**vietnamese** subsets (778 code points in the shipped file). There is **no**
+Greek subset — the only Greek-block characters present (ΓΔΠΩμπ) come from the
+math/symbols subsets — and no CJK, Hangul or Devanagari at all, so Chinese,
+Japanese, Korean and Hindi render with the system font when Lora is selected.
+That is expected behaviour, and the reason the setting is labelled a choice
+rather than a replacement.

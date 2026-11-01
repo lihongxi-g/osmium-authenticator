@@ -643,7 +643,7 @@
     <string name="font_family_system">Predeterminada del sistema</string>
     <string name="font_family_lora">Lora</string>
     <string name="font_family_sample">Aa Bb Cc 0123</string>
-    <string name="font_family_note">Lora se incluye sin modificar bajo la SIL Open Font License 1.1 y cubre latín, cirílico y griego; otros alfabetos usan la fuente del sistema.</string>
+    <string name="font_family_note">Lora se incluye sin modificar bajo la SIL Open Font License 1.1 y cubre latín y cirílico; el chino, el japonés, el coreano y el hindi usan la fuente del sistema.</string>
     <string name="attributions_lora_desc">Tipografía serif de la interfaz, incluida sin modificar bajo la SIL Open Font License 1.1 (el texto de la licencia va en la app).</string>
     <string name="haptic_title">Vibración</string>
     <string name="haptic_desc">Una vibración corta al tocar botones y otros controles</string>

@@ -660,7 +660,7 @@
     <string name="font_family_system">System default</string>
     <string name="font_family_lora">Lora</string>
     <string name="font_family_sample">Aa Bb Cc 0123</string>
-    <string name="font_family_note">Lora is bundled unmodified under the SIL Open Font License 1.1 and covers Latin, Cyrillic and Greek; other scripts fall back to the system font.</string>
+    <string name="font_family_note">Lora is bundled unmodified under the SIL Open Font License 1.1 and covers Latin and Cyrillic; Chinese, Japanese, Korean and Hindi text falls back to the system font.</string>
     <string name="attributions_lora_desc">Serif interface font, bundled unmodified under the SIL Open Font License 1.1 (the license text ships with the app).</string>
     <string name="haptic_title">Vibration feedback</string>
     <string name="haptic_desc">A short tick when you tap a button or another control</string>
