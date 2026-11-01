@@ -73,6 +73,7 @@
     <string name="details_secret_verified">Это действие требует аутентификации</string>
     <string name="settings_title">Настройки</string>
     <string name="settings_appearance">Внешний вид</string>
+    <string name="appearance_desc">Тема, размер текста, вибрация, сортировка, теги и язык</string>
     <string name="settings_security">Безопасность</string>
     <string name="settings_data">Данные</string>
     <string name="settings_about">О приложении</string>

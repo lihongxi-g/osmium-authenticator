@@ -73,6 +73,7 @@
     <string name="details_secret_verified">이 작업에는 인증이 필요합니다</string>
     <string name="settings_title">설정</string>
     <string name="settings_appearance">디스플레이</string>
+    <string name="appearance_desc">테마, 글자 크기, 진동, 정렬, 태그, 언어</string>
     <string name="settings_security">보안</string>
     <string name="settings_data">데이터</string>
     <string name="settings_about">정보</string>

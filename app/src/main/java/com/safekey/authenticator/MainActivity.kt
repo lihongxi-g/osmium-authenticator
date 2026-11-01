@@ -87,6 +87,7 @@ import com.safekey.authenticator.ui.navigation.Screen
 import com.safekey.authenticator.notify.BackupNotifier
 import com.safekey.authenticator.ui.navigation.isRootBlocked
 import com.safekey.authenticator.ui.screens.AboutScreen
+import com.safekey.authenticator.ui.screens.AppearanceSettingsScreen
 import com.safekey.authenticator.ui.screens.PermissionsScreen
 import com.safekey.authenticator.ui.screens.DeveloperScreen
 import com.safekey.authenticator.ui.screens.AccountFormScreen
@@ -1309,6 +1310,12 @@ private fun IntegrityNoticeDialog(
                     )
 
                     is Screen.Permissions -> PermissionsScreen(
+                        onBack = { vm.nav.pop() }
+                    )
+
+                    is Screen.Appearance -> AppearanceSettingsScreen(
+                        vm = vm,
+                        hiddenFeatures = vm.settings.value.devHiddenFeatures,
                         onBack = { vm.nav.pop() }
                     )
 

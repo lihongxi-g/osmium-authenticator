@@ -78,6 +78,7 @@
 
     <string name="settings_title">Settings</string>
     <string name="settings_appearance">Appearance</string>
+    <string name="appearance_desc">Theme, text size, vibration, sorting, tags and language</string>
     <string name="settings_security">Security</string>
     <string name="settings_data">Data</string>
     <string name="settings_about">About</string>

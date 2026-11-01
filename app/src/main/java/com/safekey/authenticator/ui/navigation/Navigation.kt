@@ -16,13 +16,15 @@ sealed class Screen {
     data class Detail(val accountId: String) : Screen()
     object Scan : Screen()
     object Settings : Screen()
-    /** Secondary settings page: theme (design system) options. */
+    /** Second-level settings page: everything appearance-related lives here. */
+    object Appearance : Screen()
+    /** Third-level settings page: theme (design system) options. */
     object ThemeSettings : Screen()
-    /** Secondary settings page: text size (four named steps). */
+    /** Third-level settings page: text size (adjustable percentage). */
     object FontSettings : Screen()
-    /** Secondary settings page: vibration feedback. */
+    /** Third-level settings page: vibration feedback. */
     object HapticSettings : Screen()
-    /** Secondary settings page: app language. */
+    /** Third-level settings page: app language. */
     object LanguageSettings : Screen()
     /** Secondary settings page: which update channels to check (stable / preview). */
     object UpdateSettings : Screen()

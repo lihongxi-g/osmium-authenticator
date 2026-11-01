@@ -60,6 +60,12 @@ This release adds a text-size setting with a free 80%–200% slider, and fixes s
 - Releasing the intensity slider fires one tick at the new strength, so it can be felt while adjusting.
 - The ripple is untouched: the tick is layered over the same indication the app already used.
 
+### Settings: appearance is one page now
+
+- The main settings list had six appearance rows (theme, text size, vibration, sort order, tags, language). It now has a single **Appearance** row showing the current theme; opening it lists all six, and each of those opens the page that adjusts it.
+- Everything keeps the same direction-aware slide and swipe-back gesture, so the three levels behave like one continuous stack.
+- Developer-mode "hide entry" switches still work per feature, and the entry row disappears only when every appearance feature is hidden.
+
 ### Fixes: white/black bands at the top and bottom
 
 - **The top bar added the status-bar inset twice**: `TopAppBar` already applies the system-bar insets, and `statusBarsPadding()` was wrapped around it again. Every screen with a top bar (accounts, settings, …) therefore had a status-bar-tall blank band above the title, with the content pushed down and cut at the bottom. The extra layer is gone.

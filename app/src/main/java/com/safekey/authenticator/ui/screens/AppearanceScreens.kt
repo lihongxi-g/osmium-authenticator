@@ -42,6 +42,7 @@ import com.safekey.authenticator.data.LanguagePrefs
 import com.safekey.authenticator.ui.components.AppIcons
 import com.safekey.authenticator.ui.components.SettingRow
 import com.safekey.authenticator.ui.components.SimpleTopBar
+import com.safekey.authenticator.ui.navigation.Screen
 import com.safekey.authenticator.ui.theme.AppTypography
 import com.safekey.authenticator.ui.theme.LocalFontScale
 import com.safekey.authenticator.ui.theme.monospaceFamily
@@ -57,6 +58,124 @@ import kotlin.math.roundToInt
  * own page behind a single entry row: adding a new option no longer means
  * touching the main settings list, and the sub-page can take more rows.
  */
+/**
+ * Second-level settings page: appearance.
+ *
+ * The appearance section had grown to six rows inside the main settings list.
+ * It is now one entry that opens this page, and each row here opens the page
+ * that actually adjusts the setting — so the list keeps growing without
+ * pushing the main settings screen off the screen.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AppearanceSettingsScreen(
+    vm: MainViewModel,
+    hiddenFeatures: Set<String>,
+    onBack: () -> Unit
+) {
+    val settings by vm.settings.collectAsState()
+    val context = LocalContext.current
+
+    Scaffold(
+        topBar = { SimpleTopBar(title = stringResource(R.string.settings_appearance), onBack = onBack) }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 8.dp)
+        ) {
+            if ("theme" !in hiddenFeatures) SettingRow(
+                icon = if (settings.themeMode == AppSettings.THEME_DARK) AppIcons.DarkMode else AppIcons.LightMode,
+                title = stringResource(R.string.theme_mode),
+                trailing = {
+                    Text(
+                        text = when (settings.themeMode) {
+                            AppSettings.THEME_LIGHT -> stringResource(R.string.theme_light)
+                            AppSettings.THEME_DARK -> stringResource(R.string.theme_dark)
+                            else -> stringResource(R.string.theme_system)
+                        },
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
+                onClick = { vm.nav.push(Screen.ThemeSettings) }
+            )
+
+            if ("fontSize" !in hiddenFeatures) SettingRow(
+                icon = AppIcons.FormatSize,
+                title = stringResource(R.string.font_size_title),
+                description = stringResource(R.string.font_size_desc),
+                trailing = {
+                    Text(
+                        text = if (settings.fontScaleEnabled) "${settings.fontScalePercent}%"
+                        else stringResource(R.string.font_size_off),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
+                onClick = { vm.nav.push(Screen.FontSettings) }
+            )
+
+            if ("haptic" !in hiddenFeatures) SettingRow(
+                icon = AppIcons.Vibration,
+                title = stringResource(R.string.haptic_title),
+                trailing = {
+                    Text(
+                        text = when {
+                            settings.hapticEnabled -> "${settings.hapticIntensityPercent}%"
+                            else -> stringResource(R.string.haptic_off)
+                        },
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
+                onClick = { vm.nav.push(Screen.HapticSettings) }
+            )
+
+            if ("sort" !in hiddenFeatures) SettingRow(
+                icon = AppIcons.SwapVert,
+                title = stringResource(R.string.sort_mode),
+                description = stringResource(R.string.sort_mode_desc),
+                onClick = { vm.nav.push(Screen.SortOrder) }
+            )
+
+            if ("tags" !in hiddenFeatures) SettingRow(
+                icon = AppIcons.Palette,
+                title = stringResource(R.string.tags_title),
+                description = stringResource(R.string.tags_settings_desc),
+                onClick = { vm.nav.push(Screen.TagSettings) }
+            )
+
+            if ("language" !in hiddenFeatures) SettingRow(
+                icon = AppIcons.Language,
+                title = stringResource(R.string.language),
+                trailing = {
+                    Text(
+                        text = when (LanguagePrefs.get(context)) {
+                            "zh" -> stringResource(R.string.lang_zh)
+                            "zh-TW", "zh-Hant" -> stringResource(R.string.lang_zh_tw)
+                            "en" -> stringResource(R.string.lang_en)
+                            "es" -> stringResource(R.string.lang_es)
+                            "ja" -> stringResource(R.string.lang_ja)
+                            "ko" -> stringResource(R.string.lang_ko)
+                            "de" -> stringResource(R.string.lang_de)
+                            "ru" -> stringResource(R.string.lang_ru)
+                            "fr" -> stringResource(R.string.lang_fr)
+                            "hi" -> stringResource(R.string.lang_hi)
+                            else -> stringResource(R.string.lang_system)
+                        },
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
+                onClick = { vm.nav.push(Screen.LanguageSettings) }
+            )
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ThemeSettingsScreen(

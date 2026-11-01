@@ -73,6 +73,7 @@
     <string name="details_secret_verified">この操作には認証が必要です</string>
     <string name="settings_title">設定</string>
     <string name="settings_appearance">外観</string>
+    <string name="appearance_desc">テーマ、文字サイズ、振動、並び順、タグ、言語</string>
     <string name="settings_security">セキュリティ</string>
     <string name="settings_data">データ</string>
     <string name="settings_about">アプリ情報</string>

@@ -78,6 +78,7 @@
 
     <string name="settings_title">設定</string>
     <string name="settings_appearance">外觀</string>
+    <string name="appearance_desc">主題、字體大小、震動、排序、標籤和語言</string>
     <string name="settings_security">安全性</string>
     <string name="settings_data">数據</string>
     <string name="settings_about">關於</string>
