@@ -9,7 +9,11 @@ The app itself fetches the Terms of Use and Privacy Policy from osmium.im when y
 - **TOTP and HOTP** — SHA-1 / SHA-256 / SHA-512, 6 or 8 digits, periods from 1 to 600 seconds
 - **Google Authenticator migration** — scan the “Transfer accounts” QR code and import supported accounts in a batch
 - **Import from another authenticator** — migrate in Settings → Data: Google Authenticator transfer QR codes, or plaintext export files of Aegis, 2FAS, Raivo OTP, andOTP, FreeOTP/FreeOTP+, Stratum/Authenticator Pro, Proton Authenticator and Bitwarden (JSON or CSV), plus any otpauth link list (Ente Auth, Google Auth URI export) and any CSV carrying otpauth links (KeePassXC, 1Password, Dashlane); the format is detected automatically and every entry is previewed with checkboxes before merging; unsupported entries are listed with a reason instead of being silently dropped
-- **Export to another authenticator** — the migration exit door: otpauth link list (.txt), Aegis plaintext vault (.json) or KeePassXC CSV (.csv). The file is plaintext by nature, so the screen states that, and it is written only after the identity check
+- **Export to another authenticator** — the migration exit door, in two shapes: **straight into Google Authenticator as QR codes** (`otpauth-migration`, ten accounts per code, paged when there are more, with the entries that format cannot carry listed up front), or to a file — otpauth link list (.txt), Aegis plaintext vault (.json) or KeePassXC CSV (.csv). Files are plaintext by nature, so the screen states that, and nothing is produced before the identity check
+- **Appearance in one place** — Settings → Appearance now gathers theme, font, text size, vibration, sorting, tags and language; each row opens its own page, so the main settings list stays short
+- **Interface fonts** — the system font, **Lora** or **Literata**, each previewed in its own typeface; plus a **weight slider** whose every stop is a real bundled font file (Lora 400–700, Literata 400–900), so a heavier setting always renders heavier text. Codes deliberately stay monospace. None of the bundled faces contains Chinese glyphs: a Chinese interface always uses the system font, and the font page explains that instead of offering settings that would do nothing (with a shortcut to the language page)
+- **Text size** — a 80–200% slider behind a master switch, applied on top of the system font scale, with a live preview and a ceiling that keeps the PIN keypad and account cards intact
+- **Vibration feedback** — a master switch and a 0–100% intensity slider. Every click gets a tick (buttons, switches, settings rows, the PIN keypad); scrolling, dragging and the swipe-back gesture stay silent. The app drives the vibrator itself, so it works even when the system touch-feedback switch is off
 - **Encrypted backup** — export a password-protected encrypted file and restore it on a device running a compatible Osmium version
 - **WebDAV backup** — upload encrypted backups to a WebDAV server you configure (NAS, PC, or another phone) and restore them; the server receives ciphertext only
 - **LAN quick transfer** — connect two devices to the same Wi-Fi and transfer accounts through end-to-end encryption derived from a 6-digit pairing code; no cloud server is involved; the receiver can preview and select accounts
@@ -39,17 +43,25 @@ The live test page at **https://otp.osmium.im** supports TOTP, HOTP and Steam Gu
 
 ## Download
 
-Latest stable release: **Osmium v2.6.1** (`versionCode 791-793, per ABI`: 791 = armeabi-v7a, 792 = arm64-v8a, 793 = x86_64). Choose the ABI matching your device:
+Latest stable release: **Osmium v2.6.2** (`versionCode 821-823, per ABI`: 821 = armeabi-v7a, 822 = arm64-v8a, 823 = x86_64). Choose the ABI matching your device:
 
 | File | Architecture | Devices | Download |
 |---|---|---|---|
-| `osmium-2.6.1-arm64-v8a.apk` | arm64-v8a | Virtually all modern phones (recommended) | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.6.1/osmium-2.6.1-arm64-v8a.apk) |
-| `osmium-2.6.1-armeabi-v7a.apk` | armeabi-v7a | Older 32-bit phones | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.6.1/osmium-2.6.1-armeabi-v7a.apk) |
-| `osmium-2.6.1-x86_64.apk` | x86_64 | Android emulators | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.6.1/osmium-2.6.1-x86_64.apk) |
+| `osmium-2.6.2-arm64-v8a.apk` | arm64-v8a | Virtually all modern phones (recommended) | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.6.2/osmium-2.6.2-arm64-v8a.apk) |
+| `osmium-2.6.2-armeabi-v7a.apk` | armeabi-v7a | Older 32-bit phones | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.6.2/osmium-2.6.2-armeabi-v7a.apk) |
+| `osmium-2.6.2-x86_64.apk` | x86_64 | Android emulators | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.6.2/osmium-2.6.2-x86_64.apk) |
 
 Installing an incompatible ABI may prevent the app from starting. All three APKs use the same signing certificate, SHA-256 fingerprint: `B65BB0131CAA22C45D99EA4E2C3E99B3980EAE0DC5647190F41A2878E6D88412`.
 
-APK SHA-256 checksums are listed in the [v2.6.1 release notes](release-notes-v2.6.1.md) and in `SHA256SUMS.txt` on the GitHub Release page.
+APK SHA-256 checksums are listed in the [v2.6.2 release notes](release-notes-v2.6.2.md) and in `SHA256SUMS.txt` on the GitHub Release page.
+
+### F-Droid
+
+Osmium is on F-Droid: **https://f-droid.org/packages/com.safekey.authenticator/**
+
+F-Droid ships the same builds the developer signs — the recipe points at the GitHub Release APKs and pins the signing certificate — so the GitHub and F-Droid versions can replace each other without uninstalling. For a 2FA app that matters: uninstalling deletes every local account.
+
+F-Droid's index refreshes on its own schedule, so a brand-new release can take a few days to appear there; the [package page](https://f-droid.org/packages/com.safekey.authenticator/) always shows the version actually installable right now.
 
 ## Privacy & Terms
 
@@ -83,5 +95,4 @@ The device-integrity feature embeds a pinned, source-level copy of Google's [and
 
 GPL-3.0-or-later. See [LICENSE](LICENSE) or [COPYING](COPYING).
 
-The optional interface font, **Lora**, is bundled unmodified under the SIL Open
-Font License 1.1; see [THIRD-PARTY-FONTS.md](THIRD-PARTY-FONTS.md).
+The optional interface fonts — **Lora** and **Literata** — are bundled unmodified under the SIL Open Font License 1.1 (only the file names were lowercased for Android resources); the full licence texts ship inside the APK and are listed in the app under Settings → About → Attributions. See [THIRD-PARTY-FONTS.md](THIRD-PARTY-FONTS.md).
