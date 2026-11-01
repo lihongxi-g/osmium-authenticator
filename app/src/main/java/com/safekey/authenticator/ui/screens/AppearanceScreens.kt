@@ -316,7 +316,7 @@ fun HapticSettingsScreen(
     var draft by remember(settings.hapticIntensityPercent) {
         mutableFloatStateOf(settings.hapticIntensityPercent.toFloat())
     }
-    val sliderEnabled = settings.hapticEnabled && !settings.hapticFollowSystem
+    val sliderEnabled = settings.hapticEnabled
     val context = LocalContext.current
 
     Scaffold(
@@ -337,18 +337,6 @@ fun HapticSettingsScreen(
                     Switch(
                         checked = settings.hapticEnabled,
                         onCheckedChange = { vm.setHapticEnabled(it) }
-                    )
-                }
-            )
-
-            SettingRow(
-                icon = AppIcons.Sync,
-                title = stringResource(R.string.haptic_follow_system),
-                description = stringResource(R.string.haptic_follow_desc),
-                trailing = {
-                    Switch(
-                        checked = settings.hapticFollowSystem,
-                        onCheckedChange = { vm.setHapticFollowSystem(it) }
                     )
                 }
             )

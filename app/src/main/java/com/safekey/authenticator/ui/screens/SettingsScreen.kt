@@ -182,8 +182,6 @@ fun SettingsScreen(
                 trailing = {
                     Text(
                         text = when {
-                            settings.hapticFollowSystem ->
-                                stringResource(R.string.haptic_follow_system)
                             settings.hapticEnabled -> "${settings.hapticIntensityPercent}%"
                             else -> stringResource(R.string.haptic_off)
                         },

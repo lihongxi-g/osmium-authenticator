@@ -53,12 +53,12 @@ This release adds a text-size setting with a free 80%–200% slider, and fixes s
 
 ### New: vibration feedback
 
-- Settings → Appearance → **Vibration feedback**: a master switch, a 0–100% intensity slider, and a "Follow system" switch.
-- **Every tap vibrates**: buttons, switches, rows, the PIN keypad, copying a code — the whole app, the way the system's own touch feedback behaves. Scrolling, dragging a slider and the swipe-back gesture are not taps and stay silent.
+- Settings → Appearance → **Vibration feedback**: a master switch and a 0–100% intensity slider.
+- **Only real controls vibrate**: buttons, switches, settings rows, the PIN keypad, list items and the buttons inside dialogs — the tick is attached to the clickable itself, so tapping a background, scrolling a list, dragging the slider or using the swipe-back gesture stays silent.
 - **On by default**, and the app drives the vibrator itself, so a phone whose system touch-feedback switch is off still gets the tick.
-- **"Follow system" follows the system's strength, not its off switch**: with it on, the tick uses the platform's touch-feedback intensity and the slider is greyed out. The master switch stays independent — it alone decides whether the app vibrates.
-- With Follow system off, the slider sets the strength: intensity drives both amplitude (1–255) and duration (25–60 ms). The earlier 10–20 ms tick was too short to feel on real phones.
+- Intensity drives both amplitude (1–255) and duration (25–60 ms). The earlier 10–20 ms tick was too short to feel on real phones.
 - Releasing the intensity slider fires one tick at the new strength, so it can be felt while adjusting.
+- The ripple is untouched: the tick is layered over the same indication the app already used.
 
 ### Fixes: white/black bands at the top and bottom
 
@@ -73,5 +73,5 @@ This release adds a text-size setting with a free 80%–200% slider, and fixes s
 
 ### Other
 
-- 7 new UI strings, added in all 11 languages.
+- 5 new UI strings, added in all 11 languages.
 - No new permissions, no third-party SDKs, no data collection.

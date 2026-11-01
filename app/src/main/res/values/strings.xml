@@ -655,9 +655,7 @@
     <string name="font_size_enable_desc">Off restores Osmium\'s default text size and locks the slider</string>
     <string name="font_size_off">Off</string>
     <string name="haptic_title">Vibration feedback</string>
-    <string name="haptic_desc">A short tick on every tap in the app</string>
-    <string name="haptic_follow_system">Follow system</string>
-    <string name="haptic_follow_desc">Strength follows the system touch-feedback intensity; the slider is locked</string>
+    <string name="haptic_desc">A short tick when you tap a button or another control</string>
     <string name="haptic_intensity">Intensity</string>
     <string name="haptic_intensity_desc">Drag to set how strong the vibration is</string>
     <string name="haptic_off">Off</string>

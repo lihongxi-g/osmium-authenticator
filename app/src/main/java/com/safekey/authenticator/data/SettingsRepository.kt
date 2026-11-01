@@ -24,7 +24,6 @@ data class AppSettings(
     val fontScaleEnabled: Boolean = false,
     /** Haptics: the app's own vibration is on by default; the system path is opt-in. */
     val hapticEnabled: Boolean = true,
-    val hapticFollowSystem: Boolean = false,
     /** Vibration strength, 0-100. */
     val hapticIntensityPercent: Int = HAPTIC_INTENSITY_DEFAULT,
     val gateOnOpen: Boolean = true,
@@ -115,25 +114,6 @@ data class AppSettings(
         const val HAPTIC_INTENSITY_DEFAULT = 60
 
         /**
-         * Fallback strength when "follow system" is on but the platform exposes
-         * no readable intensity (`haptic_feedback_intensity` is a hidden
-         * setting and some ROMs do not keep it).
-         */
-        const val HAPTIC_SYSTEM_INTENSITY_PERCENT = 60
-
-        /**
-         * Maps the platform's `haptic_feedback_intensity` value onto our 0-100
-         * scale. The setting is hidden API, so its scale is not guaranteed:
-         * AOSP writes 1-5 style levels on some builds and a percentage on
-         * others, and unreadable is -1.
-         */
-        fun hapticSystemIntensity(raw: Int): Int = when {
-            raw <= 0 -> HAPTIC_SYSTEM_INTENSITY_PERCENT
-            raw <= 10 -> (raw * 20).coerceIn(20, 100)
-            else -> raw.coerceIn(1, HAPTIC_INTENSITY_MAX)
-        }
-
-        /**
          * Amplitude for [VibrationEffect.createOneShot] on a 1-255 scale.
          * 0% is 1 (the weakest the platform accepts) — the master switch, not
          * a zero amplitude, is what turns the feedback off.
@@ -212,7 +192,6 @@ class SettingsRepository(
         val FONT_SCALE_PERCENT = intPreferencesKey("font_scale_percent")
         val FONT_SCALE_ENABLED = booleanPreferencesKey("font_scale_enabled")
         val HAPTIC_ENABLED = booleanPreferencesKey("haptic_enabled")
-        val HAPTIC_FOLLOW_SYSTEM = booleanPreferencesKey("haptic_follow_system")
         val HAPTIC_INTENSITY = intPreferencesKey("haptic_intensity_percent")
         val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
         val GATE_ON_OPEN = booleanPreferencesKey("gate_on_open")
@@ -263,7 +242,6 @@ class SettingsRepository(
                 ?: AppSettings.FONT_SCALE_PERCENT_DEFAULT,
             fontScaleEnabled = prefs[Keys.FONT_SCALE_ENABLED] ?: false,
             hapticEnabled = prefs[Keys.HAPTIC_ENABLED] ?: true,
-            hapticFollowSystem = prefs[Keys.HAPTIC_FOLLOW_SYSTEM] ?: false,
             hapticIntensityPercent = (prefs[Keys.HAPTIC_INTENSITY]
                 ?: AppSettings.HAPTIC_INTENSITY_DEFAULT)
                 .coerceIn(AppSettings.HAPTIC_INTENSITY_MIN, AppSettings.HAPTIC_INTENSITY_MAX),
@@ -322,14 +300,6 @@ class SettingsRepository(
      */
     suspend fun setHapticEnabled(enabled: Boolean) {
         context.dataStore.edit { it[Keys.HAPTIC_ENABLED] = enabled }
-    }
-
-    /**
-     * Following the system means the platform's haptic intensity decides the
-     * strength and the slider is locked — it does not turn the vibration off.
-     */
-    suspend fun setHapticFollowSystem(follow: Boolean) {
-        context.dataStore.edit { it[Keys.HAPTIC_FOLLOW_SYSTEM] = follow }
     }
 
     suspend fun setHapticIntensityPercent(percent: Int) {

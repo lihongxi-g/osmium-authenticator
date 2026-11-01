@@ -271,7 +271,6 @@ class MainActivity : FragmentActivity() {
                 fontScaleEnabled = settings.fontScaleEnabled,
                 fontScalePercent = settings.fontScalePercent,
                 hapticEnabled = settings.hapticEnabled,
-                hapticFollowSystem = settings.hapticFollowSystem,
                 hapticIntensityPercent = settings.hapticIntensityPercent
             ) {
                 // Screenshot policy follows the user setting (default: blocked).

@@ -638,9 +638,7 @@
     <string name="font_size_enable_desc">オフにすると Osmium 既定の文字サイズに戻り、スライダーは調整できません</string>
     <string name="font_size_off">オフ</string>
     <string name="haptic_title">振動フィードバック</string>
-    <string name="haptic_desc">アプリ内のすべてのタップで短く振動します</string>
-    <string name="haptic_follow_system">システムに従う</string>
-    <string name="haptic_follow_desc">強さはシステムの触感強度に従います（スライダーは無効）</string>
+    <string name="haptic_desc">ボタンなどの操作時に短く振動します</string>
     <string name="haptic_intensity">強さ</string>
     <string name="haptic_intensity_desc">ドラッグして振動の強さを調整します</string>
     <string name="haptic_off">オフ</string>

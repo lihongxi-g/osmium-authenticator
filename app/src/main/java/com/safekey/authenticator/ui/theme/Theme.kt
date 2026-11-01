@@ -1,18 +1,18 @@
 package com.safekey.authenticator.ui.theme
 
 import android.os.Build
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
@@ -46,7 +46,6 @@ fun SafeKeyTheme(
     fontScaleEnabled: Boolean = false,
     fontScalePercent: Int = AppSettings.FONT_SCALE_PERCENT_DEFAULT,
     hapticEnabled: Boolean = true,
-    hapticFollowSystem: Boolean = false,
     hapticIntensityPercent: Int = AppSettings.HAPTIC_INTENSITY_DEFAULT,
     content: @Composable () -> Unit
 ) {
@@ -73,21 +72,22 @@ fun SafeKeyTheme(
         AppSettings.effectiveFontScale(fontScaleEnabled, fontScalePercent, systemFontScale)
     }
     val typography = remember(fontScale) { AppTypography.scaledTo(fontScale) }
-    val hapticTick = rememberHapticTick(hapticEnabled, hapticFollowSystem, hapticIntensityPercent)
+    val hapticTick = rememberHapticTick(hapticEnabled, hapticIntensityPercent)
+    val latestTick = rememberUpdatedState(hapticTick)
 
     CompositionLocalProvider(LocalFontScale provides fontScale) {
         MaterialTheme(
             colorScheme = colorScheme,
             typography = typography
         ) {
-            // Every tap inside the app (buttons, switches, rows, the keypad)
-            // gets the same tick, the way the system's own touch feedback
-            // behaves. Nothing is consumed, so gestures are unaffected.
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .tapHaptics(hapticTick)
-            ) {
+            // Clickable surfaces get the tick through the indication, so only
+            // real controls vibrate (buttons, switches, rows, the keypad,
+            // dialog actions) while the ripple keeps drawing exactly as before.
+            val base = ripple()
+            val indication = remember(base, latestTick) {
+                HapticIndication({ latestTick.value() }, base)
+            }
+            CompositionLocalProvider(LocalIndication provides indication) {
                 content()
             }
         }

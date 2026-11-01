@@ -638,9 +638,7 @@
     <string name="font_size_enable_desc">Désactivé : revient à la taille de texte par défaut d\'Osmium, le curseur est verrouillé</string>
     <string name="font_size_off">Désactivé</string>
     <string name="haptic_title">Retour vibratoire</string>
-    <string name="haptic_desc">Une courte vibration à chaque appui dans l’application</string>
-    <string name="haptic_follow_system">Suivre le système</string>
-    <string name="haptic_follow_desc">La force suit l’intensité du système ; le curseur est verrouillé</string>
+    <string name="haptic_desc">Une courte vibration en touchant les boutons et autres contrôles</string>
     <string name="haptic_intensity">Intensité</string>
     <string name="haptic_intensity_desc">Faites glisser pour régler la force</string>
     <string name="haptic_off">Désactivé</string>

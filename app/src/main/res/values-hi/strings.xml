@@ -638,9 +638,7 @@
     <string name="font_size_enable_desc">बंद होने पर Osmium का डिफ़ॉल्ट टेक्स्ट आकार लौट आता है और स्लाइडर लॉक रहता है</string>
     <string name="font_size_off">बंद</string>
     <string name="haptic_title">कंपन फ़ीडबैक</string>
-    <string name="haptic_desc">ऐप में हर टैप पर एक छोटा कंपन</string>
-    <string name="haptic_follow_system">सिस्टम के अनुसार</string>
-    <string name="haptic_follow_desc">तीव्रता सिस्टम के अनुसार रहती है; स्लाइडर लॉक रहता है</string>
+    <string name="haptic_desc">बटन और अन्य नियंत्रण दबाने पर एक छोटा कंपन</string>
     <string name="haptic_intensity">तीव्रता</string>
     <string name="haptic_intensity_desc">ताकत सेट करने के लिए खींचें</string>
     <string name="haptic_off">बंद</string>

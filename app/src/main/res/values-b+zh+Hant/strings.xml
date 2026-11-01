@@ -651,9 +651,7 @@
     <string name="font_size_enable_desc">關閉後恢復 Osmium 預設字型大小，滑桿無法調整</string>
     <string name="font_size_off">關閉</string>
     <string name="haptic_title">震動回饋</string>
-    <string name="haptic_desc">在 App 內每次點擊都會有觸感</string>
-    <string name="haptic_follow_system">跟隨系統</string>
-    <string name="haptic_follow_desc">強度跟隨系統觸感強度；滑軸不可調整</string>
+    <string name="haptic_desc">點按按鈕等控制項時給出觸感</string>
     <string name="haptic_intensity">強度</string>
     <string name="haptic_intensity_desc">拖動調整震動強弱</string>
     <string name="haptic_off">關閉</string>

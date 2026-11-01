@@ -1,7 +1,6 @@
 package com.safekey.authenticator.data
 
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -38,39 +37,11 @@ class HapticSettingsTest {
         assertTrue(AppSettings.hapticAmplitude(50) in 2..254)
     }
 
-    /**
-     * Out of the box the app vibrates with its own effect: the system path
-     * stays silent on ROMs whose touch-feedback switch is off, which reads as
-     * "the feature does not work".
-     */
+    /** Out of the box the app vibrates on clicks; the switch turns it off. */
     @Test
-    fun `own vibration is the default and the system path is opt-in`() {
+    fun `vibration is on by default`() {
         val defaults = AppSettings()
         assertTrue(defaults.hapticEnabled)
-        assertFalse(defaults.hapticFollowSystem)
         assertEquals(AppSettings.HAPTIC_INTENSITY_DEFAULT, defaults.hapticIntensityPercent)
-        assertTrue(
-            AppSettings.HAPTIC_SYSTEM_INTENSITY_PERCENT in
-                AppSettings.HAPTIC_INTENSITY_MIN..AppSettings.HAPTIC_INTENSITY_MAX
-        )
-    }
-
-    /**
-     * "Follow system" means the strength comes from the platform, never that
-     * the app stops vibrating.
-     */
-    @Test
-    fun `system intensity is always a strength, never silence`() {
-        // Unreadable / unset (the setting is hidden API and may be missing).
-        assertEquals(AppSettings.HAPTIC_SYSTEM_INTENSITY_PERCENT, AppSettings.hapticSystemIntensity(-1))
-        assertEquals(AppSettings.HAPTIC_SYSTEM_INTENSITY_PERCENT, AppSettings.hapticSystemIntensity(0))
-        // 1-5 style levels.
-        assertEquals(20, AppSettings.hapticSystemIntensity(1))
-        assertEquals(60, AppSettings.hapticSystemIntensity(3))
-        assertEquals(100, AppSettings.hapticSystemIntensity(5))
-        // Already a percentage.
-        assertEquals(40, AppSettings.hapticSystemIntensity(40))
-        assertEquals(100, AppSettings.hapticSystemIntensity(300))
-        (1..100).forEach { assertTrue(AppSettings.hapticSystemIntensity(it) > 0) }
     }
 }

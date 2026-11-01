@@ -653,9 +653,7 @@
     <string name="font_size_enable_desc">关闭后恢复 Osmium 默认字号，滑块不可调节</string>
     <string name="font_size_off">关闭</string>
     <string name="haptic_title">震动反馈</string>
-    <string name="haptic_desc">在 App 内每次点击都会给出触感</string>
-    <string name="haptic_follow_system">跟随系统</string>
-    <string name="haptic_follow_desc">强度跟随系统触感强度；滑轴不可调</string>
+    <string name="haptic_desc">点击按钮等控件时给出触感</string>
     <string name="haptic_intensity">强度</string>
     <string name="haptic_intensity_desc">拖动调整震动强弱</string>
     <string name="haptic_off">关闭</string>
