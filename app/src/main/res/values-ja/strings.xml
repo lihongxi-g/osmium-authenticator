@@ -652,12 +652,13 @@
     <string name="font_size_enable_desc">オフにすると Osmium 既定の文字サイズに戻り、スライダーは調整できません</string>
     <string name="font_size_off">オフ</string>
     <string name="font_family_title">フォント</string>
+    <string name="font_unavailable_title">フォント設定は使用できません</string>
+    <string name="font_unavailable_body">フォントパッケージが大きすぎるため、中国語にはまだ対応していません。フォントを選ぶには%1$sを変更してください。Osmium 用の中国語フォントをデザインしてくださるなら、Osmium はあなたの作品を楽しみにしています ❤️</string>
     <string name="font_family_desc">インターフェースの書体</string>
     <string name="font_family_system">システム標準</string>
     <string name="font_family_lora">Lora</string>
     <string name="font_family_manrope">Manrope</string>
     <string name="font_family_literata">Literata</string>
-    <string name="font_family_hanserif">Noto Serif SC</string>
     <string name="font_notes_title">フォントの説明</string>
     <string name="font_notes_summary">ライセンスと収録文字</string>
     <string name="font_notes_intro">同梱フォントは SIL Open Font License 1.1 の下で改変せずに配布しています。各フォントのライセンス全文はアプリ内に収録されています。</string>
@@ -665,7 +666,6 @@
     <string name="font_cover_cyrillic">キリル文字</string>
     <string name="font_cover_greek">ギリシャ文字</string>
     <string name="font_cover_vietnamese">ベトナム語</string>
-    <string name="font_cover_han">中国語</string>
     <string name="font_family_sample">Aa Bb Cc 0123</string>
     <string name="font_weight_title">太さ</string>
     <string name="font_weight_desc">このフォントが出せる太さの割合です。100% が最太で、上限はフォントごとに異なります</string>

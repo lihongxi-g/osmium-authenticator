@@ -16,40 +16,39 @@ import com.safekey.authenticator.data.AppSettings
 val monospaceFamily = FontFamily.Monospace
 
 /**
- * The bundled faces ship as **static instances**, one file per weight.
+ * The bundled faces ship as **static instances**, one file per weight step.
  *
- * Earlier revisions used the variable files and bound each weight through
- * `FontVariation` settings. That silently does nothing here: with Noto Serif
- * SC's default instance being ExtraLight, the interface rendered hairline-thin
- * even with 400 requested, which proves the axis settings never reached the
- * platform. Shipping fixed instances removes the whole question — Compose picks
- * a file by weight and cannot fall back to "ignore the axis".
+ * Earlier revisions used the variable files and bound weights through
+ * `FontVariation` settings; the platform silently ignored them (Noto Serif
+ * SC's ExtraLight default rendered even with 400 requested), so the weight
+ * slider did nothing. Fixed files remove the question entirely: Compose picks a
+ * file by weight and cannot fall back to ignoring an axis.
  *
- * The slider then moves the *type tokens* (see [withWeightDelta]) rather than a
- * font axis, so the effect is the same on every face.
+ * The slider therefore moves the *type tokens* (see [withWeightDelta]), and the
+ * stored value is an absolute body weight that matches one of these files.
  */
 val LoraFamily: FontFamily = FontFamily(
     Font(R.font.lora, weight = FontWeight.Normal),
+    Font(R.font.lora_medium, weight = FontWeight.Medium),
     Font(R.font.lora_semibold, weight = FontWeight.SemiBold),
     Font(R.font.lora_bold, weight = FontWeight.Bold)
 )
 
 val ManropeFamily: FontFamily = FontFamily(
     Font(R.font.manrope, weight = FontWeight.Normal),
+    Font(R.font.manrope_medium, weight = FontWeight.Medium),
     Font(R.font.manrope_semibold, weight = FontWeight.SemiBold),
+    Font(R.font.manrope_bold, weight = FontWeight.Bold),
     Font(R.font.manrope_extrabold, weight = FontWeight.ExtraBold)
 )
 
 val LiterataFamily: FontFamily = FontFamily(
     Font(R.font.literata, weight = FontWeight.Normal),
+    Font(R.font.literata_medium, weight = FontWeight.Medium),
     Font(R.font.literata_semibold, weight = FontWeight.SemiBold),
+    Font(R.font.literata_bold, weight = FontWeight.Bold),
+    Font(R.font.literata_extrabold, weight = FontWeight.ExtraBold),
     Font(R.font.literata_black, weight = FontWeight.Black)
-)
-
-/** Noto Serif SC / 思源宋体 — regular + bold; heavier requests synthesise. */
-val HanSerifFamily: FontFamily = FontFamily(
-    Font(R.font.hanserif, weight = FontWeight.Normal),
-    Font(R.font.hanserif_bold, weight = FontWeight.Bold)
 )
 
 /** Stored setting key -> typeface. Unknown keys mean the system font. */
@@ -57,7 +56,6 @@ fun interfaceFontFamily(key: String): FontFamily = when (key) {
     AppSettings.FONT_FAMILY_LORA -> LoraFamily
     AppSettings.FONT_FAMILY_MANROPE -> ManropeFamily
     AppSettings.FONT_FAMILY_LITERATA -> LiterataFamily
-    AppSettings.FONT_FAMILY_HAN_SERIF -> HanSerifFamily
     else -> FontFamily.Default
 }
 

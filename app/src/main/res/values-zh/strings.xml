@@ -667,12 +667,13 @@
     <string name="font_size_enable_desc">关闭后恢复 Osmium 默认字号，滑块不可调节</string>
     <string name="font_size_off">关闭</string>
     <string name="font_family_title">字体</string>
+    <string name="font_unavailable_title">字体设置不可用</string>
+    <string name="font_unavailable_body">因字体包体积过大，所以当前未适配中文的字体，如有需要请变更%1$s，或为Osmium设计中文字体吧，Osmium期待您的作品❤️。</string>
     <string name="font_family_desc">选择应用内使用的字体</string>
     <string name="font_family_system">系统默认</string>
     <string name="font_family_lora">Lora</string>
     <string name="font_family_manrope">Manrope</string>
     <string name="font_family_literata">Literata</string>
-    <string name="font_family_hanserif">思源宋体</string>
     <string name="font_notes_title">字体说明</string>
     <string name="font_notes_summary">许可与字符覆盖</string>
     <string name="font_notes_intro">内置字体以 SIL 开放字体许可 1.1 原样随应用分发，每款字体的许可证全文都打包在应用内。</string>
@@ -680,7 +681,6 @@
     <string name="font_cover_cyrillic">西里尔</string>
     <string name="font_cover_greek">希腊</string>
     <string name="font_cover_vietnamese">越南语</string>
-    <string name="font_cover_han">中文</string>
     <string name="font_family_sample">Aa Bb Cc 0123</string>
     <string name="font_weight_title">字重</string>
     <string name="font_weight_desc">按这款字体能达到的粗细百分比调节，100% 就是它最粗的程度；不同字体的上限不同，这里会自动换算</string>

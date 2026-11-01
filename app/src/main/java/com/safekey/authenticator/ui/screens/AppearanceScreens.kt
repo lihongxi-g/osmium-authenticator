@@ -53,6 +53,14 @@ import com.safekey.authenticator.ui.theme.monospaceFamily
 import com.safekey.authenticator.ui.theme.previewHaptic
 import com.safekey.authenticator.ui.theme.scaledTo
 import kotlin.math.roundToInt
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextDecoration
 
 /**
  * Secondary settings pages for appearance.
@@ -202,8 +210,11 @@ fun AppearanceSettingsScreen(
  * Third-level settings page: interface typeface.
  *
  * Plain rows, no cards. Each option is drawn in the font it names, so the
- * difference is visible before it is applied. The licence/coverage small print
- * lives one level down, on [FontNotesScreen], to keep this page to a list.
+ * difference is visible before it is applied.
+ *
+ * None of the bundled faces covers Chinese, so a Chinese UI gets an explanation
+ * instead of a list of options that would change nothing (the CJK face was
+ * dropped because its files alone weighed 12 MB).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -212,6 +223,7 @@ fun FontFamilySettingsScreen(
     onBack: () -> Unit
 ) {
     val settings by vm.settings.collectAsState()
+    val context = LocalContext.current
     val sample = stringResource(R.string.font_family_sample)
 
     Scaffold(
@@ -224,6 +236,11 @@ fun FontFamilySettingsScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 8.dp)
         ) {
+            if (isChineseUi(context)) {
+                FontUnavailableNotice(onOpenLanguage = { vm.nav.push(Screen.LanguageSettings) })
+                return@Column
+            }
+
             FONT_CHOICES.forEach { choice ->
                 val preview = remember(choice.key) { interfaceFontFamily(choice.key) }
                 FontChoiceRow(
@@ -236,10 +253,10 @@ fun FontFamilySettingsScreen(
             }
 
             FontWeightRow(
-                percent = settings.fontWeightPercent,
-                ceiling = AppSettings.fontWeightCeiling(settings.fontFamily),
+                body = settings.fontWeightBody,
+                fontKey = settings.fontFamily,
                 enabled = settings.fontFamily != AppSettings.FONT_FAMILY_SYSTEM,
-                onChange = { vm.setFontWeightPercent(it) }
+                onChange = { vm.setFontWeightBody(it) }
             )
 
             Row(
@@ -269,6 +286,118 @@ fun FontFamilySettingsScreen(
                 )
             }
         }
+    }
+}
+
+/** True when the interface (app choice, else system) is Chinese. */
+private fun isChineseUi(context: android.content.Context): Boolean {
+    val tag = LanguagePrefs.get(context) ?: java.util.Locale.getDefault().language
+    return tag.lowercase().startsWith("zh")
+}
+
+/**
+ * Shown instead of the font list on a Chinese UI. The word for "language" is a
+ * tappable link that jumps to the language page — switching languages is the
+ * one action that makes the setting usable again.
+ */
+@Composable
+private fun FontUnavailableNotice(onOpenLanguage: () -> Unit) {
+    val languageWord = stringResource(R.string.language)
+    val body = stringResource(R.string.font_unavailable_body, languageWord)
+    val linkStart = body.indexOf(languageWord)
+
+    val annotated = remember(body, languageWord) {
+        buildAnnotatedString {
+            append(body)
+            if (linkStart >= 0) {
+                addStyle(
+                    SpanStyle(
+                        color = Color.Unspecified,
+                        textDecoration = TextDecoration.Underline
+                    ),
+                    linkStart,
+                    linkStart + languageWord.length
+                )
+            }
+        }
+    }
+    var layout by remember { mutableStateOf<TextLayoutResult?>(null) }
+
+    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 20.dp)) {
+        Text(
+            text = stringResource(R.string.font_unavailable_title),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(Modifier.height(10.dp))
+        Text(
+            text = annotated,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            onTextLayout = { layout = it },
+            modifier = Modifier.pointerInput(body) {
+                detectTapGestures { position ->
+                    val result = layout ?: return@detectTapGestures
+                    val offset = result.getOffsetForPosition(position)
+                    if (linkStart >= 0 && offset in linkStart until (linkStart + languageWord.length)) {
+                        onOpenLanguage()
+                    }
+                }
+            }
+        )
+    }
+}
+
+/**
+ * Weight slider: the absolute weight of body text, with one stop per file the
+ * selected face ships. Every stop is a real font file, so moving the slider
+ * always changes the rendering.
+ */
+@Composable
+private fun FontWeightRow(
+    body: Int,
+    fontKey: String,
+    enabled: Boolean,
+    onChange: (Int) -> Unit
+) {
+    val stops = remember(fontKey) { AppSettings.fontWeightStops(fontKey) }
+    val current = remember(body, stops) {
+        AppSettings.snapFontWeightBody(body, fontKey)
+    }
+    var draft by remember(current) { mutableFloatStateOf(current.toFloat()) }
+
+    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = stringResource(R.string.font_weight_title),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.weight(1f)
+            )
+            Text(
+                text = "${draft.roundToInt()}",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        Slider(
+            value = draft,
+            onValueChange = { draft = it },
+            onValueChangeFinished = {
+                onChange(AppSettings.snapFontWeightBody(draft.roundToInt(), fontKey))
+            },
+            valueRange = stops.first().toFloat()..stops.last().toFloat(),
+            steps = (stops.size - 2).coerceAtLeast(0),
+            enabled = enabled && stops.size > 1,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Text(
+            text = stringResource(
+                if (enabled) R.string.font_weight_desc else R.string.font_weight_system_hint
+            ),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
@@ -325,54 +454,6 @@ fun FontNotesScreen(onBack: () -> Unit) {
     }
 }
 
-/**
- * Weight slider, expressed as a percentage of the selected face's range so the
- * same position means the same idea on every font (100% = as bold as that face
- * goes). The label shows the weight a normal paragraph lands on. Only the
- * bundled variable faces can do this, so it is disabled — with a hint — on the
- * platform font.
- */
-@Composable
-private fun FontWeightRow(percent: Int, ceiling: Int, enabled: Boolean, onChange: (Int) -> Unit) {
-    var draft by remember(percent) { mutableFloatStateOf(percent.toFloat()) }
-
-    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = stringResource(R.string.font_weight_title),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.weight(1f)
-            )
-            Text(
-                text = "${AppSettings.bodyWeightAt(draft.roundToInt(), ceiling)}",
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-        Slider(
-            value = draft,
-            onValueChange = { draft = it },
-            onValueChangeFinished = {
-                onChange(AppSettings.snapFontWeightPercent(draft.roundToInt()))
-            },
-            valueRange = AppSettings.FONT_WEIGHT_PERCENT_MIN.toFloat()..
-                AppSettings.FONT_WEIGHT_PERCENT_MAX.toFloat(),
-            steps = (AppSettings.FONT_WEIGHT_PERCENT_MAX - AppSettings.FONT_WEIGHT_PERCENT_MIN) /
-                AppSettings.FONT_WEIGHT_PERCENT_STEP - 1,
-            enabled = enabled,
-            modifier = Modifier.fillMaxWidth()
-        )
-        Text(
-            text = stringResource(
-                if (enabled) R.string.font_weight_desc else R.string.font_weight_system_hint
-            ),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}
-
 /** One selectable typeface, previewed in its own face. */
 @Composable
 private fun FontChoiceRow(
@@ -412,8 +493,7 @@ private val FONT_CHOICES: List<FontChoice> = listOf(
     FontChoice(AppSettings.FONT_FAMILY_SYSTEM, R.string.font_family_system),
     FontChoice(AppSettings.FONT_FAMILY_LORA, R.string.font_family_lora),
     FontChoice(AppSettings.FONT_FAMILY_MANROPE, R.string.font_family_manrope),
-    FontChoice(AppSettings.FONT_FAMILY_LITERATA, R.string.font_family_literata),
-    FontChoice(AppSettings.FONT_FAMILY_HAN_SERIF, R.string.font_family_hanserif)
+    FontChoice(AppSettings.FONT_FAMILY_LITERATA, R.string.font_family_literata)
 )
 
 /** Bundled font and the scripts it covers (string resources). */
@@ -443,15 +523,6 @@ private val FONT_NOTES: List<FontNote> = listOf(
             R.string.font_cover_cyrillic,
             R.string.font_cover_greek,
             R.string.font_cover_vietnamese
-        )
-    ),
-    FontNote(
-        R.string.font_family_hanserif,
-        listOf(
-            R.string.font_cover_latin,
-            R.string.font_cover_cyrillic,
-            R.string.font_cover_greek,
-            R.string.font_cover_han
         )
     )
 )

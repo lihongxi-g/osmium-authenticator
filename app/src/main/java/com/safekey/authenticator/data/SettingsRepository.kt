@@ -30,7 +30,7 @@ data class AppSettings(
      * same slider position means "as bold as this font goes" regardless of
      * whether the font tops out at 700 or 900.
      */
-    val fontWeightPercent: Int = FONT_WEIGHT_PERCENT_DEFAULT,
+    val fontWeightBody: Int = FONT_WEIGHT_BODY_DEFAULT,
     /** Haptics: the app's own vibration is on by default; the system path is opt-in. */
     val hapticEnabled: Boolean = true,
     /** Vibration strength, 0-100. */
@@ -123,56 +123,56 @@ data class AppSettings(
         const val FONT_FAMILY_LORA = "lora"
         const val FONT_FAMILY_MANROPE = "manrope"
         const val FONT_FAMILY_LITERATA = "literata"
-        /** Noto Serif SC (思源宋体) subset: the only face that covers Chinese. */
-        const val FONT_FAMILY_HAN_SERIF = "hanserif"
 
         /**
          * Weight slider, as a percentage of each face's available range, so a
          * given position is the same *visual* idea on every font: 0% = design
          * weight, 100% = that face's boldest.
          */
-        /** Weight the design calls "body" — everything else is relative to it. */
-        const val FONT_WEIGHT_PERCENT_BASE = 400
-        const val FONT_WEIGHT_PERCENT_MIN = 0
-        const val FONT_WEIGHT_PERCENT_MAX = 100
-        const val FONT_WEIGHT_PERCENT_STEP = 10
-        const val FONT_WEIGHT_PERCENT_DEFAULT = 0
+        /**
+         * Weight slider: the **absolute weight of body text**, snapped to the
+         * files each face ships (400, 500, ... up to that face's ceiling).
+         *
+         * Every slider stop is a real file, so a changed position always means
+         * visibly heavier glyphs — the previous percentage/variable-axis
+         * approach could land between files and look like nothing happened.
+         */
+        const val FONT_WEIGHT_BODY_MIN = 400
+        const val FONT_WEIGHT_BODY_MAX = 900
+        const val FONT_WEIGHT_BODY_STEP = 100
+        const val FONT_WEIGHT_BODY_DEFAULT = 400
 
-        /** Boldest `wght` each bundled face can render. */
+        /** Boldest file each bundled face ships; the system font has none. */
         fun fontWeightCeiling(key: String): Int = when (key) {
             FONT_FAMILY_LORA -> 700
             FONT_FAMILY_MANROPE -> 800
             FONT_FAMILY_LITERATA -> 900
-            // Regular + Bold files; anything heavier is synthesised.
-            FONT_FAMILY_HAN_SERIF -> 700
-            else -> 400
+            else -> FONT_WEIGHT_BODY_MIN
         }
 
-        /** How much the slider adds to every token at [percent] of [ceiling]. */
-        fun fontWeightDelta(percent: Int, ceiling: Int): Int =
-            bodyWeightAt(percent, ceiling) - FONT_WEIGHT_PERCENT_BASE
+        /** Body weight clamped into what [key] can actually render. */
+        fun clampFontWeightBody(weight: Int, key: String): Int =
+            weight.coerceIn(FONT_WEIGHT_BODY_MIN, fontWeightCeiling(key))
 
         /**
-         * Weight for one type token at [percent] of [ceiling].
-         *
-         * The token keeps its own place in the hierarchy: body starts at 400,
-         * titles at 600, and all of them move toward the ceiling together.
+         * How far every type token moves: the difference between the chosen
+         * body weight and the design baseline. Tokens keep their relative
+         * order, so a title never ends up lighter than body text.
          */
-        fun fontWeightAt(baseWeight: Int, percent: Int, ceiling: Int): Int {
-            val p = percent.coerceIn(FONT_WEIGHT_PERCENT_MIN, FONT_WEIGHT_PERCENT_MAX)
-            val span = (ceiling - FONT_WEIGHT_PERCENT_BASE).coerceAtLeast(0)
-            return (baseWeight + span * p / 100).coerceIn(100, ceiling)
+        fun fontWeightDelta(weight: Int, key: String): Int =
+            clampFontWeightBody(weight, key) - FONT_WEIGHT_BODY_MIN
+
+        /** Slider stops for [key], e.g. 400/500/600/700 for Lora. */
+        fun fontWeightStops(key: String): List<Int> {
+            val ceiling = fontWeightCeiling(key)
+            return (FONT_WEIGHT_BODY_MIN..ceiling step FONT_WEIGHT_BODY_STEP).toList()
         }
 
-        /** Weight a normal paragraph lands on — what the slider label shows. */
-        fun bodyWeightAt(percent: Int, ceiling: Int): Int =
-            fontWeightAt(FONT_WEIGHT_PERCENT_BASE, percent, ceiling)
-
-        /** Rounds a raw slider value onto the step grid. */
-        fun snapFontWeightPercent(value: Int): Int {
-            val clamped = value.coerceIn(FONT_WEIGHT_PERCENT_MIN, FONT_WEIGHT_PERCENT_MAX)
-            return FONT_WEIGHT_PERCENT_MIN +
-                (clamped - FONT_WEIGHT_PERCENT_MIN) / FONT_WEIGHT_PERCENT_STEP * FONT_WEIGHT_PERCENT_STEP
+        /** Rounds a raw slider value onto [key]'s stop grid. */
+        fun snapFontWeightBody(value: Int, key: String): Int {
+            val stops = fontWeightStops(key)
+            val clamped = value.coerceIn(stops.first(), stops.last())
+            return stops.minByOrNull { kotlin.math.abs(it - clamped) } ?: stops.first()
         }
 
         /** Every value the font setting accepts; anything else stores "system". */
@@ -180,8 +180,7 @@ data class AppSettings(
             FONT_FAMILY_SYSTEM,
             FONT_FAMILY_LORA,
             FONT_FAMILY_MANROPE,
-            FONT_FAMILY_LITERATA,
-            FONT_FAMILY_HAN_SERIF
+            FONT_FAMILY_LITERATA
         )
 
         // ---- haptics ----
@@ -269,7 +268,7 @@ class SettingsRepository(
         val FONT_SCALE_PERCENT = intPreferencesKey("font_scale_percent")
         val FONT_SCALE_ENABLED = booleanPreferencesKey("font_scale_enabled")
         val FONT_FAMILY = stringPreferencesKey("font_family")
-        val FONT_WEIGHT_PERCENT = intPreferencesKey("font_weight_percent")
+        val FONT_WEIGHT_BODY = intPreferencesKey("font_weight_body")
         val HAPTIC_ENABLED = booleanPreferencesKey("haptic_enabled")
         val HAPTIC_INTENSITY = intPreferencesKey("haptic_intensity_percent")
         val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
@@ -323,9 +322,8 @@ class SettingsRepository(
             fontFamily = (prefs[Keys.FONT_FAMILY] ?: AppSettings.FONT_FAMILY_SYSTEM)
                 .takeIf { it in AppSettings.FONT_FAMILY_CHOICES }
                 ?: AppSettings.FONT_FAMILY_SYSTEM,
-            fontWeightPercent = (prefs[Keys.FONT_WEIGHT_PERCENT]
-                ?: AppSettings.FONT_WEIGHT_PERCENT_DEFAULT)
-                .coerceIn(AppSettings.FONT_WEIGHT_PERCENT_MIN, AppSettings.FONT_WEIGHT_PERCENT_MAX),
+            fontWeightBody = (prefs[Keys.FONT_WEIGHT_BODY] ?: AppSettings.FONT_WEIGHT_BODY_DEFAULT)
+                .coerceIn(AppSettings.FONT_WEIGHT_BODY_MIN, AppSettings.FONT_WEIGHT_BODY_MAX),
             hapticEnabled = prefs[Keys.HAPTIC_ENABLED] ?: true,
             hapticIntensityPercent = (prefs[Keys.HAPTIC_INTENSITY]
                 ?: AppSettings.HAPTIC_INTENSITY_DEFAULT)
@@ -373,12 +371,12 @@ class SettingsRepository(
         context.dataStore.edit { it[Keys.DYNAMIC_COLOR] = enabled }
     }
 
-    /** 0-100 % of the face's range; clamped, ignored for the platform font. */
-    suspend fun setFontWeightPercent(percent: Int) {
+    /** Absolute body weight (400-900); clamped, ignored by the platform font. */
+    suspend fun setFontWeightBody(weight: Int) {
         context.dataStore.edit {
-            it[Keys.FONT_WEIGHT_PERCENT] = percent.coerceIn(
-                AppSettings.FONT_WEIGHT_PERCENT_MIN,
-                AppSettings.FONT_WEIGHT_PERCENT_MAX
+            it[Keys.FONT_WEIGHT_BODY] = weight.coerceIn(
+                AppSettings.FONT_WEIGHT_BODY_MIN,
+                AppSettings.FONT_WEIGHT_BODY_MAX
             )
         }
     }

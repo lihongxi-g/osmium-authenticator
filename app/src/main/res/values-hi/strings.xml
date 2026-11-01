@@ -652,12 +652,13 @@
     <string name="font_size_enable_desc">बंद होने पर Osmium का डिफ़ॉल्ट टेक्स्ट आकार लौट आता है और स्लाइडर लॉक रहता है</string>
     <string name="font_size_off">बंद</string>
     <string name="font_family_title">फ़ॉन्ट</string>
+    <string name="font_unavailable_title">फ़ॉन्ट सेटिंग उपलब्ध नहीं</string>
+    <string name="font_unavailable_body">फ़ॉन्ट पैकेज बहुत बड़े हैं, इसलिए चीनी अभी शामिल नहीं है। फ़ॉन्ट चुनना चाहें तो %1$s बदलें — या Osmium के लिए एक चीनी फ़ॉन्ट डिज़ाइन करें, Osmium आपके काम का इंतज़ार करेगा ❤️</string>
     <string name="font_family_desc">इंटरफ़ेस का फ़ॉन्ट</string>
     <string name="font_family_system">सिस्टम डिफ़ॉल्ट</string>
     <string name="font_family_lora">Lora</string>
     <string name="font_family_manrope">Manrope</string>
     <string name="font_family_literata">Literata</string>
-    <string name="font_family_hanserif">Noto Serif SC</string>
     <string name="font_notes_title">फ़ॉन्ट नोट्स</string>
     <string name="font_notes_summary">लाइसेंस और लिपि कवरेज</string>
     <string name="font_notes_intro">शामिल फ़ॉन्ट SIL Open Font License 1.1 के अंतर्गत बिना बदलाव ऐप के साथ वितरित होते हैं; हर फ़ॉन्ट का पूरा लाइसेंस पाठ ऐप में शामिल है।</string>
@@ -665,7 +666,6 @@
     <string name="font_cover_cyrillic">सिरिलिक</string>
     <string name="font_cover_greek">ग्रीक</string>
     <string name="font_cover_vietnamese">वियतनामी</string>
-    <string name="font_cover_han">चीनी</string>
     <string name="font_family_sample">Aa Bb Cc 0123</string>
     <string name="font_weight_title">मोटाई</string>
     <string name="font_weight_desc">इस फ़ॉन्ट की अधिकतम मोटाई का प्रतिशत: 100% उसकी सबसे मोटी स्थिति है, हर फ़ॉन्ट की सीमा अलग होती है</string>

@@ -652,12 +652,13 @@
     <string name="font_size_enable_desc">Aus: Osmium nutzt wieder die Standardtextgröße, der Regler ist gesperrt</string>
     <string name="font_size_off">Aus</string>
     <string name="font_family_title">Schrift</string>
+    <string name="font_unavailable_title">Schrifteinstellungen nicht verfügbar</string>
+    <string name="font_unavailable_body">Die Schriftpakete sind zu groß, daher ist Chinesisch noch nicht abgedeckt. Ändere die %1$s, wenn du eine Schrift wählen möchtest — oder entwirf eine chinesische Schrift für Osmium: Osmium freut sich auf deine Arbeit ❤️</string>
     <string name="font_family_desc">Schriftart der Oberfläche</string>
     <string name="font_family_system">Systemstandard</string>
     <string name="font_family_lora">Lora</string>
     <string name="font_family_manrope">Manrope</string>
     <string name="font_family_literata">Literata</string>
-    <string name="font_family_hanserif">Noto Serif SC</string>
     <string name="font_notes_title">Hinweise zu den Schriften</string>
     <string name="font_notes_summary">Lizenz und Zeichensätze</string>
     <string name="font_notes_intro">Die mitgelieferten Schriften werden unverändert unter der SIL Open Font License 1.1 verteilt. Der vollständige Lizenztext jeder Schrift liegt im App-Paket bei.</string>
@@ -665,7 +666,6 @@
     <string name="font_cover_cyrillic">Kyrillisch</string>
     <string name="font_cover_greek">Griechisch</string>
     <string name="font_cover_vietnamese">Vietnamesisch</string>
-    <string name="font_cover_han">Chinesisch</string>
     <string name="font_family_sample">Aa Bb Cc 0123</string>
     <string name="font_weight_title">Stärke</string>
     <string name="font_weight_desc">Anteil der Stärke, die diese Schrift erreicht: 100 % ist ihr Maximum; jede Schrift hat eine andere Obergrenze</string>

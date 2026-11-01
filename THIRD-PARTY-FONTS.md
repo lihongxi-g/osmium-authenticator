@@ -1,6 +1,6 @@
 # Third-party fonts
 
-Osmium bundles four optional interface faces. All four are licensed under the
+Osmium bundles three optional interface faces. All three are licensed under the
 **SIL Open Font License, Version 1.1**, which permits bundling and
 redistribution inside an application as long as the copyright notice and the
 licence travel with the font.
@@ -18,33 +18,16 @@ file.
 
 | App label | Files (`app/src/main/res/font/`) | Sizes | Scripts |
 |---|---|---|---|
-| Lora | `lora.ttf` (400), `lora_semibold.ttf` (600), `lora_bold.ttf` (700) | 207 / 132 / 132 KB | latin, latin-ext, cyrillic, cyrillic-ext, vietnamese |
-| Manrope | `manrope.ttf` (400), `manrope_semibold.ttf` (600), `manrope_extrabold.ttf` (800) | 154 / 95 / 96 KB | latin, latin-ext, cyrillic, cyrillic-ext, greek, vietnamese |
-| Literata | `literata.ttf` (400), `literata_semibold.ttf` (600), `literata_black.ttf` (900) | 933 / 525 / 503 KB | latin, latin-ext, cyrillic, cyrillic-ext, greek, greek-ext, vietnamese |
-| Noto Serif SC / 思源宋体 | `hanserif.ttf` (400), `hanserif_bold.ttf` (700) | 7.5 MB / 4.4 MB | latin, latin-ext, cyrillic, greek, **GB2312 (简体)**, **Big5 level-1 (繁體)** |
+| Lora | `lora` (400), `lora_medium` (500), `lora_semibold` (600), `lora_bold` (700) | 207 / 132 / 132 / 132 KB | latin, latin-ext, cyrillic, cyrillic-ext, vietnamese |
+| Manrope | `manrope` (400), `manrope_medium` (500), `manrope_semibold` (600), `manrope_bold` (700), `manrope_extrabold` (800) | 154 / 95 / 95 / 95 / 96 KB | latin, latin-ext, cyrillic, cyrillic-ext, greek, vietnamese |
+| Literata | `literata` (400), `literata_medium` (500), `literata_semibold` (600), `literata_bold` (700), `literata_extrabold` (800), `literata_black` (900) | 933 / 525 / 525 / 524 / 523 / 503 KB | latin, latin-ext, cyrillic, cyrillic-ext, greek, greek-ext, vietnamese |
 
 Measured from the shipped files: Lora 778 code points, Manrope 678, Literata
-1163, Noto Serif SC subset 9823. The three Latin faces have **no** CJK, Hangul
-or Devanagari, so Chinese, Japanese, Korean and Hindi fall back to the system
-font when one of them is selected — which is why the Chinese face exists. The
-Noto Serif SC subset has no Japanese kana, Korean Hangul or Devanagari either.
-
-## Noto Serif SC subset
-
-- Built from `NotoSerifSC[wght].ttf` (Google Fonts `ofl/notoserifsc`, 24 MB,
-  variable `wght` 200–900).
-- Character set: every character used by the app's own strings in all 11
-  locales, plus **GB2312** (6763 hanzi, Simplified), **Big5 level-1** (5401
-  hanzi, Traditional), Latin-1 + Latin Extended-A/B + Latin Extended
-  Additional, Greek, Cyrillic, CJK punctuation and the fullwidth block.
-  Result: 9823 code points, ~7.5 MB, `wght` axis preserved and re-based to
-  400–900 so the default instance is Regular rather than ExtraLight.
-- The upstream file has **no U+1E9E (ẞ)**; German text with a capital sharp S
-  falls back to the system font for that single glyph. Everything else in the
-  app's German strings is covered.
-- Regenerate with `python3 scripts/build_han_serif_subset.py` (needs
-  `fonttools`); the script pins the character ranges, so the result is
-  reproducible.
+1163. **None of the three has CJK, Hangul or Devanagari**, so Chinese, Japanese,
+Korean and Hindi text renders with the system font. A Chinese face was bundled
+in an earlier revision of this branch and dropped again: its subset files alone
+weighed 12 MB, and the app explains the gap on the font page instead (with a
+shortcut to the language setting).
 
 ## Static instances
 
@@ -66,29 +49,23 @@ needs only regular + bold.
 - **Literata** — Copyright 2017 The Literata Project Authors
   (<https://github.com/googlefonts/literata>). Source: Google Fonts
   `ofl/literata`.
-- **Noto Serif SC / 思源宋体** — Copyright 2012 Google Inc. / Copyright 2014–2021
-  Adobe (<https://github.com/adobe-fonts/source-han-serif>), with Reserved Font
-  Name "Source". Source: Google Fonts `ofl/notoserifsc`.
 
 Full licence texts ship inside the APK:
 
 - `app/src/main/assets/licenses/ofl_lora.txt` (+ upstream `FONTLOG`)
 - `app/src/main/assets/licenses/ofl_manrope.txt`
 - `app/src/main/assets/licenses/ofl_literata.txt`
-- `app/src/main/assets/licenses/ofl_notoserifsc.txt`
 
 The attribution is also visible in-app: Settings → About → Attributions →
 *Bundled libraries*, one entry per face with a link to its upstream project.
 
-## Why these four
+## Why these three
 
 - **Lora** — a warm, slightly calligraphic serif.
 - **Manrope** — the sans-serif option: compact, geometric, Cyrillic + Greek
   included.
 - **Literata** — drawn for screen reading; the sturdiest Latin face at 11–16 sp.
-- **Noto Serif SC** — the Chinese option: the only face that renders 简体 and
-  繁體 without falling back, and its Latin is the Source Serif design, so a
-  Chinese UI stays consistent instead of mixing two typefaces.
+
 
 Only one face is applied at a time, and the platform font stays the default.
 Verification codes ignore all of them and stay monospace.

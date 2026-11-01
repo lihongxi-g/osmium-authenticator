@@ -669,12 +669,13 @@
     <string name="font_size_enable_desc">Off restores Osmium\'s default text size and locks the slider</string>
     <string name="font_size_off">Off</string>
     <string name="font_family_title">Font</string>
+    <string name="font_unavailable_title">Font settings unavailable</string>
+    <string name="font_unavailable_body">The font packages are too large, so Chinese is not covered yet. Change the %1$s if you want to choose a font — or design a Chinese font for Osmium, and Osmium would love to see your work ❤️</string>
     <string name="font_family_desc">Interface typeface</string>
     <string name="font_family_system">System default</string>
     <string name="font_family_lora">Lora</string>
     <string name="font_family_manrope">Manrope</string>
     <string name="font_family_literata">Literata</string>
-    <string name="font_family_hanserif">Noto Serif SC</string>
     <string name="font_notes_title">Font notes</string>
     <string name="font_notes_summary">Licence and script coverage</string>
     <string name="font_notes_intro">The bundled fonts travel with the app unmodified under the SIL Open Font License 1.1. The full licence text of each one is included in the app package.</string>
@@ -682,7 +683,6 @@
     <string name="font_cover_cyrillic">Cyrillic</string>
     <string name="font_cover_greek">Greek</string>
     <string name="font_cover_vietnamese">Vietnamese</string>
-    <string name="font_cover_han">Chinese</string>
     <string name="font_family_sample">Aa Bb Cc 0123</string>
     <string name="font_weight_title">Weight</string>
     <string name="font_weight_desc">Percentage of the weight this font can reach: 100% is as bold as it goes, and each font has its own ceiling</string>

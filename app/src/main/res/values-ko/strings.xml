@@ -652,12 +652,13 @@
     <string name="font_size_enable_desc">끄면 Osmium 기본 글자 크기로 돌아가고 슬라이더를 조정할 수 없습니다</string>
     <string name="font_size_off">끔</string>
     <string name="font_family_title">글꼴</string>
+    <string name="font_unavailable_title">글꼴 설정을 사용할 수 없습니다</string>
+    <string name="font_unavailable_body">글꼴 패키지가 너무 커서 중국어는 아직 지원하지 않습니다. 글꼴을 고르려면 %1$s을(를) 변경하세요. Osmium을 위한 중국어 글꼴을 디자인해 주신다면 Osmium은 당신의 작품을 기다립니다 ❤️</string>
     <string name="font_family_desc">인터페이스 글꼴</string>
     <string name="font_family_system">시스템 기본</string>
     <string name="font_family_lora">Lora</string>
     <string name="font_family_manrope">Manrope</string>
     <string name="font_family_literata">Literata</string>
-    <string name="font_family_hanserif">Noto Serif SC</string>
     <string name="font_notes_title">글꼴 설명</string>
     <string name="font_notes_summary">라이선스와 문자 지원</string>
     <string name="font_notes_intro">포함된 글꼴은 SIL Open Font License 1.1에 따라 수정 없이 배포되며, 각 글꼴의 라이선스 전문이 앱에 포함되어 있습니다.</string>
@@ -665,7 +666,6 @@
     <string name="font_cover_cyrillic">키릴 문자</string>
     <string name="font_cover_greek">그리스 문자</string>
     <string name="font_cover_vietnamese">베트남어</string>
-    <string name="font_cover_han">중국어</string>
     <string name="font_family_sample">Aa Bb Cc 0123</string>
     <string name="font_weight_title">굵기</string>
     <string name="font_weight_desc">이 글꼴이 낼 수 있는 굵기의 비율입니다. 100%가 최대이며 상한은 글꼴마다 다릅니다</string>

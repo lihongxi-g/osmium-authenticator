@@ -46,7 +46,7 @@ fun SafeKeyTheme(
     fontScaleEnabled: Boolean = false,
     fontScalePercent: Int = AppSettings.FONT_SCALE_PERCENT_DEFAULT,
     fontFamily: String = AppSettings.FONT_FAMILY_SYSTEM,
-    fontWeightPercent: Int = AppSettings.FONT_WEIGHT_PERCENT_DEFAULT,
+    fontWeightBody: Int = AppSettings.FONT_WEIGHT_BODY_DEFAULT,
     hapticEnabled: Boolean = true,
     hapticIntensityPercent: Int = AppSettings.HAPTIC_INTENSITY_DEFAULT,
     content: @Composable () -> Unit
@@ -76,8 +76,8 @@ fun SafeKeyTheme(
     val typeface = remember(fontFamily) { interfaceFontFamily(fontFamily) }
     // The slider moves the type tokens, not a font axis: the bundled faces ship
     // fixed weight files, so the change always lands on real glyphs.
-    val weightDelta = remember(fontFamily, fontWeightPercent) {
-        AppSettings.fontWeightDelta(fontWeightPercent, AppSettings.fontWeightCeiling(fontFamily))
+    val weightDelta = remember(fontFamily, fontWeightBody) {
+        AppSettings.fontWeightDelta(fontWeightBody, fontFamily)
     }
     val typography = remember(fontScale, typeface, weightDelta) {
         AppTypography.scaledTo(fontScale).withFamily(typeface).withWeightDelta(weightDelta)

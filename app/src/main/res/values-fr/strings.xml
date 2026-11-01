@@ -652,12 +652,13 @@
     <string name="font_size_enable_desc">Désactivé : revient à la taille de texte par défaut d\'Osmium, le curseur est verrouillé</string>
     <string name="font_size_off">Désactivé</string>
     <string name="font_family_title">Police</string>
+    <string name="font_unavailable_title">Réglages de police indisponibles</string>
+    <string name="font_unavailable_body">Les paquets de polices sont trop volumineux, le chinois n’est donc pas encore couvert. Changez la %1$s pour choisir une police — ou dessinez une police chinoise pour Osmium : Osmium sera ravi de voir votre travail ❤️</string>
     <string name="font_family_desc">Police de l’interface</string>
     <string name="font_family_system">Police du système</string>
     <string name="font_family_lora">Lora</string>
     <string name="font_family_manrope">Manrope</string>
     <string name="font_family_literata">Literata</string>
-    <string name="font_family_hanserif">Noto Serif SC</string>
     <string name="font_notes_title">À propos des polices</string>
     <string name="font_notes_summary">Licence et jeux de caractères</string>
     <string name="font_notes_intro">Les polices incluses sont distribuées non modifiées sous SIL Open Font License 1.1. Le texte intégral de chaque licence est fourni dans l’application.</string>
@@ -665,7 +666,6 @@
     <string name="font_cover_cyrillic">Cyrillique</string>
     <string name="font_cover_greek">Grec</string>
     <string name="font_cover_vietnamese">Vietnamien</string>
-    <string name="font_cover_han">Chinois</string>
     <string name="font_family_sample">Aa Bb Cc 0123</string>
     <string name="font_weight_title">Graisse</string>
     <string name="font_weight_desc">Pourcentage de la graisse que cette police peut atteindre : 100 % est son maximum, et chaque police a sa propre limite</string>

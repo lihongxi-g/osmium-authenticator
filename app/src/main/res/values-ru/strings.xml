@@ -652,12 +652,13 @@
     <string name="font_size_enable_desc">Выкл.: возвращается стандартный размер текста Osmium, ползунок заблокирован</string>
     <string name="font_size_off">Выкл.</string>
     <string name="font_family_title">Шрифт</string>
+    <string name="font_unavailable_title">Настройки шрифта недоступны</string>
+    <string name="font_unavailable_body">Пакеты шрифтов слишком велики, поэтому китайский пока не поддерживается. Измените %1$s, если хотите выбрать шрифт, — или создайте китайский шрифт для Osmium: Osmium будет рад вашей работе ❤️</string>
     <string name="font_family_desc">Шрифт интерфейса</string>
     <string name="font_family_system">Системный</string>
     <string name="font_family_lora">Lora</string>
     <string name="font_family_manrope">Manrope</string>
     <string name="font_family_literata">Literata</string>
-    <string name="font_family_hanserif">Noto Serif SC</string>
     <string name="font_notes_title">О шрифтах</string>
     <string name="font_notes_summary">Лицензия и поддержка письменностей</string>
     <string name="font_notes_intro">Встроенные шрифты распространяются без изменений по лицензии SIL Open Font License 1.1; полный текст лицензии каждого шрифта входит в состав приложения.</string>
@@ -665,7 +666,6 @@
     <string name="font_cover_cyrillic">Кириллица</string>
     <string name="font_cover_greek">Греческий</string>
     <string name="font_cover_vietnamese">Вьетнамский</string>
-    <string name="font_cover_han">Китайский</string>
     <string name="font_family_sample">Aa Bb Cc 0123</string>
     <string name="font_weight_title">Насыщенность</string>
     <string name="font_weight_desc">Доля доступной насыщенности: 100 % — максимум для этого шрифта, и у каждого шрифта свой предел</string>
