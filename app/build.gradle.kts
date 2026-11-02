@@ -54,6 +54,12 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
+            // F-Droid rebuilds from the tag and compares byte-for-byte against the
+            // published APK. AGP writes the build-time git revision into
+            // META-INF/version-control-info.textproto, so the two only match when the
+            // release APK happened to be built at the exact commit the tag points to.
+            // That string is only used by Android Studio's "jump to commit", so drop it.
+            vcsInfo.include = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             if (file(System.getenv("SAFEKEY_KEYSTORE") ?: "safekey.keystore").exists()) {
                 signingConfig = signingConfigs.getByName("safekey")
