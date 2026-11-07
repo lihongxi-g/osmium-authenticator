@@ -63,8 +63,9 @@ jobs:
           set -euo pipefail
           version=$(grep -oP 'versionName\s*=\s*"\K[^"]+' app/build.gradle.kts)
           # Dotted version with an optional -suffix. Pinned to one exact string
-          # before, which made every beta/fix build fail here.
-          echo "$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$'
+          # before, which made every beta/fix build fail here. Four-segment
+          # versions (2.6.2.1) are bugfix builds and must pass too.
+          echo "$version" | grep -Eq '^[0-9]+(\.[0-9]+)+(-[0-9A-Za-z.]+)?$'
           echo "building $version"
           mkdir -p dist
           for abi in arm64-v8a armeabi-v7a x86_64; do
