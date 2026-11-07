@@ -1,8 +1,16 @@
 package com.safekey.authenticator.ui.screens
 
+import android.app.Activity
 import android.content.ClipData
+import android.content.ClipDescription
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.ContextWrapper
+import android.os.Build
+import android.os.Handler
+import android.os.Looper
+import android.os.PersistableBundle
+import android.view.WindowManager
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -39,6 +47,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -49,6 +58,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontFamily
@@ -58,6 +69,8 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 
 import com.safekey.authenticator.MainViewModel
 import com.safekey.authenticator.R
@@ -69,6 +82,7 @@ import com.safekey.authenticator.network.DiscoveredDevice
 import com.safekey.authenticator.network.LanGuard
 import com.safekey.authenticator.network.LanPeer
 import com.safekey.authenticator.network.LanSendOutcome
+import com.safekey.authenticator.network.LanSendTarget
 import com.safekey.authenticator.network.LanSession
 import com.safekey.authenticator.network.LanThreatReport
 import com.safekey.authenticator.network.LanThreatSeverity
@@ -84,10 +98,23 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 
+
+/** A pairing code is a one-shot credential: it expires after this much idling. */
+private const val PAIRING_CODE_IDLE_TIMEOUT_MS = 180_000L
+
+/** How long a copied pairing code may stay on the clipboard. */
+private const val CLIPBOARD_CLEAR_DELAY_MS = 30_000L
+
+/**
+ * Pre-Android-13 spelling of [ClipDescription.EXTRA_IS_SENSITIVE]; the platform
+ * clip overlay reads this key on Android 10-12.
+ */
+private const val LEGACY_EXTRA_IS_SENSITIVE = "android.content.extra.IS_SENSITIVE"
 
 /**
  * LAN transfer (protocol v4).
@@ -456,6 +483,14 @@ private fun SendTabContent(
                     return@Button
                 }
 
+                // A transfer belongs on the local network: refuse a public,
+                // multicast or loopback target before anything is opened. A host
+                // name is resolved and checked again on the IO path.
+                if (LanSendTarget.literalIsLocalUnicast(targetHost) == false) {
+                    errorText = lan.targetNotLocal
+                    return@Button
+                }
+
                 val block = blockedByMe(targetHost, null)
                 if (block != null) {
                     errorText = lan.blockedByMe
@@ -517,6 +552,7 @@ private fun SendTabContent(
                         is LanSendOutcome.RefusedByPeer -> {
                             errorText = lan.blockedByPeer
                         }
+                        LanSendOutcome.NotLocal -> errorText = lan.targetNotLocal
                         LanSendOutcome.ProofFailed -> {
                             errorText = context.getString(R.string.lan_error_wrong_code)
                         }
@@ -565,6 +601,11 @@ private fun ReceiveTabContent(
     val context = LocalContext.current
     val app = context.applicationContext as SafeKeyApp
     val scope = rememberCoroutineScope()
+    val view = LocalView.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    // Read once per recomposition: only used to restore the app-wide screenshot
+    // policy when this page goes away.
+    val allowScreenshots = vm.settings.collectAsState().value.allowScreenshots
 
     var localIp by remember { mutableStateOf("") }
     var port by remember { mutableIntStateOf(0) }
@@ -621,6 +662,15 @@ private fun ReceiveTabContent(
                 onVaultReceived = { vault, _ ->
                     isTransferring = false
                     isDone = true
+                    // The code that just moved a vault is spent: drop it, and close
+                    // the socket once the handler that called us has finished.
+                    pairingCode = ""
+                    scope.launch {
+                        delay(250)
+                        server.stop()
+                        localIp = ""
+                        port = 0
+                    }
                     // Receiver wording: the accounts came *in* on this device.
                     statusText = context.getString(
                         R.string.lan_status_done_receive, vault.accounts.size
@@ -650,6 +700,20 @@ private fun ReceiveTabContent(
         }
     }
 
+    /**
+     * Ends the session on this device: socket down, mDNS withdrawn, code
+     * discarded. Whatever [message] says is what the user is left looking at.
+     */
+    fun stopListening(message: String?) {
+        server.stop()
+        pairingCode = ""
+        localIp = ""
+        port = 0
+        isTransferring = false
+        errorText = null
+        if (message != null) statusText = message
+    }
+
     LaunchedEffect(Unit) {
         startServer()
     }
@@ -658,6 +722,44 @@ private fun ReceiveTabContent(
         onDispose {
             startJob?.cancel()
             server.stop()
+        }
+    }
+
+    // A pairing code is a one-shot credential, so it must not outlive its
+    // welcome: after the idle window the session closes on its own. The effect
+    // restarts (and therefore resets) whenever a peer connects, the code changes
+    // or a transfer completes.
+    LaunchedEffect(pairingCode, isTransferring, isDone) {
+        if (pairingCode.isEmpty() || isTransferring || isDone) return@LaunchedEffect
+        delay(PAIRING_CODE_IDLE_TIMEOUT_MS)
+        stopListening(lan.idleStopped)
+    }
+
+    // A code on a screen nobody is looking at is a code an attacker can still
+    // use, so leaving the foreground ends the session. Coming back shows the
+    // refresh button: the next code has to be asked for on purpose.
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_PAUSE) {
+                if (pairingCode.isNotEmpty() || isTransferring) {
+                    stopListening(lan.idleStopped)
+                }
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
+    // The 12 digits on this page are the last key to the vault, so the page
+    // blocks screenshots and screen recording even when the user allowed them
+    // app-wide. The policy is restored on the way out.
+    DisposableEffect(view, allowScreenshots) {
+        val window = view.context.findActivity()?.window
+        window?.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
+        onDispose {
+            if (allowScreenshots) {
+                window?.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
+            }
         }
     }
 
@@ -715,11 +817,7 @@ private fun ReceiveTabContent(
                             icon = AppIcons.ContentCopy,
                             contentDescription = stringResource(R.string.copy_code),
                             onClick = {
-                                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE)
-                                    as? ClipboardManager
-                                clipboard?.setPrimaryClip(
-                                    ClipData.newPlainText("Pairing Code", pairingCode)
-                                )
+                                copyPairingCode(context, pairingCode)
                                 vm.showToast(context.getString(R.string.code_copied))
                             },
                             tint = MaterialTheme.colorScheme.onPrimaryContainer
@@ -890,8 +988,12 @@ private fun rememberLanRiskConfirmation(
     }
     return { report, peer ->
         // An unreadable scan is "unknown", not "safe": ask instead of passing
-        // the transfer through on a state the device could not verify.
-        if (report != null && !report.hasThreats && peer?.threatCodes.isNullOrEmpty()) true
+        // the transfer through on a state the device could not verify. A report
+        // whose device table could not be read is unknown too — that is the
+        // normal case on Android 10+, where /proc/net/arp is hidden.
+        if (report != null && !report.hasThreats && report.arpAvailable &&
+            peer?.threatCodes.isNullOrEmpty()
+        ) true
         else if (pending != null) false
         else {
             val request = PendingLanRisk(report, peer)
@@ -932,6 +1034,8 @@ private fun LanRiskDialog(
             Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 if (localReport == null) {
                     Text(lan.unknownScan, style = MaterialTheme.typography.bodyMedium)
+                } else if (!localReport.arpAvailable) {
+                    Text(lan.scanUnavailable, style = MaterialTheme.typography.bodyMedium)
                 } else if (local.isEmpty()) {
                     Text(lan.riskNone, style = MaterialTheme.typography.bodyMedium)
                 } else {
@@ -968,4 +1072,51 @@ private fun LanRiskDialog(
             }
         }
     )
+}
+
+/** Walks the context chain: a Compose screen does not always see the Activity. */
+private fun Context.findActivity(): Activity? {
+    var current: Context = this
+    while (current is ContextWrapper) {
+        if (current is Activity) return current
+        current = current.baseContext
+    }
+    return null
+}
+
+/**
+ * Puts the pairing code on the clipboard as sensitive content and takes it back
+ * after [CLIPBOARD_CLEAR_DELAY_MS].
+ *
+ * Without the sensitive flag the system clip overlay shows the code in clear and
+ * every keyboard or clipboard-history app may keep a copy; without the delayed
+ * clear the code would linger in that history long after the session ends. The
+ * clear only fires when the clipboard still holds this exact code, so it cannot
+ * eat something the user copied afterwards.
+ */
+private fun copyPairingCode(context: Context, code: String) {
+    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager ?: return
+    val clip = ClipData.newPlainText("Pairing Code", code)
+    clip.description.extras = PersistableBundle().apply {
+        if (Build.VERSION.SDK_INT >= 33) {
+            putBoolean(ClipDescription.EXTRA_IS_SENSITIVE, true)
+        } else {
+            putBoolean(LEGACY_EXTRA_IS_SENSITIVE, true)
+        }
+    }
+    clipboard.setPrimaryClip(clip)
+    Handler(Looper.getMainLooper()).postDelayed({
+        val current = clipboard.primaryClip
+        val currentText = if (current != null && current.itemCount == 1) {
+            current.getItemAt(0).text?.toString()
+        } else {
+            null
+        }
+        if (currentText != code) return@postDelayed
+        if (Build.VERSION.SDK_INT >= 28) {
+            clipboard.clearPrimaryClip()
+        } else {
+            clipboard.setPrimaryClip(ClipData.newPlainText("", ""))
+        }
+    }, CLIPBOARD_CLEAR_DELAY_MS)
 }

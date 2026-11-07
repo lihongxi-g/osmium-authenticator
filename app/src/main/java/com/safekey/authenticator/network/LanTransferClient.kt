@@ -192,6 +192,12 @@ class LanTransferClient(private val context: Context) {
         isBlocked: suspend (ip: String, mac: String?, deviceId: String) -> Boolean,
         confirmPeer: suspend (LanPeer) -> Boolean
     ): LanSendOutcome = withContext(Dispatchers.IO) {
+        // A transfer belongs on the local network. Refuse a public, multicast or
+        // loopback target before a socket exists — the payload is encrypted, but
+        // handing an off-network attacker a captured sample is still a downgrade
+        // of what this feature promises.
+        if (!LanSendTarget.isLocalPeer(host)) return@withContext LanSendOutcome.NotLocal
+
         val socket = Socket()
         activeSocket = socket
         try {
@@ -310,6 +316,9 @@ sealed interface LanSendOutcome {
     /** A risk dialog was cancelled, or a peer did not approve the transfer. */
     data object Cancelled : LanSendOutcome
     data object Incompatible : LanSendOutcome
+
+    /** The target address is not a local unicast address, so nothing was sent. */
+    data object NotLocal : LanSendOutcome
 
     /** Payload delivered and acknowledged by the receiving device. */
     data class Delivered(val peer: LanPeer) : LanSendOutcome

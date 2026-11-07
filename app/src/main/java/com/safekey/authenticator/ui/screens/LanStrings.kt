@@ -32,6 +32,9 @@ class LanStrings private constructor(
     val updateBoth: String,
     val waitingSender: String,
     val unknownScan: String,
+    val scanUnavailable: String,
+    val idleStopped: String,
+    val targetNotLocal: String,
     val riskCodes: Map<String, String>
 ) {
 
@@ -65,6 +68,9 @@ class LanStrings private constructor(
             updateBoth = "Update Osmium on both devices before transferring.",
             waitingSender = "Waiting for the sending device…",
             unknownScan = "This device could not read its own network state, so no risk check was possible. Continue only if you trust this network.",
+            scanUnavailable = "This system does not let Osmium read the local device table, so a man-in-the-middle check was not possible. Continue only if you trust this network.",
+            idleStopped = "Listening stopped: this screen was idle, so the code is no longer valid. Show a new code to continue.",
+            targetNotLocal = "That address is not on your local network — nothing was sent.",
             riskCodes = mapOf(
                 "wifi_open" to "The Wi-Fi network is open — anyone nearby can read its traffic.",
                 "wifi_wep" to "The Wi-Fi network uses WEP, which is broken.",
@@ -99,6 +105,9 @@ class LanStrings private constructor(
             updateBoth = "请先将两台设备的 Osmium 都更新到新版再传输。",
             waitingSender = "等待发送方设备连接…",
             unknownScan = "本机无法读取当前网络状态，未能完成风险检测。请确认你信任当前网络后再继续。",
+            scanUnavailable = "本系统不允许 Osmium 读取局域网设备表，无法检测中间人风险。请确认你信任当前网络后再继续。",
+            idleStopped = "页面长时间无操作，已停止监听，原验证码作废。需要继续请重新显示新的验证码。",
+            targetNotLocal = "目标地址不在局域网内，未发送任何数据。",
             riskCodes = mapOf(
                 "wifi_open" to "当前 Wi-Fi 为开放网络，附近任何人都能读取流量。",
                 "wifi_wep" to "当前 Wi-Fi 使用已失效的 WEP 加密。",

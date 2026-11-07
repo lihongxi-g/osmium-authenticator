@@ -32,13 +32,44 @@ class LanRiskOrderTest(unittest.TestCase):
         self.assertIn("const val ERR_PROOF", server)
         self.assertIn("else ERR_PROOF", server)
         # Only a proved-before-prompted failure may spend the attempt budget.
-        self.assertIn("failed = !prompted", server)
+        self.assertIn("charge = !prompted", server)
         screen = (SRC / "ui/screens/LanTransferScreen.kt").read_text()
         self.assertIn("LanTransferServer.ERR_PROOF", screen)
+
+    def test_a_stranger_cannot_spend_the_attempt_budget(self):
+        server = (SRC / "network/LanTransferServer.kt").read_text()
+        # Junk/timeouts before the code was proven are the limiter's business.
+        self.assertIn("charge = proofVerified", server)
+        self.assertNotIn("failed = true", server)
+        self.assertIn("limiter.admit", server)
+        self.assertIn("limiter.release()", server)
+
+    def test_a_junk_greeting_is_not_reported_as_a_version_mismatch(self):
+        server = (SRC / "network/LanTransferServer.kt").read_text()
+        self.assertIn("Greeting.WrongVersion", server)
+        self.assertIn("Greeting.Malformed", server)
+        # The version notice is rate limited, not sprayed per connection.
+        self.assertIn("reportProtocolMismatch", server)
 
     def test_unknown_scan_state_requires_confirmation(self):
         screen = (SRC / "ui/screens/LanTransferScreen.kt").read_text()
         self.assertIn("report != null && !report.hasThreats", screen)
+        # A report whose device table could not be read is unknown as well.
+        self.assertIn("report.arpAvailable", screen)
+
+    def test_sender_refuses_a_non_local_target(self):
+        client = (SRC / "network/LanTransferClient.kt").read_text()
+        self.assertIn("LanSendTarget.isLocalPeer", client)
+        self.assertLess(client.index("LanSendTarget.isLocalPeer"), client.index("socket.connect"))
+        screen = (SRC / "ui/screens/LanTransferScreen.kt").read_text()
+        self.assertIn("LanSendTarget.literalIsLocalUnicast", screen)
+
+    def test_the_pairing_code_expires(self):
+        screen = (SRC / "ui/screens/LanTransferScreen.kt").read_text()
+        receive = screen[screen.index("private fun ReceiveTabContent"):]
+        self.assertIn("PAIRING_CODE_IDLE_TIMEOUT_MS", receive)
+        self.assertIn("Lifecycle.Event.ON_PAUSE", receive)
+        self.assertIn("stopListening(lan.idleStopped)", receive)
 
 
 if __name__ == "__main__":

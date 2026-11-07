@@ -12,12 +12,21 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.withContext
 
-/** Outcome of one silent local-network scan. */
+/**
+ * Outcome of one silent local-network scan.
+ *
+ * [arpAvailable] is part of the verdict on purpose: "nothing was found" and
+ * "nothing could be looked at" are different answers, and only one of them may
+ * pass a transfer through without asking the user. Android 10+ generally hides
+ * /proc/net/arp from apps, so an unreadable table is the common case.
+ */
 data class LanThreatReport(
     val threats: List<LanThreat>,
     val gatewayMac: String?,
     val deviceCount: Int,
-    val ssid: String?
+    val ssid: String?,
+    /** False when the device table could not be read, so no ARP check ran. */
+    val arpAvailable: Boolean = true
 ) {
     val worst: LanThreatSeverity? get() = LanThreatAnalysis.worst(threats)
 
@@ -79,7 +88,10 @@ internal object LanThreatCollector {
             threats = LanThreatAnalysis.sorted(threats),
             gatewayMac = gatewayMac,
             deviceCount = entries.size,
-            ssid = ssid
+            ssid = ssid,
+            // An empty table means the file was unreadable (a live Wi-Fi link
+            // always has at least a gateway row), so the ARP checks are dead.
+            arpAvailable = entries.isNotEmpty()
         )
         LanGuard.rememberGateway(ssid, gatewayMac)
         return report

@@ -17,12 +17,14 @@ import kotlinx.coroutines.withContext
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.net.Inet4Address
+import java.net.InetAddress
 import java.net.NetworkInterface
 import java.net.ServerSocket
 import java.net.Socket
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicLong
 
 /**
  * Receiving side of a LAN transfer (protocol v4).
@@ -34,10 +36,14 @@ import java.util.concurrent.atomic.AtomicInteger
  * network cannot push data at a device that is merely waiting.
  *
  * Safety rails:
- *  - at most [LanSession.MAX_FAILED_ATTEMPTS] failed exchanges per session,
+ *  - at most [LanSession.MAX_FAILED_ATTEMPTS] failed exchanges per session, and
+ *    only a peer that proved the pairing code can spend that budget,
+ *  - every connection has to pass [LanConnectionLimiter] first (bounded
+ *    concurrency, one attempt per address per window),
  *  - a peer on the 24h block list is refused before any key material is sent,
  *  - every wire field is length-checked ([LanWire]),
- *  - a stalled peer is dropped after [SOCKET_TIMEOUT_MS].
+ *  - a stalled peer is dropped after [SOCKET_TIMEOUT_MS],
+ *  - the socket is bound to the Wi-Fi address, not to every interface.
  */
 class LanTransferServer(
     private val context: Context,
@@ -58,6 +64,12 @@ class LanTransferServer(
 
         /** Failed exchanges allowed per server session (successes don't count). */
         private const val MAX_FAILED_ATTEMPTS = LanSession.MAX_FAILED_ATTEMPTS
+
+        /** Pending connections the OS may queue before new ones are refused. */
+        private const val LISTEN_BACKLOG = 4
+
+        /** One "wrong version" notice per this window, however many peers arrive. */
+        private const val PROTOCOL_ERROR_DEBOUNCE_MS = 10_000L
     }
 
     private var serverSocket: ServerSocket? = null
@@ -66,6 +78,12 @@ class LanTransferServer(
     private val running = AtomicBoolean(false)
     private val attempts = AtomicInteger(0)
     private val activeSockets = ConcurrentHashMap.newKeySet<Socket>()
+
+    /** Rebuilt per session, so a previous session's rejections never carry over. */
+    private var limiter = LanConnectionLimiter()
+
+    /** Rate limit for the "wrong version" notice, shared by every handler. */
+    private val lastProtocolErrorAt = AtomicLong(0)
 
     var localIp: String = ""
         private set
@@ -101,10 +119,15 @@ class LanTransferServer(
         pairingCode = LanSession.newPairingCode()
         running.set(true)
         attempts.set(0)
+        limiter = LanConnectionLimiter()
+        lastProtocolErrorAt.set(0)
 
         serverJob = scope.launch(Dispatchers.IO) {
             try {
-                val server = ServerSocket(0)
+                // Bound to the Wi-Fi address only: a listener on 0.0.0.0 also
+                // accepts connections arriving over a VPN or mobile data, which
+                // this feature has no business answering.
+                val server = ServerSocket(0, LISTEN_BACKLOG, InetAddress.getByName(localIp))
                 serverSocket = server
                 port = server.localPort
 
@@ -127,9 +150,23 @@ class LanTransferServer(
                         break
                     }
 
+                    val peerIp = socket.inetAddress?.hostAddress.orEmpty()
+                    if (!limiter.admit(peerIp)) {
+                        // Not a pairing-code failure, and deliberately not charged:
+                        // a stranger must never be able to end a legitimate session
+                        // by reconnecting. The connection is simply dropped.
+                        AppLog.d("lan: refused a connection from $peerIp (limit)")
+                        runCatching { socket.close() }
+                        continue
+                    }
+
                     activeSockets.add(socket)
                     launch(Dispatchers.IO) {
-                        var failed = false
+                        // `charge` spends the attempt budget, which exists to stop
+                        // pairing-code guessing — so only a peer that proved it is
+                        // talking to the right device may spend it.
+                        var charge = false
+                        var proofVerified = false
                         try {
                             // A peer that connects and stalls must not pin this
                             // coroutine (and the session's attempt budget) forever.
@@ -137,15 +174,24 @@ class LanTransferServer(
 
                             val input = DataInputStream(socket.getInputStream())
                             val output = DataOutputStream(socket.getOutputStream())
-                            val peerIp = socket.inetAddress?.hostAddress.orEmpty()
 
-                            val hello = readHello(input)
-                            if (hello == null) {
-                                // A peer on another protocol version is not an
-                                // attack: do not spend the failed-attempt budget
-                                // that exists to stop pairing-code guessing.
-                                withContext(Dispatchers.Main) { onError(ERR_PROTOCOL) }
-                                return@launch
+                            val hello = when (val greeting = readHello(input)) {
+                                is Greeting.Ok -> greeting.hello
+                                // Another protocol version is not an attack: say so
+                                // once, and leave the attempt budget alone.
+                                Greeting.WrongVersion -> {
+                                    AppLog.d("lan: peer uses another protocol version")
+                                    reportProtocolMismatch(onError)
+                                    return@launch
+                                }
+                                // Junk, a truncated greeting, or a peer that said
+                                // nothing at all. The limiter already bounds how
+                                // often this can happen; reporting it as a version
+                                // mismatch would only spray false errors.
+                                Greeting.Malformed -> {
+                                    AppLog.d("lan: dropped a connection during the greeting")
+                                    return@launch
+                                }
                             }
 
                             // The peer's own claims are checked together with what
@@ -154,7 +200,6 @@ class LanTransferServer(
                             if (isBlocked(peerIp, peerMac, hello.deviceId)) {
                                 AppLog.d("lan: refused a blocked peer")
                                 LanWire.writeText(output, LanSession.DENY_BLOCKED)
-                                failed = true
                                 return@launch
                             }
 
@@ -201,12 +246,15 @@ class LanTransferServer(
                                 // the code, so "not prompted" means a wrong code
                                 // (or a substituted handshake) and stays charged;
                                 // a user declining is charged to nothing.
-                                failed = !prompted
+                                charge = !prompted
                                 withContext(Dispatchers.Main) {
                                     onError(if (prompted) ERR_DECLINED else ERR_PROOF)
                                 }
                                 return@launch
                             }
+                            // From here on the peer has proven the code, so a
+                            // failure is worth charging against the budget.
+                            proofVerified = true
                             socket.soTimeout = SOCKET_TIMEOUT_MS
                             withContext(Dispatchers.Main) { onClientConnected() }
                             val sealed = LanWire.readPayload(input)
@@ -214,7 +262,7 @@ class LanTransferServer(
                             if (plain == null) {
                                 AppLog.d("lan: payload failed to open")
                                 LanWire.writeText(output, LanSession.DENY)
-                                failed = true
+                                charge = true
                                 return@launch
                             }
 
@@ -223,7 +271,7 @@ class LanTransferServer(
                             } catch (e: Exception) {
                                 AppLog.d("lan: payload is not a vault: ${e.javaClass.simpleName}")
                                 LanWire.writeText(output, LanSession.DENY)
-                                failed = true
+                                charge = true
                                 return@launch
                             }
 
@@ -235,16 +283,18 @@ class LanTransferServer(
                         } catch (e: CancellationException) {
                             throw e
                         } catch (e: Exception) {
-                            // Read timeout, protocol error or socket error — any
-                            // failed exchange counts toward the attempt limit.
-                            failed = true
+                            // Timeouts and socket errors before the code was proven
+                            // are the limiter's business, not the budget's: charging
+                            // them would let a stranger end the session with a
+                            // handful of junk connections.
+                            charge = proofVerified
                             Log.d(TAG, "Transfer handler error: ${e.message}")
                         } finally {
                             activeSockets.remove(socket)
-                            // Only failed exchanges consume the budget, so a
-                            // port scanner or stalled peer cannot kill a
-                            // working session; successful transfers never do.
-                            if (failed && attempts.incrementAndGet() > MAX_FAILED_ATTEMPTS) {
+                            // Only a peer that proved the code (and then failed)
+                            // consumes the budget, so a port scanner or a stalled
+                            // peer cannot kill a working session.
+                            if (charge && attempts.incrementAndGet() > MAX_FAILED_ATTEMPTS) {
                                 running.set(false)
                                 runCatching {
                                     withContext(Dispatchers.Main) {
@@ -258,6 +308,7 @@ class LanTransferServer(
                                 unregisterNsd()
                             }
                             runCatching { socket.close() }
+                            limiter.release()
                         }
                     }
                 }
@@ -271,17 +322,25 @@ class LanTransferServer(
         }
     }
 
-    /** Sender hello, or null when the peer speaks a different protocol version. */
-    private fun readHello(input: DataInputStream): Hello? {
+    /**
+     * The peer's greeting, with "spoke a different version" kept apart from
+     * "spoke nonsense": they mean different things to the user, and only one of
+     * them is worth interrupting them for.
+     */
+    private sealed interface Greeting {
+        data class Ok(val hello: Hello) : Greeting
+        data object WrongVersion : Greeting
+        data object Malformed : Greeting
+    }
+
+    /** Sender greeting, classified rather than collapsed into null. */
+    private fun readHello(input: DataInputStream): Greeting {
         val magic = try {
             LanWire.readText(input)
         } catch (e: Exception) {
-            return null
+            return Greeting.Malformed
         }
-        if (magic != LanSession.MAGIC) {
-            AppLog.d("lan: peer uses another protocol version")
-            return null
-        }
+        if (magic != LanSession.MAGIC) return Greeting.WrongVersion
         return try {
             val publicKey = LanWire.readKey(input)
             val nonce = LanWire.readKey(input, LanWire.MAX_NONCE_BYTES)
@@ -289,13 +348,26 @@ class LanTransferServer(
             val name = LanWire.readText(input)
             val threatCodes = LanWire.codesFromText(LanWire.readText(input))
             if (publicKey.isEmpty() || nonce.isEmpty()) {
-                null
+                Greeting.Malformed
             } else {
-                Hello(publicKey, nonce, deviceId, name, threatCodes)
+                Greeting.Ok(Hello(publicKey, nonce, deviceId, name, threatCodes))
             }
         } catch (e: Exception) {
-            null
+            Greeting.Malformed
         }
+    }
+
+    /**
+     * Tells the user their peer runs another protocol version, at most once per
+     * [PROTOCOL_ERROR_DEBOUNCE_MS] however many peers arrive — otherwise a
+     * stranger can fill the screen with the same false error.
+     */
+    private suspend fun reportProtocolMismatch(onError: (String) -> Unit) {
+        val now = System.currentTimeMillis()
+        val previous = lastProtocolErrorAt.get()
+        if (now - previous < PROTOCOL_ERROR_DEBOUNCE_MS) return
+        if (!lastProtocolErrorAt.compareAndSet(previous, now)) return
+        withContext(Dispatchers.Main) { onError(ERR_PROTOCOL) }
     }
 
     private data class Hello(
