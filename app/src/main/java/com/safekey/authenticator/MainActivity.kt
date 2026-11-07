@@ -117,6 +117,7 @@ import com.safekey.authenticator.ui.screens.ThemeSettingsScreen
 import com.safekey.authenticator.ui.screens.UpdateSettingsScreen
 import com.safekey.authenticator.ui.screens.TagSettingsScreen
 import com.safekey.authenticator.ui.screens.ThirdPartyImportScreen
+import com.safekey.authenticator.ui.screens.TagAccountsScreen
 import com.safekey.authenticator.ui.screens.TagsScreen
 import com.safekey.authenticator.ui.screens.ShareQrScreen
 import com.safekey.authenticator.ui.screens.SortOrderScreen
@@ -1561,6 +1562,13 @@ private fun IntegrityNoticeDialog(
 
                     is Screen.Tags -> TagsScreen(
                         vm = vm,
+                        onBack = { vm.nav.pop() },
+                        onManageAccounts = { tag -> vm.nav.push(Screen.TagAccounts(tag.id)) }
+                    )
+
+                    is Screen.TagAccounts -> TagAccountsScreen(
+                        vm = vm,
+                        tagId = screen.tagId,
                         onBack = { vm.nav.pop() }
                     )
                 }

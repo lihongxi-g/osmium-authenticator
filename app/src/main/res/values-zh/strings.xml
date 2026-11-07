@@ -17,15 +17,10 @@
     <string name="tag_name_invalid">名称不能为空，且最多 20 个字符。</string>
     <string name="tag_name_duplicate">已存在同名标签。</string>
     <string name="tag_account_count">%1$d 个账户</string>
-    <string name="batch_select_count">已选 %1$d 项</string>
-    <string name="batch_select_enter">批量打标签</string>
-    <string name="batch_select_all">全选</string>
-    <string name="batch_select_clear">取消全选</string>
-    <string name="batch_tag_title">为 %1$d 个账户打标签</string>
-    <string name="batch_tag_action">打标签</string>
-    <string name="batch_tag_add">添加标签</string>
-    <string name="batch_tag_remove">移除标签</string>
-    <string name="batch_tag_done">已更新 %1$d 个账户</string>
+    <string name="select_clear">取消全选</string>
+    <string name="tag_accounts_hint">勾选要归入“%1$s”的账户。</string>
+    <string name="tag_accounts_count">已选 %1$d / 共 %2$d</string>
+    <string name="tag_accounts_saved">已更新“%1$s”</string>
 
     <string name="accounts_title">账户</string>
     <string name="add_account">添加账户</string>
@@ -499,7 +494,7 @@
     <string name="tags_feature">启用标签</string>
     <string name="tags_feature_desc">在主页显示标签，并允许为账户分配标签。</string>
     <string name="tags_manage">管理标签</string>
-    <string name="tags_manage_desc">创建、重命名、删除和更改标签颜色。</string>
+    <string name="tags_manage_desc">创建、重命名、更改标签颜色，并指定每个标签包含哪些账户。</string>
     <string name="tag_custom_color">自定义颜色</string>
     <string name="tag_custom_color_hint">输入六位颜色值，例如 #3F51B5，也可以选择上方颜色。</string>
     <string name="tag_custom_color_invalid">请输入 #RRGGBB 格式的有效颜色。</string>

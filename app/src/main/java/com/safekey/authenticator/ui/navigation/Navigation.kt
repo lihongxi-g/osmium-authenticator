@@ -33,6 +33,8 @@ sealed class Screen {
     /** Secondary settings page: which update channels to check (stable / preview). */
     object UpdateSettings : Screen()
     object TagSettings : Screen()
+    /** Which accounts belong to one tag; opened from the tag list. */
+    data class TagAccounts(val tagId: String) : Screen()
     object Export : Screen()
     /** Plaintext export for users migrating to another authenticator. */
     object ExportToOthers : Screen()

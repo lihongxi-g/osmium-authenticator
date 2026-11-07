@@ -8,23 +8,18 @@ import org.junit.Test
 class TagBatchTest {
 
     @Test
-    fun `refs pairs every selected account with every selected tag`() {
-        val refs = TagBatch.refs(setOf("b", "a"), setOf("two", "one"))
+    fun `refs links each ticked account to the tag`() {
         assertEquals(
-            listOf(
-                "a" to "one", "a" to "two",
-                "b" to "one", "b" to "two"
-            ),
-            refs
+            listOf("a" to "work", "b" to "work"),
+            TagBatch.refs("work", setOf("b", "a"))
         )
     }
 
     @Test
-    fun `refs is empty unless both sides have a selection`() {
-        assertTrue(TagBatch.refs(emptySet(), setOf("one")).isEmpty())
-        assertTrue(TagBatch.refs(setOf("a"), emptySet()).isEmpty())
-        assertFalse(TagBatch.canApply(emptySet(), emptySet()))
-        assertTrue(TagBatch.canApply(setOf("a"), setOf("one")))
+    fun `refs is empty without a tag or without accounts`() {
+        assertTrue(TagBatch.refs("", setOf("a")).isEmpty())
+        assertTrue(TagBatch.refs("work", emptySet()).isEmpty())
+        assertFalse(TagBatch.refs("work", setOf("a")).isEmpty())
     }
 
     @Test

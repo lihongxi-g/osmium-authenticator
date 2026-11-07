@@ -59,7 +59,7 @@ import com.safekey.authenticator.ui.components.TagColorDot
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun TagsScreen(vm: MainViewModel, onBack: () -> Unit) {
+fun TagsScreen(vm: MainViewModel, onBack: () -> Unit, onManageAccounts: (Tag) -> Unit) {
     val tags by vm.tags.collectAsState()
     val accounts by vm.accounts.collectAsState()
     var editing by remember { mutableStateOf<Tag?>(null) }
@@ -78,7 +78,16 @@ fun TagsScreen(vm: MainViewModel, onBack: () -> Unit) {
                     items(tags, key = { it.id }) { tag ->
                         val count = accounts.count { account -> account.tags.any { it.id == tag.id } }
                         Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
-                            Row(Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                            // Tapping the row (not the two icon buttons) opens the
+                            // account picker for this tag — that is where accounts
+                            // get classified, so it stays off the account list.
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { onManageAccounts(tag) }
+                                    .padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
                                 TagColorDot(tag.color, Modifier.size(12.dp))
                                 Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
                                     Text(tag.name, style = MaterialTheme.typography.titleMedium)

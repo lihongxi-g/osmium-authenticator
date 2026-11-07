@@ -66,20 +66,16 @@ class TagRepository(
     }
 
     /**
-     * Batch editor: add [tagIds] to every account in [accountIds], leaving the
-     * tags those accounts already carry alone. Existing links are ignored by the
-     * cross-ref primary key, so running it twice is harmless.
+     * Replace the whole membership of one tag. The assignment screen shows every
+     * account with a checkbox, so the ticked set *is* the answer: unticked
+     * accounts are unlinked, ticked ones linked, in a single transaction.
      */
-    suspend fun addTagsToAccounts(accountIds: Set<String>, tagIds: Set<String>) {
-        val refs = TagBatch.refs(accountIds, tagIds).map { (accountId, tagId) -> AccountTagCrossRef(accountId, tagId) }
-        if (refs.isEmpty()) return
-        transaction { dao.insertRefs(refs) }
-    }
-
-    /** Batch editor: unlink [tagIds] from every account in [accountIds]. */
-    suspend fun removeTagsFromAccounts(accountIds: Set<String>, tagIds: Set<String>) {
-        if (!TagBatch.canApply(accountIds, tagIds)) return
-        transaction { dao.deleteRefs(accountIds.toList(), tagIds.toList()) }
+    suspend fun setTagMembers(tagId: String, accountIds: Set<String>) {
+        val refs = TagBatch.refs(tagId, accountIds).map { (accountId, tag) -> AccountTagCrossRef(accountId, tag) }
+        transaction {
+            dao.deleteRefsForTag(tagId)
+            if (refs.isNotEmpty()) dao.insertRefs(refs)
+        }
     }
 
     /** Room only allows `withTransaction` on a real database; tests build the DAO alone. */

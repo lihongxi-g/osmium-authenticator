@@ -1,0 +1,1 @@
+v2.6.2.1: tags now do the classifying — open 标签, tap a tag and tick the accounts that belong to it, instead of editing accounts one by one. Tag colors are brighter, the editor shows the current color and warns about a duplicate name instead of crashing, Chinese tag names sort naturally, the About page no longer links to X.

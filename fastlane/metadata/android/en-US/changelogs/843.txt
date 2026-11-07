@@ -1,1 +1,0 @@
-v2.6.2.1: tags lose the "Uncategorized" filter chip and gain batch tagging — long-press an account (or use the palette action) to select several and assign tags in one go. Tag colors are brighter, the editor shows the current color and warns about a duplicate name instead of crashing, Chinese tag names sort naturally, and the About page no longer links to X.

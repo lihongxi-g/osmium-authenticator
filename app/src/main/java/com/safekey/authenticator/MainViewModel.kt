@@ -786,13 +786,10 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     }
     fun deleteTag(tag: com.safekey.authenticator.model.Tag) { viewModelScope.launch { tagRepo.delete(tag); _selectedTagIds.value = _selectedTagIds.value - tag.id } }
     fun setAccountTags(accountId: String, tagIds: Set<String>) = viewModelScope.launch { tagRepo.setAccountTags(accountId, tagIds) }
-    fun addTagsToAccounts(accountIds: Set<String>, tagIds: Set<String>) = viewModelScope.launch {
-        runCatching { tagRepo.addTagsToAccounts(accountIds, tagIds) }
-            .onFailure { AppLog.d("batch tag add rejected: ${it.message}") }
-    }
-    fun removeTagsFromAccounts(accountIds: Set<String>, tagIds: Set<String>) = viewModelScope.launch {
-        runCatching { tagRepo.removeTagsFromAccounts(accountIds, tagIds) }
-            .onFailure { AppLog.d("batch tag remove rejected: ${it.message}") }
+    /** Tag → accounts assignment screen: the ticked set becomes the membership. */
+    fun setTagMembers(tagId: String, accountIds: Set<String>) = viewModelScope.launch {
+        runCatching { tagRepo.setTagMembers(tagId, accountIds) }
+            .onFailure { AppLog.d("tag membership rejected: ${it.message}") }
     }
     fun incrementCopyCount(id: String) = viewModelScope.launch { repo.incrementCopyCount(id) }
 

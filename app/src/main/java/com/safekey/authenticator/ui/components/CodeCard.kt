@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Card
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
@@ -36,13 +35,10 @@ import com.safekey.authenticator.ui.theme.monospaceFamily
 @Composable
 fun CodeCard(
     ui: AccountUi,
-    /** Null in selection mode: the row selects instead of copying. */
-    onCopyCode: (() -> Unit)?,
+    onCopyCode: () -> Unit,
     modifier: Modifier = Modifier,
     hideCode: Boolean = false,
-    showTags: Boolean = true,
-    selectable: Boolean = false,
-    selected: Boolean = false
+    showTags: Boolean = true
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -59,15 +55,6 @@ fun CodeCard(
                     .padding(start = 16.dp, end = 8.dp, top = 12.dp, bottom = 6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                if (selectable) {
-                    Checkbox(
-                        checked = selected,
-                        // The card itself handles the click, so the box is
-                        // display-only and cannot swallow the row's ripple.
-                        onCheckedChange = null,
-                        modifier = Modifier.padding(end = 8.dp)
-                    )
-                }
                 AccountHeader(
                     title = ui.account.displayTitle,
                     subtitle = ui.account.displaySubtitle,
@@ -132,14 +119,12 @@ private fun CodeDisplay(
     code: String,
     remainingSeconds: Int,
     expiring: Boolean,
-    onCopyCode: (() -> Unit)?
+    onCopyCode: () -> Unit
 ) {
     Column(
         horizontalAlignment = Alignment.End,
-        modifier = if (onCopyCode == null) {
-            Modifier
-        } else {
-            Modifier.clickable(onClickLabel = "Copy code") { onCopyCode() }
+        modifier = Modifier.clickable(onClickLabel = "Copy code") {
+            onCopyCode()
         }
     ) {
         Text(

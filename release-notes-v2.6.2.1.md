@@ -1,19 +1,18 @@
 # Osmium v2.6.2.1
 
-**发布日期 / Release date: 待定 (TBD)** · versionCode 84
+**发布日期 / Release date: 待定 (TBD)** · versionCode 85
 
-这是一个改标签功能的小版本：新增批量打标签（多选账户后一次性贴标签），去掉标签筛选行里的「未分类」，把标签配色改亮、编辑器能显示当前颜色、重名不再闪退，顺手修了几处标签相关的毛病。关于页的 X（推特）入口已移除。
+这是一个改标签功能的小版本：归类改到标签页里做（点开标签即可勾选账户），去掉标签筛选行里的「未分类」，把标签配色改亮、编辑器能显示当前颜色、重名不再闪退，顺手修了几处标签相关的毛病。关于页的 X（推特）入口已移除。
 
 ## 中文更新说明
 
-### 新增：批量给账户打标签
+### 新增：在标签页里给账户归类
 
-- 长按任意账户卡片进入多选模式（也可以用顶栏的调色板按钮进入）。进入后点卡片是勾选/取消勾选，顶栏显示「已选 N 项」，左侧返回键退出。
-- 顶栏右侧「全选」一次选中当前列表里的全部账户（列表被搜索或标签筛选过时，选的是筛出来的那些）；再点一次取消全选。
-- 底部动作栏的「打标签」打开标签面板：勾选一个或多个标签，点「添加标签」贴到所有选中账户上，点「移除标签」反向解除。添加是并集——账户原有的其它标签不受影响。
-- 写入是单个事务（N 个账户 × M 个标签的关联一次批量插入），中途失败不会留下写了一半的关系。
-- 选中的账户被删除或被筛选隐藏时会自动从选择里剔除，底部计数不会虚报。
-- 多选模式下代码区不再响应点击复制（避免想勾选却复制了验证码）；打完标签自动退出多选并提示更新了多少个账户。
+- 归类入口放在**标签页**（设置 → 标签 → 管理标签），账户主页不再有多选模式：点开一个标签，进入「这个标签包含哪些账户」的清单。
+- 清单里每个账户一个勾选框，已属于该标签的预勾选；底部显示「已选 N / 共 M」，右上角一键全选 / 取消全选。
+- 每个账户行还会列出它已有的其它标签（最多 3 个 + 计数），归类时能看到全局，不会重复贴。
+- 点「保存」一次性写入：勾上的建立关联、取消勾的解除关联，全在一个事务里完成。
+- 账户中途被删除会自动从清单剔除；保存后返回标签页，标签行的账户数已经更新。
 
 ### 变更：标签筛选行去掉「未分类」
 
@@ -55,16 +54,15 @@
 
 ## English release notes
 
-A small release that reworks the tags feature: accounts can now be tagged in bulk, the "Uncategorized" filter chip is gone, the palette is brighter, the editor shows the color a tag already has, and a duplicate name no longer takes the process down. The About page no longer links to X.
+A small release that reworks the tags feature: accounts are now classified from the tag page, the "Uncategorized" filter chip is gone, the palette is brighter, the editor shows the color a tag already has, and a duplicate name no longer takes the process down. The About page no longer links to X.
 
-### New: tag accounts in bulk
+### New: classify accounts from the tag page
 
-- Long-press any account card to start selecting (or use the palette action in the top bar). In this mode a tap toggles a card instead of opening it, the top bar shows "N selected", and the back arrow leaves the mode.
-- "Select all" in the top bar selects every account currently listed — with a search or tag filter active, that is exactly the filtered set; tapping again clears the selection.
-- "Tag" in the bottom bar opens the tag panel: pick one or more tags and choose "Add tags" to apply them to every selected account, or "Remove tags" to unlink them. Adding unions with what each account already carries, so other tags are untouched.
-- The write is a single transaction (the account × tag links are inserted as one batch), so a failure cannot leave half-linked accounts behind.
-- Accounts deleted or filtered out from under the selection are dropped automatically, so the count never promises more accounts than the write touches.
-- In selection mode the code area no longer copies on tap — a stray tap should not copy instead of selecting — and applying tags exits the mode with a toast reporting how many accounts were updated.
+- The entry point lives on the **tags page** (Settings → Tags → Manage tags); the account list has no selection mode. Tap a tag to open the list of accounts that belong to it.
+- Every account has a checkbox, pre-ticked when it already carries the tag; the bottom bar shows "N of M selected" and one top-bar action selects or clears everything.
+- Each row also lists the other tags that account holds (up to three, plus a count), so the whole picture is visible while classifying and nothing gets double-tagged.
+- "Save" writes once: ticked accounts are linked, unticked ones unlinked, all in a single transaction.
+- Accounts deleted meanwhile drop out of the list; saving returns to the tag page, where the account count has already updated.
 
 ### Changed: no more "Uncategorized" chip
 

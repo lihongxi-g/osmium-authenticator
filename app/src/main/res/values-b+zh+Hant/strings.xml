@@ -17,15 +17,10 @@
     <string name="tag_name_invalid">名稱不能為空，且最多 20 個字符。</string>
     <string name="tag_name_duplicate">已存在同名標籤。</string>
     <string name="tag_account_count">%1$d 個帳戶</string>
-    <string name="batch_select_count">已選 %1$d 項</string>
-    <string name="batch_select_enter">批次打標籤</string>
-    <string name="batch_select_all">全選</string>
-    <string name="batch_select_clear">取消全選</string>
-    <string name="batch_tag_title">為 %1$d 個帳戶打標籤</string>
-    <string name="batch_tag_action">打標籤</string>
-    <string name="batch_tag_add">新增標籤</string>
-    <string name="batch_tag_remove">移除標籤</string>
-    <string name="batch_tag_done">已更新 %1$d 個帳戶</string>
+    <string name="select_clear">取消全選</string>
+    <string name="tag_accounts_hint">勾選要歸入“%1$s”的帳戶。</string>
+    <string name="tag_accounts_count">已選 %1$d / 共 %2$d</string>
+    <string name="tag_accounts_saved">已更新“%1$s”</string>
 
     <string name="accounts_title">帳戶</string>
     <string name="add_account">新增帳戶</string>
@@ -497,7 +492,7 @@
     <string name="tags_feature">啟用標籤</string>
     <string name="tags_feature_desc">在首頁顯示標籤，並允許為帳戶指定標籤。</string>
     <string name="tags_manage">管理標籤</string>
-    <string name="tags_manage_desc">建立、重新命名、刪除及變更標籤顏色。</string>
+    <string name="tags_manage_desc">建立、重新命名、變更標籤顏色，並指定每個標籤包含哪些帳戶。</string>
     <string name="tag_custom_color">自訂顏色</string>
     <string name="tag_custom_color_hint">輸入六位顏色，例如 #3F51B5，或選擇上方顏色。</string>
     <string name="tag_custom_color_invalid">請輸入 #RRGGBB 格式的有效顏色。</string>
