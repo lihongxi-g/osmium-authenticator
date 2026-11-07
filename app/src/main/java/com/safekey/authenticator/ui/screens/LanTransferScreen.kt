@@ -991,7 +991,7 @@ private fun rememberLanRiskConfirmation(
         // the transfer through on a state the device could not verify. A report
         // whose device table could not be read is unknown too — that is the
         // normal case on Android 10+, where /proc/net/arp is hidden.
-        if (report != null && !report.hasThreats && report.arpAvailable &&
+        if (report != null && !report.hasThreats && report.arpChecksRan &&
             peer?.threatCodes.isNullOrEmpty()
         ) true
         else if (pending != null) false
@@ -1034,8 +1034,10 @@ private fun LanRiskDialog(
             Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 if (localReport == null) {
                     Text(lan.unknownScan, style = MaterialTheme.typography.bodyMedium)
-                } else if (!localReport.arpAvailable) {
+                } else if (!localReport.arpReadable) {
                     Text(lan.scanUnavailable, style = MaterialTheme.typography.bodyMedium)
+                } else if (!localReport.arpChecksRan) {
+                    Text(lan.arpEmpty, style = MaterialTheme.typography.bodyMedium)
                 } else if (local.isEmpty()) {
                     Text(lan.riskNone, style = MaterialTheme.typography.bodyMedium)
                 } else {

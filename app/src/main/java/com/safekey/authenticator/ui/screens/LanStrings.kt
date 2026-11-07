@@ -33,6 +33,7 @@ class LanStrings private constructor(
     val waitingSender: String,
     val unknownScan: String,
     val scanUnavailable: String,
+    val arpEmpty: String,
     val idleStopped: String,
     val targetNotLocal: String,
     val riskCodes: Map<String, String>
@@ -69,6 +70,7 @@ class LanStrings private constructor(
             waitingSender = "Waiting for the sending device…",
             unknownScan = "This device could not read its own network state, so no risk check was possible. Continue only if you trust this network.",
             scanUnavailable = "This system does not let Osmium read the local device table, so a man-in-the-middle check was not possible. Continue only if you trust this network.",
+            arpEmpty = "The device table is readable but still empty — this phone has not talked to any neighbour on this network yet, so the impersonation checks did not run. Waiting a moment and rescanning usually fixes it.",
             idleStopped = "Listening stopped: this screen was idle, so the code is no longer valid. Show a new code to continue.",
             targetNotLocal = "That address is not on your local network — nothing was sent.",
             riskCodes = mapOf(
@@ -106,6 +108,7 @@ class LanStrings private constructor(
             waitingSender = "等待发送方设备连接…",
             unknownScan = "本机无法读取当前网络状态，未能完成风险检测。请确认你信任当前网络后再继续。",
             scanUnavailable = "本系统不允许 Osmium 读取局域网设备表，无法检测中间人风险。请确认你信任当前网络后再继续。",
+            arpEmpty = "设备表能读，但里面还是空的——这台手机还没跟本网络的任何设备通信过，所以冒充检测没能运行。稍等一下再重新扫描通常就好。",
             idleStopped = "页面长时间无操作，已停止监听，原验证码作废。需要继续请重新显示新的验证码。",
             targetNotLocal = "目标地址不在局域网内，未发送任何数据。",
             riskCodes = mapOf(

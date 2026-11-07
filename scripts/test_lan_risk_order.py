@@ -54,8 +54,13 @@ class LanRiskOrderTest(unittest.TestCase):
     def test_unknown_scan_state_requires_confirmation(self):
         screen = (SRC / "ui/screens/LanTransferScreen.kt").read_text()
         self.assertIn("report != null && !report.hasThreats", screen)
-        # A report whose device table could not be read is unknown as well.
-        self.assertIn("report.arpAvailable", screen)
+        # A report whose device table could not be read is unknown as well, and
+        # "read but empty" is a separate case with its own wording.
+        self.assertIn("report.arpChecksRan", screen)
+        self.assertIn("localReport.arpReadable", screen)
+        collector = (SRC / "network/LanThreatCollector.kt").read_text()
+        self.assertIn("arpChecksRan", collector)
+        self.assertIn("arpReadable", collector)
 
     def test_sender_refuses_a_non_local_target(self):
         client = (SRC / "network/LanTransferClient.kt").read_text()

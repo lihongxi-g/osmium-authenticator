@@ -25,10 +25,23 @@ data class LanThreatReport(
     val gatewayMac: String?,
     val deviceCount: Int,
     val ssid: String?,
-    /** False when the device table could not be read, so no ARP check ran. */
-    val arpAvailable: Boolean = true
+    /**
+     * False when the device table could not be opened at all. This is the
+     * normal case on Android 10+, where /proc/net/arp is off-limits to apps —
+     * no permission grants it.
+     */
+    val arpReadable: Boolean = false
 ) {
     val worst: LanThreatSeverity? get() = LanThreatAnalysis.worst(threats)
+
+    /**
+     * True only when the table was readable *and* had rows, i.e. when the
+     * ARP-backed checks (spoofing, gateway change, virtual gateway) actually
+     * ran. A readable but empty table means the device has not talked to a
+     * neighbour yet, which is just as blind as an unreadable one — but it is a
+     * different problem, and saying so is the point.
+     */
+    val arpChecksRan: Boolean get() = arpReadable && deviceCount > 0
 
     /** Codes only — this is what travels to the peer device. */
     val codes: List<String> get() = LanThreatAnalysis.summaryCodes(threats)
@@ -59,17 +72,36 @@ internal object LanThreatCollector {
 
     private const val ARP_PATH = "/proc/net/arp"
 
+    /**
+     * The device table as this app can see it.
+     *
+     * Null means the file could not be opened (no permission does that on
+     * Android 10+); an empty list means it was read and has no usable row yet.
+     * The two are kept apart because they call for different words in the UI.
+     */
+    private fun arpRows(): List<LanArpEntry>? = readQuietly(ARP_PATH)?.let { text ->
+        LanThreatAnalysis.usableArpEntries(LanThreatAnalysis.arpEntries(text))
+    }
+
     /** Usable ARP entries of this device; empty when the table is not readable. */
-    fun arpTable(): List<LanArpEntry> = runCatching {
-        LanThreatAnalysis.usableArpEntries(LanThreatAnalysis.arpEntries(readQuietly(ARP_PATH)))
-    }.getOrDefault(emptyList())
+    fun arpTable(): List<LanArpEntry> = runCatching { arpRows() }.getOrNull().orEmpty()
 
     fun scan(context: Context): LanThreatReport {
-        val entries = arpTable()
+        val rows = arpRows()
+        val entries = rows.orEmpty()
+        val arpReadable = rows != null
 
         val ssid = ssid(context)
         val gatewayIp = gatewayIp(context)
         val gatewayMac = entries.firstOrNull { it.ip == gatewayIp }?.mac
+        // Leaves a trace the user can export: whether the platform hid the table
+        // or the table was simply empty is the first question any report needs.
+        AppLog.d(
+            "lan scan: table " +
+                (if (!arpReadable) "unreadable" else "read, ${entries.size} rows") +
+                ", gateway ip ${gatewayIp ?: "unknown"}" +
+                ", gateway mac ${gatewayMac ?: "unknown"}"
+        )
 
         val threats = mutableListOf<LanThreat>()
         threats += LanThreatAnalysis.spoofingThreats(entries)
@@ -89,9 +121,7 @@ internal object LanThreatCollector {
             gatewayMac = gatewayMac,
             deviceCount = entries.size,
             ssid = ssid,
-            // An empty table means the file was unreadable (a live Wi-Fi link
-            // always has at least a gateway row), so the ARP checks are dead.
-            arpAvailable = entries.isNotEmpty()
+            arpReadable = arpReadable
         )
         LanGuard.rememberGateway(ssid, gatewayMac)
         return report
@@ -99,11 +129,12 @@ internal object LanThreatCollector {
 
     // -------------------------------------------------------------- probing
 
-    private fun readQuietly(path: String): String = try {
+    /** File contents, or null when the file is missing or unreadable. */
+    private fun readQuietly(path: String): String? = try {
         val file = File(path)
-        if (file.exists() && file.canRead()) file.readText() else ""
+        if (file.exists() && file.canRead()) file.readText() else null
     } catch (_: Exception) {
-        ""
+        null
     }
 
     private fun ssid(context: Context): String? = try {
