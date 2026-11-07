@@ -1,6 +1,6 @@
 # Osmium v2.6.2.1
 
-**发布日期 / Release date: 待定 (TBD)**
+**发布日期 / Release date: 待定 (TBD)** · versionCode 84
 
 这是一个改标签功能的小版本：新增批量打标签（多选账户后一次性贴标签），去掉标签筛选行里的「未分类」，把标签配色改亮、编辑器能显示当前颜色、重名不再闪退，顺手修了几处标签相关的毛病。关于页的 X（推特）入口已移除。
 
@@ -107,9 +107,9 @@ A small release that reworks the tags feature: accounts can now be tagged in bul
 ### APK checksums (SHA-256)
 
 ```
-167ad203801ac902da132ce981a6fe1586fd56bd4d5509af6f562577080883d6  osmium-2.6.2.1-arm64-v8a.apk
-325d7a3595c78f0f80c1355c09560f6f0c1fbb1bcfb3b6fee2974e97f0e0b047  osmium-2.6.2.1-armeabi-v7a.apk
-505eb7a743c5228e2a49df09dd9d0e0f5e3ce2e4cf2cb9881b6f57c9477b61eb  osmium-2.6.2.1-x86_64.apk
+6b98ef1e49907609f8619d9f86bbf6bd2503e5cd6ac4d2fd0780001860e66234  osmium-2.6.2.1-arm64-v8a.apk
+cbc4224f2ade9520542f2882506c774d9caab2ff04722a6a9e22a60138e886c4  osmium-2.6.2.1-armeabi-v7a.apk
+d0038af464297335336c438bba0155ad63de7cba9aa8e9da99cb07246b65b49a  osmium-2.6.2.1-x86_64.apk
 ```
 
-Built by GitHub Actions run 42324942136 (472 app + 146 keyattestation unit tests, 0 failed). All three APKs are signed with the certificate `B65BB0131CAA22C45D99EA4E2C3E99B3980EAE0DC5647190F41A2878E6D88412`, the same key as v2.6.2, so they upgrade in place.
+Built by GitHub Actions run 42326964800 (477 app + 146 keyattestation unit tests, 0 failed); versionCode 84 (per-ABI 841-843). All three APKs are signed with the certificate `B65BB0131CAA22C45D99EA4E2C3E99B3980EAE0DC5647190F41A2878E6D88412`, the same key as v2.6.2, so they upgrade in place.
