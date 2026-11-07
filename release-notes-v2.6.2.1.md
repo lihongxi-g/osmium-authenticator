@@ -88,4 +88,10 @@ A small release that reworks the tags feature: the "Uncategorized" filter chip i
 
 ### APK checksums (SHA-256)
 
-_To be filled in from the CI build artifacts before publishing._
+```
+167ad203801ac902da132ce981a6fe1586fd56bd4d5509af6f562577080883d6  osmium-2.6.2.1-arm64-v8a.apk
+325d7a3595c78f0f80c1355c09560f6f0c1fbb1bcfb3b6fee2974e97f0e0b047  osmium-2.6.2.1-armeabi-v7a.apk
+505eb7a743c5228e2a49df09dd9d0e0f5e3ce2e4cf2cb9881b6f57c9477b61eb  osmium-2.6.2.1-x86_64.apk
+```
+
+Built by GitHub Actions run 42324942136 (472 app + 146 keyattestation unit tests, 0 failed). All three APKs are signed with the certificate `B65BB0131CAA22C45D99EA4E2C3E99B3980EAE0DC5647190F41A2878E6D88412`, the same key as v2.6.2, so they upgrade in place.
