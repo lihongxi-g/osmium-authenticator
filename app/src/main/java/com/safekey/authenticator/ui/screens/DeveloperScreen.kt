@@ -337,7 +337,7 @@ fun DeveloperScreen(
 
     if (showReport) {
         AlertDialog(
-            onDismissRequest = { showReport = false },
+            onDismissRequest = {},
             title = { Text(dev.reportTitle) },
             text = {
                 val report = rootReport
@@ -417,7 +417,7 @@ fun DeveloperScreen(
 
     if (showKeystore) {
         AlertDialog(
-            onDismissRequest = { showKeystore = false },
+            onDismissRequest = {},
             title = { Text(dev.keystoreStatus) },
             text = {
                 val ks = keystoreStatus
@@ -460,7 +460,7 @@ fun DeveloperScreen(
         val current = settings.devHiddenFeatures
         var checked by remember { mutableStateOf(current) }
         AlertDialog(
-            onDismissRequest = { showHideList = false },
+            onDismissRequest = {},
             title = { Text(dev.hideFeatures) },
             text = {
                 Column(
@@ -533,7 +533,7 @@ fun DeveloperScreen(
     if (target != null && !showPinEntry) {
         when (ceremonyStage) {
             0 -> AlertDialog(
-                onDismissRequest = { resetCeremony() },
+                onDismissRequest = {},
                 title = { Text(dev.verifyTitle) },
                 text = {
                     Column {
@@ -561,7 +561,7 @@ fun DeveloperScreen(
             )
 
             1 -> AlertDialog(
-                onDismissRequest = { resetCeremony() },
+                onDismissRequest = {},
                 title = { Text(dev.disclaimerTitle) },
                 text = {
                     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
@@ -595,7 +595,7 @@ fun DeveloperScreen(
             2 -> {
                 val phrase = ceremonyPhrase()
                 AlertDialog(
-                    onDismissRequest = { resetCeremony() },
+                    onDismissRequest = {},
                     title = { Text(dev.phraseTitle) },
                     text = {
                         Column {

@@ -669,7 +669,7 @@ fun AutoBackupScreen(
 
     if (showTargetDialog) {
         AlertDialog(
-            onDismissRequest = { showTargetDialog = false },
+            onDismissRequest = {},
             title = { Text(stringResource(R.string.auto_backup_target_label)) },
             text = {
                 Column {
@@ -719,7 +719,7 @@ fun AutoBackupScreen(
 
     if (showIntervalDialog) {
         AlertDialog(
-            onDismissRequest = { showIntervalDialog = false },
+            onDismissRequest = {},
             title = { Text(stringResource(R.string.auto_backup_interval_picker_title)) },
             text = {
                 Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
@@ -753,7 +753,7 @@ fun AutoBackupScreen(
 
     if (showKeepDialog) {
         AlertDialog(
-            onDismissRequest = { showKeepDialog = false },
+            onDismissRequest = {},
             title = { Text(stringResource(R.string.auto_backup_keep_picker_title)) },
             text = {
                 Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
@@ -778,7 +778,7 @@ fun AutoBackupScreen(
 
     if (showTimeDialog) {
         AlertDialog(
-            onDismissRequest = { showTimeDialog = false },
+            onDismissRequest = {},
             title = { Text(stringResource(R.string.auto_backup_time_picker_title)) },
             text = {
                 TimePicker(state = timePickerState)
@@ -832,7 +832,7 @@ private fun AutoBackupPasswordDialog(
     val mismatchError = stringResource(R.string.error_password_mismatch)
 
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = {},
         title = { Text(stringResource(R.string.auto_backup_password_label)) },
         text = {
             Column(

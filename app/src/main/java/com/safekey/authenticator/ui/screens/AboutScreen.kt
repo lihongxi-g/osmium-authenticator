@@ -271,7 +271,7 @@ fun AboutScreen(
 
     if (showDevAuthDialog) {
         AlertDialog(
-            onDismissRequest = { showDevAuthDialog = false },
+            onDismissRequest = {},
             title = { Text(dev.verifyTitle) },
             text = {
                 Column {
@@ -407,7 +407,7 @@ private fun LegalDialog(
 ) {
     val failed = state is LegalDocState.Failed
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = {},
         title = { Text(title) },
         text = {
             Column(

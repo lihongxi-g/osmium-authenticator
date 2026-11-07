@@ -333,7 +333,7 @@ fun WebDavScreen(
 
     if (showHttpWarning) {
         AlertDialog(
-            onDismissRequest = { showHttpWarning = false },
+            onDismissRequest = {},
             title = { Text(stringResource(R.string.webdav_http_warning_title)) },
             text = { DialogBodyText(stringResource(R.string.webdav_http_warning_body)) },
             confirmButton = {
@@ -420,7 +420,7 @@ fun WebDavScreen(
 
     if (showPicker) {
         AlertDialog(
-            onDismissRequest = { showPicker = false },
+            onDismissRequest = {},
             title = { Text(stringResource(R.string.webdav_pick_file)) },
             text = {
                 Column(
@@ -455,7 +455,7 @@ fun WebDavScreen(
 
     if (showManage) {
         AlertDialog(
-            onDismissRequest = { showManage = false },
+            onDismissRequest = {},
             title = { Text(stringResource(R.string.webdav_manage)) },
             text = {
                 Column(
@@ -501,7 +501,7 @@ fun WebDavScreen(
     val target = deleteTarget
     if (target != null) {
         AlertDialog(
-            onDismissRequest = { deleteTarget = null },
+            onDismissRequest = {},
             title = { Text(stringResource(R.string.webdav_delete_confirm_title)) },
             text = { Text(stringResource(R.string.webdav_delete_confirm_msg, target.name)) },
             confirmButton = {
@@ -540,7 +540,7 @@ private fun BackupPasswordDialog(
     var error by remember { mutableStateOf<String?>(null) }
 
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = {},
         title = { Text(stringResource(R.string.webdav_backup_password_title)) },
         text = {
             Column(
@@ -607,7 +607,7 @@ private fun RestorePasswordDialog(
     var error by remember { mutableStateOf<String?>(null) }
 
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = {},
         title = { Text(stringResource(R.string.import_password_title)) },
         text = {
             Column(

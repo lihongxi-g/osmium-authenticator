@@ -186,6 +186,7 @@
     <string name="attributions_2fas_desc">Formatreferenz für .2fas-Backups (2FAS für Android).</string>
     <string name="attributions_raivo_desc">Artikel, der das ältere Raivo-OTP-Exportformat dokumentiert.</string>
     <string name="attributions_osmium_desc">Osmiums eigener Quellcode und Lizenz (GPL-3.0-or-later).</string>
+    <string name="attributions_fdroid_logo_desc">Das Roboter-Logo von F-Droid (GPL-3.0-or-later), verwendet für den F-Droid-Link im Willkommensbildschirm. Osmium steht in keiner Verbindung zum F-Droid-Projekt und wird von ihm nicht unterstützt.</string>
     <string name="attributions_note">Osmium ist freie Software unter der GNU GPL v3 oder neuer. Ein Tipp auf eine Karte öffnet die Projektseite in deinem Browser.</string>
     <string name="lan_error_too_many_attempts">Zu viele fehlgeschlagene Verbindungsversuche. Bitte brich die Übertragung ab und starte sie neu.</string>
 

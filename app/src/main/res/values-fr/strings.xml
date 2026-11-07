@@ -186,6 +186,7 @@
     <string name="attributions_2fas_desc">Référence de format pour les sauvegardes .2fas (2FAS pour Android).</string>
     <string name="attributions_raivo_desc">Article documentant l’ancien format d’export de Raivo OTP.</string>
     <string name="attributions_osmium_desc">Le code source d’Osmium et sa licence (GPL-3.0-or-later).</string>
+    <string name="attributions_fdroid_logo_desc">Le logo robot de F-Droid (GPL-3.0-or-later), utilisé pour le lien F-Droid de l\'écran d\'accueil. Osmium n\'est ni affilié ni approuvé par le projet F-Droid.</string>
     <string name="attributions_note">Osmium est un logiciel libre sous GNU GPL v3 ou ultérieure. Toucher une carte ouvre la page du projet dans votre navigateur.</string>
     <string name="lan_error_too_many_attempts">Trop de tentatives de connexion ont échoué. Veuillez arrêter puis relancer le transfert.</string>
 

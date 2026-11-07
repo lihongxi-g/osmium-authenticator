@@ -195,6 +195,7 @@
     <string name="attributions_2fas_desc">.2fas 备份格式的参考（2FAS Android 版）。</string>
     <string name="attributions_raivo_desc">记录 Raivo OTP 旧版导出格式的文章。</string>
     <string name="attributions_osmium_desc">Osmium 自身的源代码与许可证（GPL-3.0-or-later）。</string>
+    <string name="attributions_fdroid_logo_desc">F-Droid 的机器人图标（GPL-3.0-or-later），用于欢迎页的 F-Droid 入口。Osmium 与 F-Droid 项目没有隶属关系，也未获其背书。</string>
     <string name="attributions_note">Osmium 是基于 GNU GPL v3 或更高版本的免费软件。点击卡片可在浏览器中打开项目页面。</string>
 
     <string name="loading">加载中…</string>

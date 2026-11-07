@@ -186,6 +186,7 @@
     <string name="attributions_2fas_desc">.2fas 백업(Android용 2FAS)의 형식 참조 자료입니다.</string>
     <string name="attributions_raivo_desc">기존 Raivo OTP 내보내기 형식을 설명하는 문서입니다.</string>
     <string name="attributions_osmium_desc">Osmium 자체의 소스 코드와 라이선스(GPL-3.0-or-later)입니다.</string>
+    <string name="attributions_fdroid_logo_desc">F-Droid의 로봇 마크(GPL-3.0-or-later). 환영 화면의 F-Droid 링크에 사용했습니다. Osmium은 F-Droid 프로젝트와 제휴하거나 그 승인을 받은 것이 아닙니다.</string>
     <string name="attributions_note">Osmium은 GNU GPL v3 이상의 조건으로 배포되는 자유 소프트웨어입니다. 카드를 탭하면 브라우저에서 프로젝트 페이지가 열립니다.</string>
     <string name="lan_error_too_many_attempts">연결 시도가 너무 많이 실패했습니다. 전송을 중단하고 다시 시작하세요.</string>
 

@@ -201,7 +201,7 @@ fun ScanScreen(
 
     confirm?.let { parsed ->
         AlertDialog(
-            onDismissRequest = { confirm = null },
+            onDismissRequest = {},
             title = { Text(stringResource(R.string.add_account)) },
             text = {
                 Column {
@@ -243,7 +243,7 @@ fun ScanScreen(
 
     if (showPermissionError) {
         AlertDialog(
-            onDismissRequest = { showPermissionError = false },
+            onDismissRequest = {},
             title = { Text(stringResource(R.string.camera_permission_title)) },
             text = { DialogBodyText(stringResource(R.string.camera_permission_desc)) },
             confirmButton = {

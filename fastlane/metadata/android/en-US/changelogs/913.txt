@@ -1,0 +1,1 @@
+Update checks are fixed: the first launch no longer skips the check, and a check that cannot reach GitHub now says so instead of claiming you are up to date. New: a welcome page on the first start of each version, with the website, Telegram, GitHub and F-Droid links plus both update-channel switches. Dialogs no longer close when you tap outside them - only their buttons do.

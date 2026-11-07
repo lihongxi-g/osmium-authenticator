@@ -186,6 +186,7 @@
     <string name="attributions_2fas_desc">Справочник по формату резервных копий .2fas (2FAS для Android).</string>
     <string name="attributions_raivo_desc">Статья, описывающая старый формат экспорта Raivo OTP.</string>
     <string name="attributions_osmium_desc">Собственный исходный код и лицензия Osmium (GPL-3.0-or-later).</string>
+    <string name="attributions_fdroid_logo_desc">Логотип-робот F-Droid (GPL-3.0-or-later) использован для ссылки на F-Droid на экране приветствия. Osmium не связан с проектом F-Droid и не одобрен им.</string>
     <string name="attributions_note">Osmium — свободное ПО под лицензией GNU GPL v3 или новее. Нажатие на карточку открывает страницу проекта в вашем браузере.</string>
     <string name="lan_error_too_many_attempts">Слишком много неудачных попыток подключения. Остановите передачу и начните её заново.</string>
 

@@ -123,7 +123,7 @@ fun TagsScreen(vm: MainViewModel, onBack: () -> Unit, onManageAccounts: (Tag) ->
     deleting?.let { tag ->
         val count = accounts.count { account -> account.tags.any { it.id == tag.id } }
         AlertDialog(
-            onDismissRequest = { deleting = null },
+            onDismissRequest = {},
             title = { Text(stringResource(R.string.tags_delete_title)) },
             text = { Text(stringResource(R.string.tags_delete_message, tag.name, count)) },
             confirmButton = {
@@ -166,7 +166,7 @@ private fun TagEditorDialog(
     }
 
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = {},
         title = { Text(if (tag.id.isEmpty()) stringResource(R.string.tags_create) else stringResource(R.string.tags_edit)) },
         text = {
             Column(

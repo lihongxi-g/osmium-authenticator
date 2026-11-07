@@ -115,6 +115,12 @@ fun AttributionsScreen(
                 description = stringResource(R.string.attributions_keyattestation_desc),
                 onClick = { open("https://github.com/android/keyattestation") }
             )
+            // Artwork, not code: the F-Droid mark shown on the welcome screen.
+            AttributionCard(
+                title = "F-Droid logo (GPL-3.0-or-later)",
+                description = stringResource(R.string.attributions_fdroid_logo_desc),
+                onClick = { open("https://gitlab.com/fdroid/artwork") }
+            )
             Text(
                 text = stringResource(R.string.attributions_integrity_note),
                 style = MaterialTheme.typography.bodySmall,

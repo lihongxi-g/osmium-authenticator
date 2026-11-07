@@ -264,7 +264,7 @@ fun ExportToOthersScreen(
 
     if (showFarewell) {
         AlertDialog(
-            onDismissRequest = { showFarewell = false },
+            onDismissRequest = {},
             title = null,
             text = {
                 Column(
@@ -305,7 +305,7 @@ fun ExportToOthersScreen(
 
     if (showGoodbye) {
         AlertDialog(
-            onDismissRequest = { onDone() },
+            onDismissRequest = {},
             title = null,
             text = {
                 DialogBodyText(

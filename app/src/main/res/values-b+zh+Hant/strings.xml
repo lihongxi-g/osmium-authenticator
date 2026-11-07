@@ -193,6 +193,7 @@
     <string name="attributions_2fas_desc">.2fas 備份（Android 版 2FAS）的格式參考。</string>
     <string name="attributions_raivo_desc">記錄舊版 Raivo OTP 匯出格式的文章。</string>
     <string name="attributions_osmium_desc">Osmium 自身的原始碼與授權條款（GPL-3.0-or-later）。</string>
+    <string name="attributions_fdroid_logo_desc">F-Droid 的機器人圖示（GPL-3.0-or-later），用於歡迎頁的 F-Droid 入口。Osmium 與 F-Droid 專案沒有隸屬關係，也未獲其背書。</string>
     <string name="attributions_note">Osmium 是以 GNU GPL v3 或更新版本授權的免費軟體。輕觸卡片即可在瀏覽器中開啟專案頁面。</string>
     <string name="lan_error_too_many_attempts">連線失敗次數過多。請停止並重新開始傳輸。</string>
 

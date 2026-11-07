@@ -547,11 +547,7 @@ fun SettingsScreen(
     // ---- verification method chooser for sensitive toggles ----
     if (showVerifyDialog && (pendingToggle != null || pendingNav != null) && !pinMode) {
         AlertDialog(
-            onDismissRequest = {
-                showVerifyDialog = false
-                pendingToggle = null
-                pendingNav = null
-            },
+            onDismissRequest = {},
             title = { Text(stringResource(R.string.verify_title)) },
             text = {
                 Column {
@@ -594,7 +590,7 @@ fun SettingsScreen(
 
     if (showDestroyModeDialog) {
         AlertDialog(
-            onDismissRequest = { showDestroyModeDialog = false },
+            onDismissRequest = {},
             title = { Text(stringResource(R.string.destroy_mode)) },
             text = {
                 Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
@@ -626,7 +622,7 @@ fun SettingsScreen(
 
     if (showOffsetDialog) {
         AlertDialog(
-            onDismissRequest = { showOffsetDialog = false },
+            onDismissRequest = {},
             title = { Text(stringResource(R.string.time_offset)) },
             text = {
                 Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
@@ -665,7 +661,7 @@ fun SettingsScreen(
 
     if (showThresholdDialog) {
         AlertDialog(
-            onDismissRequest = { showThresholdDialog = false },
+            onDismissRequest = {},
             title = { Text(stringResource(R.string.fail_threshold)) },
             text = {
                 Column {
@@ -686,7 +682,7 @@ fun SettingsScreen(
     val dialogKind = rootDialogTarget
     if (dialogKind != null) {
         AlertDialog(
-            onDismissRequest = { rootDialogTarget = null },
+            onDismissRequest = {},
             text = {
                 Text(
                     stringResource(

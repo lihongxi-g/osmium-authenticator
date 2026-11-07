@@ -383,7 +383,7 @@ fun DetailScreen(
         val action = pendingAction
         if (action != null && !pinMode) {
             AlertDialog(
-                onDismissRequest = { pendingAction = null },
+                onDismissRequest = {},
                 title = { Text(stringResource(R.string.verify_title)) },
                 text = {
                     Column {
@@ -427,7 +427,7 @@ fun DetailScreen(
 
     if (showDeleteDialog && account != null) {
         AlertDialog(
-            onDismissRequest = { showDeleteDialog = false },
+            onDismissRequest = {},
             title = { Text(stringResource(R.string.delete_title)) },
             text = { Text(stringResource(R.string.delete_message, account.displayTitle)) },
             confirmButton = {

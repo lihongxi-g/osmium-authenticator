@@ -37,7 +37,7 @@ fun UpdateAvailableDialog(
 ) {
     val cleaned = ReleaseNotes.clean(notes)
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = {},
         title = { Text(stringResource(R.string.update_available_title)) },
         text = {
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {

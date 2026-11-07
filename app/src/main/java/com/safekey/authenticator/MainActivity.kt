@@ -570,7 +570,7 @@ class MainActivity : FragmentActivity() {
     @Composable
     private fun TamperedScreen(onContinue: () -> Unit) {
         AlertDialog(
-            onDismissRequest = { },
+            onDismissRequest = {},
             title = { Text(stringResource(R.string.tampered_title)) },
             text = { DialogBodyText(stringResource(R.string.tampered_message)) },
             confirmButton = {
@@ -605,7 +605,7 @@ class MainActivity : FragmentActivity() {
         onCancel: () -> Unit
     ) {
         AlertDialog(
-            onDismissRequest = onCancel,
+            onDismissRequest = {},
             title = { Text(stringResource(R.string.verify_title)) },
             text = {
                 Column {
@@ -1093,7 +1093,7 @@ private fun PinReminderDialog(
 ) {
     var silence by remember { mutableStateOf(false) }
     AlertDialog(
-        onDismissRequest = { onDismiss(silence) },
+        onDismissRequest = {},
         title = { Text(stringResource(R.string.app_pin_setup)) },
         text = {
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
@@ -1136,7 +1136,7 @@ private fun IntegrityNoticeDialog(
     val compromised = notice.level == IntegrityLevel.COMPROMISED
     val reasons = notice.hitIds.map { integrityCheckTitle(it) }.take(3).joinToString(", ")
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = {},
         title = {
             Text(
                 stringResource(

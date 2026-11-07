@@ -1,5 +1,6 @@
 package com.safekey.authenticator.ui.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,7 +25,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.safekey.authenticator.R
@@ -54,7 +57,9 @@ fun WelcomeDialog(
     var preview by remember { mutableStateOf(initialPreview) }
 
     AlertDialog(
-        onDismissRequest = { onFinish(stable, preview) },
+        // Deliberately inert: tapping outside or pressing back must not
+        // throw away the choices — only the button below closes this.
+        onDismissRequest = {},
         title = { Text(stringResource(R.string.welcome_title)) },
         text = {
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
@@ -89,9 +94,11 @@ fun WelcomeDialog(
                     url = GITHUB_URL,
                     onOpenUrl = onOpenUrl
                 )
-                // Store name is a brand, not a translatable string.
+                // The store's own mark (brand, so not translatable). Drawn as a
+                // bitmap because F-Droid's icon is a two-colour logo, not a
+                // monochrome glyph like the others.
                 WelcomeLinkRow(
-                    icon = AppIcons.Android,
+                    painter = painterResource(R.drawable.fdroid_logo),
                     label = "F-Droid",
                     url = FDROID_URL,
                     onOpenUrl = onOpenUrl
@@ -133,13 +140,19 @@ fun WelcomeDialog(
     )
 }
 
-/** Tappable row: icon + project name, opens the link in a browser. */
+/**
+ * Tappable row: mark + project name, opens the link in a browser.
+ *
+ * [icon] is a tinted monochrome vector; [painter] is used when the mark carries
+ * its own colours (F-Droid). Exactly one of them is passed.
+ */
 @Composable
 private fun WelcomeLinkRow(
-    icon: ImageVector,
     label: String,
     url: String,
-    onOpenUrl: (String) -> Unit
+    onOpenUrl: (String) -> Unit,
+    icon: ImageVector? = null,
+    painter: Painter? = null
 ) {
     Row(
         modifier = Modifier
@@ -148,12 +161,20 @@ private fun WelcomeLinkRow(
             .padding(vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            modifier = Modifier.size(20.dp),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        if (painter != null) {
+            Image(
+                painter = painter,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp)
+            )
+        } else if (icon != null) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
         Spacer(Modifier.width(12.dp))
         Text(
             text = label,

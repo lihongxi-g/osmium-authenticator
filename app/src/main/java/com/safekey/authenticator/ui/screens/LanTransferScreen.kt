@@ -1072,7 +1072,7 @@ private fun LanRiskDialog(
     val worst = listOfNotNull(localReport?.worst, peer?.worstThreat).maxByOrNull { it.ordinal }
 
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = {},
         title = {
             Text(
                 text = lan.riskTitle,
