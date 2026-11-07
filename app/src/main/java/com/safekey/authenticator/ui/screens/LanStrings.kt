@@ -33,6 +33,12 @@ class LanStrings private constructor(
     val waitingSender: String,
     val scanUnavailableNote: String,
     val idleStopped: String,
+    val pairingQrHint: String,
+    val scanQrPair: String,
+    val scanQrInstruction: String,
+    val scanQrInvalid: String,
+    val scanQrPaired: String,
+    val scanQrCancel: String,
     val targetNotLocal: String,
     val riskCodes: Map<String, String>
 ) {
@@ -68,6 +74,12 @@ class LanStrings private constructor(
             waitingSender = "Waiting for the sending device…",
             scanUnavailableNote = "This system hides the local device table, so man-in-the-middle risks cannot be checked. The transfer itself is still protected by the pairing code.",
             idleStopped = "Listening stopped: this screen was idle, so the code is no longer valid. Show a new code to continue.",
+            pairingQrHint = "Scan this code with the sending device",
+            scanQrPair = "Scan QR code to pair",
+            scanQrInstruction = "Point the camera at the QR code on the receiving device",
+            scanQrInvalid = "That is not an Osmium pairing code",
+            scanQrPaired = "Receiver found",
+            scanQrCancel = "Cancel scanning",
             targetNotLocal = "That address is not on your local network — nothing was sent.",
             riskCodes = mapOf(
                 "wifi_open" to "The Wi-Fi network is open — anyone nearby can read its traffic.",
@@ -104,6 +116,12 @@ class LanStrings private constructor(
             waitingSender = "等待发送方设备连接…",
             scanUnavailableNote = "本系统不允许读取局域网设备表，无法检测中间人风险；传输本身仍受配对码校验保护。",
             idleStopped = "页面长时间无操作，已停止监听，原验证码作废。需要继续请重新显示新的验证码。",
+            pairingQrHint = "用发送方设备扫描此二维码",
+            scanQrPair = "扫描二维码配对",
+            scanQrInstruction = "把镜头对准接收方屏幕上的二维码",
+            scanQrInvalid = "这不是 Osmium 的配对二维码",
+            scanQrPaired = "已识别接收方",
+            scanQrCancel = "取消扫描",
             targetNotLocal = "目标地址不在局域网内，未发送任何数据。",
             riskCodes = mapOf(
                 "wifi_open" to "当前 Wi-Fi 为开放网络，附近任何人都能读取流量。",

@@ -74,6 +74,22 @@ class LanRiskOrderTest(unittest.TestCase):
         screen = (SRC / "ui/screens/LanTransferScreen.kt").read_text()
         self.assertIn("LanSendTarget.literalIsLocalUnicast", screen)
 
+    def test_pairing_qr_is_validated_before_use(self):
+        # A QR can be printed by anyone on the network, so the payload carries
+        # its own rules: well-formed code, and a local unicast target only.
+        qr = (SRC / "network/LanPairingQr.kt").read_text()
+        self.assertIn("isWellFormedCode", qr)
+        self.assertIn("LanSendTarget.literalIsLocalUnicast", qr)
+        screen = (SRC / "ui/screens/LanTransferScreen.kt").read_text()
+        send = screen[screen.index("private fun SendTabContent"):screen.index("private fun ReceiveTabContent")]
+        self.assertIn("LanPairingQr.parse(raw)", send)
+        self.assertIn("LanPairingQr.encode", screen)
+
+    def test_the_clipboard_is_not_wiped_behind_the_users_back(self):
+        screen = (SRC / "ui/screens/LanTransferScreen.kt").read_text()
+        self.assertNotIn("clearPrimaryClip", screen)
+        self.assertIn("ClipDescription.EXTRA_IS_SENSITIVE", screen)
+
     def test_the_pairing_code_expires(self):
         screen = (SRC / "ui/screens/LanTransferScreen.kt").read_text()
         receive = screen[screen.index("private fun ReceiveTabContent"):]

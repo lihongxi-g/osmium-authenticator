@@ -1,17 +1,20 @@
 package com.safekey.authenticator.ui.screens
 
+import android.Manifest
 import android.app.Activity
 import android.content.ClipData
 import android.content.ClipDescription
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.ContextWrapper
+import android.content.pm.PackageManager
 import android.os.Build
-import android.os.Handler
-import android.os.Looper
 import android.os.PersistableBundle
 import android.view.WindowManager
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -57,6 +60,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalView
@@ -69,6 +73,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 
@@ -80,6 +85,7 @@ import com.safekey.authenticator.data.LanBlockRules
 import com.safekey.authenticator.model.VaultFile
 import com.safekey.authenticator.network.DiscoveredDevice
 import com.safekey.authenticator.network.LanGuard
+import com.safekey.authenticator.network.LanPairingQr
 import com.safekey.authenticator.network.LanPeer
 import com.safekey.authenticator.network.LanSendOutcome
 import com.safekey.authenticator.network.LanSendTarget
@@ -92,6 +98,8 @@ import com.safekey.authenticator.ui.components.AppIcons
 import com.safekey.authenticator.ui.components.CodeField
 import com.safekey.authenticator.ui.components.IconButtonCompat
 import com.safekey.authenticator.ui.components.LocalNetworkPermissionGate
+import com.safekey.authenticator.ui.components.QrCameraPreview
+import com.safekey.authenticator.ui.components.renderQrBitmap
 import com.safekey.authenticator.ui.components.SimpleTopBar
 import com.safekey.authenticator.ui.theme.LocalFontScale
 import kotlinx.coroutines.Dispatchers
@@ -106,9 +114,6 @@ import kotlinx.coroutines.withTimeoutOrNull
 
 /** A pairing code is a one-shot credential: it expires after this much idling. */
 private const val PAIRING_CODE_IDLE_TIMEOUT_MS = 180_000L
-
-/** How long a copied pairing code may stay on the clipboard. */
-private const val CLIPBOARD_CLEAR_DELAY_MS = 30_000L
 
 /**
  * Pre-Android-13 spelling of [ClipDescription.EXTRA_IS_SENSITIVE]; the platform
@@ -254,6 +259,7 @@ private fun SendTabContent(
     var manualIp by remember { mutableStateOf("") }
     // Pairing code: digits are the source of truth, the TextFieldValue keeps
     // text + caret so the grouping never moves the caret (see CodeField).
+    var showScanner by remember { mutableStateOf(false) }
     var codeField by remember { mutableStateOf(TextFieldValue("")) }
     val codeInput = CodeField.digits(codeField.text, LanSession.PAIRING_CODE_DIGITS)
     var isSending by remember { mutableStateOf(false) }
@@ -291,6 +297,31 @@ private fun SendTabContent(
 
     fun blockedByMe(host: String, deviceId: String?): LanBlock? =
         blocks.firstOrNull { LanBlockRules.matches(it, host, null, deviceId) }
+
+    if (showScanner) {
+        LanPairingScanner(
+            lan = lan,
+            onCancel = { showScanner = false },
+            onRaw = { raw ->
+                val payload = LanPairingQr.parse(raw)
+                if (payload == null) {
+                    vm.showToast(lan.scanQrInvalid)
+                } else {
+                    // One scan fills in everything the send path needs: address,
+                    // port and pairing code. The address still goes through the
+                    // same local-network check as a typed one.
+                    useManualIp = true
+                    manualIp = "${payload.host}:${payload.port}"
+                    val shown = LanSession.groupedCode(payload.code)
+                    codeField = TextFieldValue(shown, TextRange(shown.length))
+                    errorText = null
+                    statusText = "${lan.scanQrPaired}: ${payload.host}:${payload.port}"
+                    showScanner = false
+                }
+            }
+        )
+        return
+    }
 
     Column(
         modifier = Modifier
@@ -395,6 +426,13 @@ private fun SendTabContent(
                     }
                 }
             }
+        }
+
+        Button(
+            onClick = { showScanner = true },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(lan.scanQrPair)
         }
 
         Row(
@@ -833,6 +871,7 @@ private fun ReceiveTabContent(
                             tint = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     }
+                    LanPairingQrCard(lan, localIp, port, pairingCode)
                 } else if (startJob?.isActive == true && errorText == null) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(32.dp),
@@ -1082,6 +1121,97 @@ private fun LanRiskDialog(
 }
 
 /**
+ * The receiving side's QR code: address, port and pairing code in one picture, so
+ * the sending device pairs with a scan instead of typing twelve digits and
+ * hunting for an IP.
+ *
+ * Rendering is black-on-white on purpose ([renderQrBitmap]) — a scanner needs the
+ * contrast, whatever the card behind it looks like.
+ */
+@Composable
+private fun LanPairingQrCard(lan: LanStrings, host: String, port: Int, code: String) {
+    if (host.isEmpty() || port <= 0) return
+    val payload = remember(host, port, code) { LanPairingQr.encode(host, port, code) } ?: return
+    val bitmap = remember(payload) { renderQrBitmap(payload, 480) }
+    Spacer(Modifier.height(16.dp))
+    Image(
+        bitmap = bitmap.asImageBitmap(),
+        contentDescription = lan.pairingQrHint,
+        modifier = Modifier.size(200.dp)
+    )
+    Spacer(Modifier.height(8.dp))
+    Text(
+        text = lan.pairingQrHint,
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onPrimaryContainer,
+        textAlign = TextAlign.Center
+    )
+}
+
+/**
+ * Camera view for pairing: the sender scans the receiver's QR code.
+ *
+ * A foreign or malformed payload never reaches the transfer path — it is parsed
+ * by [LanPairingQr], which rejects anything that is not a local unicast target
+ * with a well-formed code.
+ */
+@Composable
+private fun LanPairingScanner(
+    lan: LanStrings,
+    onCancel: () -> Unit,
+    onRaw: (String) -> Unit
+) {
+    val context = LocalContext.current
+    var hasPermission by remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) ==
+                PackageManager.PERMISSION_GRANTED
+        )
+    }
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted -> hasPermission = granted }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(20.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        if (hasPermission) {
+            QrCameraPreview(
+                enabled = true,
+                onRawCode = onRaw,
+                modifier = Modifier.weight(1f)
+            )
+            Text(
+                text = lan.scanQrInstruction,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(vertical = 16.dp)
+            )
+        } else {
+            Text(
+                text = stringResource(R.string.camera_permission_desc),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
+            )
+            Button(
+                onClick = { permissionLauncher.launch(Manifest.permission.CAMERA) },
+                modifier = Modifier.padding(top = 16.dp)
+            ) {
+                Text(stringResource(R.string.grant_permission))
+            }
+        }
+        TextButton(onClick = onCancel, modifier = Modifier.padding(top = 8.dp)) {
+            Text(lan.scanQrCancel)
+        }
+    }
+}
+
+/**
  * Standing note for "the local network could not be verified".
  *
  * This replaces a confirmation dialog that fired on every single transfer on
@@ -1114,14 +1244,13 @@ private fun Context.findActivity(): Activity? {
 }
 
 /**
- * Puts the pairing code on the clipboard as sensitive content and takes it back
- * after [CLIPBOARD_CLEAR_DELAY_MS].
+ * Puts the pairing code on the clipboard as sensitive content.
  *
- * Without the sensitive flag the system clip overlay shows the code in clear and
- * every keyboard or clipboard-history app may keep a copy; without the delayed
- * clear the code would linger in that history long after the session ends. The
- * clear only fires when the clipboard still holds this exact code, so it cannot
- * eat something the user copied afterwards.
+ * The sensitive flag keeps the code out of the system clip overlay and the
+ * keyboard preview. Nothing clears the clipboard afterwards: the code is only
+ * useful while this screen is up, and a timed wipe that runs behind the user's
+ * back is worse than the exposure it prevents (scanning the QR is the normal
+ * path anyway).
  */
 private fun copyPairingCode(context: Context, code: String) {
     val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager ?: return
@@ -1134,18 +1263,4 @@ private fun copyPairingCode(context: Context, code: String) {
         }
     }
     clipboard.setPrimaryClip(clip)
-    Handler(Looper.getMainLooper()).postDelayed({
-        val current = clipboard.primaryClip
-        val currentText = if (current != null && current.itemCount == 1) {
-            current.getItemAt(0).text?.toString()
-        } else {
-            null
-        }
-        if (currentText != code) return@postDelayed
-        if (Build.VERSION.SDK_INT >= 28) {
-            clipboard.clearPrimaryClip()
-        } else {
-            clipboard.setPrimaryClip(ClipData.newPlainText("", ""))
-        }
-    }, CLIPBOARD_CLEAR_DELAY_MS)
 }
