@@ -105,9 +105,9 @@ A small release that reworks the tags feature: accounts are now classified from 
 ### APK checksums (SHA-256)
 
 ```
-6b98ef1e49907609f8619d9f86bbf6bd2503e5cd6ac4d2fd0780001860e66234  osmium-2.6.2.1-arm64-v8a.apk
-cbc4224f2ade9520542f2882506c774d9caab2ff04722a6a9e22a60138e886c4  osmium-2.6.2.1-armeabi-v7a.apk
-d0038af464297335336c438bba0155ad63de7cba9aa8e9da99cb07246b65b49a  osmium-2.6.2.1-x86_64.apk
+cf3e682f0d2927691006a83ff1fd278666f8b1e79961b78e2e9487ee5c686113  osmium-2.6.2.1-arm64-v8a.apk
+8c5267347b5b88e1b78e8170b083a315fa5cf6c0bde69df32ffb17bd6d4c28ec  osmium-2.6.2.1-armeabi-v7a.apk
+b7703d1beea0d340fee135ef97a86367caaa039697b75d3d6913fbe2951629bf  osmium-2.6.2.1-x86_64.apk
 ```
 
-Built by GitHub Actions run 42326964800 (477 app + 146 keyattestation unit tests, 0 failed); versionCode 84 (per-ABI 841-843). All three APKs are signed with the certificate `B65BB0131CAA22C45D99EA4E2C3E99B3980EAE0DC5647190F41A2878E6D88412`, the same key as v2.6.2, so they upgrade in place.
+Built by GitHub Actions run 42329116939 (477 app + 146 keyattestation unit tests, 0 failed); versionCode 85 (per-ABI 851-853). All three APKs are signed with the certificate `B65BB0131CAA22C45D99EA4E2C3E99B3980EAE0DC5647190F41A2878E6D88412`, the same key as v2.6.2, so they upgrade in place.
