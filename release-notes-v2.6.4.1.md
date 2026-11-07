@@ -1,6 +1,6 @@
 # Osmium v2.6.4.1
 
-**发布日期 / Release date: 待定 (TBD)** · versionCode 911–913（911 = armeabi-v7a、912 = arm64-v8a、913 = x86_64）
+**发布日期 / Release date: 2026-11-07** · versionCode 911–913（911 = armeabi-v7a、912 = arm64-v8a、913 = x86_64）
 
 这是一个修复更新检查的小版本，同时加了每个版本首次启动时的欢迎页，并把弹窗改成只能点按钮退出。
 
@@ -67,5 +67,7 @@
 ## APK SHA-256
 
 ```
-待 CI 构建后填入
+fddf6fffd8d7c06874c0b00928bc2b93e0b0be3d5593148f1ec9aad9a33ea3ba  osmium-2.6.4.1-arm64-v8a.apk
+bf4b58dc432f17e2ded5b716fe770273f67ffbc559595dc8248e7fe7a756a3fe  osmium-2.6.4.1-armeabi-v7a.apk
+a63a281c9b1e32fc3cf0840adc174c294df0f89b9cb96efeb69e24dae4922621  osmium-2.6.4.1-x86_64.apk
 ```
