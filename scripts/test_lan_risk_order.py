@@ -51,16 +51,21 @@ class LanRiskOrderTest(unittest.TestCase):
         # The version notice is rate limited, not sprayed per connection.
         self.assertIn("reportProtocolMismatch", server)
 
-    def test_unknown_scan_state_requires_confirmation(self):
+    def test_an_unverified_network_is_stated_not_dialogued(self):
+        # An unreadable device table is the permanent state on Android 10+, so it
+        # must be reported as a standing note instead of a dialog that fires on
+        # every transfer — but it must still be *said*, never silently dropped.
         screen = (SRC / "ui/screens/LanTransferScreen.kt").read_text()
-        self.assertIn("report != null && !report.hasThreats", screen)
-        # A report whose device table could not be read is unknown as well, and
-        # "read but empty" is a separate case with its own wording.
-        self.assertIn("report.arpChecksRan", screen)
-        self.assertIn("localReport.arpReadable", screen)
+        self.assertIn("scanUnverified = report?.arpChecksRan != true", screen)
+        self.assertIn("LanScanNote(lan)", screen)
+        self.assertIn("lan.scanUnavailableNote", screen)
         collector = (SRC / "network/LanThreatCollector.kt").read_text()
         self.assertIn("arpChecksRan", collector)
         self.assertIn("arpReadable", collector)
+
+    def test_only_a_real_finding_interrupts_the_transfer(self):
+        screen = (SRC / "ui/screens/LanTransferScreen.kt").read_text()
+        self.assertIn("report?.hasThreats != true && peer?.threatCodes.isNullOrEmpty()", screen)
 
     def test_sender_refuses_a_non_local_target(self):
         client = (SRC / "network/LanTransferClient.kt").read_text()

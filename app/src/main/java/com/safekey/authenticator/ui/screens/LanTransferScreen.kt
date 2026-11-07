@@ -259,12 +259,15 @@ private fun SendTabContent(
     var isSending by remember { mutableStateOf(false) }
     var statusText by remember { mutableStateOf("") }
     var errorText by remember { mutableStateOf<String?>(null) }
+    // True when the local network could not be verified (the normal state on
+    // Android 10+, where the device table is hidden): shown as a standing note.
+    var scanUnverified by remember { mutableStateOf(false) }
     val confirmRisk = rememberLanRiskConfirmation(lan, onBlockPeer)
 
     val client = remember { LanTransferClient(context) }
 
     LaunchedEffect(Unit) {
-        LanGuard.refresh(context)
+        scanUnverified = LanGuard.refresh(context)?.arpChecksRan != true
         discoveredDevices.clear()
         client.startDiscovery(
             onDeviceFound = { dev ->
@@ -453,6 +456,8 @@ private fun SendTabContent(
             )
         }
 
+        if (scanUnverified) LanScanNote(lan)
+
         Button(
             onClick = {
                 errorText = null
@@ -502,6 +507,7 @@ private fun SendTabContent(
                 scope.launch {
                     try {
                     val selfReport = LanGuard.refresh(context)
+                    scanUnverified = selfReport?.arpChecksRan != true
                     if (!confirmRisk(selfReport, null)) {
                         statusText = lan.cancelled
                         return@launch
@@ -614,6 +620,9 @@ private fun ReceiveTabContent(
     var isTransferring by remember { mutableStateOf(false) }
     var isDone by remember { mutableStateOf(false) }
     var errorText by remember { mutableStateOf<String?>(null) }
+    // True when the local network could not be verified (the normal state on
+    // Android 10+, where the device table is hidden): shown as a standing note.
+    var scanUnverified by remember { mutableStateOf(false) }
     val confirmRisk = rememberLanRiskConfirmation(lan, onBlockPeer)
 
     val server = remember { LanTransferServer(context, scope) }
@@ -632,6 +641,7 @@ private fun ReceiveTabContent(
             try {
             val deviceId = app.lanBlockRepository.deviceId()
             val report = LanGuard.refresh(context)
+            scanUnverified = report?.arpChecksRan != true
             if (!confirmRisk(report, null)) {
                 statusText = lan.cancelled
                 return@launch
@@ -949,6 +959,8 @@ private fun ReceiveTabContent(
             }
         }
 
+        if (scanUnverified) LanScanNote(lan)
+
         Text(
             text = stringResource(R.string.lan_security_tip),
             style = MaterialTheme.typography.bodySmall,
@@ -987,13 +999,12 @@ private fun rememberLanRiskConfirmation(
         )
     }
     return { report, peer ->
-        // An unreadable scan is "unknown", not "safe": ask instead of passing
-        // the transfer through on a state the device could not verify. A report
-        // whose device table could not be read is unknown too — that is the
-        // normal case on Android 10+, where /proc/net/arp is hidden.
-        if (report != null && !report.hasThreats && report.arpChecksRan &&
-            peer?.threatCodes.isNullOrEmpty()
-        ) true
+        // Only a real finding interrupts a transfer. An unverifiable scan is not
+        // a reason to stop the user every single time: on Android 10+ the device
+        // table is hidden permanently, so that state is reported as a standing
+        // note on the page instead of a dialog (see LanScanNote), which keeps the
+        // claim honest without nagging.
+        if (report?.hasThreats != true && peer?.threatCodes.isNullOrEmpty()) true
         else if (pending != null) false
         else {
             val request = PendingLanRisk(report, peer)
@@ -1032,13 +1043,7 @@ private fun LanRiskDialog(
         },
         text = {
             Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                if (localReport == null) {
-                    Text(lan.unknownScan, style = MaterialTheme.typography.bodyMedium)
-                } else if (!localReport.arpReadable) {
-                    Text(lan.scanUnavailable, style = MaterialTheme.typography.bodyMedium)
-                } else if (!localReport.arpChecksRan) {
-                    Text(lan.arpEmpty, style = MaterialTheme.typography.bodyMedium)
-                } else if (local.isEmpty()) {
+                if (local.isEmpty()) {
                     Text(lan.riskNone, style = MaterialTheme.typography.bodyMedium)
                 } else {
                     Text(lan.riskLocalHeader, style = MaterialTheme.typography.labelLarge)
@@ -1073,6 +1078,28 @@ private fun LanRiskDialog(
                 if (peer != null) TextButton(onClick = onBlock) { Text(lan.blockAction) }
             }
         }
+    )
+}
+
+/**
+ * Standing note for "the local network could not be verified".
+ *
+ * This replaces a confirmation dialog that fired on every single transfer on
+ * Android 10+, where /proc/net/arp is hidden from apps: the user cannot change
+ * that state, so asking again and again only trains them to tap through it. The
+ * sentence stays on the page, so the app still never claims the network was
+ * checked — it just stops interrupting.
+ */
+@Composable
+private fun LanScanNote(lan: LanStrings) {
+    Text(
+        text = lan.scanUnavailableNote,
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        textAlign = TextAlign.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 8.dp)
     )
 }
 
