@@ -1,6 +1,6 @@
 # Términos de uso
 
-*Fecha de entrada en vigor: 7 de noviembre de 2026 · Se aplica a Osmium v2.6.4 y versiones posteriores*
+*Fecha de entrada en vigor: 7 de noviembre de 2026 · Se aplica a Osmium v2.6.4.1 y versiones posteriores*
 
 *Versión actual, publicada en osmium.im. La aplicación la lee cuando abres Acerca de → Términos de uso.*
 
@@ -27,7 +27,7 @@ Osmium genera códigos TOTP y HOTP de 4, 5, 6, 7 u 8 dígitos y admite SHA-1, SH
 
 Puedes usar Osmium para tu propia autenticación de dos factores y en los dispositivos que controlas o que estás autorizado a usar.
 
-Osmium no tiene sistema de cuentas ni sincronización en la nube; todas las funciones de importación se ejecutan íntegramente en este dispositivo. La aplicación no hace ninguna solicitud de red al iniciarse a menos que actives la comprobación de versiones opcional. Por lo demás, solo se conecta cuando usas una función que la necesita: el servidor WebDAV que configures, la API de GitHub Releases para la comprobación de versiones opcional (desactivada por defecto; puedes activarla en Ajustes), el sitio web osmium.im para leer las versiones actuales de estos Términos de uso y de la Política de privacidad cuando las abres en Acerca de, la lista pública de estados de atestación de Google cuando actualizas los datos de revocación en la pantalla de integridad, o el otro dispositivo durante una transferencia LAN. La transferencia LAN usa cifrado AES-256-GCM derivado del código de emparejamiento y no pasa por ningún servidor en la nube de Osmium.
+Osmium no tiene sistema de cuentas ni sincronización en la nube; todas las funciones de importación se ejecutan íntegramente en este dispositivo. La aplicación no hace ninguna solicitud de red al iniciarse a menos que aceptes la pregunta sobre la comprobación de versiones de la pantalla de bienvenida que aparece la primera vez que abres cada versión (o la actives más tarde en Ajustes). Por lo demás, solo se conecta cuando usas una función que la necesita: el servidor WebDAV que configures, la API de GitHub Releases para la comprobación de versiones opcional (se pregunta una vez en esa pantalla de bienvenida, con el canal estable marcado y el canal preliminar desactivado; ambos pueden cambiarse en Ajustes en cualquier momento), el sitio web osmium.im para leer las versiones actuales de estos Términos de uso y de la Política de privacidad cuando las abres en Acerca de, la lista pública de estados de atestación de Google cuando actualizas los datos de revocación en la pantalla de integridad, o el otro dispositivo durante una transferencia LAN. La transferencia LAN usa cifrado AES-256-GCM derivado del código de emparejamiento y no pasa por ningún servidor en la nube de Osmium.
 
 Las versiones actuales de estos Términos de uso y de la Política de privacidad se publican en el sitio web osmium.im, y las versiones publicadas allí son las que se aplican. La aplicación las lee cuando abres el documento desde Acerca de y conserva la copia que leyó para que puedas volver a leerla sin conexión. Si la obtención falla, la aplicación muestra un aviso de error con un enlace al sitio web.
 

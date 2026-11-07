@@ -1,6 +1,6 @@
 # Terms of Use
 
-*Effective date: November 7, 2026 · Applies to Osmium v2.6.4 and later*
+*Effective date: November 7, 2026 · Applies to Osmium v2.6.4.1 and later*
 
 *Current version, published at osmium.im. The app reads it when you open About → Terms of Use.*
 
@@ -27,7 +27,7 @@ Osmium generates TOTP and HOTP codes with 4, 5, 6, 7 or 8 digits and supports SH
 
 You may use Osmium for your own two-factor authentication and for devices you control or are authorized to use.
 
-Osmium has no account system and no cloud synchronization; all import features run entirely on this device. The app makes no network request at start-up unless you switch on the optional version check. Otherwise it connects only when you use a feature that needs it: the WebDAV server you configure, the GitHub Releases API for the optional version check (off by default; you can switch it on in Settings), the osmium.im website to read the current versions of these Terms of Use and of the Privacy Policy when you open them in About, Google's public attestation status list when you refresh the revocation data on the integrity screen, or the other device during a LAN transfer. LAN transfer uses AES-256-GCM encryption derived from the pairing code and does not pass through an Osmium cloud server.
+Osmium has no account system and no cloud synchronization; all import features run entirely on this device. The app makes no network request at start-up unless you accept the update-check question on the welcome screen shown the first time you open each version (or switch it on later in Settings). Otherwise it connects only when you use a feature that needs it: the WebDAV server you configure, the GitHub Releases API for the optional version check (asked once on that welcome screen, with the stable channel preselected and the preview channel off; both can be changed in Settings at any time), the osmium.im website to read the current versions of these Terms of Use and of the Privacy Policy when you open them in About, Google's public attestation status list when you refresh the revocation data on the integrity screen, or the other device during a LAN transfer. LAN transfer uses AES-256-GCM encryption derived from the pairing code and does not pass through an Osmium cloud server.
 
 The current versions of these Terms of Use and of the Privacy Policy are published on the osmium.im website, and the versions published there are the ones that apply. The app reads them when you open the document from About and keeps the copy it read so you can read it again without a connection. If a fetch fails, the app shows a failure notice with a link to the website.
 

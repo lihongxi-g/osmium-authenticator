@@ -1,8 +1,8 @@
 # Osmium v2.6.4.1
 
-**发布日期 / Release date: 待定 (TBD)** · versionCode 901–903（901 = armeabi-v7a、902 = arm64-v8a、903 = x86_64）
+**发布日期 / Release date: 待定 (TBD)** · versionCode 911–913（911 = armeabi-v7a、912 = arm64-v8a、913 = x86_64）
 
-这是一个修复更新检查的小版本，同时加了每个版本首次启动时的欢迎页。
+这是一个修复更新检查的小版本，同时加了每个版本首次启动时的欢迎页，并把弹窗改成只能点按钮退出。
 
 ## 中文更新说明
 
@@ -24,6 +24,16 @@
 - 默认：正式版打开（你在这里点的「开始使用」就是同意），预览版关闭——测试包不该自己找上门。
 - 每个版本只弹一次：弹过的版本号记在本机，升级到新版本会再弹一次。
 
+### 变更：弹窗只能点按钮退出
+
+- 全部 39 个对话框不再因为点到外面（或按返回键）而关闭——误触不会丢掉正在填的内容或正在确认的操作，必须点对话框上的按钮。
+- 原本只能靠点外面关掉的 15 个对话框（选文件、选频率、根检测报告、密钥库状态、验证方式选择等）都补了一个「取消 / 关闭」按钮；本来就有关闭按钮的保持原样。
+
+### 变更：F-Droid 入口用官方图标
+
+- 欢迎页的 F-Droid 行改用 F-Droid 项目官方的机器人标识（`drawable-nodpi/fdroid_logo.png`），不再是通用的 Android 机器人。
+- 关于 → 开源致谢里补了这张图标的来源与许可（GPL-3.0-or-later），并注明 Osmium 与 F-Droid 项目没有隶属关系。
+
 ## English notes
 
 ### Fixed: the first launch skipped the update check
@@ -43,6 +53,16 @@
 - Both update-channel switches (stable / preview) sit at the bottom; "get started" applies them, and Settings → Update checks can change them later.
 - Defaults: stable on (tapping "get started" is the consent), preview off — a test build must never arrive uninvited.
 - Once per version: the shown version is recorded locally, so upgrading to a new version shows it again.
+
+### Changed: dialogs only close from their buttons
+
+- All 39 dialogs now ignore taps outside them (and the back gesture), so a mistimed tap no longer throws away what was being entered or confirmed - the buttons are the only way out.
+- The 15 dialogs that previously relied on an outside tap (file picker, frequency picker, root report, keystore status, verification chooser, ...) each got an explicit cancel/close button; the ones that already had one are unchanged.
+
+### Changed: the real F-Droid mark
+
+- The F-Droid row on the welcome screen now uses F-Droid's own robot mark (`drawable-nodpi/fdroid_logo.png`) instead of a generic Android robot.
+- About → attributions gained the source and licence of that artwork (GPL-3.0-or-later), noting that Osmium is not affiliated with or endorsed by the F-Droid project.
 
 ## APK SHA-256
 

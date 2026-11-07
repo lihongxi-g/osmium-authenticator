@@ -2,7 +2,7 @@
 
 Osmium 是一款隐私优先的 Android TOTP/HOTP 验证器。本项目基于 GNU GPL v3 或更高版本发布。验证码在设备本地计算；账户数据使用 Android Keystore 中的不可导出密钥加密后才落盘。应用无需注册账号、不收集遥测。
 
-应用在你打开「设置 → 关于 → 用户协议 / 隐私政策」时才从官网 osmium.im 获取最新版本（不发送任何用户数据）；除此之外，网络功能均为可选：用户配置的 WebDAV 备份、GitHub 更新检查（正式版与预览版各一个开关，默认均关闭），以及用户主动发起的两台设备局域网快捷传输。点击 GitHub、验证实验室等外部链接时，流量由系统浏览器或其他应用处理。
+应用在你打开「设置 → 关于 → 用户协议 / 隐私政策」时才从官网 osmium.im 获取最新版本（不发送任何用户数据）；除此之外，网络功能均为可选：用户配置的 WebDAV 备份、GitHub 更新检查（正式版与预览版各一个开关；在每个版本首次打开的欢迎页上询问一次，那里正式版开关预先勾选、预览版不勾选，之后随时可在设置中更改），以及用户主动发起的两台设备局域网快捷传输。点击 GitHub、验证实验室等外部链接时，流量由系统浏览器或其他应用处理。
 
 ## 功能
 
@@ -21,7 +21,9 @@ Osmium 是一款隐私优先的 Android TOTP/HOTP 验证器。本项目基于 GN
 - **备份结果通知**——定时备份结束后通知结果：成功为静默通知（无声音、无横幅、无角标），失败或被跳过会提醒；锁屏只显示「后台任务完成」，时间与目标需解锁后查看；可随时关闭
 - **权限页面**——设置中集中列出相机、通知、生物识别、局域网、存储（Android 9 及更低）与电池优化豁免的实时状态，可直接发起申请
 - **从通知进入需验证**——点备份通知进入自动备份页面时要求指纹、锁屏密码或应用 PIN（默认开启，可关闭）；该页面可修改备份密码
-- **更新检查**——可选查询 GitHub Releases API；只读取公开版本信息，分两个独立通道（正式版、或正式版+预览版，两个开关默认均关闭），不发送账户或设备数据，也不会自动下载或安装
+- **欢迎页（每个版本一次）**——某个版本第一次打开时会致谢并列出官网、Telegram、GitHub、F-Droid 入口，同时就地询问是否检查更新，不用再翻到设置里找；不确认就不会发出任何请求
+- **更新检查**——可选查询 GitHub Releases API；只读取公开版本信息，分两个独立通道（正式版、或正式版+预览版），在欢迎页上询问一次，之后随时可在设置中更改，不发送账户或设备数据，也不会自动下载或安装
+- **弹窗不再被误触关闭**——点到弹窗外面不会再关掉它，确认信息不会被手快抹掉，只有弹窗上的按钮才会关闭
 - **Steam Guard**——手动添加 Steam 账户，生成 5 位字母数字验证码
 - **隐藏验证码模式**——验证码以圆点显示，复制不受影响；编辑与分享在关闭该模式前被锁定
 - **排序与搜索**——支持随机、字母、添加时间、复制次数排序，并可按账户名或服务商搜索
@@ -43,23 +45,23 @@ Osmium 是一款隐私优先的 Android TOTP/HOTP 验证器。本项目基于 GN
 
 ## 下载
 
-最新正式版：**Osmium v2.6.4**（versionCode 891–893，按架构：891 = armeabi-v7a、892 = arm64-v8a、893 = x86_64）。请选择与设备匹配的架构：
+最新正式版：**Osmium v2.6.4.1**（versionCode 911–913，按架构：911 = armeabi-v7a、912 = arm64-v8a、913 = x86_64）。请选择与设备匹配的架构：
 
 | 文件 | 架构 | 适用设备 | 下载 |
 |---|---|---|---|
-| `osmium-2.6.4-arm64-v8a.apk` | arm64-v8a | 几乎所有现代手机（推荐） | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.6.4/osmium-2.6.4-arm64-v8a.apk) |
-| `osmium-2.6.4-armeabi-v7a.apk` | armeabi-v7a | 老款 32 位手机 | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.6.4/osmium-2.6.4-armeabi-v7a.apk) |
-| `osmium-2.6.4-x86_64.apk` | x86_64 | Android 模拟器 | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.6.4/osmium-2.6.4-x86_64.apk) |
+| `osmium-2.6.4.1-arm64-v8a.apk` | arm64-v8a | 几乎所有现代手机（推荐） | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.6.4.1/osmium-2.6.4.1-arm64-v8a.apk) |
+| `osmium-2.6.4.1-armeabi-v7a.apk` | armeabi-v7a | 老款 32 位手机 | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.6.4.1/osmium-2.6.4.1-armeabi-v7a.apk) |
+| `osmium-2.6.4.1-x86_64.apk` | x86_64 | Android 模拟器 | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.6.4.1/osmium-2.6.4.1-x86_64.apk) |
 
 安装与设备架构不符的包可能无法启动。三个架构使用同一签名证书，SHA-256 指纹为：`B65BB0131CAA22C45D99EA4E2C3E99B3980EAE0DC5647190F41A2878E6D88412`。
 
-APK 的 SHA-256 校验和见 [v2.6.4 发布说明](release-notes-v2.6.4.md) 及 Release 页面的 `SHA256SUMS.txt`。
+APK 的 SHA-256 校验和见 [v2.6.4.1 发布说明](release-notes-v2.6.4.1.md) 及 Release 页面的 `SHA256SUMS.txt`。
 
 ### F-Droid
 
 Osmium 已上架 F-Droid：**https://f-droid.org/packages/com.safekey.authenticator/**
 
-F-Droid 用同一份源码构建、并使用同一张签名证书（配方钉死了签名密钥），所以两边是同一个应用：在两个渠道之间切换属于覆盖升级，不用卸载——对 2FA 应用来说这点很关键，卸载意味着本地账户全丢。需要注意两边版本号规则不同：GitHub 用上表的 versionCode（2.6.4 为 891–893），F-Droid 用同一份源码自己推导版本号，目前提供的是 2.6.2。GitHub 的号更高，因此从 F-Droid 换到 GitHub 是升级；反向换回去要等 F-Droid 那边的构建追上来。
+F-Droid 用同一份源码构建、并使用同一张签名证书（配方钉死了签名密钥），所以两边是同一个应用：在两个渠道之间切换属于覆盖升级，不用卸载——对 2FA 应用来说这点很关键，卸载意味着本地账户全丢。需要注意两边版本号规则不同：GitHub 用上表的 versionCode（2.6.4.1 为 911–913），F-Droid 用同一份源码自己推导版本号，目前提供的是 2.6.2。GitHub 的号更高，因此从 F-Droid 换到 GitHub 是升级；反向换回去要等 F-Droid 那边的构建追上来。
 
 F-Droid 的索引按它自己的节奏刷新，新版本可能要几天才会出现；[包页面](https://f-droid.org/packages/com.safekey.authenticator/)上显示的就是当前真正能安装的版本——截至目前是 **2.6.2**。
 
