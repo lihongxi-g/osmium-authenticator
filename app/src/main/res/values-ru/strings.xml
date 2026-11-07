@@ -412,6 +412,12 @@
     <string name="auto_backup_password_saved">Пароль сохранён</string>
     <string name="auto_backup_time_picker_title">Выберите время</string>
     <string name="auto_backup_interval_picker_title">Выберите периодичность</string>
+    <string name="welcome_title">Добро пожаловать в Osmium</string>
+    <string name="welcome_body">Спасибо, что выбрали Osmium. Коды создаются на этом устройстве и никогда его не покидают: без аккаунта, без облака, без слежки. Всё ниже — по желанию.</string>
+    <string name="welcome_links_title">Где нас найти</string>
+    <string name="welcome_update_title">Проверка обновлений</string>
+    <string name="welcome_update_hint">Оба переключателя можно изменить позже в разделе Настройки → Проверка обновлений.</string>
+    <string name="welcome_start">Начать</string>
     <string name="update_settings_title">Проверка обновлений</string>
     <string name="update_settings_desc">Автоматически искать новые версии: стабильные, предварительные или обе</string>
     <string name="update_stable_title">Проверять стабильные обновления</string>

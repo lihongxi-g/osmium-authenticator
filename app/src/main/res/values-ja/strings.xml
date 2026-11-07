@@ -412,6 +412,12 @@
     <string name="auto_backup_password_saved">パスワードを保存しました</string>
     <string name="auto_backup_time_picker_title">時刻を選択</string>
     <string name="auto_backup_interval_picker_title">頻度を選択</string>
+    <string name="welcome_title">Osmium へようこそ</string>
+    <string name="welcome_body">Osmium をお選びいただきありがとうございます。コードはこの端末内で生成され、外部に送信されることはありません。アカウントもクラウドも追跡もありません。以下の項目はすべて任意です。</string>
+    <string name="welcome_links_title">リンク</string>
+    <string name="welcome_update_title">アップデートの確認</string>
+    <string name="welcome_update_hint">この 2 つのスイッチは、あとから「設定 → アップデートの確認」で変更できます。</string>
+    <string name="welcome_start">はじめる</string>
     <string name="update_settings_title">アップデートの確認</string>
     <string name="update_settings_desc">新しいバージョンを自動で確認します（正式版・プレビュー版を個別に選べます）</string>
     <string name="update_stable_title">正式版の更新を確認</string>

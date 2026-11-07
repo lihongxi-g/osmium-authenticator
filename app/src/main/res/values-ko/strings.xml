@@ -412,6 +412,12 @@
     <string name="auto_backup_password_saved">백업 비밀번호 저장됨</string>
     <string name="auto_backup_time_picker_title">시간 선택</string>
     <string name="auto_backup_interval_picker_title">주기 선택</string>
+    <string name="welcome_title">Osmium에 오신 것을 환영합니다</string>
+    <string name="welcome_body">Osmium을 선택해 주셔서 감사합니다. 코드는 이 기기에서 생성되며 절대 외부로 나가지 않습니다. 계정도, 클라우드도, 추적도 없습니다. 아래 항목은 모두 선택 사항입니다.</string>
+    <string name="welcome_links_title">우리를 찾는 곳</string>
+    <string name="welcome_update_title">업데이트 확인</string>
+    <string name="welcome_update_hint">두 스위치는 나중에 설정 → 업데이트 확인에서 변경할 수 있습니다.</string>
+    <string name="welcome_start">시작하기</string>
     <string name="update_settings_title">업데이트 확인</string>
     <string name="update_settings_desc">새 버전을 자동으로 확인합니다(정식 버전과 프리뷰 버전을 따로 켤 수 있습니다)</string>
     <string name="update_stable_title">정식 버전 업데이트 확인</string>

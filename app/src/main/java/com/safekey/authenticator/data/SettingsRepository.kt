@@ -88,7 +88,23 @@ data class AppSettings(
     // ---- integrity detection logging (2026-09) ----
     val devDetailedLogging: Boolean = false,
     /** User asked not to be reminded about setting a PIN on a device without biometrics. */
-    val pinReminderSilenced: Boolean = false
+    val pinReminderSilenced: Boolean = false,
+    /**
+     * versionName of the last build whose welcome dialog was shown. Empty on a
+     * fresh install; compared against the running build so every version opens
+     * the dialog exactly once.
+     */
+    val welcomeShownVersion: String = "",
+    /**
+     * True only for values that actually came out of DataStore.
+     *
+     * The ViewModel's StateFlow starts at `AppSettings()`, i.e. loaded = false,
+     * and a cold start reaches `MainActivity.onStart` before the first DataStore
+     * read lands. Anything that acts on a stored setting has to wait for this
+     * flag — treating the defaults as the user's choice is what silently skipped
+     * the update check on every first launch.
+     */
+    val loaded: Boolean = false
 ) {
     companion object {
         const val THEME_SYSTEM = "system"
@@ -298,6 +314,7 @@ class SettingsRepository(
         val AUTO_BACKUP_NOTIFY_AUTH = booleanPreferencesKey("auto_backup_notify_auth")
         val AUTO_CHECK_UPDATES = booleanPreferencesKey("auto_check_updates")
         val CHECK_PREVIEW_UPDATES = booleanPreferencesKey("check_preview_updates")
+        val WELCOME_SHOWN_VERSION = stringPreferencesKey("welcome_shown_version")
         val TAGS_ENABLED = booleanPreferencesKey("tags_enabled")
         val DEV_MODE_ENABLED = booleanPreferencesKey("dev_mode_enabled")
         val DEV_DISABLE_ROOT_SECURITY = booleanPreferencesKey("dev_disable_root_security")
@@ -356,7 +373,10 @@ class SettingsRepository(
 
             devHiddenFeatures = prefs[Keys.DEV_HIDDEN_FEATURES] ?: emptySet(),
             devDetailedLogging = prefs[Keys.DEV_DETAILED_LOGGING] ?: false,
-            pinReminderSilenced = prefs[Keys.PIN_REMINDER_SILENCED] ?: false
+            pinReminderSilenced = prefs[Keys.PIN_REMINDER_SILENCED] ?: false,
+            welcomeShownVersion = prefs[Keys.WELCOME_SHOWN_VERSION] ?: "",
+            // Anything that arrived from DataStore is, by definition, loaded.
+            loaded = true
         )
     }
 
@@ -561,6 +581,14 @@ class SettingsRepository(
      */
     suspend fun setCheckPreviewUpdates(enabled: Boolean) {
         context.dataStore.edit { it[Keys.CHECK_PREVIEW_UPDATES] = enabled }
+    }
+
+    /**
+     * Records that the welcome dialog was shown for [version], so the same
+     * build never opens it twice (a newer version shows it again).
+     */
+    suspend fun setWelcomeShownVersion(version: String) {
+        context.dataStore.edit { it[Keys.WELCOME_SHOWN_VERSION] = version }
     }
 
     suspend fun setTagsEnabled(enabled: Boolean) {

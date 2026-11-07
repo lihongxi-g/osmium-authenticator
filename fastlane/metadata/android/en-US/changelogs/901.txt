@@ -1,0 +1,1 @@
+Update checks are fixed: the first launch after installing no longer skips the check (it read default settings before yours had loaded), and a check that could not reach GitHub now says so instead of claiming you are on the latest version. New: a welcome page on the first start of each version — website, Telegram, GitHub, F-Droid and both update-channel switches in one place.

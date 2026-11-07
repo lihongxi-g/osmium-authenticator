@@ -412,6 +412,12 @@
     <string name="auto_backup_password_saved">बैकअप पासवर्ड सहेजा गया</string>
     <string name="auto_backup_time_picker_title">समय चुनें</string>
     <string name="auto_backup_interval_picker_title">आवृत्ति चुनें</string>
+    <string name="welcome_title">Osmium में आपका स्वागत है</string>
+    <string name="welcome_body">Osmium चुनने के लिए धन्यवाद। आपके कोड इसी डिवाइस पर बनते हैं और कभी बाहर नहीं जाते — कोई खाता नहीं, कोई क्लाउड नहीं, कोई ट्रैकिंग नहीं। नीचे दिया सब कुछ वैकल्पिक है।</string>
+    <string name="welcome_links_title">हमें यहाँ पाएँ</string>
+    <string name="welcome_update_title">अपडेट जाँच</string>
+    <string name="welcome_update_hint">ये दोनों स्विच आप बाद में सेटिंग्स → अपडेट जाँच में बदल सकते हैं।</string>
+    <string name="welcome_start">शुरू करें</string>
     <string name="update_settings_title">अपडेट जाँच</string>
     <string name="update_settings_desc">नए संस्करण अपने आप खोजें: स्थिर, प्रीव्यू या दोनों</string>
     <string name="update_stable_title">स्थिर अपडेट जाँचें</string>

@@ -82,6 +82,7 @@ import com.safekey.authenticator.totp.OtpUriParser
 import com.safekey.authenticator.ui.components.DialogBodyText
 import com.safekey.authenticator.ui.components.SwipeBackContainer
 import com.safekey.authenticator.ui.components.UpdateAvailableDialog
+import com.safekey.authenticator.ui.components.WelcomeDialog
 import com.safekey.authenticator.ui.components.integrityCheckTitle
 import com.safekey.authenticator.ui.navigation.Screen
 import com.safekey.authenticator.notify.BackupNotifier
@@ -130,6 +131,7 @@ import com.safekey.authenticator.update.UpdateResult
 import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -389,9 +391,29 @@ class MainActivity : FragmentActivity() {
                             )
                         }
                     }
-                    // Update notification only over the unlocked main UI.
+                    // Welcome, once per version, above everything else: the two
+                    // update channels are asked here instead of three menus
+                    // deep, and a fresh install learns where the project lives.
+                    val firstEverWelcome = settings.welcomeShownVersion.isEmpty()
+                    val showWelcome = settings.loaded && !locked && !pinRequired &&
+                        !destroyed && !tamperBlocked &&
+                        settings.welcomeShownVersion != BuildConfig.VERSION_NAME
+                    if (showWelcome) {
+                        WelcomeDialog(
+                            // Fresh install: stable on (the user agrees here,
+                            // rather than discovering a setting later), preview
+                            // off — a test build must never arrive uninvited.
+                            // Upgrading: keep exactly what the user last chose.
+                            initialStable = if (firstEverWelcome) true else settings.autoCheckUpdates,
+                            initialPreview = if (firstEverWelcome) false else settings.checkPreviewUpdates,
+                            onOpenUrl = { url -> openExternalUrl(url) },
+                            onFinish = { stable, preview -> vm.completeWelcome(stable, preview) }
+                        )
+                    }
+                    // Update notification only over the unlocked main UI, and
+                    // never stacked on top of the welcome dialog.
                     val update = pendingUpdate
-                    if (update != null && !locked && !pinRequired &&
+                    if (update != null && !locked && !pinRequired && !showWelcome &&
                         !destroyed && !tamperBlocked
                     ) {
                         UpdateAvailableDialog(
@@ -1009,10 +1031,7 @@ class MainActivity : FragmentActivity() {
      * the unlocked main UI.
      */
     private fun maybeCheckForUpdate() {
-        val settings = vm.settings.value
-        val checkStable = settings.autoCheckUpdates
-        val checkPreview = settings.checkPreviewUpdates
-        if ((!checkStable && !checkPreview) || updateCheckInFlight ||
+        if (updateCheckInFlight ||
             (tampered && !tamperAcknowledged) ||
             vm.destroyed.value
         ) return
@@ -1022,6 +1041,22 @@ class MainActivity : FragmentActivity() {
         updateCheckInFlight = true
         lifecycleScope.launch {
             try {
+                // Wait for the stored settings. The StateFlow starts at
+                // AppSettings() defaults (both channels off) and a cold start
+                // reaches onStart before the first DataStore read lands, so
+                // reading `value` here saw "off" and skipped the check on every
+                // first launch — the app then only checked on the *next*
+                // onStart, after the user had been to the background and back.
+                val settings = try {
+                    vm.settings.first { it.loaded }
+                } catch (_: Exception) {
+                    // A failed settings read must not crash the app from a
+                    // background nicety like this one.
+                    return@launch
+                }
+                val checkStable = settings.autoCheckUpdates
+                val checkPreview = settings.checkPreviewUpdates
+                if (!checkStable && !checkPreview) return@launch
                 val result = withContext(Dispatchers.IO) {
                     UpdateChecker.check(includeStable = checkStable, includePreview = checkPreview)
                 }
@@ -1029,6 +1064,15 @@ class MainActivity : FragmentActivity() {
             } finally {
                 updateCheckInFlight = false
             }
+        }
+    }
+
+    /** Opens a link in whatever browser the device has; failure is a toast. */
+    private fun openExternalUrl(url: String) {
+        try {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+        } catch (_: Exception) {
+            vm.showToast(getString(R.string.no_browser))
         }
     }
 

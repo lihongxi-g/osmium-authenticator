@@ -802,6 +802,18 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     fun setCheckPreviewUpdates(enabled: Boolean) =
         viewModelScope.launch { settingsRepo.setCheckPreviewUpdates(enabled) }
 
+    /**
+     * The welcome dialog's "get started": both channel switches plus the
+     * "already shown for this version" marker, written in one go so the dialog
+     * cannot reappear because only part of it landed.
+     */
+    fun completeWelcome(stableChannel: Boolean, previewChannel: Boolean) =
+        viewModelScope.launch {
+            settingsRepo.setAutoCheckUpdates(stableChannel)
+            settingsRepo.setCheckPreviewUpdates(previewChannel)
+            settingsRepo.setWelcomeShownVersion(BuildConfig.VERSION_NAME)
+        }
+
     fun setAutoBackupEnabled(enabled: Boolean) = viewModelScope.launch { settingsRepo.setAutoBackupEnabled(enabled) }
     fun setAutoBackupTarget(target: String) = viewModelScope.launch { settingsRepo.setAutoBackupTarget(target) }
     fun setAutoBackupIntervalDays(days: Int) = viewModelScope.launch { settingsRepo.setAutoBackupIntervalDays(days) }

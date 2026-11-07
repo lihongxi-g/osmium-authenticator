@@ -412,6 +412,12 @@
     <string name="auto_backup_password_saved">Backup-Passwort gespeichert</string>
     <string name="auto_backup_time_picker_title">Zeit wählen</string>
     <string name="auto_backup_interval_picker_title">Häufigkeit wählen</string>
+    <string name="welcome_title">Willkommen bei Osmium</string>
+    <string name="welcome_body">Danke, dass du Osmium gewählt hast. Deine Codes entstehen auf diesem Gerät und verlassen es nie – kein Konto, keine Cloud, kein Tracking. Alles Folgende ist optional.</string>
+    <string name="welcome_links_title">Wo du uns findest</string>
+    <string name="welcome_update_title">Update-Prüfung</string>
+    <string name="welcome_update_hint">Beide Schalter lassen sich später unter Einstellungen → Update-Prüfung ändern.</string>
+    <string name="welcome_start">Los geht\'s</string>
     <string name="update_settings_title">Update-Prüfung</string>
     <string name="update_settings_desc">Automatisch nach neuen Versionen suchen: stabil, Vorschau oder beides</string>
     <string name="update_stable_title">Auf stabile Updates prüfen</string>

@@ -428,6 +428,12 @@
     <string name="auto_backup_password_saved">备份密码已保存</string>
     <string name="auto_backup_time_picker_title">选择备份时间</string>
     <string name="auto_backup_interval_picker_title">选择备份频率</string>
+    <string name="welcome_title">欢迎使用 Osmium</string>
+    <string name="welcome_body">感谢你选择 Osmium。所有验证码都在本机生成，不会离开这台设备——没有账号、没有云端、没有追踪。下面列出的选项都可以随时更改。</string>
+    <string name="welcome_links_title">关注我们</string>
+    <string name="welcome_update_title">更新检查</string>
+    <string name="welcome_update_hint">这两个开关之后都可以在「设置 → 更新检查」里修改。</string>
+    <string name="welcome_start">开始使用</string>
     <string name="update_settings_title">检查更新</string>
     <string name="update_settings_desc">自动检查新版本：正式版、预览版，可分别开启</string>
     <string name="update_stable_title">检查正式版更新</string>

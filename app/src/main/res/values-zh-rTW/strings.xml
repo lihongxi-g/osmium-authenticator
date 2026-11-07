@@ -427,6 +427,12 @@
     <string name="auto_backup_password_saved">備份密碼已儲存</string>
     <string name="auto_backup_time_picker_title">選取備份時間</string>
     <string name="auto_backup_interval_picker_title">選取備份頻率</string>
+    <string name="welcome_title">歡迎使用 Osmium</string>
+    <string name="welcome_body">感謝你選擇 Osmium。所有驗證碼都在本機產生，不會離開這台裝置——沒有帳號、沒有雲端、沒有追蹤。下面列出的選項都可以隨時更改。</string>
+    <string name="welcome_links_title">關注我們</string>
+    <string name="welcome_update_title">更新檢查</string>
+    <string name="welcome_update_hint">這兩個開關之後都可以在「設定 → 更新檢查」裡修改。</string>
+    <string name="welcome_start">開始使用</string>
     <string name="update_settings_title">檢查更新</string>
     <string name="update_settings_desc">自動檢查新版本：正式版、預覽版，可分別開啟</string>
     <string name="update_stable_title">檢查正式版更新</string>

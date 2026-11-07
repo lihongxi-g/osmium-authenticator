@@ -193,7 +193,11 @@ object UpdateChecker {
                 includePreview = true
             )
 
-            includeStable -> fetchLatest()
+            // A null here is a failed request (offline, blocked, rate limited),
+            // not a build that is up to date. Reporting it as UpToDate made
+            // About → check for updates answer "you already have the latest
+            // version" with the network switched off.
+            includeStable -> fetchLatest() ?: return UpdateResult.Failed
 
             // Neither channel enabled: no request at all. A build nobody asked
             // to check must not phone home (F-Droid review: no connections

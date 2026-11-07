@@ -412,6 +412,12 @@
     <string name="auto_backup_password_saved">Mot de passe enregistré</string>
     <string name="auto_backup_time_picker_title">Choisir une heure</string>
     <string name="auto_backup_interval_picker_title">Choisir une fréquence</string>
+    <string name="welcome_title">Bienvenue dans Osmium</string>
+    <string name="welcome_body">Merci d\'avoir choisi Osmium. Vos codes sont générés sur cet appareil et n\'en sortent jamais : pas de compte, pas de cloud, pas de traçage. Tout ce qui suit est facultatif.</string>
+    <string name="welcome_links_title">Où nous trouver</string>
+    <string name="welcome_update_title">Vérification des mises à jour</string>
+    <string name="welcome_update_hint">Vous pourrez modifier ces deux interrupteurs plus tard dans Paramètres → Vérification des mises à jour.</string>
+    <string name="welcome_start">Commencer</string>
     <string name="update_settings_title">Vérification des mises à jour</string>
     <string name="update_settings_desc">Recherche automatique des nouvelles versions : stables, d’aperçu, ou les deux</string>
     <string name="update_stable_title">Vérifier les versions stables</string>
