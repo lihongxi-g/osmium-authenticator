@@ -2,9 +2,18 @@
 
 **发布日期 / Release date: 待定 (TBD)**
 
-这是一个修标签功能的小版本：去掉标签筛选行里的「未分类」，把标签配色改亮、编辑器能显示当前颜色、重名不再闪退，顺手修了几处标签相关的毛病。关于页的 X（推特）入口已移除。
+这是一个改标签功能的小版本：新增批量打标签（多选账户后一次性贴标签），去掉标签筛选行里的「未分类」，把标签配色改亮、编辑器能显示当前颜色、重名不再闪退，顺手修了几处标签相关的毛病。关于页的 X（推特）入口已移除。
 
 ## 中文更新说明
+
+### 新增：批量给账户打标签
+
+- 长按任意账户卡片进入多选模式（也可以用顶栏的调色板按钮进入）。进入后点卡片是勾选/取消勾选，顶栏显示「已选 N 项」，左侧返回键退出。
+- 顶栏右侧「全选」一次选中当前列表里的全部账户（列表被搜索或标签筛选过时，选的是筛出来的那些）；再点一次取消全选。
+- 底部动作栏的「打标签」打开标签面板：勾选一个或多个标签，点「添加标签」贴到所有选中账户上，点「移除标签」反向解除。添加是并集——账户原有的其它标签不受影响。
+- 写入是单个事务（N 个账户 × M 个标签的关联一次批量插入），中途失败不会留下写了一半的关系。
+- 选中的账户被删除或被筛选隐藏时会自动从选择里剔除，底部计数不会虚报。
+- 多选模式下代码区不再响应点击复制（避免想勾选却复制了验证码）；打完标签自动退出多选并提示更新了多少个账户。
 
 ### 变更：标签筛选行去掉「未分类」
 
@@ -46,7 +55,16 @@
 
 ## English release notes
 
-A small release that reworks the tags feature: the "Uncategorized" filter chip is gone, the palette is brighter, the editor shows the color a tag already has, and a duplicate name no longer takes the process down. The About page no longer links to X.
+A small release that reworks the tags feature: accounts can now be tagged in bulk, the "Uncategorized" filter chip is gone, the palette is brighter, the editor shows the color a tag already has, and a duplicate name no longer takes the process down. The About page no longer links to X.
+
+### New: tag accounts in bulk
+
+- Long-press any account card to start selecting (or use the palette action in the top bar). In this mode a tap toggles a card instead of opening it, the top bar shows "N selected", and the back arrow leaves the mode.
+- "Select all" in the top bar selects every account currently listed — with a search or tag filter active, that is exactly the filtered set; tapping again clears the selection.
+- "Tag" in the bottom bar opens the tag panel: pick one or more tags and choose "Add tags" to apply them to every selected account, or "Remove tags" to unlink them. Adding unions with what each account already carries, so other tags are untouched.
+- The write is a single transaction (the account × tag links are inserted as one batch), so a failure cannot leave half-linked accounts behind.
+- Accounts deleted or filtered out from under the selection are dropped automatically, so the count never promises more accounts than the write touches.
+- In selection mode the code area no longer copies on tap — a stray tap should not copy instead of selecting — and applying tags exits the mode with a toast reporting how many accounts were updated.
 
 ### Changed: no more "Uncategorized" chip
 

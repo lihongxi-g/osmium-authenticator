@@ -45,6 +45,10 @@ interface TagDao {
     @Query("DELETE FROM account_tag_cross_ref WHERE accountId = :accountId")
     suspend fun deleteRefsForAccount(accountId: String)
 
+    /** Bulk unlink used by the batch tag editor: accounts x tags in one go. */
+    @Query("DELETE FROM account_tag_cross_ref WHERE accountId IN (:accountIds) AND tagId IN (:tagIds)")
+    suspend fun deleteRefs(accountIds: List<String>, tagIds: List<String>)
+
     @Query("SELECT COUNT(*) FROM account_tag_cross_ref WHERE tagId = :tagId")
     suspend fun countAccounts(tagId: String): Int
 }

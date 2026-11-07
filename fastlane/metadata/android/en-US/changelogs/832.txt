@@ -1,1 +1,0 @@
-v2.6.2.1: tags lose the "Uncategorized" filter chip. Tag colors are brighter and easier to tell apart, the editor shows which color a tag already has and warns about a duplicate name instead of crashing, Chinese tag names sort naturally, and the delete prompt says how many accounts are affected. The About page no longer links to X.

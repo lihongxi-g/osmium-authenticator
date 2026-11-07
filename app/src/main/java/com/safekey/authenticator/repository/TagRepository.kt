@@ -6,6 +6,7 @@ import com.safekey.authenticator.database.AppDatabase
 import com.safekey.authenticator.database.TagDao
 import com.safekey.authenticator.database.TagEntity
 import com.safekey.authenticator.model.Tag
+import com.safekey.authenticator.tags.TagBatch
 import com.safekey.authenticator.tags.TagColor
 import com.safekey.authenticator.tags.TagRules
 import kotlinx.coroutines.flow.Flow
@@ -58,15 +59,32 @@ class TagRepository(
         // One transaction: the untransacted delete-then-insert pair could leave
         // the account with no tags when the insert failed.
         val refs = tagIds.map { AccountTagCrossRef(accountId, it) }
-        if (db == null) {
+        transaction {
             dao.deleteRefsForAccount(accountId)
             dao.insertRefs(refs)
-        } else {
-            db.withTransaction {
-                dao.deleteRefsForAccount(accountId)
-                dao.insertRefs(refs)
-            }
         }
+    }
+
+    /**
+     * Batch editor: add [tagIds] to every account in [accountIds], leaving the
+     * tags those accounts already carry alone. Existing links are ignored by the
+     * cross-ref primary key, so running it twice is harmless.
+     */
+    suspend fun addTagsToAccounts(accountIds: Set<String>, tagIds: Set<String>) {
+        val refs = TagBatch.refs(accountIds, tagIds).map { (accountId, tagId) -> AccountTagCrossRef(accountId, tagId) }
+        if (refs.isEmpty()) return
+        transaction { dao.insertRefs(refs) }
+    }
+
+    /** Batch editor: unlink [tagIds] from every account in [accountIds]. */
+    suspend fun removeTagsFromAccounts(accountIds: Set<String>, tagIds: Set<String>) {
+        if (!TagBatch.canApply(accountIds, tagIds)) return
+        transaction { dao.deleteRefs(accountIds.toList(), tagIds.toList()) }
+    }
+
+    /** Room only allows `withTransaction` on a real database; tests build the DAO alone. */
+    private suspend fun transaction(block: suspend () -> Unit) {
+        if (db == null) block() else db.withTransaction { block() }
     }
 
     suspend fun getAccountTagIds(accountId: String): Set<String> = dao.getRefsForAccount(accountId).map { it.tagId }.toSet()

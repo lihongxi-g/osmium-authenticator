@@ -16,6 +16,15 @@
     <string name="tag_name_invalid">Name cannot be empty and must be 20 characters or fewer.</string>
     <string name="tag_name_duplicate">A tag with this name already exists.</string>
     <string name="tag_account_count">%1$d account(s)</string>
+    <string name="batch_select_count">%1$d selected</string>
+    <string name="batch_select_enter">Tag accounts in bulk</string>
+    <string name="batch_select_all">Select all</string>
+    <string name="batch_select_clear">Clear selection</string>
+    <string name="batch_tag_title">Tag %1$d accounts</string>
+    <string name="batch_tag_action">Tag</string>
+    <string name="batch_tag_add">Add tags</string>
+    <string name="batch_tag_remove">Remove tags</string>
+    <string name="batch_tag_done">Updated %1$d accounts</string>
 
     <string name="app_tagline">गोपनीयता-प्रथम प्रमाणक</string>
     <string name="accounts_title">खाते</string>

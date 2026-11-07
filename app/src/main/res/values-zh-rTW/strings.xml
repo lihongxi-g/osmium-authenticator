@@ -17,6 +17,15 @@
     <string name="tag_name_invalid">名稱不能為空，且最多 20 個字符。</string>
     <string name="tag_name_duplicate">已存在同名標籤。</string>
     <string name="tag_account_count">%1$d 個帳戶</string>
+    <string name="batch_select_count">已選 %1$d 項</string>
+    <string name="batch_select_enter">批次打標籤</string>
+    <string name="batch_select_all">全選</string>
+    <string name="batch_select_clear">取消全選</string>
+    <string name="batch_tag_title">為 %1$d 個帳戶打標籤</string>
+    <string name="batch_tag_action">打標籤</string>
+    <string name="batch_tag_add">新增標籤</string>
+    <string name="batch_tag_remove">移除標籤</string>
+    <string name="batch_tag_done">已更新 %1$d 個帳戶</string>
 
     <string name="accounts_title">帳戶</string>
     <string name="add_account">新增帳戶</string>
