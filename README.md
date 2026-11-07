@@ -16,7 +16,7 @@ The app itself fetches the Terms of Use and Privacy Policy from osmium.im when y
 - **Vibration feedback** — a master switch and a 0–100% intensity slider. Every click gets a tick (buttons, switches, settings rows, the PIN keypad); scrolling, dragging and the swipe-back gesture stay silent. The app drives the vibrator itself, so it works even when the system touch-feedback switch is off
 - **Encrypted backup** — export a password-protected encrypted file and restore it on a device running a compatible Osmium version
 - **WebDAV backup** — upload encrypted backups to a WebDAV server you configure (NAS, PC, or another phone) and restore them; the server receives ciphertext only
-- **LAN quick transfer** — connect two devices to the same Wi-Fi and transfer accounts through end-to-end encryption derived from a 6-digit pairing code; no cloud server is involved; the receiver can preview and select accounts
+- **LAN quick transfer** — connect two devices to the same Wi-Fi and transfer accounts through end-to-end encryption derived from a 12-digit pairing code, which the receiver shows as a QR code the sender scans (or types by hand); no cloud server is involved; the receiver can preview and select accounts
 - **Automatic backup** — schedule backups to WebDAV or the phone’s Download/Osmium folder, with configurable interval, time and retention
 - **Backup result notifications** — scheduled runs report their outcome: success is silent (no sound, no banner, no badge), failure or a skipped run alerts; the lock screen shows only that a background task finished, with time and destination revealed after unlocking; can be switched off at any time
 - **Permissions page** — one place under Settings listing live status for camera, notifications, biometrics, local network, storage (Android 9 and older) and the battery-optimisation exemption, with the request one tap away
@@ -43,25 +43,25 @@ The live test page at **https://otp.osmium.im** supports TOTP, HOTP and Steam Gu
 
 ## Download
 
-Latest stable release: **Osmium v2.6.2** (`versionCode 821-823, per ABI`: 821 = armeabi-v7a, 822 = arm64-v8a, 823 = x86_64). Choose the ABI matching your device:
+Latest stable release: **Osmium v2.6.4** (`versionCode 891-893, per ABI`: 891 = armeabi-v7a, 892 = arm64-v8a, 893 = x86_64). Choose the ABI matching your device:
 
 | File | Architecture | Devices | Download |
 |---|---|---|---|
-| `osmium-2.6.2-arm64-v8a.apk` | arm64-v8a | Virtually all modern phones (recommended) | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.6.2/osmium-2.6.2-arm64-v8a.apk) |
-| `osmium-2.6.2-armeabi-v7a.apk` | armeabi-v7a | Older 32-bit phones | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.6.2/osmium-2.6.2-armeabi-v7a.apk) |
-| `osmium-2.6.2-x86_64.apk` | x86_64 | Android emulators | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.6.2/osmium-2.6.2-x86_64.apk) |
+| `osmium-2.6.4-arm64-v8a.apk` | arm64-v8a | Virtually all modern phones (recommended) | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.6.4/osmium-2.6.4-arm64-v8a.apk) |
+| `osmium-2.6.4-armeabi-v7a.apk` | armeabi-v7a | Older 32-bit phones | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.6.4/osmium-2.6.4-armeabi-v7a.apk) |
+| `osmium-2.6.4-x86_64.apk` | x86_64 | Android emulators | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.6.4/osmium-2.6.4-x86_64.apk) |
 
 Installing an incompatible ABI may prevent the app from starting. All three APKs use the same signing certificate, SHA-256 fingerprint: `B65BB0131CAA22C45D99EA4E2C3E99B3980EAE0DC5647190F41A2878E6D88412`.
 
-APK SHA-256 checksums are listed in the [v2.6.2 release notes](release-notes-v2.6.2.md) and in `SHA256SUMS.txt` on the GitHub Release page.
+APK SHA-256 checksums are listed in the [v2.6.4 release notes](release-notes-v2.6.4.md) and in `SHA256SUMS.txt` on the GitHub Release page.
 
 ### F-Droid
 
 Osmium is on F-Droid: **https://f-droid.org/packages/com.safekey.authenticator/**
 
-F-Droid builds from the same source and signs with the same certificate as the GitHub release (the recipe pins the signing key), so the two are the same app — moving between them is an in-place update, and for a 2FA app that matters because uninstalling deletes every local account. Note that the two channels number their versions differently: GitHub uses the versionCode below (821–823 for 2.6.2), F-Droid derives its own (791–793 for 2.6.1), and the GitHub number is the higher one. Switching from F-Droid to GitHub therefore upgrades; switching back to F-Droid waits until an F-Droid build catches up.
+F-Droid builds from the same source and signs with the same certificate as the GitHub release (the recipe pins the signing key), so the two are the same app — moving between them is an in-place update, and for a 2FA app that matters because uninstalling deletes every local account. Note that the two channels number their versions differently: GitHub uses the versionCode above (891–893 for 2.6.4), while F-Droid derives its own number for the same source and currently serves 2.6.2. The GitHub number is the higher one, so switching from F-Droid to GitHub is an upgrade; switching back waits until an F-Droid build catches up.
 
-F-Droid's index refreshes on its own schedule, so a brand-new release can take a few days to appear there; the [package page](https://f-droid.org/packages/com.safekey.authenticator/) always shows the version actually installable right now. As of this release it offers **2.6.1**.
+F-Droid's index refreshes on its own schedule, so a brand-new release can take a few days to appear there; the [package page](https://f-droid.org/packages/com.safekey.authenticator/) always shows the version actually installable right now. As of this release it offers **2.6.2**.
 
 ## Privacy & Terms
 
