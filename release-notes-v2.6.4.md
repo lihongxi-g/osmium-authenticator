@@ -69,7 +69,9 @@ Security hardening for LAN quick transfer, plus everything from the unpublished 
 ## APK SHA-256
 
 ```
-CHECKSUMS_PLACEHOLDER
+7ddac7359ac1ba90962aab1394cee4b26f1da66a17fd069e0018ce70e9b14ea4  osmium-2.6.4-arm64-v8a.apk
+350469595b55edc2174b39cca42762ef65ca5b7f75900b253557510d25bfd39b  osmium-2.6.4-armeabi-v7a.apk
+6ddf4f06c1e95683c3888aeab3e3592014ee7495826a62449435029362ad41dc  osmium-2.6.4-x86_64.apk
 ```
 
 所有 APK 使用同一张签名证书，SHA-256 指纹：`B65BB0131CAA22C45D99EA4E2C3E99B3980EAE0DC5647190F41A2878E6D88412`
