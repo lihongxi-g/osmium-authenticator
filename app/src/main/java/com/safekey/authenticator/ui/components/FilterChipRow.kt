@@ -28,7 +28,6 @@ import com.safekey.authenticator.tags.TagColor
 fun FilterChipRow(
     tags: List<Tag>,
     selected: Set<String>,
-    uncategorized: Boolean,
     vm: MainViewModel,
     scrollState: ScrollState = rememberScrollState()
 ) {
@@ -40,14 +39,9 @@ fun FilterChipRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         FilterChip(
-            selected = selected.isEmpty() && !uncategorized,
+            selected = selected.isEmpty(),
             onClick = { vm.clearTagFilter() },
             label = { Text(stringResource(R.string.filter_all)) }
-        )
-        FilterChip(
-            selected = uncategorized,
-            onClick = { vm.setUncategorizedSelected(!uncategorized) },
-            label = { Text(stringResource(R.string.filter_uncategorized)) }
         )
         tags.forEach { tag ->
             FilterChip(

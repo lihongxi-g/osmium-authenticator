@@ -69,6 +69,16 @@ class UpdateCheckerTest {
     }
 
     @Test
+    fun fourPartVersionsStillOrder() {
+        // 2.6.2.1-style bugfix builds must rank above the three-part release
+        // they patch, and never the other way round.
+        assertTrue(UpdateChecker.isNewer("2.6.2.1", "2.6.2"))
+        assertTrue(UpdateChecker.isNewer("v2.6.2.1", "2.6.2"))
+        assertFalse(UpdateChecker.isNewer("2.6.2", "2.6.2.1"))
+        assertFalse(UpdateChecker.isNewer("2.6.2.1", "2.6.2.1"))
+    }
+
+    @Test
     fun previewSuffixesStillOrder() {
         assertTrue(UpdateChecker.isNewer("2.6.1-beta1", "2.6.1-beta"))
         assertFalse(UpdateChecker.isNewer("2.6.1-beta", "2.6.1-beta1"))

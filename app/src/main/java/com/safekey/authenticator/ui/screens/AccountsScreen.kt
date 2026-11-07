@@ -91,7 +91,6 @@ fun AccountsScreen(
     val accountsLoaded by vm.accountsLoaded.collectAsState()
     val tags by vm.tags.collectAsState()
     val selectedTagIds by vm.selectedTagIds.collectAsState()
-    val uncategorized by vm.uncategorizedSelected.collectAsState()
     val settings by vm.settings.collectAsState()
     val search by vm.searchQuery.collectAsState()
     // Saveable: the query lives in the ViewModel, so losing this flag across a
@@ -142,7 +141,7 @@ fun AccountsScreen(
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
             if (TagPresentation.shouldShowFilterRow(settings.tagsEnabled, tags)) {
-                FilterChipRow(tags, selectedTagIds, uncategorized, vm, tagRowState)
+                FilterChipRow(tags, selectedTagIds, vm, tagRowState)
             }
             Box(
                 modifier = Modifier

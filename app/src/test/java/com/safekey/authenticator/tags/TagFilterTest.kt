@@ -34,32 +34,29 @@ class TagFilterTest {
 
     @Test
     fun `all filter returns every account`() {
-        assertEquals(listOf("one", "two", "three", "four"), TagFilter.apply(accounts, "", emptySet(), false).map { it.id })
-    }
-
-    @Test
-    fun `uncategorized filter returns only accounts without tags`() {
-        assertEquals(listOf("three"), TagFilter.apply(accounts, "", emptySet(), true).map { it.id })
+        assertEquals(listOf("one", "two", "three", "four"), TagFilter.apply(accounts, "", emptySet()).map { it.id })
     }
 
     @Test
     fun `multiple selected tags use OR semantics`() {
-        assertEquals(listOf("one", "two", "four"), TagFilter.apply(accounts, "", setOf(work.id, games.id), false).map { it.id })
+        assertEquals(listOf("one", "two", "four"), TagFilter.apply(accounts, "", setOf(work.id, games.id)).map { it.id })
     }
 
     @Test
     fun `search intersects selected tag filters`() {
-        assertEquals(listOf("one", "four"), TagFilter.apply(accounts, "google", setOf(work.id), false).map { it.id })
+        assertEquals(listOf("one", "four"), TagFilter.apply(accounts, "google", setOf(work.id)).map { it.id })
     }
 
     @Test
     fun `unknown selected tag yields no tagged accounts`() {
-        assertEquals(emptyList<String>(), TagFilter.apply(accounts, "", setOf("missing"), false).map { it.id })
+        assertEquals(emptyList<String>(), TagFilter.apply(accounts, "", setOf("missing")).map { it.id })
     }
 
     @Test
-    fun `uncategorized and tag filter are mutually exclusive`() {
-        // The ViewModel must clear the other mode when the user switches chips.
-        assertEquals(listOf("one", "four"), TagFilter.apply(accounts, "", setOf(work.id), false).map { it.id })
+    fun `tagless accounts stay visible with no filter selected`() {
+        // There is no "uncategorized" chip any more: accounts without a tag
+        // simply show up under "All".
+        val tagless = listOf(account("three", "GitHub", "octocat", emptySet()))
+        assertEquals(listOf("three"), TagFilter.apply(tagless, "", emptySet()).map { it.id })
     }
 }

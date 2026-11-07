@@ -10,10 +10,11 @@
     <string name="tags_edit">Edit tag</string>
     <string name="tags_delete">Delete tag</string>
     <string name="tags_delete_title">Delete tag?</string>
-    <string name="tags_delete_message">This only unlinks “%1$s” from accounts. Accounts will not be deleted.</string>
+    <string name="tags_delete_message">This only unlinks “%1$s” from %2$d account(s). Accounts will not be deleted.</string>
     <string name="tag_name">Tag name</string>
     <string name="tag_color">Tag color</string>
     <string name="tag_name_invalid">Name cannot be empty and must be 20 characters or fewer.</string>
+    <string name="tag_name_duplicate">A tag with this name already exists.</string>
     <string name="tag_account_count">%1$d account(s)</string>
 
     <string name="app_tagline">プライバシー重視の認証アプリ</string>
@@ -264,7 +265,6 @@
     <string name="check_updates">アップデートを確認</string>
     <string name="about_follow">Osmiumをフォロー</string>
     <string name="social_telegram">Telegram</string>
-    <string name="social_x">X</string>
     <string name="social_github">GitHub</string>
     <string name="social_mail">メール</string>
     <string name="social_website">ウェブサイト</string>
@@ -470,7 +470,6 @@
     <string name="lan_error_connection">Connection failed: %1$s</string>
     <string name="lan_security_tip">Ephemeral P-256 key exchange + AES-256-GCM. Both devices verify the 12-digit code before anything is sent, so third parties on the local network cannot read or impersonate the transfer.</string>
     <string name="filter_all">All</string>
-    <string name="filter_uncategorized">Uncategorized</string>
     <string name="tags_settings_desc">Configure tag support and manage your tags.</string>
     <string name="tags_settings_section">Tag settings</string>
     <string name="tags_feature">Enable tags</string>

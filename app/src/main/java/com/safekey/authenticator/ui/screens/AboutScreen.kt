@@ -207,9 +207,6 @@ fun AboutScreen(
                 SocialIcon(AppIcons.Telegram, stringResource(R.string.social_telegram), "https://t.me/osmium2fa") { url ->
                     openUrl(context, url, vm)
                 }
-                SocialIcon(AppIcons.XLogo, stringResource(R.string.social_x), "https://x.com/lihongxi_l") { url ->
-                    openUrl(context, url, vm)
-                }
                 SocialIcon(AppIcons.GitHub, stringResource(R.string.social_github), "https://github.com/lihongxi-g/osmium-authenticator") { url ->
                     openUrl(context, url, vm)
                 }

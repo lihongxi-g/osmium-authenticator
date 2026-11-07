@@ -10,13 +10,16 @@ import com.safekey.authenticator.tags.TagColor
 import com.safekey.authenticator.tags.TagRules
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import java.text.Collator
 import java.util.UUID
 
 class TagRepository(
     private val dao: TagDao,
     private val db: AppDatabase? = null
 ) {
-    val tags: Flow<List<Tag>> = dao.observeAll().map { list -> list.map { Tag(it.id, it.name, it.color, it.createdAt, it.updatedAt) } }
+    val tags: Flow<List<Tag>> = dao.observeAll().map { list ->
+        sortedByName(list.map { Tag(it.id, it.name, it.color, it.createdAt, it.updatedAt) })
+    }
 
     val accountTagIds: Flow<Map<String, Set<String>>> = dao.observeAllRefs().map { refs ->
         refs.groupBy { it.accountId }.mapValues { (_, values) -> values.map { it.tagId }.toSet() }
@@ -74,6 +77,17 @@ class TagRepository(
         val existing = dao.getByName(clean)
         require(existing == null || existing.id == excludeId) { "Duplicate tag name" }
         return clean
+    }
+
+    /**
+     * Locale-aware ordering for the tag list and the filter row. The DAO sorts
+     * with `COLLATE NOCASE`, which is ASCII-only, so CJK names came back in
+     * code-point order — random as far as a reader is concerned.
+     */
+    private fun sortedByName(tags: List<Tag>): List<Tag> {
+        val collator = Collator.getInstance()
+        collator.strength = Collator.SECONDARY
+        return tags.sortedWith(Comparator { a, b -> collator.compare(a.name, b.name) })
     }
 
     private fun Tag.toEntity() = TagEntity(id, name, color, createdAt, updatedAt)

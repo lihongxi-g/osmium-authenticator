@@ -317,26 +317,20 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     private val _selectedTagIds = MutableStateFlow<Set<String>>(emptySet())
     val selectedTagIds: StateFlow<Set<String>> = _selectedTagIds
-    private val _uncategorizedSelected = MutableStateFlow(false)
-    val uncategorizedSelected: StateFlow<Boolean> = _uncategorizedSelected
 
     fun toggleTagFilter(id: String) {
         _selectedTagIds.value = _selectedTagIds.value.toMutableSet().also { if (!it.add(id)) it.remove(id) }
-        _uncategorizedSelected.value = false
     }
-    fun setUncategorizedSelected(value: Boolean) { _uncategorizedSelected.value = value; if (value) _selectedTagIds.value = emptySet() }
-    fun clearTagFilter() { _selectedTagIds.value = emptySet(); _uncategorizedSelected.value = false }
+    fun clearTagFilter() { _selectedTagIds.value = emptySet() }
 
     val filteredSortedAccountUiList: StateFlow<List<AccountUi>> = combine(
         sortedAccountUiList,
         searchQuery,
         selectedTagIds,
-        uncategorizedSelected,
         settings
-    ) { list, query, ids, uncategorized, currentSettings ->
+    ) { list, query, ids, currentSettings ->
         val effectiveIds = ids.takeIf { currentSettings.tagsEnabled }.orEmpty()
-        val effectiveUncategorized = currentSettings.tagsEnabled && uncategorized
-        val filteredIds = TagFilter.apply(list.map { it.account }, query, effectiveIds, effectiveUncategorized)
+        val filteredIds = TagFilter.apply(list.map { it.account }, query, effectiveIds)
             .map { it.id }
             .toSet()
         list.filter { it.account.id in filteredIds }
@@ -779,8 +773,17 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     fun setHideCodes(enabled: Boolean) = viewModelScope.launch { settingsRepo.setHideCodes(enabled) }
     fun setSortMode(mode: String) = viewModelScope.launch { settingsRepo.setSortMode(mode) }
     fun setTimeOffsetSeconds(offset: Int) = viewModelScope.launch { settingsRepo.setTimeOffsetSeconds(offset) }
-    fun createTag(name: String, color: String) = viewModelScope.launch { tagRepo.create(name, color) }
-    fun updateTag(tag: com.safekey.authenticator.model.Tag, name: String, color: String) = viewModelScope.launch { tagRepo.update(tag, name, color) }
+    // The tag editor checks for duplicate names, but TagRepository re-validates
+    // and throws; an uncaught throw inside viewModelScope.launch used to take
+    // the whole process down when two names collided.
+    fun createTag(name: String, color: String) = viewModelScope.launch {
+        runCatching { tagRepo.create(name, color) }
+            .onFailure { AppLog.d("tag create rejected: ${it.message}") }
+    }
+    fun updateTag(tag: com.safekey.authenticator.model.Tag, name: String, color: String) = viewModelScope.launch {
+        runCatching { tagRepo.update(tag, name, color) }
+            .onFailure { AppLog.d("tag update rejected: ${it.message}") }
+    }
     fun deleteTag(tag: com.safekey.authenticator.model.Tag) { viewModelScope.launch { tagRepo.delete(tag); _selectedTagIds.value = _selectedTagIds.value - tag.id } }
     fun setAccountTags(accountId: String, tagIds: Set<String>) = viewModelScope.launch { tagRepo.setAccountTags(accountId, tagIds) }
     fun incrementCopyCount(id: String) = viewModelScope.launch { repo.incrementCopyCount(id) }

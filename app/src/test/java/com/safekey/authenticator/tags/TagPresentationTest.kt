@@ -14,20 +14,17 @@ class TagPresentationTest {
     fun `disabled tag feature hides all tag presentation`() {
         assertEquals(emptyList<Tag>(), TagPresentation.visibleTags(false, listOf(work)))
         assertFalse(TagPresentation.shouldShowFilterRow(false, listOf(work)))
-        assertFalse(TagPresentation.shouldShowUncategorized(false, listOf(work)))
     }
 
     @Test
-    fun `uncategorized is hidden when no tags have been created`() {
+    fun `filter row is hidden when no tags have been created`() {
         assertTrue(TagPresentation.visibleTags(true, emptyList()).isEmpty())
         assertFalse(TagPresentation.shouldShowFilterRow(true, emptyList()))
-        assertFalse(TagPresentation.shouldShowUncategorized(true, emptyList()))
     }
 
     @Test
     fun `enabled feature shows filters only after a tag exists`() {
         assertEquals(listOf(work), TagPresentation.visibleTags(true, listOf(work)))
         assertTrue(TagPresentation.shouldShowFilterRow(true, listOf(work)))
-        assertTrue(TagPresentation.shouldShowUncategorized(true, listOf(work)))
     }
 }

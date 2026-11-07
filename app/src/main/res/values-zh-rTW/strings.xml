@@ -11,10 +11,11 @@
     <string name="tags_edit">編輯標籤</string>
     <string name="tags_delete">刪除標籤</string>
     <string name="tags_delete_title">刪除標籤？</string>
-    <string name="tags_delete_message">只會解除“%1$s”與帳戶的關联，不會刪除帳戶。</string>
+    <string name="tags_delete_message">只會解除“%1$s”與 %2$d 個帳戶的關聯，不會刪除帳戶。</string>
     <string name="tag_name">標籤名稱</string>
     <string name="tag_color">標籤颜色</string>
     <string name="tag_name_invalid">名稱不能為空，且最多 20 個字符。</string>
+    <string name="tag_name_duplicate">已存在同名標籤。</string>
     <string name="tag_account_count">%1$d 個帳戶</string>
 
     <string name="accounts_title">帳戶</string>
@@ -275,7 +276,6 @@
     <string name="check_updates">檢查更新</string>
     <string name="about_follow">關注 Osmium</string>
     <string name="social_telegram">Telegram</string>
-    <string name="social_x">X</string>
     <string name="social_github">GitHub</string>
     <string name="social_mail">郵件</string>
     <string name="social_website">網站</string>
@@ -483,7 +483,6 @@
     <string name="lan_error_connection">連線失敗：%1$s</string>
     <string name="lan_security_tip">使用一次性 P-256 金鑰交換 + AES-256-GCM 加密：12 位驗證碼會在兩台裝置上互相驗證後才會傳輸資料，區域網路內的第三方無法讀取或冒充。</string>
     <string name="filter_all">全部</string>
-    <string name="filter_uncategorized">未分類</string>
     <string name="tags_settings_desc">設定標籤功能並管理標籤。</string>
     <string name="tags_settings_section">標籤設定</string>
     <string name="tags_feature">啟用標籤</string>

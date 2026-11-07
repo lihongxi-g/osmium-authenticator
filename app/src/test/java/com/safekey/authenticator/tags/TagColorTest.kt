@@ -1,6 +1,7 @@
 package com.safekey.authenticator.tags
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -17,7 +18,7 @@ class TagColorTest {
     fun `keeps legacy named colors compatible`() {
         assertTrue(TagColor.isValid(TagColor.RED))
         assertEquals(TagColor.RED, TagColor.normalize(TagColor.RED))
-        assertEquals("#BA1A1A", TagColor.hexFor(TagColor.RED))
+        assertEquals("#E05450", TagColor.hexFor(TagColor.RED))
     }
 
     @Test
@@ -27,8 +28,19 @@ class TagColorTest {
     }
 
     @Test
-    fun `palette contains selectable muted colors`() {
-        assertTrue(TagColor.PALETTE.isNotEmpty())
+    fun `palette holds twelve selectable colors`() {
+        assertEquals(12, TagColor.PALETTE.size)
+        assertEquals(TagColor.PALETTE.size, TagColor.PALETTE.map { it.uppercase() }.toSet().size)
         assertTrue(TagColor.PALETTE.all(TagColor::isValid))
+    }
+
+    @Test
+    fun `named presets map onto a palette swatch`() {
+        // The editor lights up the swatch that matches the stored color, so a
+        // legacy "blue" tag must resolve to an entry in the grid.
+        TagColor.ALL.forEach { named ->
+            assertEquals(TagColor.hexFor(named), TagColor.paletteEntryFor(named))
+        }
+        assertNull(TagColor.paletteEntryFor("#123456"))
     }
 }
