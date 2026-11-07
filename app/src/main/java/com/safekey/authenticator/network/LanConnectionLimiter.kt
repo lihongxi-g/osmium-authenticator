@@ -42,13 +42,22 @@ internal class LanConnectionLimiter(
     /**
      * True when [address] may be served now. The caller must call [release]
      * once the exchange is over — every admitted connection owns one slot.
+     *
+     * The cooldown starts only when a connection is actually accepted: a peer
+     * turned away because the pool was full may try again as soon as a slot
+     * frees, otherwise a busy moment would lock out the legitimate sender.
      */
     fun admit(address: String): Boolean {
         val now = clock()
-        val previous = lastAttempt.putIfAbsent(address, now)
+        val previous = lastAttempt[address]
         if (previous != null && now - previous < perAddressCooldownMs) return false
         if (!slots.tryAcquire()) return false
-        if (previous != null) lastAttempt[address] = now
+        val replaced = lastAttempt.put(address, now)
+        if (replaced != null && now - replaced < perAddressCooldownMs) {
+            // Another thread admitted this address first; give the slot back.
+            slots.release()
+            return false
+        }
         prune(now)
         return true
     }
