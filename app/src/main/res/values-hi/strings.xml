@@ -550,6 +550,7 @@
     <string name="integrity_dialog_dismiss">समझ गया</string>
     <string name="attributions_bundled_title">बंडल की गई लाइब्रेरी</string>
     <string name="attributions_keyattestation_desc">© Google LLC (Apache-2.0)। android/keyattestation की एम्बेडेड, पिन की गई प्रति स्थानीय संशोधनों सहित; Google द्वारा अनुमोदित नहीं।</string>
+    <string name="attributions_bouncycastle_desc">© The Legion of the Bouncy Castle Inc. (MIT)। प्रमाणन सत्यापनकर्ता द्वारा प्रयुक्त क्रिप्टो लाइब्रेरी; लाइसेंस पाठ ऐप में मौजूद।</string>
     <string name="attributions_integrity_note">डिवाइस अखंडता जाँचें समुदाय के शोध (जैसे Duck Detector प्रोजेक्ट) से प्रेरित हैं; उनका कोई कोड पुनः उपयोग नहीं किया गया।</string>
 
     <!-- K2 consistency checks (2026-09) -->

@@ -550,6 +550,7 @@
     <string name="integrity_dialog_dismiss">Entendido</string>
     <string name="attributions_bundled_title">Bibliotecas incluidas</string>
     <string name="attributions_keyattestation_desc">© Google LLC (Apache-2.0). Copia integrada y fijada de android/keyattestation con modificaciones locales; no cuenta con el respaldo de Google.</string>
+    <string name="attributions_bouncycastle_desc">© The Legion of the Bouncy Castle Inc. (MIT). Biblioteca criptográfica del verificador de certificados; el texto de la licencia va en la app.</string>
     <string name="attributions_integrity_note">Las comprobaciones de integridad se inspiran en investigación comunitaria (por ejemplo, el proyecto Duck Detector); no se reutiliza código de esos proyectos.</string>
 
     <!-- K2 consistency checks (2026-09) -->

@@ -565,6 +565,7 @@
     <string name="integrity_dialog_dismiss">知道了</string>
     <string name="attributions_bundled_title">内置开源库</string>
     <string name="attributions_keyattestation_desc">© Google LLC（Apache-2.0）。内嵌 android/keyattestation 的固定版本副本并含本地修改；不代表 Google 认可。</string>
+    <string name="attributions_bouncycastle_desc">© The Legion of the Bouncy Castle Inc.（MIT）。密钥认证校验器使用的加密库；许可证全文随应用分发。</string>
     <string name="attributions_integrity_note">设备完整性检测的思路借鉴自社区研究（如 Duck Detector 项目），未复用其任何代码。</string>
 
     <!-- K2 consistency checks (2026-09) -->

@@ -550,6 +550,7 @@
     <string name="integrity_dialog_dismiss">확인</string>
     <string name="attributions_bundled_title">내장 라이브러리</string>
     <string name="attributions_keyattestation_desc">© Google LLC (Apache-2.0). android/keyattestation의 고정 커밋 사본을 내장하고 일부 수정했습니다. Google의 보증이 아닙니다.</string>
+    <string name="attributions_bouncycastle_desc">© The Legion of the Bouncy Castle Inc. (MIT). 인증 검증기가 사용하는 암호 라이브러리이며 라이선스 전문은 앱에 포함되어 있습니다.</string>
     <string name="attributions_integrity_note">기기 무결성 검사는 커뮤니티 연구(예: Duck Detector 프로젝트)에서 착안했으며, 해당 코드는 재사용하지 않았습니다.</string>
 
     <!-- K2 consistency checks (2026-09) -->

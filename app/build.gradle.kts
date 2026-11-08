@@ -90,6 +90,15 @@ android {
             excludes += "/META-INF/versions/9/module-info.class"
             excludes += "/META-INF/BC2048KE.SF"
             excludes += "/META-INF/BC2048KE.DSA"
+            // BouncyCastle 1.86 ships its licence as META-INF/LICENSE.md and
+            // META-INF/NOTICE.md in all three jars, so the merge sees three
+            // copies of the same path and fails. Dropping the jar copies is
+            // safe because the licence reaches the APK as
+            // assets/licenses/bouncycastle_LICENSE.md and is credited in
+            // About → Attributions; without those two, excluding it here
+            // would strip the notice MIT requires us to ship.
+            excludes += "/META-INF/LICENSE.md"
+            excludes += "/META-INF/NOTICE.md"
         }
     }
 }

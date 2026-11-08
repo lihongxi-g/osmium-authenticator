@@ -110,6 +110,14 @@ fun AttributionsScreen(
                 description = stringResource(R.string.attributions_keyattestation_desc),
                 onClick = { open("https://github.com/android/keyattestation") }
             )
+            // Pulled in by the verifier module; MIT requires the notice to
+            // travel with binary distributions, and the APK carries its text
+            // as assets/licenses/bouncycastle_LICENSE.md.
+            AttributionCard(
+                title = "Bouncy Castle (MIT)",
+                description = stringResource(R.string.attributions_bouncycastle_desc),
+                onClick = { open("https://www.bouncycastle.org") }
+            )
             // Artwork, not code: the F-Droid mark shown on the welcome screen.
             AttributionCard(
                 title = "F-Droid logo (GPL-3.0-or-later)",
