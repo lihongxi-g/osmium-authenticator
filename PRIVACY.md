@@ -14,7 +14,7 @@ Attestation revocation data: the app ships a snapshot of Google's attestation re
 
 Export: exporting to another authenticator happens entirely on this device. You either save a plaintext file to a location you choose (otpauth links, Aegis JSON or KeePassXC CSV), or — for the Google Authenticator option — the app renders the selected accounts as QR codes on the screen and writes nothing to disk. Nothing is uploaded, and no server is contacted. A plaintext export is readable without any password, so delete the file or close the screen once the transfer is done.
 
-Fonts: the optional interface fonts (Lora, Literata) are bundled inside the app and rendered offline; choosing one triggers no network request and collects nothing.
+Fonts: the one optional interface font (Literata) is bundled inside the app and rendered offline; choosing it triggers no network request and collects nothing.
 
 Import: importing from Google Authenticator QR codes and from Aegis, 2FAS and Raivo OTP export files happens entirely on this device. The selected file is read into memory to build the import preview; it is not copied, uploaded or sent anywhere. Only the entries you confirm are saved into the encrypted vault; everything else is discarded. A backup file whose entries use code parameters the app cannot reproduce faithfully (a code length or algorithm outside the supported set) is refused as a whole, so a damaged or edited file can never add an account that shows codes the service would reject.
 

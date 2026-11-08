@@ -666,7 +666,6 @@
     <string name="font_unavailable_body">Пакеты шрифтов слишком велики, поэтому китайский пока не поддерживается. Измените %1$s, если хотите выбрать шрифт, — или создайте китайский шрифт для Osmium: Osmium будет рад вашей работе ❤️</string>
     <string name="font_family_desc">Шрифт интерфейса</string>
     <string name="font_family_system">Системный</string>
-    <string name="font_family_lora">Lora</string>
     <string name="font_family_literata">Literata</string>
     <string name="font_notes_title">О шрифтах</string>
     <string name="font_notes_summary">Лицензия и поддержка письменностей</string>
@@ -680,7 +679,7 @@
     <string name="font_weight_desc">Доля доступной насыщенности: 100 % — максимум для этого шрифта, и у каждого шрифта свой предел</string>
     <string name="font_weight_system_hint">Поддерживают только встроенные шрифты; системный остаётся как есть</string>
     <string name="font_family_note">Lora включён без изменений по лицензии SIL Open Font License 1.1 и покрывает латиницу и кириллицу; китайский, японский, корейский и хинди отображаются системным шрифтом.</string>
-    <string name="attributions_lora_desc">Шрифт интерфейса с засечками, включён без изменений по SIL Open Font License 1.1 (текст лицензии в приложении).</string>
+    <string name="attributions_literata_desc">Шрифт интерфейса с засечками, включён без изменений по SIL Open Font License 1.1 (текст лицензии в приложении).</string>
     <string name="haptic_title">Вибрация</string>
     <string name="haptic_desc">Короткий отклик при нажатии кнопок и других элементов</string>
     <string name="haptic_intensity">Интенсивность</string>

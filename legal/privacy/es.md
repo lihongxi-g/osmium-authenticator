@@ -14,7 +14,7 @@ Datos de revocación de atestación: la aplicación incluye una instantánea de 
 
 Exportación: exportar a otro autenticador ocurre por completo en este dispositivo. O guardas un archivo de texto plano en la ubicación que elijas (enlaces otpauth, JSON de Aegis o CSV de KeePassXC), o —con la opción de Google Authenticator— la app muestra las cuentas seleccionadas como códigos QR en pantalla y no escribe nada en el disco. No se sube nada ni se contacta con ningún servidor. Una exportación en texto plano se puede leer sin contraseña, así que borra el archivo o cierra la pantalla cuando termines la transferencia.
 
-Fuentes: las fuentes de interfaz opcionales (Lora, Literata) van incluidas en la app y se dibujan sin conexión; elegir una no genera ninguna petición de red ni recoge datos.
+Fuentes: la fuente de interfaz opcional (Literata) va incluida en la app y se dibuja sin conexión; elegirla no genera ninguna petición de red ni recoge datos.
 
 
 Importación: importar desde códigos QR de Google Authenticator y desde archivos de exportación de Aegis, 2FAS y Raivo OTP ocurre íntegramente en este dispositivo. El archivo seleccionado se lee en memoria para construir la vista previa de importación; no se copia, sube ni envía a ningún sitio. Solo las entradas que confirmas se guardan en la bóveda cifrada; todo lo demás se descarta. Un archivo de copia cuyas entradas usen parámetros de código que la aplicación no pueda reproducir fielmente (una longitud de código o un algoritmo fuera del conjunto admitido) se rechaza entero, de modo que un archivo dañado o editado nunca pueda añadir una cuenta que muestre códigos que el servicio rechazaría.

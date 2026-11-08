@@ -493,8 +493,8 @@ private fun FontChoiceRow(
 
 /** Label resource for a stored font key — the appearance page shows it as the row value. */
 private fun fontFamilyLabelRes(key: String): Int = when (key) {
-    AppSettings.FONT_FAMILY_LORA -> R.string.font_family_lora
-    AppSettings.FONT_FAMILY_LITERATA -> R.string.font_family_literata
+    // Legacy "lora" values render as Literata, so the row must name Literata.
+    AppSettings.FONT_FAMILY_LORA, AppSettings.FONT_FAMILY_LITERATA -> R.string.font_family_literata
     else -> R.string.font_family_system
 }
 
@@ -503,7 +503,6 @@ private class FontChoice(val key: String, val nameRes: Int)
 
 private val FONT_CHOICES: List<FontChoice> = listOf(
     FontChoice(AppSettings.FONT_FAMILY_SYSTEM, R.string.font_family_system),
-    FontChoice(AppSettings.FONT_FAMILY_LORA, R.string.font_family_lora),
     FontChoice(AppSettings.FONT_FAMILY_LITERATA, R.string.font_family_literata)
 )
 
@@ -514,10 +513,6 @@ private class FontNote(val nameRes: Int, val scripts: List<Int>)
 private const val FONT_LICENSE = "SIL OFL 1.1"
 
 private val FONT_NOTES: List<FontNote> = listOf(
-    FontNote(
-        R.string.font_family_lora,
-        listOf(R.string.font_cover_latin, R.string.font_cover_cyrillic, R.string.font_cover_vietnamese)
-    ),
     FontNote(
         R.string.font_family_literata,
         listOf(

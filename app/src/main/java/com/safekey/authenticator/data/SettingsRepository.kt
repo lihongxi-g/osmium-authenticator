@@ -135,8 +135,13 @@ data class AppSettings(
         // ---- typeface ----
         /** Follow the platform font. */
         const val FONT_FAMILY_SYSTEM = "system"
-        /** The bundled faces; all three ship under the SIL OFL 1.1. */
+        /**
+         * Retired: the Lora face is no longer bundled. The key is kept only so
+         * the stored preference of older installs still resolves — it now
+         * renders as Literata (see `interfaceFontFamily`).
+         */
         const val FONT_FAMILY_LORA = "lora"
+        /** The bundled face, shipped under the SIL OFL 1.1. */
         const val FONT_FAMILY_LITERATA = "literata"
 
         /**
@@ -159,8 +164,8 @@ data class AppSettings(
 
         /** Boldest file each bundled face ships; the system font has none. */
         fun fontWeightCeiling(key: String): Int = when (key) {
-            FONT_FAMILY_LORA -> 700
-            FONT_FAMILY_LITERATA -> 900
+            // Legacy Lora preferences resolve to Literata, so they get its ceiling.
+            FONT_FAMILY_LORA, FONT_FAMILY_LITERATA -> 900
             else -> FONT_WEIGHT_BODY_MIN
         }
 

@@ -11,7 +11,7 @@ Osmium 是一款隐私优先的 Android TOTP/HOTP 验证器。本项目基于 GN
 - **从其他验证器导入**——通过「设置 → 数据」迁移：Google Authenticator 转移二维码，或 Aegis、2FAS、Raivo OTP、andOTP、FreeOTP/FreeOTP+、Stratum/Authenticator Pro、Proton Authenticator、Bitwarden（JSON 或 CSV）的明文导出文件，也支持任意 otpauth 链接清单（Ente Auth、Google Auth URI 导出）与带 otpauth 链接的 CSV（KeePassXC、1Password、Dashlane）；自动识别格式，逐条预览勾选后再合并导入；不支持的条目会列出原因，不会被静默丢弃
 - **导出到其它验证器**——迁移出口，两种形式：**直接以二维码形式导出到 Google Authenticator**（`otpauth-migration`，每张码 10 个账户，超出可分页，格式无法承载的条目会提前列出），或导出为文件——otpauth 链接清单（.txt）、Aegis 明文保险库（.json）、KeePassXC CSV（.csv）。文件本身即明文，页面会明确提示，且必须先通过身份验证才会生成
 - **外观集中在一页**——设置 → 外观 现在汇总主题、字体、字体大小、震动、排序、标签与语言，每项点进去是自己的页面，主设置列表因此不再冗长
-- **界面字体**——可选系统默认、**Lora** 或 **Literata**，每项用它自己的字体渲染预览；另有**字重滑轴**，每一档都对应一个真实的内置字体文件（Lora 400–700、Literata 400–900），调到哪一档就一定粗到哪一档。验证码刻意保持等宽。三款内置字体都不含汉字：中文界面一律使用系统字体，字体页会直接说明这一点（并提供跳转语言设置的入口），而不是给你一堆调了也没用的选项
+- **界面字体**——可选系统默认或 **Literata**，用它自己的字体渲染预览；另有**字重滑轴**，每一档都对应一个真实的内置字体文件（Literata 400–900），调到哪一档就一定粗到哪一档。验证码刻意保持等宽。内置字体不含汉字：中文界面一律使用系统字体，字体页会直接说明这一点（并提供跳转语言设置的入口），而不是给你一堆调了也没用的选项
 - **字体大小**——主开关 + 80–200% 滑轴，叠加在系统字体缩放之上，拖动即可实时预览，并设上限以保证 PIN 键盘与账户卡片不被撑破
 - **震动反馈**——主开关 + 0–100% 强度滑轴。每次点击都会给出触感（按钮、开关、设置行、PIN 键盘），滚动、拖动与侧滑返回不震。振动由应用自行驱动，因此即使系统触感反馈关闭也能生效
 - **加密备份**——导出为密码保护的加密文件，可在安装兼容版本 Osmium 的设备上恢复
@@ -97,4 +97,4 @@ Release 构建启用 R8 并按 ABI 分包。构建环境：Gradle 9.3.1、AGP 9.
 
 GPL-3.0-or-later，详见 [LICENSE](LICENSE) 或 [COPYING](COPYING)。
 
-可选界面字体 **Lora** 与 **Literata** 以 SIL 开放字体许可 1.1 原样内置（仅为满足 Android 资源命名规则改为小写文件名），许可证全文随 APK 分发，并在应用内「设置 → 关于 → 来源说明」中列出；详见 [THIRD-PARTY-FONTS.md](THIRD-PARTY-FONTS.md)。
+可选界面字体 **Literata** 以 SIL 开放字体许可 1.1 原样内置（仅为满足 Android 资源命名规则改为小写文件名），许可证全文随 APK 分发，并在应用内「设置 → 关于 → 来源说明」中列出；详见 [THIRD-PARTY-FONTS.md](THIRD-PARTY-FONTS.md)。

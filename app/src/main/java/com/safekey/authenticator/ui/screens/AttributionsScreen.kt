@@ -101,13 +101,8 @@ fun AttributionsScreen(
                 modifier = Modifier.padding(top = 20.dp, bottom = 4.dp)
             )
             AttributionCard(
-                title = "Lora (SIL OFL 1.1)",
-                description = stringResource(R.string.attributions_lora_desc),
-                onClick = { open("https://github.com/cyrealtype/Lora-Cyrillic") }
-            )
-            AttributionCard(
                 title = "Literata (SIL OFL 1.1)",
-                description = stringResource(R.string.attributions_lora_desc),
+                description = stringResource(R.string.attributions_literata_desc),
                 onClick = { open("https://github.com/googlefonts/literata") }
             )
             AttributionCard(

@@ -14,7 +14,7 @@ Données de révocation des attestations : l’application embarque un instantan
 
 Export : l’export vers un autre authentificateur se fait entièrement sur cet appareil. Soit vous enregistrez un fichier en clair à l’endroit de votre choix (liens otpauth, JSON Aegis ou CSV KeePassXC), soit — pour l’option Google Authenticator — l’application affiche les comptes sélectionnés sous forme de QR codes à l’écran et n’écrit rien sur le disque. Rien n’est téléversé et aucun serveur n’est contacté. Un export en clair se lit sans mot de passe : supprimez le fichier ou fermez l’écran une fois le transfert terminé.
 
-Polices : les polices d’interface optionnelles (Lora, Literata) sont intégrées à l’application et rendues hors ligne ; en choisir une ne déclenche aucune requête réseau et ne collecte rien.
+Police : la police d’interface optionnelle (Literata) est intégrée à l’application et rendue hors ligne ; la choisir ne déclenche aucune requête réseau et ne collecte rien.
 
 
 Import : l’import depuis les QR codes de Google Authenticator et depuis les fichiers d’export d’Aegis, de 2FAS et de Raivo OTP se fait entièrement sur cet appareil. Le fichier sélectionné est lu en mémoire pour construire l’aperçu d’import ; il n’est ni copié, ni envoyé, ni transmis où que ce soit. Seules les entrées que vous confirmez sont enregistrées dans le coffre chiffré ; tout le reste est écarté. Un fichier de sauvegarde dont les entrées utilisent des paramètres de code que l’application ne peut pas reproduire fidèlement (une longueur de code ou un algorithme hors de l’ensemble pris en charge) est refusé en bloc, de sorte qu’un fichier endommagé ou modifié ne puisse jamais ajouter un compte qui afficherait des codes que le service rejetterait.

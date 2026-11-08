@@ -27,13 +27,6 @@ val monospaceFamily = FontFamily.Monospace
  * The slider therefore moves the *type tokens* (see [withWeightDelta]), and the
  * stored value is an absolute body weight that matches one of these files.
  */
-val LoraFamily: FontFamily = FontFamily(
-    Font(R.font.lora, weight = FontWeight.Normal),
-    Font(R.font.lora_medium, weight = FontWeight.Medium),
-    Font(R.font.lora_semibold, weight = FontWeight.SemiBold),
-    Font(R.font.lora_bold, weight = FontWeight.Bold)
-)
-
 val LiterataFamily: FontFamily = FontFamily(
     Font(R.font.literata, weight = FontWeight.Normal),
     Font(R.font.literata_medium, weight = FontWeight.Medium),
@@ -43,10 +36,15 @@ val LiterataFamily: FontFamily = FontFamily(
     Font(R.font.literata_black, weight = FontWeight.Black)
 )
 
-/** Stored setting key -> typeface. Unknown keys mean the system font. */
+/**
+ * Stored setting key -> typeface. Unknown keys mean the system font.
+ *
+ * `"lora"` is retired (the face is no longer bundled) but versions up to
+ * 2.6.4.1 wrote it to DataStore. Those users keep a serif interface by being
+ * mapped to Literata, instead of silently dropping to the platform font.
+ */
 fun interfaceFontFamily(key: String): FontFamily = when (key) {
-    AppSettings.FONT_FAMILY_LORA -> LoraFamily
-    AppSettings.FONT_FAMILY_LITERATA -> LiterataFamily
+    AppSettings.FONT_FAMILY_LORA, AppSettings.FONT_FAMILY_LITERATA -> LiterataFamily
     else -> FontFamily.Default
 }
 

@@ -666,7 +666,6 @@
     <string name="font_unavailable_body">글꼴 패키지가 너무 커서 중국어는 아직 지원하지 않습니다. 글꼴을 고르려면 %1$s을(를) 변경하세요. Osmium을 위한 중국어 글꼴을 디자인해 주신다면 Osmium은 당신의 작품을 기다립니다 ❤️</string>
     <string name="font_family_desc">인터페이스 글꼴</string>
     <string name="font_family_system">시스템 기본</string>
-    <string name="font_family_lora">Lora</string>
     <string name="font_family_literata">Literata</string>
     <string name="font_notes_title">글꼴 설명</string>
     <string name="font_notes_summary">라이선스와 문자 지원</string>
@@ -680,7 +679,7 @@
     <string name="font_weight_desc">이 글꼴이 낼 수 있는 굵기의 비율입니다. 100%가 최대이며 상한은 글꼴마다 다릅니다</string>
     <string name="font_weight_system_hint">포함된 글꼴만 지원하며 시스템 글꼴은 그대로입니다</string>
     <string name="font_family_note">Lora는 SIL Open Font License 1.1에 따라 수정 없이 포함되어 있으며 라틴·키릴 문자를 지원합니다. 중국어·일본어·한국어·힌디어는 시스템 글꼴로 표시됩니다.</string>
-    <string name="attributions_lora_desc">인터페이스용 세리프 글꼴. SIL Open Font License 1.1에 따라 수정 없이 포함 (라이선스 전문은 앱에 포함).</string>
+    <string name="attributions_literata_desc">인터페이스용 세리프 글꼴. SIL Open Font License 1.1에 따라 수정 없이 포함 (라이선스 전문은 앱에 포함).</string>
     <string name="haptic_title">진동 피드백</string>
     <string name="haptic_desc">버튼 등 컨트롤을 누를 때 짧게 진동합니다</string>
     <string name="haptic_intensity">강도</string>

@@ -681,7 +681,6 @@
     <string name="font_unavailable_body">因字体包体积过大，所以当前未适配中文的字体，如有需要请变更%1$s，或为Osmium设计中文字体吧，Osmium期待您的作品❤️。</string>
     <string name="font_family_desc">选择应用内使用的字体</string>
     <string name="font_family_system">系统默认</string>
-    <string name="font_family_lora">Lora</string>
     <string name="font_family_literata">Literata</string>
     <string name="font_notes_title">字体说明</string>
     <string name="font_notes_summary">许可与字符覆盖</string>
@@ -695,7 +694,7 @@
     <string name="font_weight_desc">按这款字体能达到的粗细百分比调节，100% 就是它最粗的程度；不同字体的上限不同，这里会自动换算</string>
     <string name="font_weight_system_hint">只有内置字体支持调节，系统默认字体保持原样</string>
     <string name="font_family_note">Lora 以 SIL 开放字体许可 1.1 原样内置，覆盖拉丁文和西里尔文；中文、日文、韩文和印地文自动使用系统字体。</string>
-    <string name="attributions_lora_desc">衬线界面字体，以 SIL 开放字体许可 1.1 原样内置（许可证全文随应用分发）。</string>
+    <string name="attributions_literata_desc">衬线界面字体，以 SIL 开放字体许可 1.1 原样内置（许可证全文随应用分发）。</string>
     <string name="haptic_title">震动反馈</string>
     <string name="haptic_desc">点击按钮等控件时给出触感</string>
     <string name="haptic_intensity">强度</string>

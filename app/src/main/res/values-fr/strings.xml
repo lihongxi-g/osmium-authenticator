@@ -666,7 +666,6 @@
     <string name="font_unavailable_body">Les paquets de polices sont trop volumineux, le chinois n’est donc pas encore couvert. Changez la %1$s pour choisir une police — ou dessinez une police chinoise pour Osmium : Osmium sera ravi de voir votre travail ❤️</string>
     <string name="font_family_desc">Police de l’interface</string>
     <string name="font_family_system">Police du système</string>
-    <string name="font_family_lora">Lora</string>
     <string name="font_family_literata">Literata</string>
     <string name="font_notes_title">À propos des polices</string>
     <string name="font_notes_summary">Licence et jeux de caractères</string>
@@ -680,7 +679,7 @@
     <string name="font_weight_desc">Pourcentage de la graisse que cette police peut atteindre : 100 % est son maximum, et chaque police a sa propre limite</string>
     <string name="font_weight_system_hint">Seules les polices incluses le permettent ; celle du système reste inchangée</string>
     <string name="font_family_note">Lora est fournie non modifiée sous SIL Open Font License 1.1 et couvre le latin et le cyrillique ; le chinois, le japonais, le coréen et l’hindi utilisent la police du système.</string>
-    <string name="attributions_lora_desc">Police à empattements de l’interface, incluse non modifiée sous SIL Open Font License 1.1 (texte de licence fourni dans l’app).</string>
+    <string name="attributions_literata_desc">Police à empattements de l’interface, incluse non modifiée sous SIL Open Font License 1.1 (texte de licence fourni dans l’app).</string>
     <string name="haptic_title">Retour vibratoire</string>
     <string name="haptic_desc">Une courte vibration en touchant les boutons et autres contrôles</string>
     <string name="haptic_intensity">Intensité</string>

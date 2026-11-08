@@ -6,7 +6,7 @@
 
 By installing or using Osmium, you agree to the following terms.
 
-Osmium is free and open source software released under the GNU General Public License version 3 or later (GPL-3.0-or-later; see LICENSE/COPYING). Two optional interface fonts (Lora, Literata) are bundled under the SIL Open Font License 1.1 and credited in About → Attributions.
+Osmium is free and open source software released under the GNU General Public License version 3 or later (GPL-3.0-or-later; see LICENSE/COPYING). One optional interface font (Literata) is bundled under the SIL Open Font License 1.1 and credited in About → Attributions.
 
 The software is provided "as is", without warranty of any kind. To the maximum extent permitted by law, the developer is not liable for damages arising from its use.
 

@@ -683,7 +683,6 @@
     <string name="font_unavailable_body">The font packages are too large, so Chinese is not covered yet. Change the %1$s if you want to choose a font — or design a Chinese font for Osmium, and Osmium would love to see your work ❤️</string>
     <string name="font_family_desc">Interface typeface</string>
     <string name="font_family_system">System default</string>
-    <string name="font_family_lora">Lora</string>
     <string name="font_family_literata">Literata</string>
     <string name="font_notes_title">Font notes</string>
     <string name="font_notes_summary">Licence and script coverage</string>
@@ -697,7 +696,7 @@
     <string name="font_weight_desc">Percentage of the weight this font can reach: 100% is as bold as it goes, and each font has its own ceiling</string>
     <string name="font_weight_system_hint">Only the bundled fonts support this; the system font stays as it is</string>
     <string name="font_family_note">Lora is bundled unmodified under the SIL Open Font License 1.1 and covers Latin and Cyrillic; Chinese, Japanese, Korean and Hindi text falls back to the system font.</string>
-    <string name="attributions_lora_desc">Serif interface font, bundled unmodified under the SIL Open Font License 1.1 (the license text ships with the app).</string>
+    <string name="attributions_literata_desc">Serif interface font, bundled unmodified under the SIL Open Font License 1.1 (the license text ships with the app).</string>
     <string name="haptic_title">Vibration feedback</string>
     <string name="haptic_desc">A short tick when you tap a button or another control</string>
     <string name="haptic_intensity">Intensity</string>

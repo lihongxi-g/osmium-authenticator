@@ -666,7 +666,6 @@
     <string name="font_unavailable_body">Die Schriftpakete sind zu groß, daher ist Chinesisch noch nicht abgedeckt. Ändere die %1$s, wenn du eine Schrift wählen möchtest — oder entwirf eine chinesische Schrift für Osmium: Osmium freut sich auf deine Arbeit ❤️</string>
     <string name="font_family_desc">Schriftart der Oberfläche</string>
     <string name="font_family_system">Systemstandard</string>
-    <string name="font_family_lora">Lora</string>
     <string name="font_family_literata">Literata</string>
     <string name="font_notes_title">Hinweise zu den Schriften</string>
     <string name="font_notes_summary">Lizenz und Zeichensätze</string>
@@ -680,7 +679,7 @@
     <string name="font_weight_desc">Anteil der Stärke, die diese Schrift erreicht: 100 % ist ihr Maximum; jede Schrift hat eine andere Obergrenze</string>
     <string name="font_weight_system_hint">Nur die mitgelieferten Schriften unterstützen das; die Systemschrift bleibt unverändert</string>
     <string name="font_family_note">Lora ist unverändert unter der SIL Open Font License 1.1 enthalten und deckt Latein und Kyrillisch ab; Chinesisch, Japanisch, Koreanisch und Hindi nutzen die Systemschrift.</string>
-    <string name="attributions_lora_desc">Serifen-Schriftart der Oberfläche, unverändert unter der SIL Open Font License 1.1 enthalten (Lizenztext in der App).</string>
+    <string name="attributions_literata_desc">Serifen-Schriftart der Oberfläche, unverändert unter der SIL Open Font License 1.1 enthalten (Lizenztext in der App).</string>
     <string name="haptic_title">Vibrationsfeedback</string>
     <string name="haptic_desc">Ein kurzer Impuls beim Tippen auf Schaltflächen und andere Bedienelemente</string>
     <string name="haptic_intensity">Intensität</string>
