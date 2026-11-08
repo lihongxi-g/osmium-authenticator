@@ -127,13 +127,13 @@ dependencies {
     // (IndexOutOfBoundsException in end()/exitGroup) observed on Android 16 /
     // OnePlus during ordinary recomposition — several composer group-stack
     // imbalance bugs were fixed across the 1.7.0–1.7.3 line.
-    val composeBom = platform("androidx.compose:compose-bom:2024.09.03")
+    val composeBom = platform("androidx.compose:compose-bom:2026.09.00")
     implementation(composeBom)
-    implementation("androidx.core:core-ktx:1.12.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
-    implementation("androidx.activity:activity-compose:1.10.1")
-    implementation("androidx.fragment:fragment-ktx:1.6.2")
+    implementation("androidx.core:core-ktx:1.19.1")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.11.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.11.0")
+    implementation("androidx.activity:activity-compose:1.13.0")
+    implementation("androidx.fragment:fragment-ktx:1.9.1")
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
@@ -143,41 +143,41 @@ dependencies {
     // in AppIcons.kt from official Material Symbols path data instead.
 
     // KSP2/Kotlin 2-compatible processor; no schema or migration changes.
-    implementation("androidx.room:room-runtime:2.7.2")
-    implementation("androidx.room:room-ktx:2.7.2")
-    ksp("androidx.room:room-compiler:2.7.2")
+    implementation("androidx.room:room-runtime:2.8.5")
+    implementation("androidx.room:room-ktx:2.8.5")
+    ksp("androidx.room:room-compiler:2.8.5")
 
     // QR generation + scanning for account sharing / imports (core only, no camera bloat)
-    implementation("com.google.zxing:core:3.5.2")
-    implementation("androidx.datastore:datastore-preferences:1.0.0")
+    implementation("com.google.zxing:core:3.5.4")
+    implementation("androidx.datastore:datastore-preferences:1.3.0")
 
     // Scheduled auto-backup (WebDAV / local storage). Google first-party;
     // handles Doze, process death and reboot without custom alarm plumbing.
-    implementation("androidx.work:work-runtime-ktx:2.9.1")
+    implementation("androidx.work:work-runtime-ktx:2.12.0")
     // Android 14/15 BiometricPrompt fixes. 1.1.0/1.2.0-alpha05 misbehave on
     // ColorOS 15; 1.4.0-alpha02 requires compileSdk 35 (a real release SDK).
-    implementation("androidx.biometric:biometric:1.4.0-alpha02")
+    implementation("androidx.biometric:biometric:1.4.0-beta01")
 
     // 1.4.x is the first line whose native libraries are 16 KB page-size aligned
     // (1.3.x ships a 4 KB-aligned libimage_processing_util_jni.so, which Android
     // flags as incompatible with 16 KB devices — Android 15+/17 hardware).
-    val cameraxVersion = "1.4.2"
+    val cameraxVersion = "1.6.2"
     implementation("androidx.camera:camera-core:$cameraxVersion")
     implementation("androidx.camera:camera-camera2:$cameraxVersion")
     implementation("androidx.camera:camera-lifecycle:$cameraxVersion")
     implementation("androidx.camera:camera-view:$cameraxVersion")
 
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.12.0")
 
     // Vendored Google Android Key Attestation verifier (see keyattestation/NOTICE).
     implementation(project(":keyattestation"))
 
     testImplementation("junit:junit:4.13.2")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.11.0")
     // XmlPullParser on the JVM for unit-testing the WebDAV multistatus parser
     testImplementation("net.sf.kxml:kxml2:2.3.0")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    androidTestImplementation("androidx.test.ext:junit:1.3.0")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
