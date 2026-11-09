@@ -132,15 +132,14 @@ object AutoBackupScheduler {
     }
 
     /**
-     * Ensure a schedule exists without disturbing a pending one — except when
-     * the pending one was armed for a *different* time.
+     * Ensure a schedule exists without disturbing a pending one.
      *
-     * `ExistingWorkPolicy.KEEP` alone kept a job whose delay had been computed
-     * from the settings of the previous version: the alarm was re-armed for the
-     * new time on every start while the job still woke up at the old one, so
-     * one day produced two backups at two times. The target is recomputed
-     * deterministically from the current settings, so replacing it with the
-     * same value is a no-op — replacing it with a different value is the point.
+     * `KEEP` on purpose: replacing would cancel a run that is in flight when
+     * the app comes to the foreground, and a half-written backup is worse than
+     * a slightly early one. A job left armed for a time the user has since
+     * changed is not harmless by luck — [classifyTrigger] drops it as
+     * [TriggerVerdict.STALE_SLOT], and its own `finally` re-arms the current
+     * target, so the schedule converges either way.
      */
     fun ensureScheduled(context: Context, settings: AppSettings) {
         if (!settings.autoBackupEnabled) return
@@ -155,7 +154,7 @@ object AutoBackupScheduler {
         val request = OneTimeWorkRequestBuilder<AutoBackupWorker>()
             .setInitialDelay((next - now).coerceAtLeast(0L), TimeUnit.MILLISECONDS)
             .build()
-        wm.enqueueUniqueWork(WORK_NAME, ExistingWorkPolicy.REPLACE, request)
+        wm.enqueueUniqueWork(WORK_NAME, ExistingWorkPolicy.KEEP, request)
         // Alarms do not survive reboots, app updates or a clock change, so this
         // runs on every start (cheap and idempotent: same PendingIntent).
         AutoBackupAlarm.schedule(context, settings)
