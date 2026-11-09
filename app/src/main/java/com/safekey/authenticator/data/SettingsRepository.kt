@@ -59,9 +59,14 @@ data class AppSettings(
     val autoBackupNotify: Boolean = true,
     /**
      * When the schedule was last changed by the user (time / interval / target /
-     * switch). A success recorded *before* this cannot absorb the next run: the
-     * user just asked for one, and swallowing it silently made "I changed the
-     * time and nothing happened" the normal experience.
+     * switch).
+     *
+     * Kept for the record and for older installs' stored value only: duplicate
+     * triggers are now deduped by *slot*
+     * ([com.safekey.authenticator.backup.AutoBackupScheduler.classifyTrigger]),
+     * which covers this case by itself — a slot the user just moved the time to
+     * is newer than the last success, so it is never absorbed, and no escape
+     * hatch that also lets a second trigger through is needed.
      */
     val autoBackupConfigChangedAt: Long = 0L,
     /**

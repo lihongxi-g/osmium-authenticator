@@ -855,8 +855,8 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     /**
-     * Catch-up for a frozen schedule: when the last run is overdue by more
-     * than the interval, run one now instead of waiting for the system.
+     * Catch-up for a frozen schedule: when the configured slot has passed with
+     * no successful run, run one now instead of waiting for the system.
      */
     fun catchUpAutoBackupIfDue() {
         val s = settings.value
@@ -865,7 +865,10 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                 System.currentTimeMillis(),
                 s.autoBackupLastTime,
                 s.autoBackupLastError,
-                s.autoBackupIntervalDays
+                s.autoBackupIntervalDays,
+                s.autoBackupHour,
+                s.autoBackupMinute,
+                s.autoBackupConfigChangedAt
             )
         ) {
             // Logged so an exported log can tell "the catch-up looked and found

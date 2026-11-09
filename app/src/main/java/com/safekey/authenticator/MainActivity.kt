@@ -1060,7 +1060,18 @@ class MainActivity : FragmentActivity() {
                 val result = withContext(Dispatchers.IO) {
                     UpdateChecker.check(includeStable = checkStable, includePreview = checkPreview)
                 }
-                if (result is UpdateResult.Found) pendingUpdate = result.info
+                when (result) {
+                    is UpdateResult.Found -> pendingUpdate = result.info
+                    // Silent when the installed build is current. A failed
+                    // check says so out loud: "nothing happened" is otherwise
+                    // indistinguishable from "you are up to date", which is how
+                    // a blocked API stayed invisible for several releases.
+                    UpdateResult.Failed -> {
+                        AppLog.d("update check: FAILED (github and website both unusable)")
+                        vm.showToast(getString(R.string.update_check_failed))
+                    }
+                    UpdateResult.UpToDate -> Unit
+                }
             } finally {
                 updateCheckInFlight = false
             }

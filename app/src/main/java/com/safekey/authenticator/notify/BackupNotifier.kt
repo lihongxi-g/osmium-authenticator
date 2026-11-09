@@ -52,6 +52,13 @@ object BackupNotifier {
     private const val ID_FAILURE = 4712
     private const val REQUEST_CONTENT = 4713
 
+    /**
+     * Skip codes that describe the scheduler, not the backup: the other trigger
+     * already wrote this slot's file, or the trigger was armed for a time the
+     * user has since changed. Neither is a reason to buzz the phone.
+     */
+    private val SILENT_SKIP_REASONS = setOf("SLOT_DONE", "STALE_SLOT")
+
     /** Created on every app start: cheap, idempotent, survives channel edits. */
     fun ensureChannels(context: Context) {
         val manager = context.getSystemService(NotificationManager::class.java) ?: return
@@ -87,11 +94,14 @@ object BackupNotifier {
 
     /**
      * Post the outcome of one unattended run. [AutoBackupRunner.Outcome.Skipped]
-     * with [AutoBackupRunner.Outcome.Skipped.reason] "RECENT_SUCCESS" is an
-     * internal duplicate-trigger signal and stays silent.
+     * with a duplicate/stale-trigger [AutoBackupRunner.Outcome.Skipped.reason]
+     * ("SLOT_DONE", "STALE_SLOT") is an internal scheduling signal and stays
+     * silent.
      */
     fun notifyOutcome(context: Context, outcome: AutoBackupRunner.Outcome) {
-        if (outcome is AutoBackupRunner.Outcome.Skipped && outcome.reason == "RECENT_SUCCESS") return
+        if (outcome is AutoBackupRunner.Outcome.Skipped &&
+            outcome.reason in SILENT_SKIP_REASONS
+        ) return
         if (!canNotify(context)) {
             AppLog.d("backup notification skipped: notifications disabled")
             return

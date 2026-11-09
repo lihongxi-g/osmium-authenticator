@@ -600,7 +600,10 @@ fun AutoBackupScreen(
                         System.currentTimeMillis(),
                         lastSignal,
                         "",
-                        settings.autoBackupIntervalDays
+                        settings.autoBackupIntervalDays,
+                        settings.autoBackupHour,
+                        settings.autoBackupMinute,
+                        settings.autoBackupConfigChangedAt
                     )
                 ) {
                     Text(

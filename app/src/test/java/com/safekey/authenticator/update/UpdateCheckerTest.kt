@@ -147,6 +147,82 @@ class UpdateCheckerTest {
         assertTrue(newest?.isPreview ?: false)
     }
 
+    // ------------------------------------------------- two-source merge
+
+    private fun info(tag: String) =
+        UpdateInfo(tag = tag, notes = "", url = "https://osmium.im/#download")
+
+    @Test
+    fun aNewerBuildFromEitherSourceIsReported() {
+        // GitHub blocked, website answered with a newer build.
+        assertEquals(
+            UpdateResult.Found(info("v2.7.0")),
+            UpdateChecker.combine(UpdateResult.Failed, UpdateResult.Found(info("v2.7.0")))
+        )
+        // Website blocked, GitHub answered with a newer build.
+        assertEquals(
+            UpdateResult.Found(info("v2.7.0")),
+            UpdateChecker.combine(UpdateResult.Found(info("v2.7.0")), UpdateResult.Failed)
+        )
+    }
+
+    @Test
+    fun theHighestBuildWinsWhenBothReportOne() {
+        assertEquals(
+            UpdateResult.Found(info("v2.7.1")),
+            UpdateChecker.combine(
+                UpdateResult.Found(info("v2.7.0")),
+                UpdateResult.Found(info("v2.7.1"))
+            )
+        )
+        assertEquals(
+            UpdateResult.Found(info("v2.7.1")),
+            UpdateChecker.combine(
+                UpdateResult.Found(info("v2.7.1")),
+                UpdateResult.Found(info("v2.7.0"))
+            )
+        )
+    }
+
+    @Test
+    fun oneFailedSourceIsNotAFailedCheck() {
+        // The whole point: a blocked GitHub API must not turn a healthy website
+        // answer into "检查更新失败".
+        assertEquals(
+            UpdateResult.UpToDate,
+            UpdateChecker.combine(UpdateResult.Failed, UpdateResult.UpToDate)
+        )
+        assertEquals(
+            UpdateResult.UpToDate,
+            UpdateChecker.combine(UpdateResult.UpToDate, UpdateResult.Failed)
+        )
+    }
+
+    @Test
+    fun onlyATotalFailureIsAFailedCheck() {
+        assertEquals(
+            UpdateResult.Failed,
+            UpdateChecker.combine(UpdateResult.Failed, UpdateResult.Failed)
+        )
+    }
+
+    @Test
+    fun anUnconsultedSourceIsIgnored() {
+        // A preview-only subscriber never asks the website.
+        assertEquals(
+            UpdateResult.UpToDate,
+            UpdateChecker.combine(UpdateResult.UpToDate, null)
+        )
+        assertEquals(
+            UpdateResult.Failed,
+            UpdateChecker.combine(UpdateResult.Failed, null)
+        )
+        assertEquals(
+            UpdateResult.UpToDate,
+            UpdateChecker.combine(null, null)
+        )
+    }
+
     // ------------------------------------------------- release notes (update dialog)
 
     @Test

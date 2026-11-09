@@ -170,7 +170,7 @@ class AutoBackupSchedulerTest {
 
     /** Success-only shorthand; error cases call the full signature below. */
     private fun isDue(now: Long, lastRun: Long, intervalDays: Int): Boolean =
-        AutoBackupScheduler.isDue(now, lastRun, "", intervalDays)
+        AutoBackupScheduler.isDue(now, lastRun, "", intervalDays, hour = 3, minute = 0)
 
     @Test
     fun neverRunIsNeverDue() {
@@ -182,9 +182,63 @@ class AutoBackupSchedulerTest {
     @Test
     fun aRunInsideTheIntervalIsNotDue() {
         val last = at(2026, 8, 16, 3, 0)
+        // Twelve hours later the next slot (tomorrow 03:00) is still ahead.
         assertFalse(isDue(last + day / 2, last, 1))
-        // Exactly on the boundary is still on time (strictly greater).
-        assertFalse(isDue(last + day, last, 1))
+    }
+
+    @Test
+    fun theSlotItselfIsDue() {
+        // Once the configured time-of-day arrives the run is due, even though
+        // exactly one interval has elapsed — the scheduled trigger may have
+        // been skipped by the system, and the catch-up is the fallback.
+        val last = at(2026, 8, 16, 3, 0)
+        assertTrue(isDue(last + day, last, 1))
+    }
+
+    @Test
+    fun changingTheBackupTimeRetiresTheOldSlot() {
+        // The reported bug: the time was moved from 22:15 to 22:20 and the
+        // app still backed up at 22:15 (and again at 22:20).
+        val lastRun = at(2026, 8, 16, 22, 15)      // yesterday, on the old time
+        val changedAt = at(2026, 8, 17, 20, 0)     // moved to 22:20 tonight
+
+        // Catch-up at 22:16 must NOT run: the 22:20 slot is still ahead.
+        assertFalse(
+            AutoBackupScheduler.isDue(
+                at(2026, 8, 17, 22, 16), lastRun, "", 1, hour = 22, minute = 20,
+                configChangedAt = changedAt
+            )
+        )
+        // A trigger still armed for the old 22:15 is stale, not a second run.
+        assertEquals(
+            AutoBackupScheduler.TriggerVerdict.STALE_SLOT,
+            AutoBackupScheduler.classifyTrigger(
+                at(2026, 8, 17, 22, 15), lastRun, "", hour = 22, minute = 20,
+                configChangedAt = changedAt
+            )
+        )
+        // The real slot runs exactly once.
+        assertEquals(
+            AutoBackupScheduler.TriggerVerdict.RUN,
+            AutoBackupScheduler.classifyTrigger(
+                at(2026, 8, 17, 22, 20), lastRun, "", hour = 22, minute = 20,
+                configChangedAt = changedAt
+            )
+        )
+        assertEquals(
+            AutoBackupScheduler.TriggerVerdict.ALREADY_RAN,
+            AutoBackupScheduler.classifyTrigger(
+                at(2026, 8, 17, 22, 23), at(2026, 8, 17, 22, 20), "", hour = 22,
+                minute = 20, configChangedAt = changedAt
+            )
+        )
+        // And the catch-up that follows a genuinely skipped slot still works.
+        assertTrue(
+            AutoBackupScheduler.isDue(
+                at(2026, 8, 18, 22, 30), at(2026, 8, 17, 22, 20), "", 1,
+                hour = 22, minute = 20, configChangedAt = changedAt
+            )
+        )
     }
 
     @Test
@@ -208,15 +262,26 @@ class AutoBackupSchedulerTest {
         // whole interval: the next app start retries it.
         val failed = at(2026, 8, 16, 3, 0)
         assertFalse(
-            AutoBackupScheduler.isDue(failed + 5 * 60_000L, failed, "INTEGRITY_UNKNOWN", 1)
+            AutoBackupScheduler.isDue(
+                failed + 5 * 60_000L, failed, "INTEGRITY_UNKNOWN", 1, hour = 3, minute = 0
+            )
         )
         assertTrue(
             AutoBackupScheduler.isDue(
-                failed + AutoBackupScheduler.RETRY_GAP_MS, failed, "INTEGRITY_UNKNOWN", 1
+                failed + AutoBackupScheduler.RETRY_GAP_MS,
+                failed,
+                "INTEGRITY_UNKNOWN",
+                1,
+                hour = 3,
+                minute = 0
             )
         )
         // Works beyond the interval too: a stale failure is still a retry.
-        assertTrue(AutoBackupScheduler.isDue(failed + day, failed, "IOException: x", 7))
+        assertTrue(
+            AutoBackupScheduler.isDue(
+                failed + day, failed, "IOException: x", 7, hour = 3, minute = 0
+            )
+        )
     }
 
     @Test
@@ -227,47 +292,44 @@ class AutoBackupSchedulerTest {
 
     // ------------------------------------------- duplicate-trigger guard
 
+    private fun verdict(now: Long, lastRun: Long, lastError: String = ""): String =
+        AutoBackupScheduler.classifyTrigger(
+            now, lastRun, lastError, hour = 3, minute = 0
+        ).name
+
     @Test
-    fun aRecentSuccessAbsorbsTheSecondTrigger() {
+    fun aSuccessForTheSlotAbsorbsTheSecondTrigger() {
         // The alarm and the WorkManager job both aim at one slot; whichever
         // fires second must not write another file.
-        val now = at(2026, 8, 16, 3, 5)
-        assertTrue(
-            AutoBackupScheduler.isRecentSuccess(now, at(2026, 8, 16, 3, 0), "")
-        )
-        assertTrue(
-            AutoBackupScheduler.isRecentSuccess(now, at(2026, 8, 16, 2, 50), "")
+        assertEquals("ALREADY_RAN", verdict(at(2026, 8, 16, 3, 5), at(2026, 8, 16, 3, 0)))
+        // A late delivery hours after the slot still belongs to that slot.
+        assertEquals("ALREADY_RAN", verdict(at(2026, 8, 16, 7, 30), at(2026, 8, 16, 3, 0)))
+    }
+
+    @Test
+    fun aFailureForTheSlotIsRetriedNotAbsorbed() {
+        assertEquals(
+            "RUN",
+            verdict(at(2026, 8, 16, 3, 5), at(2026, 8, 16, 3, 0), "IOException: x")
         )
     }
 
     @Test
-    fun aRecentFailureIsRetriedNotAbsorbed() {
-        val now = at(2026, 8, 16, 3, 5)
-        assertFalse(
-            AutoBackupScheduler.isRecentSuccess(now, at(2026, 8, 16, 3, 0), "IOException: x")
-        )
+    fun aSuccessFromAnOlderSlotDoesNotAbsorbTheNewOne() {
+        // Yesterday's run does not cover today's slot — a late WorkManager job
+        // a whole slot behind must not swallow the run the user expects.
+        assertEquals("RUN", verdict(at(2026, 8, 16, 3, 0), at(2026, 8, 15, 3, 0)))
+        // A manual run just *before* the slot is not a run for that slot
+        // either: whoever sets the time a couple of minutes ahead still gets
+        // their run (the old window-based guard swallowed it).
+        assertEquals("RUN", verdict(at(2026, 8, 16, 3, 5), at(2026, 8, 16, 2, 58)))
     }
 
     @Test
-    fun aSuccessOlderThanTheWindowIsNotAbsorbed() {
-        // A late WorkManager run after a successful alarm run is a harmless
-        // second file; a newly chosen backup time must still run.
-        val now = at(2026, 8, 16, 6, 0)
-        assertFalse(
-            AutoBackupScheduler.isRecentSuccess(now, at(2026, 8, 16, 3, 0), "")
-        )
-        // Exactly on the boundary is no longer "recent".
-        assertFalse(
-            AutoBackupScheduler.isRecentSuccess(
-                now, now - AutoBackupScheduler.RECENT_SUCCESS_WINDOW_MS, ""
-            )
-        )
-    }
-
-    @Test
-    fun neverRunOrClockRollbackIsNotAbsorbed() {
+    fun neverRunOrClockRollbackStillRuns() {
         val now = at(2026, 8, 16, 3, 0)
-        assertFalse(AutoBackupScheduler.isRecentSuccess(now, 0L, ""))
-        assertFalse(AutoBackupScheduler.isRecentSuccess(now, now + day, ""))
+        assertEquals("RUN", verdict(now, 0L))
+        // A timestamp in the future (clock rolled back) covers nothing.
+        assertEquals("RUN", verdict(now, now + day))
     }
 }

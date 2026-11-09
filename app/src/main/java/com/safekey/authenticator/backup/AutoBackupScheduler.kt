@@ -26,15 +26,34 @@ object AutoBackupScheduler {
 
     const val WORK_NAME = "osmium-auto-backup"
 
-    /**
-     * Two triggers for one slot (alarm + job) must not write two files. Kept
-     * short on purpose: a wider window would also swallow a run the user just
-     * asked for by moving the backup time to "in a minute".
-     */
-    const val RECENT_SUCCESS_WINDOW_MS = 30L * 60_000L
-
     /** Floor between a failed attempt and the catch-up retry that follows it. */
     const val RETRY_GAP_MS = 15L * 60_000L
+
+    /**
+     * Most recent occurrence of [hour]:[minute] at or before [now] — the slot a
+     * trigger belongs to.
+     *
+     * This is what makes dedupe slot-based instead of window-based: a success
+     * at or after this instant already produced the file for the slot, so the
+     * second trigger (alarm vs job) must not write another one. A fixed
+     * "recent success" window got it wrong in both directions — a backup time
+     * the user moved inside the window was swallowed, and a stale trigger
+     * armed for an old time was not absorbed at all.
+     */
+    fun slotStartMillis(
+        now: Long,
+        hour: Int,
+        minute: Int,
+        zone: ZoneId = ZoneId.systemDefault()
+    ): Long {
+        val nowZoned = Instant.ofEpochMilli(now).atZone(zone)
+        val candidate = ZonedDateTime.of(nowZoned.toLocalDate().atTime(hour, minute), zone)
+        return if (candidate.toInstant().toEpochMilli() > now) {
+            candidate.minusDays(1).toInstant().toEpochMilli()
+        } else {
+            candidate.toInstant().toEpochMilli()
+        }
+    }
 
     /**
      * Next occurrence of [hour]:[minute] strictly after [now], stepping by
@@ -112,7 +131,17 @@ object AutoBackupScheduler {
         AutoBackupAlarm.schedule(context, settings)
     }
 
-    /** Ensure a schedule exists without disturbing a pending one. */
+    /**
+     * Ensure a schedule exists without disturbing a pending one — except when
+     * the pending one was armed for a *different* time.
+     *
+     * `ExistingWorkPolicy.KEEP` alone kept a job whose delay had been computed
+     * from the settings of the previous version: the alarm was re-armed for the
+     * new time on every start while the job still woke up at the old one, so
+     * one day produced two backups at two times. The target is recomputed
+     * deterministically from the current settings, so replacing it with the
+     * same value is a no-op — replacing it with a different value is the point.
+     */
     fun ensureScheduled(context: Context, settings: AppSettings) {
         if (!settings.autoBackupEnabled) return
         val wm = WorkManager.getInstance(context)
@@ -126,23 +155,32 @@ object AutoBackupScheduler {
         val request = OneTimeWorkRequestBuilder<AutoBackupWorker>()
             .setInitialDelay((next - now).coerceAtLeast(0L), TimeUnit.MILLISECONDS)
             .build()
-        wm.enqueueUniqueWork(WORK_NAME, ExistingWorkPolicy.KEEP, request)
+        wm.enqueueUniqueWork(WORK_NAME, ExistingWorkPolicy.REPLACE, request)
         // Alarms do not survive reboots, app updates or a clock change, so this
         // runs on every start (cheap and idempotent: same PendingIntent).
         AutoBackupAlarm.schedule(context, settings)
     }
 
     /**
-     * True when the caller should run a catch-up backup now. Two cases:
+     * True when the caller should run a catch-up backup now.
      *
-     *  • the last run **succeeded** and lies further back than the interval —
-     *    the system scheduler let the slot pass (OEM battery policies, or a
-     *    WorkManager job that was never delivered);
+     * Anchored to the configured **slot**, not to "interval since the last
+     * run". That distinction was a real bug: with `now - lastRun > interval`,
+     * the catch-up fired as soon as 24 hours had passed since the last success
+     * — i.e. at whatever time of day the user happened to open the app. The
+     * user moved the backup time from 22:15 to 22:20 and still got a run at
+     * 22:15, because opening the app at 22:15 was already "overdue".
+     *
+     * Two cases are due:
+     *
+     *  • the last run **succeeded** and the next occurrence of [hour]:[minute]
+     *    after it — or after the last schedule change, whichever is later — has
+     *    already passed: the system scheduler let the slot go;
      *  • the last run **failed or was skipped** ([lastError] non-empty) — an
      *    unattended attempt that produced nothing must be retried at the first
-     *    opportunity (the next app start) instead of waiting a whole interval,
-     *    which is what made a single bad night look like a dead feature. The
-     *    [retryGapMs] floor keeps a launch loop from hammering a broken path.
+     *    opportunity (the next app start) instead of waiting a whole interval.
+     *    The [retryGapMs] floor keeps a launch loop from hammering a broken
+     *    path.
      *
      * Never true when no run has happened yet — the first scheduled run still
      * owns that. Pure function, unit-tested.
@@ -152,26 +190,65 @@ object AutoBackupScheduler {
         lastRun: Long,
         lastError: String,
         intervalDays: Int,
-        retryGapMs: Long = RETRY_GAP_MS
+        hour: Int,
+        minute: Int,
+        /** When the user last changed the schedule (0 = never). */
+        configChangedAt: Long = 0L,
+        retryGapMs: Long = RETRY_GAP_MS,
+        zone: ZoneId = ZoneId.systemDefault()
     ): Boolean {
         if (lastRun <= 0L) return false
         if (lastError.isNotEmpty()) return now - lastRun >= retryGapMs
-        val intervalMs = intervalDays.coerceAtLeast(1) * 24L * 3600_000L
-        return now - lastRun > intervalMs
+        // The clock starts at whichever came last: the previous run, or the
+        // moment the user moved the time. Anchoring on the run alone made a
+        // rescheduled night look served — a 22:20 schedule inherited from a
+        // 22:15 run is due at 22:15 the next day, which is the off-time backup
+        // this whole anchoring exists to stop.
+        val anchor = maxOf(lastRun, configChangedAt)
+        return now >= nextRunMillis(anchor, hour, minute, intervalDays, zone)
+    }
+
+    /** What a trigger that just fired should do. */
+    enum class TriggerVerdict {
+        /** Run the backup. */
+        RUN,
+
+        /** This slot already produced a backup — the other trigger got there first. */
+        ALREADY_RAN,
+
+        /**
+         * The trigger was armed for a time the user has since changed (pending
+         * work survives an app update); the new schedule owns the run, so this
+         * one must not write a file at the old time.
+         */
+        STALE_SLOT
     }
 
     /**
-     * True when the last run already succeeded inside [windowMs]: the alarm and
-     * the WorkManager job target the same scheduled time and either may fire
-     * late, so the second trigger must not write a second file for the same
-     * slot. A failed run does not count — the other trigger may retry it.
-     * Pure function, unit-tested.
+     * Decide what the trigger that fired at [now] should do.
+     *
+     * Slot-based rather than "within N minutes of the last success" on purpose
+     * (see [slotStartMillis]): the window version had to let "the user just
+     * changed the schedule" through, and that escape hatch is what produced two
+     * backups at two times — the catch-up run at the old time plus the newly
+     * armed run at the new one.
+     *
+     * A failed run ([lastError] non-empty) never counts as covering a slot: the
+     * other trigger may retry it. A success timestamped in the future (clock
+     * rolled back) does not count either. Pure function, unit-tested.
      */
-    fun isRecentSuccess(
+    fun classifyTrigger(
         now: Long,
         lastRun: Long,
         lastError: String,
-        windowMs: Long = RECENT_SUCCESS_WINDOW_MS
-    ): Boolean =
-        lastRun > 0L && lastError.isEmpty() && now >= lastRun && now - lastRun < windowMs
+        hour: Int,
+        minute: Int,
+        configChangedAt: Long = 0L,
+        zone: ZoneId = ZoneId.systemDefault()
+    ): TriggerVerdict {
+        val slot = slotStartMillis(now, hour, minute, zone)
+        if (slot < configChangedAt) return TriggerVerdict.STALE_SLOT
+        val covered = lastRun > 0L && lastRun <= now && lastError.isEmpty() && lastRun >= slot
+        return if (covered) TriggerVerdict.ALREADY_RAN else TriggerVerdict.RUN
+    }
 }

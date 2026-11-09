@@ -110,29 +110,41 @@ object AutoBackupRunner {
 
     /**
      * Entry point for the two scheduled triggers — the WorkManager job and the
-     * alarm, which both aim at the same slot and either may fire late. A slot
-     * that already succeeded inside the dedupe window is absorbed silently:
-     * no second file, no overwritten status. A failed run is retried.
+     * alarm. Both aim at the same slot and either may fire late, so
+     * [AutoBackupScheduler.classifyTrigger] decides between running, absorbing
+     * a slot that already produced a file, and dropping a trigger armed for a
+     * time the user has since changed.
      */
     suspend fun runScheduled(app: SafeKeyApp): Outcome {
         val settings = app.settingsRepository.settings.first()
-        // A schedule the user changed after that success means they asked for a
-        // run, so the dedupe window must not absorb it. Without this, setting a
-        // backup time "in a few minutes" right after a successful manual backup
-        // produced nothing at all: the trigger fired, was treated as the second
-        // half of a duplicate pair, and stayed silent.
-        val configChangedSinceSuccess =
-            settings.autoBackupConfigChangedAt > settings.autoBackupLastTime
-        if (!configChangedSinceSuccess && AutoBackupScheduler.isRecentSuccess(
-                System.currentTimeMillis(),
-                settings.autoBackupLastTime,
-                settings.autoBackupLastError
-            )
-        ) {
-            AppLog.d("auto-backup skipped: RECENT_SUCCESS (other trigger already ran)")
-            return Outcome.Skipped("RECENT_SUCCESS")
+        val now = System.currentTimeMillis()
+        val slot = AutoBackupScheduler.classifyTrigger(
+            now = now,
+            lastRun = settings.autoBackupLastTime,
+            lastError = settings.autoBackupLastError,
+            hour = settings.autoBackupHour,
+            minute = settings.autoBackupMinute,
+            configChangedAt = settings.autoBackupConfigChangedAt
+        )
+        val slotLabel = "${settings.autoBackupHour}:" +
+            settings.autoBackupMinute.toString().padStart(2, '0')
+        when (slot) {
+            AutoBackupScheduler.TriggerVerdict.RUN -> return runAndRecord(app, notify = true)
+            AutoBackupScheduler.TriggerVerdict.ALREADY_RAN -> {
+                AppLog.d(
+                    "auto-backup skipped: SLOT_DONE (slot=$slotLabel " +
+                        "last=${settings.autoBackupLastTime})"
+                )
+                return Outcome.Skipped("SLOT_DONE")
+            }
+            AutoBackupScheduler.TriggerVerdict.STALE_SLOT -> {
+                AppLog.d(
+                    "auto-backup skipped: STALE_SLOT (slot=$slotLabel " +
+                        "changedAt=${settings.autoBackupConfigChangedAt})"
+                )
+                return Outcome.Skipped("STALE_SLOT")
+            }
         }
-        return runAndRecord(app, notify = true)
     }
 
     suspend fun run(app: SafeKeyApp, settings: AppSettings): Outcome {
