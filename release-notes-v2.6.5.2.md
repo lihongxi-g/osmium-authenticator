@@ -61,5 +61,7 @@
 ## APK SHA-256
 
 ```
-PLACEHOLDER
+c89108fbea39492243002272560895e67fa75ae98ca7b4c8bfff19efb14bb01c  osmium-2.6.5.2-arm64-v8a.apk
+8d14cc23ab0184746e1b9bc2f10f176d316be818973a891c79a7a2cbfb117f83  osmium-2.6.5.2-armeabi-v7a.apk
+a64070b0a4d619c62acfe629b0df91c97c339974852134ea8d7796ceeb3739de  osmium-2.6.5.2-x86_64.apk
 ```
