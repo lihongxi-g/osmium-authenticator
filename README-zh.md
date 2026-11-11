@@ -45,23 +45,23 @@ Osmium 是一款隐私优先的 Android TOTP/HOTP 验证器。本项目基于 GN
 
 ## 下载
 
-最新正式版：**Osmium v2.6.4.1**（versionCode 911–913，按架构：911 = armeabi-v7a、912 = arm64-v8a、913 = x86_64）。请选择与设备匹配的架构：
+最新正式版：**Osmium v2.6.5.2**（versionCode 941–943，按架构：941 = armeabi-v7a、942 = arm64-v8a、943 = x86_64）。请选择与设备匹配的架构：
 
 | 文件 | 架构 | 适用设备 | 下载 |
 |---|---|---|---|
-| `osmium-2.6.4.1-arm64-v8a.apk` | arm64-v8a | 几乎所有现代手机（推荐） | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.6.4.1/osmium-2.6.4.1-arm64-v8a.apk) |
-| `osmium-2.6.4.1-armeabi-v7a.apk` | armeabi-v7a | 老款 32 位手机 | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.6.4.1/osmium-2.6.4.1-armeabi-v7a.apk) |
-| `osmium-2.6.4.1-x86_64.apk` | x86_64 | Android 模拟器 | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.6.4.1/osmium-2.6.4.1-x86_64.apk) |
+| `osmium-2.6.5.2-arm64-v8a.apk` | arm64-v8a | 几乎所有现代手机（推荐） | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.6.5.2/osmium-2.6.5.2-arm64-v8a.apk) |
+| `osmium-2.6.5.2-armeabi-v7a.apk` | armeabi-v7a | 老款 32 位手机 | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.6.5.2/osmium-2.6.5.2-armeabi-v7a.apk) |
+| `osmium-2.6.5.2-x86_64.apk` | x86_64 | Android 模拟器 | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.6.5.2/osmium-2.6.5.2-x86_64.apk) |
 
 安装与设备架构不符的包可能无法启动。三个架构使用同一签名证书，SHA-256 指纹为：`B65BB0131CAA22C45D99EA4E2C3E99B3980EAE0DC5647190F41A2878E6D88412`。
 
-APK 的 SHA-256 校验和见 [v2.6.4.1 发布说明](release-notes-v2.6.4.1.md) 及 Release 页面的 `SHA256SUMS.txt`。
+APK 的 SHA-256 校验和见 [v2.6.5.2 发布说明](release-notes-v2.6.5.2.md) 及 Release 页面的 `SHA256SUMS.txt`。
 
 ### F-Droid
 
 Osmium 已上架 F-Droid：**https://f-droid.org/packages/com.safekey.authenticator/**
 
-F-Droid 用同一份源码构建、并使用同一张签名证书（配方钉死了签名密钥），所以两边是同一个应用：在两个渠道之间切换属于覆盖升级，不用卸载——对 2FA 应用来说这点很关键，卸载意味着本地账户全丢。需要注意两边版本号规则不同：GitHub 用上表的 versionCode（2.6.4.1 为 911–913），F-Droid 用同一份源码自己推导版本号，目前提供的是 2.6.2。GitHub 的号更高，因此从 F-Droid 换到 GitHub 是升级；反向换回去要等 F-Droid 那边的构建追上来。
+F-Droid 用同一份源码构建、并使用同一张签名证书（配方钉死了签名密钥），所以两边是同一个应用：在两个渠道之间切换属于覆盖升级，不用卸载——对 2FA 应用来说这点很关键，卸载意味着本地账户全丢。需要注意两边版本号规则不同：GitHub 用上表的 versionCode（2.6.5.2 为 941–943），F-Droid 用同一份源码自己推导版本号，目前提供的是 2.6.2。GitHub 的号更高，因此从 F-Droid 换到 GitHub 是升级；反向换回去要等 F-Droid 那边的构建追上来。
 
 F-Droid 的索引按它自己的节奏刷新，新版本可能要几天才会出现；[包页面](https://f-droid.org/packages/com.safekey.authenticator/)上显示的就是当前真正能安装的版本——截至目前是 **2.6.2**。
 

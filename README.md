@@ -45,23 +45,23 @@ The live test page at **https://otp.osmium.im** supports TOTP, HOTP and Steam Gu
 
 ## Download
 
-Latest stable release: **Osmium v2.6.4.1** (`versionCode 911-913, per ABI`: 911 = armeabi-v7a, 912 = arm64-v8a, 913 = x86_64). Choose the ABI matching your device:
+Latest stable release: **Osmium v2.6.5.2** (`versionCode 941-943, per ABI`: 941 = armeabi-v7a, 942 = arm64-v8a, 943 = x86_64). Choose the ABI matching your device:
 
 | File | Architecture | Devices | Download |
 |---|---|---|---|
-| `osmium-2.6.4.1-arm64-v8a.apk` | arm64-v8a | Virtually all modern phones (recommended) | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.6.4.1/osmium-2.6.4.1-arm64-v8a.apk) |
-| `osmium-2.6.4.1-armeabi-v7a.apk` | armeabi-v7a | Older 32-bit phones | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.6.4.1/osmium-2.6.4.1-armeabi-v7a.apk) |
-| `osmium-2.6.4.1-x86_64.apk` | x86_64 | Android emulators | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.6.4.1/osmium-2.6.4.1-x86_64.apk) |
+| `osmium-2.6.5.2-arm64-v8a.apk` | arm64-v8a | Virtually all modern phones (recommended) | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.6.5.2/osmium-2.6.5.2-arm64-v8a.apk) |
+| `osmium-2.6.5.2-armeabi-v7a.apk` | armeabi-v7a | Older 32-bit phones | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.6.5.2/osmium-2.6.5.2-armeabi-v7a.apk) |
+| `osmium-2.6.5.2-x86_64.apk` | x86_64 | Android emulators | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.6.5.2/osmium-2.6.5.2-x86_64.apk) |
 
 Installing an incompatible ABI may prevent the app from starting. All three APKs use the same signing certificate, SHA-256 fingerprint: `B65BB0131CAA22C45D99EA4E2C3E99B3980EAE0DC5647190F41A2878E6D88412`.
 
-APK SHA-256 checksums are listed in the [v2.6.4.1 release notes](release-notes-v2.6.4.1.md) and in `SHA256SUMS.txt` on the GitHub Release page.
+APK SHA-256 checksums are listed in the [v2.6.5.2 release notes](release-notes-v2.6.5.2.md) and in `SHA256SUMS.txt` on the GitHub Release page.
 
 ### F-Droid
 
 Osmium is on F-Droid: **https://f-droid.org/packages/com.safekey.authenticator/**
 
-F-Droid builds from the same source and signs with the same certificate as the GitHub release (the recipe pins the signing key), so the two are the same app — moving between them is an in-place update, and for a 2FA app that matters because uninstalling deletes every local account. Note that the two channels number their versions differently: GitHub uses the versionCode above (911–913 for 2.6.4.1), while F-Droid derives its own number for the same source and currently serves 2.6.2. The GitHub number is the higher one, so switching from F-Droid to GitHub is an upgrade; switching back waits until an F-Droid build catches up.
+F-Droid builds from the same source and signs with the same certificate as the GitHub release (the recipe pins the signing key), so the two are the same app — moving between them is an in-place update, and for a 2FA app that matters because uninstalling deletes every local account. Note that the two channels number their versions differently: GitHub uses the versionCode above (941–943 for 2.6.5.2), while F-Droid derives its own number for the same source and currently serves 2.6.2. The GitHub number is the higher one, so switching from F-Droid to GitHub is an upgrade; switching back waits until an F-Droid build catches up.
 
 F-Droid's index refreshes on its own schedule, so a brand-new release can take a few days to appear there; the [package page](https://f-droid.org/packages/com.safekey.authenticator/) always shows the version actually installable right now. As of this release it offers **2.6.2**.
 
