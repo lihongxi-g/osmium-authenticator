@@ -147,39 +147,56 @@ class UpdateCheckerTest {
         assertTrue(newest?.isPreview ?: false)
     }
 
-    // ------------------------------------------------- two-source merge
+    // ------------------------------------------------- multi-source merge
 
     private fun info(tag: String) =
         UpdateInfo(tag = tag, notes = "", url = "https://osmium.im/#download")
 
     @Test
-    fun aNewerBuildFromEitherSourceIsReported() {
-        // GitHub blocked, website answered with a newer build.
+    fun aNewerBuildFromAnySourceIsReported() {
+        // GitHub blocked, the website answered with a newer build.
         assertEquals(
             UpdateResult.Found(info("v2.7.0")),
-            UpdateChecker.combine(UpdateResult.Failed, UpdateResult.Found(info("v2.7.0")))
+            UpdateChecker.combine(listOf(UpdateResult.Failed, UpdateResult.Found(info("v2.7.0"))))
         )
-        // Website blocked, GitHub answered with a newer build.
+        // Website blocked, GitHub answered.
         assertEquals(
             UpdateResult.Found(info("v2.7.0")),
-            UpdateChecker.combine(UpdateResult.Found(info("v2.7.0")), UpdateResult.Failed)
+            UpdateChecker.combine(listOf(UpdateResult.Found(info("v2.7.0")), UpdateResult.Failed))
+        )
+        // Both stable sources blocked, the preview file carried the answer.
+        assertEquals(
+            UpdateResult.Found(info("v2.7.0-beta")),
+            UpdateChecker.combine(
+                listOf(
+                    UpdateResult.Failed,
+                    UpdateResult.Failed,
+                    UpdateResult.Found(info("v2.7.0-beta"))
+                )
+            )
         )
     }
 
     @Test
-    fun theHighestBuildWinsWhenBothReportOne() {
+    fun theHighestBuildWins() {
         assertEquals(
             UpdateResult.Found(info("v2.7.1")),
             UpdateChecker.combine(
-                UpdateResult.Found(info("v2.7.0")),
-                UpdateResult.Found(info("v2.7.1"))
+                listOf(
+                    UpdateResult.Found(info("v2.7.0")),
+                    UpdateResult.Found(info("v2.7.1")),
+                    UpdateResult.Found(info("v2.7.1-beta"))
+                )
             )
         )
+        // Same numbers: the release outranks its own pre-release.
         assertEquals(
             UpdateResult.Found(info("v2.7.1")),
             UpdateChecker.combine(
-                UpdateResult.Found(info("v2.7.1")),
-                UpdateResult.Found(info("v2.7.0"))
+                listOf(
+                    UpdateResult.Found(info("v2.7.1-beta")),
+                    UpdateResult.Found(info("v2.7.1"))
+                )
             )
         )
     }
@@ -187,14 +204,16 @@ class UpdateCheckerTest {
     @Test
     fun oneFailedSourceIsNotAFailedCheck() {
         // The whole point: a blocked GitHub API must not turn a healthy website
-        // answer into "检查更新失败".
+        // answer into "检查更新失败", and vice versa.
         assertEquals(
             UpdateResult.UpToDate,
-            UpdateChecker.combine(UpdateResult.Failed, UpdateResult.UpToDate)
+            UpdateChecker.combine(listOf(UpdateResult.Failed, UpdateResult.UpToDate))
         )
         assertEquals(
             UpdateResult.UpToDate,
-            UpdateChecker.combine(UpdateResult.UpToDate, UpdateResult.Failed)
+            UpdateChecker.combine(
+                listOf(UpdateResult.Failed, UpdateResult.UpToDate, UpdateResult.Failed)
+            )
         )
     }
 
@@ -202,25 +221,24 @@ class UpdateCheckerTest {
     fun onlyATotalFailureIsAFailedCheck() {
         assertEquals(
             UpdateResult.Failed,
-            UpdateChecker.combine(UpdateResult.Failed, UpdateResult.Failed)
+            UpdateChecker.combine(
+                listOf(UpdateResult.Failed, UpdateResult.Failed, UpdateResult.Failed)
+            )
         )
     }
 
     @Test
     fun anUnconsultedSourceIsIgnored() {
-        // A preview-only subscriber never asks the website.
+        // A stable-only subscriber never asks for the preview file.
         assertEquals(
             UpdateResult.UpToDate,
-            UpdateChecker.combine(UpdateResult.UpToDate, null)
+            UpdateChecker.combine(listOf(UpdateResult.UpToDate, null, null))
         )
         assertEquals(
             UpdateResult.Failed,
-            UpdateChecker.combine(UpdateResult.Failed, null)
+            UpdateChecker.combine(listOf(UpdateResult.Failed, null, null))
         )
-        assertEquals(
-            UpdateResult.UpToDate,
-            UpdateChecker.combine(null, null)
-        )
+        assertEquals(UpdateResult.UpToDate, UpdateChecker.combine(emptyList()))
     }
 
     // ------------------------------------------------- release notes (update dialog)
