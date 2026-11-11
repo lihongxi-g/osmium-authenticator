@@ -2,9 +2,9 @@
 
 **发布日期 / Release date: 2026-11-11** · versionCode 941–943（941 = armeabi-v7a、942 = arm64-v8a、943 = x86_64）
 
-> 这是**预览版（pre-release）**，只提供给打开「检查预览版更新」的用户。正式版仍是 v2.6.4.1，稳定通道不会收到这个版本。
+> 本版先以预览版形式发布，同日转为正式版。装 2.6.4.1 及更早版本的用户，无论是否开启预览通道，都会收到这次更新。
 >
-> This is a **pre-release**, offered only to users who enabled the preview channel. The stable channel stays on v2.6.4.1.
+> This build was published as a pre-release first and promoted to a stable release the same day. Users on 2.6.4.1 and older will be offered it on both channels.
 
 ## 中文更新说明
 
