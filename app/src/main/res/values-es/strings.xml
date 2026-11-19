@@ -454,8 +454,8 @@
     <string name="update_go_github">Abrir página de descarga</string>
     <string name="update_later">Más tarde</string>
     <string name="webdav_http_warning_title">Aviso de conexión sin cifrar</string>
-    <string name="webdav_http_warning_body">Esta dirección http:// transmite datos sin cifrar: cualquiera en la red puede leerlos. Úsala solo en una red local de confianza. ¿Guardar de todos modos?</string>
-    <string name="webdav_http_confirm">Guardar de todos modos</string>
+    <string name="webdav_http_warning_body">Esta dirección usa http:// sin cifrar: cualquiera en la misma red puede leer o alterar lo que se transmite, incluidos los archivos de copia y las credenciales del servidor. Úsala solo en una red de confianza. Si aceptas, Osmium no volverá a preguntar.</string>
+    <string name="webdav_http_confirm">Aceptar y no volver a preguntar</string>
     <string name="webdav_cert_trust_button">Confiar en el certificado del servidor</string>
     <string name="webdav_cert_fetching">Leyendo el certificado del servidor…</string>
     <string name="webdav_cert_trust_title">Confirmar el certificado del servidor</string>

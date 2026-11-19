@@ -469,8 +469,8 @@
     <string name="update_go_github">前往下載頁</string>
     <string name="update_later">稍後</string>
     <string name="webdav_http_warning_title">明文連線警告</string>
-    <string name="webdav_http_warning_body">該位址使用 http:// 明文傳輸，網絡上的其他人可能截獲內容。僅在可信區域網路內使用。確認儲存？</string>
-    <string name="webdav_http_confirm">仍然儲存</string>
+    <string name="webdav_http_warning_body">此位址使用 http:// 明文傳輸，同一網路中的其他人可以讀取甚至竄改傳輸內容——包括備份檔案和伺服器憑證。請僅在你信任的網路裡使用。同意後不再提示。</string>
+    <string name="webdav_http_confirm">同意，不再提示</string>
     <string name="webdav_cert_trust_button">信任伺服器憑證</string>
     <string name="webdav_cert_fetching">正在讀取伺服器憑證…</string>
     <string name="webdav_cert_trust_title">確認伺服器憑證</string>

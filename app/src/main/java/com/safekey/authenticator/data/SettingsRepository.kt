@@ -56,6 +56,12 @@ data class AppSettings(
      * [SettingsRepository.getWebDavBackupPassword]); this is only the flag.
      */
     val webDavBackupPasswordSet: Boolean = false,
+    /**
+     * The user accepted the plaintext-HTTP warning once, so saving an http://
+     * WebDAV address (and therefore every backup, which persists the config)
+     * no longer raises the dialog.
+     */
+    val webDavHttpWarningAcknowledged: Boolean = false,
     val autoBackupKeepCount: Int = 5,
     val autoBackupLastTime: Long = 0L,
     val autoBackupLastError: String = "",
@@ -315,6 +321,8 @@ class SettingsRepository(
         val WEBDAV_PASS_IV = stringPreferencesKey("webdav_pass_iv")
         val WEBDAV_PASS_CT = stringPreferencesKey("webdav_pass_ct")
         val WEBDAV_CERT_SHA256 = stringPreferencesKey("webdav_cert_sha256")
+        /** One-time acknowledgement of the plaintext-HTTP warning. */
+        val WEBDAV_HTTP_ACK = booleanPreferencesKey("webdav_http_ack")
         /** Export password the user chose to remember for WebDAV backups. */
         val WEBDAV_BACKUP_PASS_IV = stringPreferencesKey("webdav_backup_pass_iv")
         val WEBDAV_BACKUP_PASS_CT = stringPreferencesKey("webdav_backup_pass_ct")
@@ -378,6 +386,7 @@ class SettingsRepository(
             autoBackupMinute = prefs[Keys.AUTO_BACKUP_MINUTE] ?: 0,
             autoBackupPasswordSet = prefs[Keys.AUTO_BACKUP_PASS_IV] != null,
             webDavBackupPasswordSet = prefs[Keys.WEBDAV_BACKUP_PASS_IV] != null,
+            webDavHttpWarningAcknowledged = prefs[Keys.WEBDAV_HTTP_ACK] ?: false,
             autoBackupKeepCount = prefs[Keys.AUTO_BACKUP_KEEP] ?: AppSettings.AUTO_BACKUP_KEEP_DEFAULT,
             autoBackupLastTime = prefs[Keys.AUTO_BACKUP_LAST_TIME] ?: 0L,
             autoBackupLastError = prefs[Keys.AUTO_BACKUP_LAST_ERROR] ?: "",
@@ -699,6 +708,11 @@ class SettingsRepository(
                 }
             }
         }
+    }
+
+    /** Record that the plaintext-HTTP warning was accepted; never asked again. */
+    suspend fun setWebDavHttpWarningAcknowledged() {
+        context.dataStore.edit { it[Keys.WEBDAV_HTTP_ACK] = true }
     }
 
     /**

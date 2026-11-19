@@ -454,8 +454,8 @@
     <string name="update_go_github">ダウンロードページを開く</string>
     <string name="update_later">後で</string>
     <string name="webdav_http_warning_title">平文接続の警告</string>
-    <string name="webdav_http_warning_body">このhttp://アドレスは平文でデータを送信するため、ネットワーク上の他者に読み取られる恐れがあります。信頼できるローカルネットワークでのみ使用してください。それでも保存しますか？</string>
-    <string name="webdav_http_confirm">それでも保存</string>
+    <string name="webdav_http_warning_body">このアドレスは http:// の平文で通信するため、同じネットワーク上の誰でも内容を読み取り・改ざんできます（バックアップファイルやサーバーの認証情報を含む）。信頼できるネットワークでのみ使用してください。同意すると以後表示されません。</string>
+    <string name="webdav_http_confirm">同意して今後表示しない</string>
     <string name="webdav_cert_trust_button">サーバー証明書を信頼</string>
     <string name="webdav_cert_fetching">サーバー証明書を読み取り中…</string>
     <string name="webdav_cert_trust_title">サーバー証明書の確認</string>

@@ -454,8 +454,8 @@
     <string name="update_go_github">Ouvrir la page de téléchargement</string>
     <string name="update_later">Plus tard</string>
     <string name="webdav_http_warning_title">Avertissement de connexion en clair</string>
-    <string name="webdav_http_warning_body">Cette adresse http:// transmet les données en clair — n’importe qui sur le réseau peut les lire. Utilisez-la uniquement sur un réseau local de confiance. Enregistrer quand même ?</string>
-    <string name="webdav_http_confirm">Enregistrer quand même</string>
+    <string name="webdav_http_warning_body">Cette adresse utilise http:// en clair : toute personne sur le même réseau peut lire ou modifier ce qui circule, y compris les fichiers de sauvegarde et les identifiants du serveur. N’utilisez le clair que sur un réseau de confiance. Une fois accepté, Osmium ne redemandera plus.</string>
+    <string name="webdav_http_confirm">Accepter, ne plus demander</string>
     <string name="webdav_cert_trust_button">Faire confiance au certificat du serveur</string>
     <string name="webdav_cert_fetching">Lecture du certificat du serveur…</string>
     <string name="webdav_cert_trust_title">Confirmer le certificat du serveur</string>

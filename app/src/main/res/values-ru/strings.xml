@@ -454,8 +454,8 @@
     <string name="update_go_github">Открыть страницу загрузки</string>
     <string name="update_later">Позже</string>
     <string name="webdav_http_warning_title">Предупреждение о незашифрованном соединении</string>
-    <string name="webdav_http_warning_body">Адрес http:// передаёт данные открытым текстом — их может прочитать кто угодно в сети. Используйте только в доверенной локальной сети. Всё равно сохранить?</string>
-    <string name="webdav_http_confirm">Всё равно сохранить</string>
+    <string name="webdav_http_warning_body">Этот адрес использует незашифрованный http://: любой в той же сети может читать и изменять передаваемые данные, включая файлы копий и учётные данные сервера. Используйте только в доверенной сети. После согласия Osmium больше не спросит.</string>
+    <string name="webdav_http_confirm">Согласен, больше не спрашивать</string>
     <string name="webdav_cert_trust_button">Доверять сертификату сервера</string>
     <string name="webdav_cert_fetching">Чтение сертификата сервера…</string>
     <string name="webdav_cert_trust_title">Подтвердите сертификат сервера</string>

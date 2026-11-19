@@ -454,8 +454,8 @@
     <string name="update_go_github">डाउनलोड पेज खोलें</string>
     <string name="update_later">बाद में</string>
     <string name="webdav_http_warning_title">प्लेनटेक्स्ट कनेक्शन चेतावनी</string>
-    <string name="webdav_http_warning_body">यह http:// पता डेटा को प्लेनटेक्स्ट में भेजता है — नेटवर्क पर कोई भी इसे पढ़ सकता है। केवल विश्वसनीय लोकल नेटवर्क पर उपयोग करें। फिर भी सहेजें?</string>
-    <string name="webdav_http_confirm">फिर भी सहेजें</string>
+    <string name="webdav_http_warning_body">यह पता http:// सादे टेक्स्ट पर चलता है, इसलिए उसी नेटवर्क का कोई भी व्यक्ति भेजी जा रही सामग्री पढ़ या बदल सकता है — बैकअप फ़ाइलें और सर्वर क्रेडेंशियल भी। इसे केवल भरोसेमंद नेटवर्क पर उपयोग करें। सहमति देने पर Osmium दोबारा नहीं पूछेगा।</string>
+    <string name="webdav_http_confirm">सहमत, दोबारा न पूछें</string>
     <string name="webdav_cert_trust_button">सर्वर प्रमाणपत्र पर भरोसा करें</string>
     <string name="webdav_cert_fetching">सर्वर प्रमाणपत्र पढ़ा जा रहा है…</string>
     <string name="webdav_cert_trust_title">सर्वर प्रमाणपत्र की पुष्टि करें</string>

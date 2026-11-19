@@ -472,8 +472,8 @@
     <string name="update_go_github">Open download page</string>
     <string name="update_later">Later</string>
     <string name="webdav_http_warning_title">Plaintext connection warning</string>
-    <string name="webdav_http_warning_body">This http:// address transmits data in plaintext — anyone on the network can read it. Use it only on a trusted local network. Save anyway?</string>
-    <string name="webdav_http_confirm">Save anyway</string>
+    <string name="webdav_http_warning_body">This address uses plain http://, so anyone on the same network can read or alter what passes over it — including backup files and the server credentials. Use plaintext only on a network you trust. Once you agree, Osmium will not ask again.</string>
+    <string name="webdav_http_confirm">Agree, don’t ask again</string>
     <string name="webdav_cert_trust_button">Trust the server certificate</string>
     <string name="webdav_cert_fetching">Reading the server certificate…</string>
     <string name="webdav_cert_trust_title">Confirm the server certificate</string>

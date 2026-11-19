@@ -118,6 +118,9 @@ fun WebDavScreen(
     var deleteTarget by remember { mutableStateOf<WebDavFile?>(null) }
     // Fingerprint waiting for the user's confirmation (null = no prompt).
     var certPrompt by remember { mutableStateOf<String?>(null) }
+    // What to run once the one-time plaintext warning is accepted (a backup
+    // that needs the config saved first, or null for the Save button).
+    var pendingAfterHttpAck by remember { mutableStateOf<(() -> Unit)?>(null) }
 
     // Seed the form from the saved config once (and only once, so the user's
     // edits are never overwritten by a re-emission of the flow).
@@ -145,22 +148,40 @@ fun WebDavScreen(
         return ok
     }
 
-    fun doSaveConfig(skipHttpWarning: Boolean = false) {
-        // Plaintext HTTP is useful for trusted LAN servers, but the user
-        // must explicitly acknowledge the risk before we store the address.
-        if (!skipHttpWarning &&
-            url.trim().startsWith("http://", ignoreCase = true)
-        ) {
+    fun persistConfig() {
+        vm.saveWebDavConfig(currentConfig())
+    }
+
+    /**
+     * Plaintext HTTP is acknowledged **once**, then never asked again.
+     *
+     * Before this, every save raised the dialog — and a backup saves the form
+     * on every run, so the warning came back on every upload even though the
+     * user had accepted the exact same LAN address minutes earlier.
+     */
+    fun httpAckPending(): Boolean =
+        url.trim().startsWith("http://", ignoreCase = true) &&
+            !settings.webDavHttpWarningAcknowledged
+
+    /**
+     * Persist the form, then run [then].
+     *
+     * [silent] is for the save a backup performs by itself: the "saved" toast
+     * would otherwise land on top of the upload result every single time.
+     */
+    fun saveConfig(silent: Boolean = false, then: (() -> Unit)? = null) {
+        if (url.isBlank()) {
+            urlError = true
+            return
+        }
+        if (httpAckPending()) {
+            pendingAfterHttpAck = then
             showHttpWarning = true
             return
         }
-        vm.saveWebDavConfig(currentConfig())
-        vm.showToast(context.getString(R.string.webdav_saved))
-    }
-
-    fun saveConfig() {
-        if (url.isBlank()) return
-        doSaveConfig()
+        persistConfig()
+        if (!silent) vm.showToast(context.getString(R.string.webdav_saved))
+        then?.invoke()
     }
 
     fun runBusy(label: String, block: suspend () -> Unit) {
@@ -203,15 +224,12 @@ fun WebDavScreen(
     }
 
     /**
-     * Uploads one backup encrypted with [exportPassword].
+     * Uploads one backup, encrypted with [exportPassword].
      *
-     * Shared by both entry points: the password the user just typed (and maybe
-     * asked us to remember), and the remembered one that lets "Back up now"
-     * skip the dialog entirely.
+     * Split out of [startBackup] because Kotlin local functions cannot be
+     * referenced before they are declared: the caller has to come last.
      */
-    fun startBackup(exportPassword: String) {
-        if (!validateUrl()) return
-        saveConfig()
+    fun uploadBackup(exportPassword: String) {
         val fileName = "osmium-backup-${
             SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US).format(Date())
         }.json"
@@ -238,6 +256,17 @@ fun WebDavScreen(
                 vm.showToast(context.getString(R.string.webdav_backup_done))
             }
         }
+    }
+
+    /**
+     * Backup entry point shared by both password sources: the one the user just
+     * typed (and maybe asked us to remember), and the remembered one that lets
+     * "Back up now" skip the dialog entirely.
+     */
+    fun startBackup(exportPassword: String) {
+        if (!validateUrl()) return
+        // Silent: a backup persists the form, it is not a "Save settings" action.
+        saveConfig(silent = true) { uploadBackup(exportPassword) }
     }
 
     fun startRestore(file: WebDavFile, exportPassword: String) {
@@ -461,12 +490,27 @@ fun WebDavScreen(
                 TextButton(
                     onClick = {
                         showHttpWarning = false
-                        doSaveConfig(skipHttpWarning = true)
+                        // Accepting is permanent. The dialog exists so the user
+                        // thinks about plaintext once, not to nag on every save.
+                        vm.setWebDavHttpWarningAcknowledged()
+                        val after = pendingAfterHttpAck
+                        pendingAfterHttpAck = null
+                        persistConfig()
+                        if (after != null) {
+                            after()
+                        } else {
+                            vm.showToast(context.getString(R.string.webdav_saved))
+                        }
                     }
                 ) { Text(stringResource(R.string.webdav_http_confirm)) }
             },
             dismissButton = {
-                TextButton(onClick = { showHttpWarning = false }) {
+                TextButton(
+                    onClick = {
+                        showHttpWarning = false
+                        pendingAfterHttpAck = null
+                    }
+                ) {
                     Text(stringResource(R.string.cancel))
                 }
             }

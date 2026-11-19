@@ -454,8 +454,8 @@
     <string name="update_go_github">Downloadseite öffnen</string>
     <string name="update_later">Später</string>
     <string name="webdav_http_warning_title">Warnung: unverschlüsselte Verbindung</string>
-    <string name="webdav_http_warning_body">Diese http://-Adresse überträgt Daten unverschlüsselt — jeder im Netzwerk kann sie lesen. Nur in einem vertrauenswürdigen lokalen Netzwerk verwenden. Trotzdem speichern?</string>
-    <string name="webdav_http_confirm">Trotzdem speichern</string>
+    <string name="webdav_http_warning_body">Diese Adresse nutzt einfaches http:// – wer im selben Netz ist, kann mitlesen und verändern, was übertragen wird, einschließlich Backup-Dateien und Server-Zugangsdaten. Nutze Klartext nur in einem Netz, dem du vertraust. Nach dem Zustimmen fragt Osmium nicht mehr.</string>
+    <string name="webdav_http_confirm">Zustimmen, nicht mehr fragen</string>
     <string name="webdav_cert_trust_button">Serverzertifikat vertrauen</string>
     <string name="webdav_cert_fetching">Serverzertifikat wird gelesen…</string>
     <string name="webdav_cert_trust_title">Serverzertifikat bestätigen</string>

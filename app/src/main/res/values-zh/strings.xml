@@ -470,8 +470,8 @@
     <string name="update_go_github">前往下载页</string>
     <string name="update_later">稍后</string>
     <string name="webdav_http_warning_title">明文连接警告</string>
-    <string name="webdav_http_warning_body">该地址使用 http:// 明文传输，网络上的其他人可能截获内容。仅在可信局域网内使用。确认保存？</string>
-    <string name="webdav_http_confirm">仍然保存</string>
+    <string name="webdav_http_warning_body">此地址使用 http:// 明文传输，同一网络中的其他人可以读取甚至篡改传输内容——包括备份文件和服务器凭据。请仅在你信任的网络里使用。同意后不再提示。</string>
+    <string name="webdav_http_confirm">同意，不再提示</string>
     <string name="webdav_cert_trust_button">信任服务器证书</string>
     <string name="webdav_cert_fetching">正在读取服务器证书…</string>
     <string name="webdav_cert_trust_title">确认服务器证书</string>

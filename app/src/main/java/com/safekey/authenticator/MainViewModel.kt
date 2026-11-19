@@ -819,6 +819,8 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     fun setAutoBackupIntervalDays(days: Int) = viewModelScope.launch { settingsRepo.setAutoBackupIntervalDays(days) }
     fun setAutoBackupTime(hour: Int, minute: Int) = viewModelScope.launch { settingsRepo.setAutoBackupTime(hour, minute) }
     fun setAutoBackupPassword(password: String) = viewModelScope.launch { settingsRepo.setAutoBackupPassword(password) }
+    fun setWebDavHttpWarningAcknowledged() =
+        viewModelScope.launch { settingsRepo.setWebDavHttpWarningAcknowledged() }
     fun setWebDavBackupPassword(password: String) =
         viewModelScope.launch { settingsRepo.setWebDavBackupPassword(password) }
     suspend fun webDavBackupPassword(): String? = settingsRepo.getWebDavBackupPassword()
