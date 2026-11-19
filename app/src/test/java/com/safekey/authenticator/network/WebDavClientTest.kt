@@ -15,6 +15,7 @@ import java.net.ServerSocket
 import java.net.Socket
 import java.net.SocketException
 import java.security.KeyFactory
+import java.security.MessageDigest
 import java.security.KeyStore
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
@@ -289,6 +290,92 @@ class WebDavClientTest {
         }
     }
 
+    @Test
+    fun `a pinned certificate is accepted although no CA signed it`() {
+        val tlsServer = MockDavServer(user, pass, sslContext = serverContext(CERT, KEY))
+        try {
+            val pin = sha256Hex(readCertificate(CERT).encoded)
+            val cfg = WebDavServerConfig("https://localhost:${tlsServer.port}", user, pass, pin)
+            // Tls.DEFAULT is what the app uses: platform trust anchors plus the
+            // pinned-certificate path, i.e. no CA has to vouch for the server.
+            WebDavClient.testConnection(cfg)
+            assertEquals(listOf("PROPFIND"), tlsServer.methods.toList())
+        } finally {
+            tlsServer.close()
+        }
+    }
+
+    @Test
+    fun `a certificate that does not match the pin is refused before any request`() {
+        val tlsServer = MockDavServer(user, pass, sslContext = serverContext(CERT, KEY))
+        try {
+            // The user trusted some other certificate, so this server is not the
+            // one they confirmed — a self-signed certificate proves nothing by
+            // itself.
+            val wrongPin = sha256Hex(readCertificate(WRONG_CERT).encoded)
+            val cfg = WebDavServerConfig("https://localhost:${tlsServer.port}", user, pass, wrongPin)
+            val e = assertThrows(WebDavException::class.java) { WebDavClient.testConnection(cfg) }
+            assertTrue(e.message!!.contains("fingerprint", ignoreCase = true))
+            // Credentials must not reach a server that failed the pin check.
+            assertTrue(tlsServer.methods.isEmpty())
+        } finally {
+            tlsServer.close()
+        }
+    }
+
+    @Test
+    fun `a malformed pin falls back to normal CA validation`() {
+        val tlsServer = MockDavServer(user, pass, sslContext = serverContext(CERT, KEY))
+        try {
+            // Not a 64-character hex digest: treated as "no pin" rather than as
+            // an accept-anything token.
+            val cfg = WebDavServerConfig("https://localhost:${tlsServer.port}", user, pass, "not-a-pin")
+            val e = assertThrows(WebDavException::class.java) { WebDavClient.testConnection(cfg) }
+            assertTrue(e.message!!.contains("TLS", ignoreCase = true))
+            assertTrue(tlsServer.methods.isEmpty())
+        } finally {
+            tlsServer.close()
+        }
+    }
+
+    @Test
+    fun `the certificate fingerprint can be read without sending a request`() {
+        val tlsServer = MockDavServer(user, pass, sslContext = serverContext(CERT, KEY))
+        try {
+            val cfg = WebDavServerConfig("https://localhost:${tlsServer.port}", user, pass)
+            val sha256 = WebDavClient.serverCertificateSha256(cfg)
+            assertEquals(sha256Hex(readCertificate(CERT).encoded), sha256)
+            // The trust prompt must never leak the credentials.
+            assertTrue(tlsServer.methods.isEmpty())
+            assertTrue(tlsServer.headerLines.isEmpty())
+        } finally {
+            tlsServer.close()
+        }
+    }
+
+    @Test
+    fun `an http address has no certificate to trust`() {
+        val e = assertThrows(WebDavException::class.java) {
+            WebDavClient.serverCertificateSha256(config())
+        }
+        assertTrue(e.message!!.contains("https", ignoreCase = true))
+    }
+
+    @Test
+    fun `a fingerprint pasted with colons is accepted as a pin`() {
+        val tlsServer = MockDavServer(user, pass, sslContext = serverContext(CERT, KEY))
+        try {
+            // What `openssl x509 -fingerprint -sha256` prints: AB:CD:...
+            val colonForm = sha256Hex(readCertificate(CERT).encoded)
+                .chunked(2).joinToString(":").uppercase()
+            val cfg = WebDavServerConfig("https://localhost:${tlsServer.port}", user, pass, colonForm)
+            WebDavClient.testConnection(cfg)
+            assertEquals(listOf("PROPFIND"), tlsServer.methods.toList())
+        } finally {
+            tlsServer.close()
+        }
+    }
+
     // ------------------------------------------------------------------ keys
 
     private companion object {
@@ -312,6 +399,11 @@ private fun pemBody(pem: ByteArray, label: String): ByteArray {
     val body = text.substringAfter("-----BEGIN $label-----").substringBefore("-----END $label-----")
     return Base64.getMimeDecoder().decode(body)
 }
+
+/** Lowercase hex SHA-256, the form the client stores and compares. */
+private fun sha256Hex(bytes: ByteArray): String =
+    MessageDigest.getInstance("SHA-256").digest(bytes)
+        .joinToString("") { "%02x".format(it) }
 
 private fun readCertificate(path: String): X509Certificate =
     CertificateFactory.getInstance("X.509")

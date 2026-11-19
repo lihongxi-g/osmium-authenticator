@@ -1,0 +1,2 @@
+New: WebDAV servers with a self-signed certificate can now be used — the app shows the certificate fingerprint on first connection, you compare it with the server, and the app then accepts only that exact certificate. No CA has to be installed and nothing is trusted blindly.
+Also: the WebDAV client's error messages now say what actually failed.

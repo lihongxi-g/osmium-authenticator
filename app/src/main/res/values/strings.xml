@@ -453,6 +453,15 @@
     <string name="webdav_http_warning_title">Plaintext connection warning</string>
     <string name="webdav_http_warning_body">This http:// address transmits data in plaintext — anyone on the network can read it. Use it only on a trusted local network. Save anyway?</string>
     <string name="webdav_http_confirm">Save anyway</string>
+    <string name="webdav_cert_trust_button">Trust the server certificate</string>
+    <string name="webdav_cert_fetching">Reading the server certificate…</string>
+    <string name="webdav_cert_trust_title">Confirm the server certificate</string>
+    <string name="webdav_cert_trust_body">This certificate is not signed by a public authority, which is normal for a machine on your own network. Its SHA-256 fingerprint is:\n%1$s\nCompare it with the fingerprint the server itself prints. Trust it only if the two match exactly.</string>
+    <string name="webdav_cert_trust_confirm">Trust this certificate</string>
+    <string name="webdav_cert_trusted">Certificate trusted for this server</string>
+    <string name="webdav_cert_pinned">Trusted certificate: %1$s</string>
+    <string name="webdav_cert_reset">Reset</string>
+    <string name="webdav_cert_reset_done">Trusted certificate cleared</string>
     <string name="manual_auto_backup_title">Automatic backup</string>
     <string name="manual_auto_backup_body">Settings → Data → Auto backup runs an unattended backup on a schedule: pick a target (WebDAV server or phone storage), an interval in days, and a time of day. The next run time is shown in the device’s local time zone.\n\nBackups use the same password-encrypted export format as manual backups. The export password is stored encrypted with the Android Keystore key and is used only to encrypt backup files. Local backups are written to the public Download/Osmium folder; a configurable number of auto-backups are kept (default 5, max 10) and older ones are pruned.\n\nThe last run result is shown on the auto-backup screen. A backup that fails (e.g. no server reachable) is recorded there and retried once; the next scheduled run tries again.</string>
     <string name="manual_updates_title">Update checks</string>

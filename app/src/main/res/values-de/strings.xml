@@ -435,6 +435,15 @@
     <string name="webdav_http_warning_title">Warnung: unverschlüsselte Verbindung</string>
     <string name="webdav_http_warning_body">Diese http://-Adresse überträgt Daten unverschlüsselt — jeder im Netzwerk kann sie lesen. Nur in einem vertrauenswürdigen lokalen Netzwerk verwenden. Trotzdem speichern?</string>
     <string name="webdav_http_confirm">Trotzdem speichern</string>
+    <string name="webdav_cert_trust_button">Serverzertifikat vertrauen</string>
+    <string name="webdav_cert_fetching">Serverzertifikat wird gelesen…</string>
+    <string name="webdav_cert_trust_title">Serverzertifikat bestätigen</string>
+    <string name="webdav_cert_trust_body">Dieses Zertifikat ist nicht von einer öffentlichen Stelle signiert — bei einem Gerät im eigenen Netz ist das normal. Sein SHA-256-Fingerabdruck lautet:\n%1$s\nVergleiche ihn mit dem Fingerabdruck, den der Server selbst anzeigt. Nur bei exakter Übereinstimmung vertrauen.</string>
+    <string name="webdav_cert_trust_confirm">Diesem Zertifikat vertrauen</string>
+    <string name="webdav_cert_trusted">Zertifikat für diesen Server vertraut</string>
+    <string name="webdav_cert_pinned">Vertrautes Zertifikat: %1$s</string>
+    <string name="webdav_cert_reset">Zurücksetzen</string>
+    <string name="webdav_cert_reset_done">Vertrautes Zertifikat entfernt</string>
     <string name="manual_auto_backup_title">Automatisches Backup</string>
     <string name="manual_auto_backup_body">Einstellungen → Daten → Automatisches Backup führt unbeaufsichtigt Backups nach Plan aus: Ziel (WebDAV-Server oder Telefonspeicher), Intervall in Tagen und Uhrzeit wählen. Die nächste Ausführung wird in der Zeitzone des Geräts angezeigt.\n\nDie Backups nutzen dasselbe passwortverschlüsselte Exportformat wie manuelle Backups. Das Export-Passwort wird mit dem Android-Keystore-Schlüssel verschlüsselt gespeichert und dient nur zum Verschlüsseln der Backup-Dateien. Lokale Backups landen im öffentlichen Ordner Download/Osmium; eine einstellbare Anzahl bleibt erhalten (Standard 5, max. 10), ältere werden gelöscht.\n\nDas Ergebnis des letzten Laufs wird auf dem Auto-Backup-Bildschirm angezeigt. Ein fehlgeschlagenes Backup (z. B. Server nicht erreichbar) wird dort vermerkt und einmal erneut versucht; der nächste geplante Lauf versucht es wieder.</string>
     <string name="manual_updates_title">Update-Prüfung</string>

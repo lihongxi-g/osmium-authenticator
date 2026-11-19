@@ -435,6 +435,15 @@
     <string name="webdav_http_warning_title">Aviso de conexión sin cifrar</string>
     <string name="webdav_http_warning_body">Esta dirección http:// transmite datos sin cifrar: cualquiera en la red puede leerlos. Úsala solo en una red local de confianza. ¿Guardar de todos modos?</string>
     <string name="webdav_http_confirm">Guardar de todos modos</string>
+    <string name="webdav_cert_trust_button">Confiar en el certificado del servidor</string>
+    <string name="webdav_cert_fetching">Leyendo el certificado del servidor…</string>
+    <string name="webdav_cert_trust_title">Confirmar el certificado del servidor</string>
+    <string name="webdav_cert_trust_body">Este certificado no está firmado por una autoridad pública, algo normal en un equipo de tu propia red. Su huella SHA-256 es:\n%1$s\nCompárala con la que muestra el propio servidor. Confía solo si coinciden exactamente.</string>
+    <string name="webdav_cert_trust_confirm">Confiar en este certificado</string>
+    <string name="webdav_cert_trusted">Certificado de confianza para este servidor</string>
+    <string name="webdav_cert_pinned">Certificado de confianza: %1$s</string>
+    <string name="webdav_cert_reset">Restablecer</string>
+    <string name="webdav_cert_reset_done">Certificado de confianza eliminado</string>
     <string name="manual_auto_backup_title">Copia automática</string>
     <string name="manual_auto_backup_body">Ajustes → Datos → Copia automática ejecuta copias sin intervención según un plan: elige destino (servidor WebDAV o almacenamiento del teléfono), intervalo en días y hora. La próxima ejecución se muestra en la zona horaria del dispositivo.\n\nLas copias usan el mismo formato de exportación cifrado con contraseña que las manuales. La contraseña se guarda cifrada con la clave de Android Keystore y solo sirve para cifrar los archivos. Las copias locales van a la carpeta pública Download/Osmium; se conserva una cantidad configurable (por defecto 5, máx. 10) y se borran las antiguas.\n\nEl resultado del último intento se muestra en la pantalla de copia automática. Un fallo (p. ej. servidor inaccesible) se registra y se reintenta una vez; el siguiente intento programado volverá a probar.</string>
     <string name="manual_updates_title">Comprobación de actualizaciones</string>

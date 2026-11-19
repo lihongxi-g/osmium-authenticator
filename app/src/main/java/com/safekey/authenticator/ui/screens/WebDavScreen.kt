@@ -85,6 +85,10 @@ fun WebDavScreen(
     var url by rememberSaveable { mutableStateOf("") }
     var username by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
+    // SHA-256 of the certificate the user trusted for this server. Public
+    // data (not a secret), so rememberSaveable is fine: it survives the
+    // lock-gate rebuild exactly like the other form fields.
+    var certPin by rememberSaveable { mutableStateOf("") }
     var seeded by rememberSaveable { mutableStateOf(false) }
     var urlError by remember { mutableStateOf(false) }
     // Deliberately NOT saveable: a restored non-null busyLabel would leave the
@@ -109,6 +113,8 @@ fun WebDavScreen(
     var showManage by remember { mutableStateOf(false) }
     var manageFiles by remember { mutableStateOf<List<WebDavFile>>(emptyList()) }
     var deleteTarget by remember { mutableStateOf<WebDavFile?>(null) }
+    // Fingerprint waiting for the user's confirmation (null = no prompt).
+    var certPrompt by remember { mutableStateOf<String?>(null) }
 
     // Seed the form from the saved config once (and only once, so the user's
     // edits are never overwritten by a re-emission of the flow).
@@ -118,6 +124,7 @@ fun WebDavScreen(
             url = cfg.baseUrl
             username = cfg.username
             password = cfg.password
+            certPin = cfg.trustedCertSha256
             seeded = true
         }
     }
@@ -125,7 +132,8 @@ fun WebDavScreen(
     fun currentConfig() = WebDavServerConfig(
         baseUrl = url.trim(),
         username = username.trim(),
-        password = password
+        password = password,
+        trustedCertSha256 = certPin
     )
 
     fun validateUrl(): Boolean {
@@ -178,6 +186,16 @@ fun WebDavScreen(
             } finally {
                 busyLabel = null
             }
+        }
+    }
+
+    // Reads the certificate the server presents and shows the fingerprint for
+    // confirmation. No request and no credentials are sent for this.
+    fun fetchCertificate() {
+        if (!validateUrl()) return
+        runBusy(context.getString(R.string.webdav_cert_fetching)) {
+            val sha256 = WebDavClient.serverCertificateSha256(currentConfig())
+            withContext(Dispatchers.Main) { certPrompt = sha256 }
         }
     }
 
@@ -258,6 +276,36 @@ fun WebDavScreen(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.error
                     )
+                }
+                if (url.trim().startsWith("https://", ignoreCase = true)) {
+                    if (certPin.isBlank()) {
+                        TextButton(
+                            onClick = { fetchCertificate() },
+                            enabled = busyLabel == null,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(stringResource(R.string.webdav_cert_trust_button))
+                        }
+                    } else {
+                        Text(
+                            text = stringResource(
+                                R.string.webdav_cert_pinned,
+                                WebDavClient.formatFingerprint(certPin)
+                            ),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        TextButton(
+                            onClick = {
+                                certPin = ""
+                                vm.saveWebDavConfig(currentConfig())
+                                vm.showToast(context.getString(R.string.webdav_cert_reset_done))
+                            },
+                            enabled = busyLabel == null
+                        ) {
+                            Text(stringResource(R.string.webdav_cert_reset))
+                        }
+                    }
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedButton(
@@ -346,6 +394,39 @@ fun WebDavScreen(
             },
             dismissButton = {
                 TextButton(onClick = { showHttpWarning = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+
+    // ------------------------------------------------- server certificate
+
+    val promptedSha256 = certPrompt
+    if (promptedSha256 != null) {
+        AlertDialog(
+            onDismissRequest = {},
+            title = { Text(stringResource(R.string.webdav_cert_trust_title)) },
+            text = {
+                DialogBodyText(
+                    stringResource(
+                        R.string.webdav_cert_trust_body,
+                        WebDavClient.formatFingerprint(promptedSha256)
+                    )
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        certPin = promptedSha256
+                        certPrompt = null
+                        vm.saveWebDavConfig(currentConfig())
+                        vm.showToast(context.getString(R.string.webdav_cert_trusted))
+                    }
+                ) { Text(stringResource(R.string.webdav_cert_trust_confirm)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { certPrompt = null }) {
                     Text(stringResource(R.string.cancel))
                 }
             }

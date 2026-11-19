@@ -15,13 +15,19 @@ import java.net.SocketTimeoutException
 import java.net.URL
 import java.net.URLDecoder
 import java.net.UnknownHostException
+import java.security.MessageDigest
+import java.security.SecureRandom
+import java.security.cert.X509Certificate
 import java.text.SimpleDateFormat
 import java.util.Base64
 import java.util.Locale
 import javax.net.ssl.HttpsURLConnection
+import javax.net.ssl.SSLContext
 import javax.net.ssl.SSLException
 import javax.net.ssl.SSLSocket
 import javax.net.ssl.SSLSocketFactory
+import javax.net.ssl.TrustManager
+import javax.net.ssl.X509TrustManager
 
 /** A failure talking to the WebDAV server, with a user-presentable message. */
 class WebDavException(message: String, cause: Throwable? = null) : Exception(message, cause)
@@ -90,6 +96,30 @@ object WebDavClient {
     private val HEX = "0123456789ABCDEF".toCharArray()
 
     /**
+     * Completes a TLS handshake without validating the server certificate.
+     *
+     * This is NOT a trust-all escape hatch. It is used in exactly two places:
+     *
+     *  - [connect] on the certificate-pinning path, where the certificate the
+     *    server presented is compared against the SHA-256 the user confirmed
+     *    before a single byte of the request is written, and
+     *  - [serverCertificateSha256], which reads the fingerprint for the trust
+     *    prompt and sends no request and no credentials at all.
+     *
+     * Every other https request keeps using the platform trust anchors.
+     */
+    private val UNVERIFIED_HANDSHAKE_FACTORY: SSLSocketFactory by lazy {
+        val trustAnyCertificate = object : X509TrustManager {
+            override fun checkClientTrusted(chain: Array<out X509Certificate>?, authType: String?) = Unit
+            override fun checkServerTrusted(chain: Array<out X509Certificate>?, authType: String?) = Unit
+            override fun getAcceptedIssuers(): Array<X509Certificate> = emptyArray()
+        }
+        SSLContext.getInstance("TLS")
+            .apply { init(null, arrayOf<TrustManager>(trustAnyCertificate), SecureRandom()) }
+            .socketFactory
+    }
+
+    /**
      * TLS knobs. The app always uses [DEFAULT] — the platform trust anchors.
      * It is injectable only so the unit tests can talk to a local server with a
      * test certificate; it is internal to this module and no production call
@@ -131,6 +161,39 @@ object WebDavClient {
         return parseMultistatus(body)
             .filter { it.name.endsWith(".json", ignoreCase = true) }
             .sortedByDescending { it.name } // timestamped names sort chronologically
+    }
+
+    /**
+     * SHA-256 (lowercase hex) of the certificate the server presents, for the
+     * "trust this certificate" prompt. The connection is closed straight after
+     * the handshake: no request line, no Basic credentials, nothing else is
+     * sent.
+     */
+    fun serverCertificateSha256(config: WebDavServerConfig): String {
+        val target = url(base(config))
+        if (target.protocol != "https") {
+            throw WebDavException(
+                "Only https:// addresses have a certificate to trust — " +
+                    "this address uses plain http://"
+            )
+        }
+        return mappedErrors {
+            val raw = Socket()
+            try {
+                raw.tcpNoDelay = true
+                raw.connect(InetSocketAddress(target.host, port(target)), CONNECT_TIMEOUT_MS)
+                raw.soTimeout = READ_TIMEOUT_MS
+                val ssl = openTls(
+                    raw, target, UNVERIFIED_HANDSHAKE_FACTORY, verifyHostName = false
+                )
+                peerCertificateSha256(ssl)
+            } finally {
+                try {
+                    raw.close()
+                } catch (_: Exception) {
+                }
+            }
+        }
     }
 
     /** Upload an encrypted backup file. Creates the directory on first use. */
@@ -242,33 +305,9 @@ object WebDavClient {
             AppLog.d("webdav: $method ${target.host}:${target.port}${target.path}")
             // Credentials go out only towards the host the user configured.
             val trusted = sameHost(target, base(config))
-            val response = try {
+            val response = mappedErrors {
                 roundTrip(method, target, config, trusted, requestBody, extraHeaders,
                     contentType, maxBytes, tls)
-            } catch (e: WebDavException) {
-                throw e
-            } catch (e: SocketTimeoutException) {
-                throw WebDavException("The server timed out", e)
-            } catch (e: UnknownHostException) {
-                throw WebDavException("Cannot resolve the server address", e)
-            } catch (e: ConnectException) {
-                throw WebDavException("The server is unreachable", e)
-            } catch (e: SSLException) {
-                throw WebDavException(
-                    "TLS error — the server certificate is not trusted " +
-                        "or does not match the server name", e)
-            } catch (e: IOException) {
-                val msg = e.message ?: ""
-                // Android 16+ local-network protection returns EPERM/ECONNABORTED
-                // when LAN access is blocked (Android 17 enforces it for apps
-                // targeting 37+). Surface a hint instead of a raw socket error.
-                if (msg.contains("EPERM") || msg.contains("ECONNABORTED")) {
-                    throw WebDavException(
-                        "Local network access was blocked by the system — " +
-                            "check this app's local-network permission", e
-                    )
-                }
-                throw WebDavException("Connection failed: $msg", e)
             }
 
             if (response.status in REDIRECT_CODES && hops < MAX_REDIRECTS) {
@@ -300,6 +339,39 @@ object WebDavClient {
         }
     }
 
+    /**
+     * Maps transport failures onto the friendly messages the UI shows. A
+     * [WebDavException] thrown deeper down (an HTTP status, a certificate pin
+     * mismatch) passes through untouched.
+     */
+    private fun <T> mappedErrors(block: () -> T): T = try {
+        block()
+    } catch (e: WebDavException) {
+        throw e
+    } catch (e: SocketTimeoutException) {
+        throw WebDavException("The server timed out", e)
+    } catch (e: UnknownHostException) {
+        throw WebDavException("Cannot resolve the server address", e)
+    } catch (e: ConnectException) {
+        throw WebDavException("The server is unreachable", e)
+    } catch (e: SSLException) {
+        throw WebDavException(
+            "TLS error — the server certificate is not trusted " +
+                "or does not match the server name", e)
+    } catch (e: IOException) {
+        val msg = e.message ?: ""
+        // Android 16+ local-network protection returns EPERM/ECONNABORTED when
+        // LAN access is blocked (Android 17 enforces it for apps targeting
+        // 37+). Surface a hint instead of a raw socket error.
+        if (msg.contains("EPERM") || msg.contains("ECONNABORTED")) {
+            throw WebDavException(
+                "Local network access was blocked by the system — " +
+                    "check this app's local-network permission", e
+            )
+        }
+        throw WebDavException("Connection failed: $msg", e)
+    }
+
     private fun httpError(status: Int): String = when (status) {
         401 -> "Wrong username or password (401)"
         403 -> "Access denied by the server (403)"
@@ -328,7 +400,7 @@ object WebDavClient {
         maxBytes: Long,
         tls: Tls
     ): Response {
-        connect(target, tls).use { socket ->
+        connect(target, tls, config.trustedCertSha256).use { socket ->
             val output = socket.getOutputStream()
             writeRequest(output, method, target, config, sendCredentials, requestBody,
                 extraHeaders, contentType)
@@ -348,10 +420,20 @@ object WebDavClient {
     }
 
     /**
-     * Opens the TCP connection and, for https, completes the TLS handshake
-     * with real certificate *and* host name verification.
+     * Opens the TCP connection and, for https, completes the TLS handshake.
+     *
+     * Without a pin: platform trust anchors plus the platform host name check,
+     * exactly as before.
+     *
+     * With a pin ([WebDavServerConfig.trustedCertSha256]): the handshake is
+     * allowed to finish with a self-signed certificate, and the certificate the
+     * server presented is then compared against the SHA-256 the user confirmed.
+     * The comparison happens before the request is written, so a substituted
+     * certificate never sees the username or password. The host name check is
+     * skipped on this path on purpose: it would add nothing, because the pin
+     * already identifies one exact certificate.
      */
-    private fun connect(target: URL, tls: Tls): Socket {
+    private fun connect(target: URL, tls: Tls, trustedSha256: String): Socket {
         val host = target.host
         val port = port(target)
         val raw = Socket()
@@ -360,15 +442,15 @@ object WebDavClient {
             raw.connect(InetSocketAddress(host, port), CONNECT_TIMEOUT_MS)
             raw.soTimeout = READ_TIMEOUT_MS
             if (target.protocol != "https") return raw
-            // Handing the host name to the factory makes the TLS layer send SNI
-            // and resume sessions; endpoint identification makes the handshake
-            // fail if the certificate is not valid for this name.
-            val ssl = tls.socketFactory.createSocket(raw, host, port, true) as SSLSocket
-            ssl.soTimeout = READ_TIMEOUT_MS
-            val params = ssl.sslParameters
-            params.endpointIdentificationAlgorithm = "HTTPS"
-            ssl.sslParameters = params
-            ssl.startHandshake()
+            val pin = normalizePin(trustedSha256)
+            if (pin.isEmpty()) {
+                // Handing the host name to the factory makes the TLS layer send
+                // SNI and resume sessions; endpoint identification makes the
+                // handshake fail if the certificate is not valid for this name.
+                return openTls(raw, target, tls.socketFactory, verifyHostName = true)
+            }
+            val ssl = openTls(raw, target, UNVERIFIED_HANDSHAKE_FACTORY, verifyHostName = false)
+            verifyPinnedCertificate(ssl, pin)
             return ssl
         } catch (e: Throwable) {
             try {
@@ -378,6 +460,79 @@ object WebDavClient {
             throw e
         }
     }
+
+    /** Starts TLS over [raw] and completes the handshake. */
+    private fun openTls(
+        raw: Socket,
+        target: URL,
+        factory: SSLSocketFactory,
+        verifyHostName: Boolean
+    ): SSLSocket {
+        val ssl = factory.createSocket(raw, target.host, port(target), true) as SSLSocket
+        ssl.soTimeout = READ_TIMEOUT_MS
+        val params = ssl.sslParameters
+        params.endpointIdentificationAlgorithm = if (verifyHostName) "HTTPS" else null
+        ssl.sslParameters = params
+        ssl.startHandshake()
+        return ssl
+    }
+
+    /**
+     * Compares the peer certificate with the trusted fingerprint. Runs before
+     * any request byte is written; a mismatch ends the connection with the
+     * fingerprint that was actually offered, so the user can compare it with
+     * the server.
+     */
+    private fun verifyPinnedCertificate(ssl: SSLSocket, pinnedSha256: String) {
+        val actual = peerCertificateSha256(ssl)
+        if (!actual.equals(pinnedSha256, ignoreCase = true)) {
+            throw WebDavException(
+                "The server certificate does not match the fingerprint you trusted — " +
+                    "it may have been replaced, or the connection is being intercepted. " +
+                    "The certificate offered now is " + formatFingerprint(actual)
+            )
+        }
+    }
+
+    /** SHA-256 (lowercase hex) of the certificate handed over in the handshake. */
+    private fun peerCertificateSha256(ssl: SSLSocket): String {
+        val certificates = try {
+            ssl.session.peerCertificates
+        } catch (e: SSLException) {
+            throw WebDavException("The server presented no certificate", e)
+        }
+        val certificate = certificates.firstOrNull() as? X509Certificate
+            ?: throw WebDavException("The server presented no certificate")
+        return sha256Hex(certificate.encoded)
+    }
+
+    private fun sha256Hex(bytes: ByteArray): String {
+        val digest = MessageDigest.getInstance("SHA-256").digest(bytes)
+        val hex = StringBuilder(digest.size * 2)
+        for (byte in digest) {
+            hex.append(HEX[(byte.toInt() shr 4) and 0x0F])
+            hex.append(HEX[byte.toInt() and 0x0F])
+        }
+        return hex.toString().lowercase(Locale.US)
+    }
+
+    /**
+     * Stored form of a pin: lowercase hex with separators removed, so a value
+     * pasted from `openssl -fingerprint -sha256` ("AB:CD:…") still matches.
+     * Anything that is not a 64-character hex string counts as "no pin" and
+     * falls back to normal CA validation rather than to a weaker check.
+     */
+    private fun normalizePin(raw: String): String {
+        val hex = raw.filter { it.isLetterOrDigit() }.lowercase(Locale.US)
+        return if (hex.length == 64 && hex.all { it in "0123456789abcdef" }) hex else ""
+    }
+
+    /** "AB:CD:…" for display only; the stored form is [sha256Hex]. */
+    fun formatFingerprint(sha256: String): String =
+        sha256.filter { it.isLetterOrDigit() }
+            .uppercase(Locale.US)
+            .chunked(2)
+            .joinToString(":")
 
     private fun port(target: URL): Int =
         if (target.port != -1) target.port

@@ -308,6 +308,7 @@ class SettingsRepository(
         val WEBDAV_USER = stringPreferencesKey("webdav_user")
         val WEBDAV_PASS_IV = stringPreferencesKey("webdav_pass_iv")
         val WEBDAV_PASS_CT = stringPreferencesKey("webdav_pass_ct")
+        val WEBDAV_CERT_SHA256 = stringPreferencesKey("webdav_cert_sha256")
         val AUTO_BACKUP_ENABLED = booleanPreferencesKey("auto_backup_enabled")
         val AUTO_BACKUP_TARGET = stringPreferencesKey("auto_backup_target")
         val AUTO_BACKUP_INTERVAL = intPreferencesKey("auto_backup_interval_days")
@@ -649,7 +650,13 @@ class SettingsRepository(
                 ""
             }
         } else ""
-        WebDavServerConfig(baseUrl = url, username = user, password = password)
+        val certSha256 = prefs[Keys.WEBDAV_CERT_SHA256] ?: ""
+        WebDavServerConfig(
+            baseUrl = url,
+            username = user,
+            password = password,
+            trustedCertSha256 = certSha256
+        )
     }
 
     /** Persist the server config; the password is encrypted with the
@@ -661,6 +668,7 @@ class SettingsRepository(
                 prefs.remove(Keys.WEBDAV_USER)
                 prefs.remove(Keys.WEBDAV_PASS_IV)
                 prefs.remove(Keys.WEBDAV_PASS_CT)
+                prefs.remove(Keys.WEBDAV_CERT_SHA256)
             } else {
                 prefs[Keys.WEBDAV_URL] = config.baseUrl.trim()
                 prefs[Keys.WEBDAV_USER] = config.username
@@ -671,6 +679,13 @@ class SettingsRepository(
                     val field = crypto.encrypt(config.password)
                     prefs[Keys.WEBDAV_PASS_IV] = field.iv
                     prefs[Keys.WEBDAV_PASS_CT] = field.ciphertext
+                }
+                // A certificate pin is public data, not a secret: it stays
+                // readable so the UI can show which certificate is trusted.
+                if (config.trustedCertSha256.isBlank()) {
+                    prefs.remove(Keys.WEBDAV_CERT_SHA256)
+                } else {
+                    prefs[Keys.WEBDAV_CERT_SHA256] = config.trustedCertSha256
                 }
             }
         }
