@@ -1,6 +1,6 @@
 # Osmium / WebDAV Backup Guide
 
-These documents describe WebDAV backup and restore in Osmium v2.5.0. WebDAV backup and LAN quick transfer are separate features: WebDAV connects to a backup server you configure; LAN transfer connects to another device on the same Wi‑Fi.
+These documents describe WebDAV backup and restore in Osmium v2.6.5.3. WebDAV backup and LAN quick transfer are separate features: WebDAV connects to a backup server you configure; LAN transfer connects to another device on the same Wi‑Fi.
 
 ## What the Osmium WebDAV client needs
 
@@ -14,7 +14,7 @@ Osmium uses these WebDAV methods:
 
 The server must support HTTP Basic authentication; anonymous servers are also supported. Backups are encrypted on the device first with PBKDF2 + AES-256-GCM, so the server receives ciphertext only.
 
-For an `http://` address, Osmium asks for explicit confirmation before saving it; HTTPS is still recommended for real deployments. Self-signed certificates not trusted by the device are rejected.
+For an `http://` address, Osmium warns once that the traffic is plaintext; accepting that warning stops the prompt for good. HTTPS with a publicly trusted certificate is still the recommended deployment. A server with a self-signed certificate is supported too: Osmium shows the certificate's SHA-256 fingerprint, you compare it with the server (for example `openssl x509 -noout -fingerprint -sha256 -in server.crt`), and once you confirm it the app accepts only that exact certificate for that address — no CA needs to be installed on the phone. Reset the trust from the same screen when the server's certificate is renewed.
 
 ## NAS
 

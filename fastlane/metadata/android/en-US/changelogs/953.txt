@@ -1,2 +1,3 @@
-New: WebDAV servers with a self-signed certificate can now be used — the app shows the certificate fingerprint on first connection, you compare it with the server, and the app then accepts only that exact certificate. No CA has to be installed and nothing is trusted blindly.
-Also: the WebDAV client's error messages now say what actually failed.
+New: WebDAV servers with a self-signed certificate work — the app shows its SHA-256 fingerprint and, after you confirm, accepts only that exact certificate (no CA installed).
+New: the backup password can be remembered (Keystore-encrypted), so Back up now stops asking; restoring still asks on purpose.
+Fixed: the plaintext http:// warning is asked once, not on every save, and a backup no longer adds a redundant toast.
