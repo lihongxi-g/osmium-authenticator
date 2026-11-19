@@ -1,22 +1,22 @@
 # Osmium v2.6.5.3
 
-**2026-11-19** · versionCode 951–953(951 = armeabi-v7a、952 = arm64-v8a、953 = x86_64) · 正式版,2.6.5.2 及更早的用户两个通道都会收到
+**2026-11-19** · versionCode 951–953(951 = armeabi-v7a、952 = arm64-v8a、953 = x86_64)· 正式版
 
-## 中文
+## 更新内容
 
-- **自签名证书的 WebDAV 服务器能连了。** 连接时应用显示证书的 SHA-256 指纹,你确认后只认这一张,手机里不用装 CA。证书续期后要重新确认。
-- **备份密码可以记住。** 对话框里默认勾选,密码存在本机、由 Keystore 加密,之后点「立即备份」不再问。换密码或清除:WebDAV 备份 → 备份密码。恢复仍然问,因为旧备份可能用的是别的密码。
-- **明文 `http://` 的警告只问一次。** 之前每次备份都弹,因为备份会顺手保存表单,而警告挂在保存上。
-- **备份不再多弹一句「服务器设置已保存」**,只显示上传结果。自己点保存还是会有提示。
-- **隐私政策和用户协议同步更新**(10 种语言),生效日期改为 2026-11-19。
+- 新增:支持使用自签名证书的 WebDAV 服务器。首次连接时显示该证书的 SHA-256 指纹,确认后仅接受此证书;证书更换后需重新确认。
+- 新增:可保存备份密码。密码由 Android Keystore 密钥加密存储于本机,保存后「立即备份」不再询问;可在 WebDAV 备份 → 备份密码 中更改或清除。恢复备份仍需输入密码。
+- 变更:明文 `http://` 地址的提示改为仅在首次保存时显示,确认后不再重复。
+- 修复:执行备份时不再额外提示「服务器设置已保存」。
+- 变更:隐私政策与用户协议同步更新(10 种语言),生效日期为 2026-11-19。
 
-## English
+## Changes
 
-- **WebDAV servers with a self-signed certificate work now.** The app shows the certificate's SHA-256 fingerprint; once you confirm it, only that certificate is accepted for that address, and no CA needs to be installed. Re-confirm after the certificate is renewed.
-- **The backup password can be remembered.** Ticked by default, stored on the device encrypted with the Keystore key, so "Back up now" stops asking. Change or forget it under WebDAV backup → Backup password. Restore still asks — an older file may use a different password.
-- **The plaintext `http://` warning is asked once.** It used to come back on every backup, because a backup saves the form and the warning hung off that save.
-- **A backup no longer adds a redundant "server settings saved" toast** on top of the upload result. Tapping Save yourself still confirms.
-- **Privacy policy and terms updated** in all 10 languages; effective date 2026-11-19.
+- New: WebDAV servers using a self-signed certificate are supported. The certificate's SHA-256 fingerprint is shown on the first connection and only that certificate is accepted afterwards; re-confirmation is required once the certificate is renewed.
+- New: The backup password can be saved. It is stored on the device encrypted with the Android Keystore key, and Back up now stops prompting once it is set. Change or clear it under WebDAV backup → Backup password. Restoring still requires the password.
+- Changed: The plaintext `http://` notice is shown only on the first save and is not repeated after it is accepted.
+- Fixed: A backup no longer shows a redundant "server settings saved" message.
+- Changed: Privacy Policy and Terms of Use updated in all 10 languages; effective date 2026-11-19.
 
 ## APK SHA-256
 
