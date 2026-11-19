@@ -361,7 +361,7 @@
     <string name="webdav_error_url">Saisissez l’adresse du serveur, ex. http://192.168.1.5:5005</string>
     <string name="webdav_warning">N’utilisez que des serveurs de confiance. Le fichier de sauvegarde est chiffré, mais gardez précieusement le mot de passe d’export : quiconque peut atteindre le fichier ET connaît le mot de passe peut le restaurer.</string>
     <string name="manual_webdav_title">Sauvegarde WebDAV</string>
-    <string name="manual_webdav_body">Réglages → Données → Sauvegarde WebDAV envoie le fichier d’export chiffré vers un serveur WebDAV. Saisissez l’adresse, l’utilisateur et le mot de passe.\n\nLa restauration liste les sauvegardes et leur gestion permet de supprimer les anciennes. Le serveur ne reçoit que des données chiffrées ; cette fonction se connecte uniquement à l’adresse configurée.</string>
+    <string name="manual_webdav_body">Réglages → Données → Sauvegarde WebDAV envoie le fichier d’export chiffré vers un serveur WebDAV. Saisissez l’adresse, l’utilisateur et le mot de passe.\n\nLa restauration liste les sauvegardes et leur gestion permet de supprimer les anciennes. Le serveur ne reçoit que des données chiffrées ; cette fonction se connecte uniquement à l’adresse configurée.\n\nCochez Mémoriser ce mot de passe dans la boîte de sauvegarde (ou définissez-le une fois dans Mot de passe de sauvegarde) : les sauvegardes suivantes sont envoyées sans demander. Cette page permet aussi de le remplacer ou de l’oublier.</string>
     <string name="about_terms_title">Conditions d’utilisation</string>
     <string name="about_privacy_title">Politique de confidentialité</string>
     <string name="legal_loading">Chargement…</string>
@@ -376,6 +376,27 @@
     <string name="webdav_delete_confirm_msg">Supprimer %1$s du serveur ? Cette action est irréversible.</string>
     <string name="webdav_deleting">Suppression…</string>
     <string name="webdav_deleted">Sauvegarde supprimée</string>
+
+    <!-- WebDAV backup password: remember once, manage it afterwards -->
+    <string name="webdav_backup_password_remember">Mémoriser ce mot de passe</string>
+    <string name="webdav_backup_password_remember_desc">Les sauvegardes seront envoyées avec ce mot de passe au lieu de le redemander. Gérez-le dans Mot de passe de sauvegarde.</string>
+    <string name="webdav_password_title">Mot de passe de sauvegarde</string>
+    <string name="webdav_password_desc">Les sauvegardes manuelles sont chiffrées avec ce mot de passe avant l’envoi. Mémorisé une fois, Osmium ne le redemande plus ; vous pouvez le remplacer ou l’oublier ici à tout moment.</string>
+    <string name="webdav_password_state_remembered">Mot de passe mémorisé — plus de demande à chaque sauvegarde</string>
+    <string name="webdav_password_state_none">Aucun mot de passe mémorisé — chaque sauvegarde le demande</string>
+    <string name="webdav_password_row_set_desc">Mémorisé. Touchez pour le remplacer.</string>
+    <string name="webdav_password_row_unset_desc">Pas encore mémorisé. Touchez pour le définir une fois.</string>
+    <string name="webdav_password_remembered_short">Mémorisé</string>
+    <string name="webdav_password_unset_short">Non défini</string>
+    <string name="webdav_password_set_title">Définir le mot de passe de sauvegarde</string>
+    <string name="webdav_password_change_title">Remplacer le mot de passe de sauvegarde</string>
+    <string name="webdav_password_set_desc">Ce mot de passe chiffre les sauvegardes envoyées depuis cette page. Conservez-le : il est nécessaire pour restaurer.</string>
+    <string name="webdav_password_saved">Mot de passe de sauvegarde mémorisé</string>
+    <string name="webdav_password_clear">Oublier le mot de passe</string>
+    <string name="webdav_password_clear_confirm_title">Oublier le mot de passe ?</string>
+    <string name="webdav_password_clear_confirm_msg">La prochaine sauvegarde redemandera un mot de passe. Les sauvegardes déjà sur le serveur gardent celui avec lequel elles ont été créées.</string>
+    <string name="webdav_password_cleared">Mot de passe oublié</string>
+    <string name="webdav_password_storage_hint">Stocké uniquement sur cet appareil, chiffré avec la clé Android Keystore. Il n’est jamais envoyé ailleurs, sauf dans le fichier de sauvegarde chiffré.</string>
 
     <string name="auto_backup_title">Sauvegarde automatique</string>
     <string name="auto_backup_desc">Sauvegarde planifiée vers WebDAV ou le stockage local</string>

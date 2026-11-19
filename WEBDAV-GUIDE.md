@@ -110,7 +110,9 @@ Open MiXplorer → menu → Servers → start the WebDAV server, then use the di
 3. Tap **Test connection** and confirm that `PROPFIND` succeeds.
 4. Tap **Save**.
 5. Enter the separate backup password when backing up or restoring; it is not the WebDAV login password.
-6. Manage backups can list and delete old files on the server; confirm the target before deleting.
+6. **Remember this password** is ticked by default in the backup dialog: later taps on **Back up now** encrypt and upload with the remembered password and never ask again (the WebDAV login password still comes from the saved config in step 4).
+7. To replace or forget the remembered password, open the **Backup password** page: set/change it, or forget it — after forgetting, the next backup asks again. The password is stored on this device encrypted with the Android Keystore key.
+8. Manage backups can list and delete old files on the server; confirm the target before deleting.
 
 ## LAN quick transfer is not WebDAV
 

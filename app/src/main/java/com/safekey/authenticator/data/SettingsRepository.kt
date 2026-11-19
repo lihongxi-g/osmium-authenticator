@@ -50,6 +50,12 @@ data class AppSettings(
     val autoBackupHour: Int = 3,
     val autoBackupMinute: Int = 0,
     val autoBackupPasswordSet: Boolean = false,
+    /**
+     * A remembered WebDAV export password exists, so "Back up now" can skip
+     * the password dialog. The password itself is Keystore-encrypted (see
+     * [SettingsRepository.getWebDavBackupPassword]); this is only the flag.
+     */
+    val webDavBackupPasswordSet: Boolean = false,
     val autoBackupKeepCount: Int = 5,
     val autoBackupLastTime: Long = 0L,
     val autoBackupLastError: String = "",
@@ -309,6 +315,9 @@ class SettingsRepository(
         val WEBDAV_PASS_IV = stringPreferencesKey("webdav_pass_iv")
         val WEBDAV_PASS_CT = stringPreferencesKey("webdav_pass_ct")
         val WEBDAV_CERT_SHA256 = stringPreferencesKey("webdav_cert_sha256")
+        /** Export password the user chose to remember for WebDAV backups. */
+        val WEBDAV_BACKUP_PASS_IV = stringPreferencesKey("webdav_backup_pass_iv")
+        val WEBDAV_BACKUP_PASS_CT = stringPreferencesKey("webdav_backup_pass_ct")
         val AUTO_BACKUP_ENABLED = booleanPreferencesKey("auto_backup_enabled")
         val AUTO_BACKUP_TARGET = stringPreferencesKey("auto_backup_target")
         val AUTO_BACKUP_INTERVAL = intPreferencesKey("auto_backup_interval_days")
@@ -368,6 +377,7 @@ class SettingsRepository(
             autoBackupHour = prefs[Keys.AUTO_BACKUP_HOUR] ?: 3,
             autoBackupMinute = prefs[Keys.AUTO_BACKUP_MINUTE] ?: 0,
             autoBackupPasswordSet = prefs[Keys.AUTO_BACKUP_PASS_IV] != null,
+            webDavBackupPasswordSet = prefs[Keys.WEBDAV_BACKUP_PASS_IV] != null,
             autoBackupKeepCount = prefs[Keys.AUTO_BACKUP_KEEP] ?: AppSettings.AUTO_BACKUP_KEEP_DEFAULT,
             autoBackupLastTime = prefs[Keys.AUTO_BACKUP_LAST_TIME] ?: 0L,
             autoBackupLastError = prefs[Keys.AUTO_BACKUP_LAST_ERROR] ?: "",
@@ -692,6 +702,41 @@ class SettingsRepository(
     }
 
     /**
+     * Remember (or, with an empty string, forget) the export password used by
+     * manual WebDAV backups, so "Back up now" does not ask again.
+     *
+     * Encrypted with the Android Keystore key exactly like the server
+     * password: DataStore only ever holds IV + ciphertext. A remembered
+     * password is a convenience, never a security boundary — it protects the
+     * uploaded file, and the device key protects it at rest.
+     */
+    suspend fun setWebDavBackupPassword(password: String) {
+        context.dataStore.edit { prefs ->
+            if (password.isEmpty()) {
+                prefs.remove(Keys.WEBDAV_BACKUP_PASS_IV)
+                prefs.remove(Keys.WEBDAV_BACKUP_PASS_CT)
+            } else {
+                val field = crypto.encrypt(password)
+                prefs[Keys.WEBDAV_BACKUP_PASS_IV] = field.iv
+                prefs[Keys.WEBDAV_BACKUP_PASS_CT] = field.ciphertext
+            }
+        }
+    }
+
+    /** The remembered WebDAV export password, or null when none is stored. */
+    suspend fun getWebDavBackupPassword(): String? {
+        val prefs = context.dataStore.data.first()
+        val iv = prefs[Keys.WEBDAV_BACKUP_PASS_IV] ?: return null
+        val ct = prefs[Keys.WEBDAV_BACKUP_PASS_CT] ?: return null
+        return try {
+            crypto.decrypt(CryptoManager.EncryptedField(iv, ct)).takeIf { it.isNotEmpty() }
+        } catch (e: Exception) {
+            // Corrupt record — fall back to asking, rather than crash.
+            null
+        }
+    }
+
+    /**
      * Developer-mode maintenance: re-encrypt the stored WebDAV / auto-backup
      * passwords with fresh IVs. The DataStore edit is atomic — on failure
      * nothing is written. Returns the number of fields re-encrypted.
@@ -701,6 +746,7 @@ class SettingsRepository(
         context.dataStore.edit { prefs ->
             for ((ivKey, ctKey) in listOf(
                 Keys.WEBDAV_PASS_IV to Keys.WEBDAV_PASS_CT,
+                Keys.WEBDAV_BACKUP_PASS_IV to Keys.WEBDAV_BACKUP_PASS_CT,
                 Keys.AUTO_BACKUP_PASS_IV to Keys.AUTO_BACKUP_PASS_CT
             )) {
                 val iv = prefs[ivKey] ?: continue

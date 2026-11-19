@@ -376,7 +376,7 @@
     <string name="webdav_error_url">請輸入伺服器位址，例如 http://192.168.1.5:5005</string>
     <string name="webdav_warning">只使用你信任的伺服器。備份檔案本身已加密，但請妥善保管匯出密碼——任何能拿到檔案且知道密碼的人都能還原它。</string>
     <string name="manual_webdav_title">WebDAV 備份</string>
-    <string name="manual_webdav_body">設定 → 資料 → WebDAV 備份會將加密匯出檔案上傳到 WebDAV 伺服器。輸入伺服器位址、使用者名稱和密碼。\n\n還原會列出伺服器備份，管理功能可刪除舊備份。伺服器只會收到加密資料；此功能只連線你設定的位址。</string>
+    <string name="manual_webdav_body">設定 → 資料 → WebDAV 備份會將加密匯出檔案上傳到 WebDAV 伺服器。輸入伺服器位址、使用者名稱和密碼。\n\n還原會列出伺服器備份，管理功能可刪除舊備份。伺服器只會收到加密資料；此功能只連線你設定的位址。\n\n勾選備份對話框裡的「記住此密碼」（或在「備份密碼」裡設定一次），之後的備份就會直接上傳、不再詢問；該頁面也能更換或清除已記住的密碼。</string>
     <string name="about_terms_title">使用者條款</string>
     <string name="about_privacy_title">隱私權政策</string>
     <string name="legal_loading">載入中…</string>
@@ -391,6 +391,27 @@
     <string name="webdav_delete_confirm_msg">從伺服器刪除 %1$s？此操作不可撤销。</string>
     <string name="webdav_deleting">刪除中…</string>
     <string name="webdav_deleted">備份已刪除</string>
+
+    <!-- WebDAV backup password: remember once, manage it afterwards -->
+    <string name="webdav_backup_password_remember">記住此密碼</string>
+    <string name="webdav_backup_password_remember_desc">之後的備份將直接用此密碼上傳，不再詢問。可在「備份密碼」中管理。</string>
+    <string name="webdav_password_title">備份密碼</string>
+    <string name="webdav_password_desc">手動備份在上傳前會用此密碼加密。記住一次後 Osmium 就不會再詢問；你隨時可以在這裡更換或清除。</string>
+    <string name="webdav_password_state_remembered">已記住密碼——備份不再詢問</string>
+    <string name="webdav_password_state_none">未記住密碼——每次備份都會詢問</string>
+    <string name="webdav_password_row_set_desc">已記住，點按可更換。</string>
+    <string name="webdav_password_row_unset_desc">尚未記住，點按設定一次即可。</string>
+    <string name="webdav_password_remembered_short">已記住</string>
+    <string name="webdav_password_unset_short">未設定</string>
+    <string name="webdav_password_set_title">設定備份密碼</string>
+    <string name="webdav_password_change_title">更換備份密碼</string>
+    <string name="webdav_password_set_desc">此密碼用於加密從此頁上傳的備份檔案。請妥善保管——還原時需要它。</string>
+    <string name="webdav_password_saved">備份密碼已記住</string>
+    <string name="webdav_password_clear">清除記住的密碼</string>
+    <string name="webdav_password_clear_confirm_title">清除記住的密碼？</string>
+    <string name="webdav_password_clear_confirm_msg">下次備份會重新要求輸入密碼。伺服器上已有的備份仍使用建立時的密碼，不受影響。</string>
+    <string name="webdav_password_cleared">已清除記住的密碼</string>
+    <string name="webdav_password_storage_hint">僅儲存在本機，以 Android Keystore 金鑰加密。除了作為加密備份檔案的一部分，不會傳送到任何地方。</string>
 
     <string name="auto_backup_title">自動備份</string>
     <string name="auto_backup_desc">按計劃自動備份到 WebDAV 伺服器或手机本地儲存</string>

@@ -361,7 +361,7 @@
     <string name="webdav_error_url">सर्वर पता दर्ज करें, जैसे http://192.168.1.5:5005</string>
     <string name="webdav_warning">केवल उन्हीं सर्वर का उपयोग करें जिन पर आप भरोसा करते हैं। बैकअप फ़ाइल स्वयं एन्क्रिप्टेड है, लेकिन एक्सपोर्ट पासवर्ड सुरक्षित रखें — जो फ़ाइल तक पहुंच सके और पासवर्ड जानता हो, वह उसे पुनर्स्थापित कर सकता है।</string>
     <string name="manual_webdav_title">WebDAV बैकअप</string>
-    <string name="manual_webdav_body">सेटिंग → डेटा → WebDAV बैकअप एन्क्रिप्टेड फ़ाइल को आपके WebDAV सर्वर पर अपलोड करता है। सर्वर पता, उपयोगकर्ता नाम और पासवर्ड भरें।\n\nपुनर्स्थापना सर्वर की प्रतियाँ दिखाती है और प्रबंधन से पुरानी प्रतियाँ हटाई जा सकती हैं। सर्वर को केवल एन्क्रिप्टेड डेटा मिलता है; यह सुविधा केवल आपके सेट किए पते से जुड़ती है।</string>
+    <string name="manual_webdav_body">सेटिंग → डेटा → WebDAV बैकअप एन्क्रिप्टेड फ़ाइल को आपके WebDAV सर्वर पर अपलोड करता है। सर्वर पता, उपयोगकर्ता नाम और पासवर्ड भरें।\n\nपुनर्स्थापना सर्वर की प्रतियाँ दिखाती है और प्रबंधन से पुरानी प्रतियाँ हटाई जा सकती हैं। सर्वर को केवल एन्क्रिप्टेड डेटा मिलता है; यह सुविधा केवल आपके सेट किए पते से जुड़ती है।\n\nबैकअप डायलॉग में यह पासवर्ड याद रखें चुनें (या बैकअप पासवर्ड में एक बार सेट करें) — इसके बाद बैकअप बिना पूछे सीधे अपलोड होंगे। उसी पेज से याद रखा पासवर्ड बदला या हटाया जा सकता है।</string>
     <string name="about_terms_title">उपयोग की शर्तें</string>
     <string name="about_privacy_title">गोपनीयता नीति</string>
     <string name="legal_loading">लोड हो रहा है…</string>
@@ -376,6 +376,27 @@
     <string name="webdav_delete_confirm_msg">सर्वर से %1$s हटाएँ? इसे पूर्ववत नहीं किया जा सकता।</string>
     <string name="webdav_deleting">हटाया जा रहा है…</string>
     <string name="webdav_deleted">बैकअप हटा दिया गया</string>
+
+    <!-- WebDAV backup password: remember once, manage it afterwards -->
+    <string name="webdav_backup_password_remember">यह पासवर्ड याद रखें</string>
+    <string name="webdav_backup_password_remember_desc">अब से बैकअप इसी पासवर्ड से अपलोड होंगे, दोबारा नहीं पूछा जाएगा। इसे बैकअप पासवर्ड में प्रबंधित करें।</string>
+    <string name="webdav_password_title">बैकअप पासवर्ड</string>
+    <string name="webdav_password_desc">मैन्युअल बैकअप अपलोड से पहले इस पासवर्ड से एन्क्रिप्ट होते हैं। एक बार याद रखने पर Osmium दोबारा नहीं पूछेगा; आप इसे यहाँ कभी भी बदल या हटा सकते हैं।</string>
+    <string name="webdav_password_state_remembered">पासवर्ड याद है — बैकअप में अब नहीं पूछा जाएगा</string>
+    <string name="webdav_password_state_none">कोई पासवर्ड याद नहीं — हर बैकअप में पूछा जाएगा</string>
+    <string name="webdav_password_row_set_desc">याद है। बदलने के लिए टैप करें।</string>
+    <string name="webdav_password_row_unset_desc">अभी याद नहीं है। एक बार सेट करने के लिए टैप करें।</string>
+    <string name="webdav_password_remembered_short">याद है</string>
+    <string name="webdav_password_unset_short">सेट नहीं</string>
+    <string name="webdav_password_set_title">बैकअप पासवर्ड सेट करें</string>
+    <string name="webdav_password_change_title">बैकअप पासवर्ड बदलें</string>
+    <string name="webdav_password_set_desc">यह पासवर्ड इस पेज से अपलोड होने वाले बैकअप को एन्क्रिप्ट करता है। इसे सँभालकर रखें — रिस्टोर के लिए इसकी ज़रूरत होती है।</string>
+    <string name="webdav_password_saved">बैकअप पासवर्ड याद रखा गया</string>
+    <string name="webdav_password_clear">याद रखा पासवर्ड हटाएँ</string>
+    <string name="webdav_password_clear_confirm_title">पासवर्ड हटाएँ?</string>
+    <string name="webdav_password_clear_confirm_msg">अगले बैकअप में फिर पासवर्ड पूछा जाएगा। सर्वर पर मौजूद बैकअप अपने बनाए जाने वाले पासवर्ड के साथ ही रहेंगे।</string>
+    <string name="webdav_password_cleared">याद रखा पासवर्ड हटा दिया गया</string>
+    <string name="webdav_password_storage_hint">केवल इस डिवाइस पर संग्रहित, Android Keystore कुंजी से एन्क्रिप्टेड। एन्क्रिप्टेड बैकअप फ़ाइल के भाग के अलावा कहीं नहीं भेजा जाता।</string>
 
     <string name="auto_backup_title">स्वचालित बैकअप</string>
     <string name="auto_backup_desc">शेड्यूल अनुसार WebDAV या स्थानीय स्टोरेज पर बैकअप</string>

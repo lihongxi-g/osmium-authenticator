@@ -123,6 +123,7 @@ import com.safekey.authenticator.ui.screens.TagsScreen
 import com.safekey.authenticator.ui.screens.ShareQrScreen
 import com.safekey.authenticator.ui.screens.SortOrderScreen
 import com.safekey.authenticator.ui.screens.ManualScreen
+import com.safekey.authenticator.ui.screens.WebDavPasswordScreen
 import com.safekey.authenticator.ui.screens.WebDavScreen
 import com.safekey.authenticator.ui.theme.SafeKeyTheme
 import com.safekey.authenticator.update.UpdateChecker
@@ -1466,6 +1467,12 @@ private fun IntegrityNoticeDialog(
                     )
 
                     is Screen.WebDav -> WebDavScreen(
+                        vm = vm,
+                        onBack = { vm.nav.pop() },
+                        onManagePassword = { vm.nav.push(Screen.WebDavPassword) }
+                    )
+
+                    is Screen.WebDavPassword -> WebDavPasswordScreen(
                         vm = vm,
                         onBack = { vm.nav.pop() }
                     )

@@ -12,6 +12,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -70,11 +71,13 @@ import java.util.Locale
 @Composable
 fun WebDavScreen(
     vm: MainViewModel,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onManagePassword: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val savedConfig by vm.webDavConfig.collectAsState()
+    val settings by vm.settings.collectAsState()
 
     // The form fields use rememberSaveable, not remember: with "verify on
     // open" enabled (the default) going to the background locks the app, and
@@ -196,6 +199,44 @@ fun WebDavScreen(
         runBusy(context.getString(R.string.webdav_cert_fetching)) {
             val sha256 = WebDavClient.serverCertificateSha256(currentConfig())
             withContext(Dispatchers.Main) { certPrompt = sha256 }
+        }
+    }
+
+    /**
+     * Uploads one backup encrypted with [exportPassword].
+     *
+     * Shared by both entry points: the password the user just typed (and maybe
+     * asked us to remember), and the remembered one that lets "Back up now"
+     * skip the dialog entirely.
+     */
+    fun startBackup(exportPassword: String) {
+        if (!validateUrl()) return
+        saveConfig()
+        val fileName = "osmium-backup-${
+            SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US).format(Date())
+        }.json"
+        runBusy(context.getString(R.string.webdav_uploading)) {
+            val repo = (context.applicationContext as com.safekey.authenticator.SafeKeyApp).accountRepository
+            val pinHash = vm.pinManager.getPinHashForExport()
+            val export = repo.exportVault(
+                pinSalt = pinHash?.first ?: "",
+                pinHash = pinHash?.second ?: ""
+            )
+            if (export.dropped > 0) {
+                throw WebDavException(
+                    "${export.dropped} accounts could not be decrypted — upload aborted"
+                )
+            }
+            val payload = VaultIO.encrypt(export.vault, exportPassword.toCharArray())
+            try {
+                WebDavClient.upload(currentConfig(), fileName, payload.toByteArray(Charsets.UTF_8))
+            } catch (e: WebDavException) {
+                throw WebDavException(
+                    context.getString(R.string.webdav_backup_failed, e.message ?: ""), e)
+            }
+            withContext(Dispatchers.Main) {
+                vm.showToast(context.getString(R.string.webdav_backup_done))
+            }
         }
     }
 
@@ -333,7 +374,24 @@ fun WebDavScreen(
                 }
                 Spacer(Modifier.height(4.dp))
                 Button(
-                    onClick = { if (validateUrl()) showBackupDialog = true },
+                    onClick = {
+                        if (!validateUrl()) return@Button
+                        // A remembered password means no dialog at all — that is
+                        // the point of remembering it. Read it off the main
+                        // thread (DataStore + Keystore decryption).
+                        scope.launch {
+                            val remembered = try {
+                                withContext(Dispatchers.IO) { vm.webDavBackupPassword() }
+                            } catch (e: Exception) {
+                                null
+                            }
+                            if (remembered != null) {
+                                startBackup(remembered)
+                            } else {
+                                showBackupDialog = true
+                            }
+                        }
+                    },
                     enabled = busyLabel == null,
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -360,6 +418,21 @@ fun WebDavScreen(
                 ) {
                     Text(stringResource(R.string.webdav_manage))
                 }
+                OutlinedButton(
+                    onClick = { onManagePassword() },
+                    enabled = busyLabel == null,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(stringResource(R.string.webdav_password_title))
+                }
+                Text(
+                    text = stringResource(
+                        if (settings.webDavBackupPasswordSet) R.string.webdav_password_state_remembered
+                        else R.string.webdav_password_state_none
+                    ),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
                 busyLabel?.let { label ->
                     Text(
                         text = label,
@@ -438,36 +511,12 @@ fun WebDavScreen(
     if (showBackupDialog) {
         BackupPasswordDialog(
             onDismiss = { showBackupDialog = false },
-            onConfirm = { exportPassword ->
+            onConfirm = { exportPassword, remember ->
                 showBackupDialog = false
-                if (!validateUrl()) return@BackupPasswordDialog
-                saveConfig()
-                val fileName = "osmium-backup-${
-                    SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US).format(Date())
-                }.json"
-                runBusy(context.getString(R.string.webdav_uploading)) {
-                    val repo = (context.applicationContext as com.safekey.authenticator.SafeKeyApp).accountRepository
-                    val pinHash = vm.pinManager.getPinHashForExport()
-                    val export = repo.exportVault(
-                        pinSalt = pinHash?.first ?: "",
-                        pinHash = pinHash?.second ?: ""
-                    )
-                    if (export.dropped > 0) {
-                        throw WebDavException(
-                            "${export.dropped} accounts could not be decrypted — upload aborted"
-                        )
-                    }
-                    val payload = VaultIO.encrypt(export.vault, exportPassword.toCharArray())
-                    try {
-                        WebDavClient.upload(currentConfig(), fileName, payload.toByteArray(Charsets.UTF_8))
-                    } catch (e: WebDavException) {
-                        throw WebDavException(
-                            context.getString(R.string.webdav_backup_failed, e.message ?: ""), e)
-                    }
-                    withContext(Dispatchers.Main) {
-                        vm.showToast(context.getString(R.string.webdav_backup_done))
-                    }
-                }
+                // Store first: the upload below can fail on the network, but the
+                // user's "remember this" choice is about the password, not the run.
+                if (remember) vm.setWebDavBackupPassword(exportPassword)
+                startBackup(exportPassword)
             }
         )
     }
@@ -611,25 +660,38 @@ fun WebDavScreen(
 // ------------------------------------------------------------------ dialogs
 
 @Composable
-private fun BackupPasswordDialog(
+internal fun BackupPasswordDialog(
     onDismiss: () -> Unit,
-    onConfirm: (String) -> Unit
+    onConfirm: (password: String, remember: Boolean) -> Unit,
+    titleRes: Int = R.string.webdav_backup_password_title,
+    descriptionRes: Int = R.string.webdav_backup_password_desc,
+    /**
+     * Offer "remember this password". The same dialog also serves the password
+     * management page, where the password is stored unconditionally and a
+     * checkbox would be noise.
+     */
+    showRemember: Boolean = true
 ) {
     val context = LocalContext.current
-    var password by remember { mutableStateOf("") }
-    var confirm by remember { mutableStateOf("") }
+    var password by rememberSaveable { mutableStateOf("") }
+    var confirm by rememberSaveable { mutableStateOf("") }
+    // Remembering is the default: the dialog exists on every backup only
+    // because nothing was remembered yet, and the user can still untick it.
+    // (Named rememberPassword, not remember: a local val named `remember`
+    // would shadow the Compose function and break the line below.)
+    var rememberPassword by rememberSaveable { mutableStateOf(true) }
     var error by remember { mutableStateOf<String?>(null) }
 
     AlertDialog(
         onDismissRequest = {},
-        title = { Text(stringResource(R.string.webdav_backup_password_title)) },
+        title = { Text(stringResource(titleRes)) },
         text = {
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    text = stringResource(R.string.webdav_backup_password_desc),
+                    text = stringResource(descriptionRes),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -650,6 +712,25 @@ private fun BackupPasswordDialog(
                     isError = error != null,
                     modifier = Modifier.fillMaxWidth()
                 )
+                if (showRemember) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(
+                            checked = rememberPassword,
+                            onCheckedChange = { rememberPassword = it }
+                        )
+                        Column(modifier = Modifier.padding(start = 8.dp)) {
+                            Text(
+                                text = stringResource(R.string.webdav_backup_password_remember),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                            Text(
+                                text = stringResource(R.string.webdav_backup_password_remember_desc),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
                 error?.let {
                     Text(
                         text = it,
@@ -668,7 +749,7 @@ private fun BackupPasswordDialog(
                         password != confirm -> context.getString(R.string.error_password_mismatch)
                         else -> null
                     }
-                    if (error == null) onConfirm(password)
+                    if (error == null) onConfirm(password, showRemember && rememberPassword)
                 }
             ) { Text(stringResource(R.string.confirm)) }
         },

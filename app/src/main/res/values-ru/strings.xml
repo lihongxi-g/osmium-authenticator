@@ -361,7 +361,7 @@
     <string name="webdav_error_url">Введите адрес сервера, например http://192.168.1.5:5005</string>
     <string name="webdav_warning">Используйте только серверы, которым доверяете. Сам файл копии зашифрован, но храните пароль экспорта надёжно — любой, кто получит доступ к файлу И знает пароль, сможет его восстановить.</string>
     <string name="manual_webdav_title">Резервное копирование WebDAV</string>
-    <string name="manual_webdav_body">Настройки → Данные → WebDAV загружает зашифрованный файл экспорта на WebDAV-сервер. Введите адрес, имя пользователя и пароль.\n\nВосстановление показывает копии на сервере, а управление позволяет удалить старые. Сервер получает только шифротекст; эта функция подключается только к настроенному адресу.</string>
+    <string name="manual_webdav_body">Настройки → Данные → WebDAV загружает зашифрованный файл экспорта на WebDAV-сервер. Введите адрес, имя пользователя и пароль.\n\nВосстановление показывает копии на сервере, а управление позволяет удалить старые. Сервер получает только шифротекст; эта функция подключается только к настроенному адресу.\n\nОтметьте Запомнить этот пароль в окне резервного копирования (или задайте его один раз в разделе Пароль резервной копии) — дальнейшие копии загружаются без запроса. Там же пароль можно заменить или удалить.</string>
     <string name="about_terms_title">Условия использования</string>
     <string name="about_privacy_title">Политика конфиденциальности</string>
     <string name="legal_loading">Загрузка…</string>
@@ -376,6 +376,27 @@
     <string name="webdav_delete_confirm_msg">Удалить %1$s с сервера? Это действие необратимо.</string>
     <string name="webdav_deleting">Удаление…</string>
     <string name="webdav_deleted">Копия удалена</string>
+
+    <!-- WebDAV backup password: remember once, manage it afterwards -->
+    <string name="webdav_backup_password_remember">Запомнить этот пароль</string>
+    <string name="webdav_backup_password_remember_desc">Дальше резервные копии будут загружаться с этим паролем, без повторного запроса. Управление — в разделе «Пароль резервной копии».</string>
+    <string name="webdav_password_title">Пароль резервной копии</string>
+    <string name="webdav_password_desc">Ручные резервные копии шифруются этим паролем перед загрузкой. Запомните его один раз — Osmium больше не будет спрашивать; здесь можно заменить или удалить его в любой момент.</string>
+    <string name="webdav_password_state_remembered">Пароль запомнен — при создании копии запросов нет</string>
+    <string name="webdav_password_state_none">Пароль не запомнен — каждый раз запрашивается</string>
+    <string name="webdav_password_row_set_desc">Запомнен. Нажмите, чтобы заменить.</string>
+    <string name="webdav_password_row_unset_desc">Ещё не запомнен. Нажмите, чтобы задать один раз.</string>
+    <string name="webdav_password_remembered_short">Запомнен</string>
+    <string name="webdav_password_unset_short">Не задан</string>
+    <string name="webdav_password_set_title">Задать пароль резервной копии</string>
+    <string name="webdav_password_change_title">Заменить пароль резервной копии</string>
+    <string name="webdav_password_set_desc">Этот пароль шифрует копии, загружаемые с этой страницы. Сохраните его — он нужен для восстановления.</string>
+    <string name="webdav_password_saved">Пароль резервной копии запомнен</string>
+    <string name="webdav_password_clear">Удалить запомненный пароль</string>
+    <string name="webdav_password_clear_confirm_title">Удалить пароль?</string>
+    <string name="webdav_password_clear_confirm_msg">При следующей копии пароль снова запросят. Копии на сервере сохраняют пароль, с которым были созданы.</string>
+    <string name="webdav_password_cleared">Запомненный пароль удалён</string>
+    <string name="webdav_password_storage_hint">Хранится только на этом устройстве, зашифрован ключом Android Keystore. Никуда не отправляется, кроме как в составе зашифрованного файла копии.</string>
 
     <string name="auto_backup_title">Автобэкап</string>
     <string name="auto_backup_desc">Резервное копирование по расписанию на WebDAV или локально</string>

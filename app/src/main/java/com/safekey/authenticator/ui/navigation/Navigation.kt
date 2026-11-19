@@ -41,6 +41,8 @@ sealed class Screen {
     object Import : Screen()
     /** WebDAV backup to a user-configured server on the local network. */
     object WebDav : Screen()
+    /** Third-level page under WebDAV: the remembered backup (export) password. */
+    object WebDavPassword : Screen()
     /** Scheduled automatic backup (WebDAV server or local storage). */
     object AutoBackup : Screen()
     /** Quick LAN transfer between nearby devices over Wi-Fi. */
@@ -110,7 +112,7 @@ class NavigationState(initial: Screen = Screen.Accounts) {
 
 /** Screens that are unavailable while the root security restriction is active. */
 fun Screen.isRootBlocked(): Boolean = when (this) {
-    is Screen.WebDav, is Screen.AutoBackup, is Screen.LanTransfer,
+    is Screen.WebDav, is Screen.WebDavPassword, is Screen.AutoBackup, is Screen.LanTransfer,
     is Screen.ThirdPartyImport, is Screen.GoogleImport, is Screen.FileImport -> true
     else -> false
 }

@@ -361,7 +361,7 @@
     <string name="webdav_error_url">Introduce la dirección del servidor, p. ej. http://192.168.1.5:5005</string>
     <string name="webdav_warning">Usa solo servidores de confianza. El archivo de copia va cifrado, pero guarda bien la contraseña de exportación: quien pueda acceder al archivo y conozca la contraseña podrá restaurarlo.</string>
     <string name="manual_webdav_title">Copia de seguridad WebDAV</string>
-    <string name="manual_webdav_body">Ajustes → Datos → Copia WebDAV sube el archivo cifrado a un servidor WebDAV. Introduce su dirección, usuario y contraseña.\n\nRestaurar lista las copias del servidor y Gestionar copias permite borrar las antiguas. El servidor solo recibe datos cifrados; esta función se conecta únicamente a la dirección configurada.</string>
+    <string name="manual_webdav_body">Ajustes → Datos → Copia WebDAV sube el archivo cifrado a un servidor WebDAV. Introduce su dirección, usuario y contraseña.\n\nRestaurar lista las copias del servidor y Gestionar copias permite borrar las antiguas. El servidor solo recibe datos cifrados; esta función se conecta únicamente a la dirección configurada.\n\nMarca Recordar esta contraseña en el diálogo de copia (o defínela una vez en Contraseña de copia): las copias posteriores se suben sin preguntar. En esa página también puedes cambiarla u olvidarla.</string>
     <string name="about_terms_title">Términos de uso</string>
     <string name="about_privacy_title">Política de privacidad</string>
     <string name="legal_loading">Cargando…</string>
@@ -376,6 +376,27 @@
     <string name="webdav_delete_confirm_msg">¿Eliminar %1$s del servidor? Esta acción no se puede deshacer.</string>
     <string name="webdav_deleting">Eliminando…</string>
     <string name="webdav_deleted">Copia eliminada</string>
+
+    <!-- WebDAV backup password: remember once, manage it afterwards -->
+    <string name="webdav_backup_password_remember">Recordar esta contraseña</string>
+    <string name="webdav_backup_password_remember_desc">Las copias se subirán con esta contraseña en lugar de volver a pedirla. Gestiónala en Contraseña de copia.</string>
+    <string name="webdav_password_title">Contraseña de copia</string>
+    <string name="webdav_password_desc">Las copias manuales se cifran con esta contraseña antes de subirse. Si la recuerdas una vez, Osmium deja de preguntar; puedes cambiarla u olvidarla aquí cuando quieras.</string>
+    <string name="webdav_password_state_remembered">Contraseña recordada: las copias ya no preguntan</string>
+    <string name="webdav_password_state_none">Sin contraseña recordada: cada copia la pide</string>
+    <string name="webdav_password_row_set_desc">Recordada. Toca para cambiarla.</string>
+    <string name="webdav_password_row_unset_desc">Aún no recordada. Toca para definirla una vez.</string>
+    <string name="webdav_password_remembered_short">Recordada</string>
+    <string name="webdav_password_unset_short">Sin definir</string>
+    <string name="webdav_password_set_title">Definir contraseña de copia</string>
+    <string name="webdav_password_change_title">Cambiar contraseña de copia</string>
+    <string name="webdav_password_set_desc">Esta contraseña cifra las copias que se suben desde esta página. Guárdala bien: se necesita para restaurar.</string>
+    <string name="webdav_password_saved">Contraseña de copia recordada</string>
+    <string name="webdav_password_clear">Olvidar contraseña</string>
+    <string name="webdav_password_clear_confirm_title">¿Olvidar la contraseña?</string>
+    <string name="webdav_password_clear_confirm_msg">La próxima copia volverá a pedir una contraseña. Las copias que ya están en el servidor conservan la contraseña con la que se crearon.</string>
+    <string name="webdav_password_cleared">Contraseña olvidada</string>
+    <string name="webdav_password_storage_hint">Se guarda solo en este dispositivo, cifrada con la clave del Android Keystore. Nunca se envía a ningún sitio, salvo dentro del archivo de copia cifrado.</string>
 
     <string name="auto_backup_title">Copia de seguridad automática</string>
     <string name="auto_backup_desc">Copia programada a WebDAV o almacenamiento local</string>

@@ -361,7 +361,7 @@
     <string name="webdav_error_url">서버 주소를 입력하세요 (예: http://192.168.1.5:5005)</string>
     <string name="webdav_warning">신뢰하는 서버만 사용하세요. 백업 파일 자체는 암호화되어 있지만, 내보내기 비밀번호는 안전하게 보관하세요. 파일에 접근할 수 있고 비밀번호를 아는 사람이라면 누구든 복원할 수 있습니다.</string>
     <string name="manual_webdav_title">WebDAV 백업</string>
-    <string name="manual_webdav_body">설정 → 데이터 → WebDAV 백업은 암호화된 내보내기 파일을 WebDAV 서버에 업로드합니다. 서버 주소, 사용자 이름과 비밀번호를 입력하세요.\n\n복원은 서버 백업을 보여주고 관리에서 오래된 백업을 삭제할 수 있습니다. 서버에는 암호화 데이터만 전달되며 이 기능은 설정한 주소에만 연결합니다.</string>
+    <string name="manual_webdav_body">설정 → 데이터 → WebDAV 백업은 암호화된 내보내기 파일을 WebDAV 서버에 업로드합니다. 서버 주소, 사용자 이름과 비밀번호를 입력하세요.\n\n복원은 서버 백업을 보여주고 관리에서 오래된 백업을 삭제할 수 있습니다. 서버에는 암호화 데이터만 전달되며 이 기능은 설정한 주소에만 연결합니다.\n\n백업 대화상자에서 이 비밀번호 기억하기를 선택하거나 백업 비밀번호에서 한 번 설정하면 이후 백업은 묻지 않고 바로 업로드됩니다. 같은 페이지에서 기억된 비밀번호를 변경하거나 삭제할 수 있습니다.</string>
     <string name="about_terms_title">이용 약관</string>
     <string name="about_privacy_title">개인정보 처리방침</string>
     <string name="legal_loading">로딩 중…</string>
@@ -376,6 +376,27 @@
     <string name="webdav_delete_confirm_msg">서버에서 %1$s을(를) 삭제할까요? 이 작업은 되돌릴 수 없습니다.</string>
     <string name="webdav_deleting">삭제 중…</string>
     <string name="webdav_deleted">백업이 삭제되었습니다</string>
+
+    <!-- WebDAV backup password: remember once, manage it afterwards -->
+    <string name="webdav_backup_password_remember">이 비밀번호 기억하기</string>
+    <string name="webdav_backup_password_remember_desc">이제부터 이 비밀번호로 백업을 업로드하며 다시 묻지 않습니다. 백업 비밀번호에서 관리할 수 있습니다.</string>
+    <string name="webdav_password_title">백업 비밀번호</string>
+    <string name="webdav_password_desc">수동 백업은 업로드 전에 이 비밀번호로 암호화됩니다. 한 번 기억하면 Osmium이 다시 묻지 않으며, 여기에서 언제든 변경하거나 삭제할 수 있습니다.</string>
+    <string name="webdav_password_state_remembered">비밀번호 기억됨 — 백업 시 묻지 않음</string>
+    <string name="webdav_password_state_none">기억된 비밀번호 없음 — 백업할 때마다 물어봄</string>
+    <string name="webdav_password_row_set_desc">기억됨. 눌러서 변경하세요.</string>
+    <string name="webdav_password_row_unset_desc">아직 기억되지 않음. 눌러서 한 번 설정하세요.</string>
+    <string name="webdav_password_remembered_short">기억됨</string>
+    <string name="webdav_password_unset_short">설정 안 됨</string>
+    <string name="webdav_password_set_title">백업 비밀번호 설정</string>
+    <string name="webdav_password_change_title">백업 비밀번호 변경</string>
+    <string name="webdav_password_set_desc">이 비밀번호는 이 페이지에서 업로드하는 백업을 암호화합니다. 복원에 필요하니 잘 보관하세요.</string>
+    <string name="webdav_password_saved">백업 비밀번호를 기억했습니다</string>
+    <string name="webdav_password_clear">기억된 비밀번호 삭제</string>
+    <string name="webdav_password_clear_confirm_title">기억된 비밀번호를 삭제할까요?</string>
+    <string name="webdav_password_clear_confirm_msg">다음 백업에서 다시 비밀번호를 묻습니다. 서버에 이미 있는 백업은 생성 당시의 비밀번호를 그대로 사용합니다.</string>
+    <string name="webdav_password_cleared">기억된 비밀번호를 삭제했습니다</string>
+    <string name="webdav_password_storage_hint">이 기기에만 저장되며 Android Keystore 키로 암호화됩니다. 암호화된 백업 파일의 일부로만 전송됩니다.</string>
 
     <string name="auto_backup_title">자동 백업</string>
     <string name="auto_backup_desc">일정에 따라 WebDAV 또는 로컬 저장소에 백업</string>

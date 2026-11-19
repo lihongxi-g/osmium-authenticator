@@ -361,7 +361,7 @@
     <string name="webdav_error_url">Gib die Serveradresse ein, z. B. http://192.168.1.5:5005</string>
     <string name="webdav_warning">Verwende nur Server, denen du vertraust. Die Backup-Datei selbst ist verschlüsselt, aber bewahre das Export-Passwort sicher auf – wer die Datei erreichen UND das Passwort kennt, kann sie wiederherstellen.</string>
     <string name="manual_webdav_title">WebDAV-Backup</string>
-    <string name="manual_webdav_body">Einstellungen → Daten → WebDAV-Backup lädt die verschlüsselte Exportdatei auf einen WebDAV-Server. Gib Serveradresse, Benutzername und Passwort ein.\n\nWiederherstellen listet die Backups des Servers; alte Backups können dort gelöscht werden. Der Server erhält nur passwortverschlüsselte Daten; diese Funktion verbindet sich nur mit der konfigurierten Adresse.</string>
+    <string name="manual_webdav_body">Einstellungen → Daten → WebDAV-Backup lädt die verschlüsselte Exportdatei auf einen WebDAV-Server. Gib Serveradresse, Benutzername und Passwort ein.\n\nWiederherstellen listet die Backups des Servers; alte Backups können dort gelöscht werden. Der Server erhält nur passwortverschlüsselte Daten; diese Funktion verbindet sich nur mit der konfigurierten Adresse.\n\nAktiviere im Backup-Dialog Dieses Passwort merken (oder lege es einmal unter Backup-Passwort fest) – spätere Backups laden dann ohne Nachfrage hoch. Dort lässt sich das gemerkte Passwort auch ändern oder löschen.</string>
     <string name="about_terms_title">Nutzungsbedingungen</string>
     <string name="about_privacy_title">Datenschutzerklärung</string>
     <string name="legal_loading">Wird geladen…</string>
@@ -376,6 +376,27 @@
     <string name="webdav_delete_confirm_msg">%1$s vom Server löschen? Das kann nicht rückgängig gemacht werden.</string>
     <string name="webdav_deleting">Lösche…</string>
     <string name="webdav_deleted">Backup gelöscht</string>
+
+    <!-- WebDAV backup password: remember once, manage it afterwards -->
+    <string name="webdav_backup_password_remember">Dieses Passwort merken</string>
+    <string name="webdav_backup_password_remember_desc">Backups werden ab jetzt mit diesem Passwort hochgeladen, statt erneut zu fragen. Verwalten unter Backup-Passwort.</string>
+    <string name="webdav_password_title">Backup-Passwort</string>
+    <string name="webdav_password_desc">Manuelle Backups werden vor dem Hochladen mit diesem Passwort verschlüsselt. Einmal gemerkt fragt Osmium nicht mehr – hier kannst du es jederzeit ändern oder löschen.</string>
+    <string name="webdav_password_state_remembered">Passwort gemerkt – Backups fragen nicht mehr</string>
+    <string name="webdav_password_state_none">Kein Passwort gemerkt – jedes Backup fragt danach</string>
+    <string name="webdav_password_row_set_desc">Gemerkt. Tippen zum Ändern.</string>
+    <string name="webdav_password_row_unset_desc">Noch nicht gemerkt. Tippen, um es einmalig zu setzen.</string>
+    <string name="webdav_password_remembered_short">Gemerkt</string>
+    <string name="webdav_password_unset_short">Nicht gesetzt</string>
+    <string name="webdav_password_set_title">Backup-Passwort festlegen</string>
+    <string name="webdav_password_change_title">Backup-Passwort ändern</string>
+    <string name="webdav_password_set_desc">Dieses Passwort verschlüsselt die von dieser Seite hochgeladenen Backups. Gut aufbewahren – zum Wiederherstellen wird es benötigt.</string>
+    <string name="webdav_password_saved">Backup-Passwort gemerkt</string>
+    <string name="webdav_password_clear">Passwort vergessen</string>
+    <string name="webdav_password_clear_confirm_title">Passwort vergessen?</string>
+    <string name="webdav_password_clear_confirm_msg">Das nächste Backup fragt wieder nach einem Passwort. Backups, die schon auf dem Server liegen, behalten das Passwort, mit dem sie erstellt wurden.</string>
+    <string name="webdav_password_cleared">Passwort vergessen</string>
+    <string name="webdav_password_storage_hint">Nur auf diesem Gerät gespeichert, verschlüsselt mit dem Android-Keystore-Schlüssel. Es wird nirgendwohin gesendet, außer als Teil der verschlüsselten Backup-Datei.</string>
 
     <string name="auto_backup_title">Automatisches Backup</string>
     <string name="auto_backup_desc">Automatische Sicherung auf WebDAV oder lokalen Speicher</string>

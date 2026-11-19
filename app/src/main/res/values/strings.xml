@@ -216,7 +216,7 @@
     <string name="manual_backup_title">Backup &amp; restore</string>
     <string name="manual_backup_body">Settings → Data → Export creates an encrypted backup (password + app PIN). Keep the password safe — without it the backup cannot be restored. Google Authenticator migration is read-only import.</string>
     <string name="manual_webdav_title">WebDAV backup</string>
-    <string name="manual_webdav_body">Settings → Data → WebDAV backup uploads the same encrypted export file to a WebDAV server. Fill in the server address (hostname or LAN IP), username and password.\n\nRestore lists the backups stored on the server and lets you pick one to restore. Manage backups can delete old backups from that server. The server receives password-encrypted data only; this feature connects only to the address you configure.\n\nIf the address changes often, give the NAS a fixed IP or use its hostname.</string>
+    <string name="manual_webdav_body">Settings → Data → WebDAV backup uploads the same encrypted export file to a WebDAV server. Fill in the server address (hostname or LAN IP), username and password.\n\nRestore lists the backups stored on the server and lets you pick one to restore. Manage backups can delete old backups from that server. The server receives password-encrypted data only; this feature connects only to the address you configure.\n\nIf the address changes often, give the NAS a fixed IP or use its hostname.\n\nTick “Remember this password” in the backup dialog (or set it once under Backup password) and later backups upload straight away without asking. That page can also replace or forget the stored password.</string>
     <string name="manual_tester_title">Test your authenticator</string>
     <string name="manual_tester_body">Open https://otp.osmium.im to verify that Osmium (or any authenticator) generates correct codes: the site issues a test secret, you add it to your app and enter the code back. It supports TOTP, HOTP and Steam Guard with multiple algorithms, digit counts and periods — fully in-browser, nothing is uploaded.</string>
     <string name="manual_naming_title">Account names &amp; issuers</string>
@@ -385,6 +385,27 @@
     <string name="webdav_delete_confirm_msg">Delete %1$s from the server? This cannot be undone.</string>
     <string name="webdav_deleting">Deleting…</string>
     <string name="webdav_deleted">Backup deleted</string>
+
+    <!-- WebDAV backup password: remember once, manage it afterwards -->
+    <string name="webdav_backup_password_remember">Remember this password</string>
+    <string name="webdav_backup_password_remember_desc">Backups upload with this password from now on instead of asking again. Manage it under Backup password.</string>
+    <string name="webdav_password_title">Backup password</string>
+    <string name="webdav_password_desc">Manual backups are encrypted with this password before they are uploaded. Remember it once and Osmium stops asking; you can replace or forget it here at any time.</string>
+    <string name="webdav_password_state_remembered">Password remembered — backups no longer ask</string>
+    <string name="webdav_password_state_none">No password remembered — every backup asks for one</string>
+    <string name="webdav_password_row_set_desc">Remembered. Tap to change.</string>
+    <string name="webdav_password_row_unset_desc">Not remembered yet. Tap to set it once.</string>
+    <string name="webdav_password_remembered_short">Remembered</string>
+    <string name="webdav_password_unset_short">Not set</string>
+    <string name="webdav_password_set_title">Set backup password</string>
+    <string name="webdav_password_change_title">Change backup password</string>
+    <string name="webdav_password_set_desc">This password encrypts the backups uploaded from this page. Keep it safe — restoring needs it.</string>
+    <string name="webdav_password_saved">Backup password remembered</string>
+    <string name="webdav_password_clear">Forget password</string>
+    <string name="webdav_password_clear_confirm_title">Forget the password?</string>
+    <string name="webdav_password_clear_confirm_msg">The next backup will ask for a password again. Backups already on the server keep the password they were created with.</string>
+    <string name="webdav_password_cleared">Password forgotten</string>
+    <string name="webdav_password_storage_hint">Stored only on this device, encrypted with the Android Keystore key. It is never sent anywhere except inside the encrypted backup file.</string>
 
     <!-- Terms &amp; privacy (in-app) -->
     <string name="about_terms_title">Terms of Use</string>

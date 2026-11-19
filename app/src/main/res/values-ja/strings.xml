@@ -361,7 +361,7 @@
     <string name="webdav_error_url">サーバーアドレスを入力してください（例：http://192.168.1.5:5005）</string>
     <string name="webdav_warning">信頼できるサーバーのみ使用してください。バックアップファイル自体は暗号化されていますが、書き出し用パスワードは大切に保管してください。ファイルにアクセスでき、かつパスワードを知っている人なら復元できてしまいます。</string>
     <string name="manual_webdav_title">WebDAV バックアップ</string>
-    <string name="manual_webdav_body">設定 → データ → WebDAV バックアップで暗号化した書き出しファイルを WebDAV サーバーに送信します。アドレス、ユーザー名、パスワードを入力してください。\n\n復元ではサーバーのバックアップを一覧表示し、管理画面で古いものを削除できます。サーバーが受け取るのは暗号化データだけで、この機能は設定したアドレスにのみ接続します。</string>
+    <string name="manual_webdav_body">設定 → データ → WebDAV バックアップで暗号化した書き出しファイルを WebDAV サーバーに送信します。アドレス、ユーザー名、パスワードを入力してください。\n\n復元ではサーバーのバックアップを一覧表示し、管理画面で古いものを削除できます。サーバーが受け取るのは暗号化データだけで、この機能は設定したアドレスにのみ接続します。\n\nバックアップ画面で「このパスワードを記憶する」にチェックする（または「バックアップパスワード」で一度設定する）と、以降は確認なしでアップロードされます。同ページで記憶したパスワードの変更・削除もできます。</string>
     <string name="about_terms_title">利用規約</string>
     <string name="about_privacy_title">プライバシーポリシー</string>
     <string name="legal_loading">読み込み中…</string>
@@ -376,6 +376,27 @@
     <string name="webdav_delete_confirm_msg">サーバーから %1$s を削除しますか？この操作は取り消せません。</string>
     <string name="webdav_deleting">削除中…</string>
     <string name="webdav_deleted">バックアップを削除しました</string>
+
+    <!-- WebDAV backup password: remember once, manage it afterwards -->
+    <string name="webdav_backup_password_remember">このパスワードを記憶する</string>
+    <string name="webdav_backup_password_remember_desc">次回からこのパスワードでバックアップをアップロードし、入力を求めません。管理は「バックアップパスワード」から行えます。</string>
+    <string name="webdav_password_title">バックアップパスワード</string>
+    <string name="webdav_password_desc">手動バックアップはアップロード前にこのパスワードで暗号化されます。一度記憶すれば Osmium は尋ねません。ここでいつでも変更・削除できます。</string>
+    <string name="webdav_password_state_remembered">パスワード記憶済み — バックアップ時に確認しません</string>
+    <string name="webdav_password_state_none">パスワード未記憶 — バックアップのたびに確認します</string>
+    <string name="webdav_password_row_set_desc">記憶済み。タップで変更。</string>
+    <string name="webdav_password_row_unset_desc">未記憶。タップして一度設定してください。</string>
+    <string name="webdav_password_remembered_short">記憶済み</string>
+    <string name="webdav_password_unset_short">未設定</string>
+    <string name="webdav_password_set_title">バックアップパスワードを設定</string>
+    <string name="webdav_password_change_title">バックアップパスワードを変更</string>
+    <string name="webdav_password_set_desc">このパスワードはこのページからアップロードするバックアップを暗号化します。復元に必要なので大切に保管してください。</string>
+    <string name="webdav_password_saved">バックアップパスワードを記憶しました</string>
+    <string name="webdav_password_clear">記憶したパスワードを削除</string>
+    <string name="webdav_password_clear_confirm_title">記憶したパスワードを削除しますか？</string>
+    <string name="webdav_password_clear_confirm_msg">次回のバックアップで再びパスワードを求めます。サーバー上の既存のバックアップは作成時のパスワードのままです。</string>
+    <string name="webdav_password_cleared">記憶したパスワードを削除しました</string>
+    <string name="webdav_password_storage_hint">この端末にのみ保存され、Android Keystore の鍵で暗号化されます。暗号化されたバックアップファイルの一部として以外、どこにも送信されません。</string>
 
     <string name="auto_backup_title">自動バックアップ</string>
     <string name="auto_backup_desc">スケジュールに従ってWebDAVまたはローカルに自動バックアップ</string>
