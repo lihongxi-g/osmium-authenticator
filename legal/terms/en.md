@@ -1,6 +1,6 @@
 # Terms of Use
 
-*Effective date: November 11, 2026 · Applies to Osmium v2.6.5.2 and later*
+*Effective date: November 19, 2026 · Applies to Osmium v2.6.5.3 and later*
 
 *Current version, published at osmium.im. The app reads it when you open About → Terms of Use.*
 
@@ -24,6 +24,7 @@ Osmium generates TOTP and HOTP codes with 4, 5, 6, 7 or 8 digits and supports SH
 - Rooted devices. When Osmium detects that the device is rooted, it forces on its protections (verification on open, screenshot blocking, hidden codes) and disables LAN quick transfer, WebDAV backup, automatic backups, self-destruct configuration and third-party import. These restrictions can only be lifted in Developer mode. Root detection runs locally on the device and is best-effort.
 - Device integrity report. At launch Osmium also checks device integrity locally: system, mount, kernel, boot-state and app-signature checks, cross-checks between them, and hardware-backed key attestation (TEE certificate chain, verified-boot chain and boot hash) verified on this device with Google's official verifier. The report is shown on your device only; when the result is suspicious or compromised, the app reminds you once per app open. A root-manager app being installed is treated as a hint, not as proof. No software check is perfectly accurate, so read the report as guidance about your device rather than a guarantee. Developer mode can hide this feature; once hidden, the app no longer runs these checks at launch and no longer shows the reminder.
 - Developer mode. Hidden behind seven taps on the app name in About and protected by identity verification, it can lift the root restrictions, hide settings entries, export your vault as plaintext, and force re-encryption of the local database. It also offers an optional detailed detection log - integrity checks write no log unless you enable it. A plaintext export contains all of your secrets without encryption — anyone who obtains the file can read every account. You use developer mode at your own risk; the developer is not liable for losses caused by it or by plaintext exports.
+- WebDAV server trust. Backups go only to the server you configure. Accepting a self-signed certificate trusts exactly the fingerprint shown: compare it with the server yourself before accepting, and confirm the new fingerprint when the server's certificate is renewed — a changed certificate is refused until you do. A plaintext http:// address sends your WebDAV username and password across the network unencrypted; use https with a valid certificate, or a trusted local network, if that matters to you. A remembered backup password lets anyone holding your unlocked device upload a new backup without typing it; forget it on the Backup password page if you do not want that.
 
 You may use Osmium for your own two-factor authentication and for devices you control or are authorized to use.
 
