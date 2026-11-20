@@ -281,6 +281,7 @@
     <string name="check_updates">檢查更新</string>
     <string name="about_follow">關注 Osmium</string>
     <string name="social_telegram">Telegram</string>
+    <string name="social_fdroid">F-Droid</string>
     <string name="social_github">GitHub</string>
     <string name="social_mail">郵件</string>
     <string name="social_website">網站</string>

@@ -270,6 +270,7 @@
     <string name="check_updates">Buscar actualizaciones</string>
     <string name="about_follow">Seguir a Osmium</string>
     <string name="social_telegram">Telegram</string>
+    <string name="social_fdroid">F-Droid</string>
     <string name="social_github">GitHub</string>
     <string name="social_mail">Correo</string>
     <string name="social_website">Sitio web</string>
