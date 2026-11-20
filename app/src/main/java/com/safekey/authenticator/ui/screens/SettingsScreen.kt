@@ -62,7 +62,7 @@ import com.safekey.authenticator.ui.navigation.Screen
  * single entry row as long as at least one of them is still visible.
  */
 private val APPEARANCE_FEATURES =
-    listOf("theme", "fontFamily", "fontSize", "haptic", "sort", "tags", "language")
+    listOf("theme", "fontFamily", "fontSize", "haptic", "predictiveBack", "sort", "tags", "language")
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

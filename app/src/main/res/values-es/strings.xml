@@ -716,4 +716,6 @@
     <string name="haptic_intensity">Intensidad</string>
     <string name="haptic_intensity_desc">Arrastra para ajustar la fuerza</string>
     <string name="haptic_off">Desactivado</string>
+    <string name="predictive_back_title">Animación de retroceso predictivo</string>
+    <string name="predictive_back_desc">Las pantallas siguen el dedo al deslizar desde el borde</string>
 </resources>

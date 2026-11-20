@@ -1237,6 +1237,7 @@ private fun IntegrityNoticeDialog(
         val direction = vm.nav.direction
         val current = vm.nav.current
         val rootRestricted by vm.rootRestricted.collectAsState()
+        val settings by vm.settings.collectAsState()
 
         // Defense in depth: if the restriction becomes active while a blocked
         // screen is open (e.g. restored after a config change), leave it
@@ -1252,6 +1253,7 @@ private fun IntegrityNoticeDialog(
         Box(Modifier.fillMaxSize()) {
             SwipeBackContainer(
             canGoBack = vm.nav.canGoBack,
+            predictiveBack = settings.predictiveBackAnimation,
             onBack = { vm.nav.pop() }
         ) {
             AnimatedContent(

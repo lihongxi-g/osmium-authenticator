@@ -35,6 +35,13 @@ data class AppSettings(
     val hapticEnabled: Boolean = true,
     /** Vibration strength, 0-100. */
     val hapticIntensityPercent: Int = HAPTIC_INTENSITY_DEFAULT,
+    /**
+     * Predictive back: while the system back gesture runs, the screen follows
+     * the finger instead of waiting for the gesture to finish. Off keeps back
+     * navigation working — it just cuts to the previous screen without the
+     * preview.
+     */
+    val predictiveBackAnimation: Boolean = true,
     val gateOnOpen: Boolean = true,
     val allowScreenshots: Boolean = false,
     val hideCodes: Boolean = false,
@@ -306,6 +313,7 @@ class SettingsRepository(
         val FONT_WEIGHT_BODY = intPreferencesKey("font_weight_body")
         val HAPTIC_ENABLED = booleanPreferencesKey("haptic_enabled")
         val HAPTIC_INTENSITY = intPreferencesKey("haptic_intensity_percent")
+        val PREDICTIVE_BACK = booleanPreferencesKey("predictive_back_animation")
         val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
         val GATE_ON_OPEN = booleanPreferencesKey("gate_on_open")
         val ALLOW_SCREENSHOTS = booleanPreferencesKey("allow_screenshots")
@@ -370,6 +378,7 @@ class SettingsRepository(
             hapticIntensityPercent = (prefs[Keys.HAPTIC_INTENSITY]
                 ?: AppSettings.HAPTIC_INTENSITY_DEFAULT)
                 .coerceIn(AppSettings.HAPTIC_INTENSITY_MIN, AppSettings.HAPTIC_INTENSITY_MAX),
+            predictiveBackAnimation = prefs[Keys.PREDICTIVE_BACK] ?: true,
             gateOnOpen = prefs[Keys.GATE_ON_OPEN] ?: true,
             allowScreenshots = prefs[Keys.ALLOW_SCREENSHOTS] ?: false,
             hideCodes = prefs[Keys.HIDE_CODES] ?: false,
@@ -450,6 +459,10 @@ class SettingsRepository(
      */
     suspend fun setHapticEnabled(enabled: Boolean) {
         context.dataStore.edit { it[Keys.HAPTIC_ENABLED] = enabled }
+    }
+
+    suspend fun setPredictiveBackAnimation(enabled: Boolean) {
+        context.dataStore.edit { it[Keys.PREDICTIVE_BACK] = enabled }
     }
 
     suspend fun setHapticIntensityPercent(percent: Int) {

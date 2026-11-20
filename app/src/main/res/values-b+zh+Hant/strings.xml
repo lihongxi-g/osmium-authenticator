@@ -729,4 +729,6 @@
     <string name="haptic_intensity">強度</string>
     <string name="haptic_intensity_desc">拖動調整震動強弱</string>
     <string name="haptic_off">關閉</string>
+    <string name="predictive_back_title">預測式返回動畫</string>
+    <string name="predictive_back_desc">從螢幕邊緣滑動返回時，頁面跟著手指移動</string>
 </resources>

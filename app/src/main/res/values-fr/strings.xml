@@ -716,4 +716,6 @@
     <string name="haptic_intensity">Intensité</string>
     <string name="haptic_intensity_desc">Faites glisser pour régler la force</string>
     <string name="haptic_off">Désactivé</string>
+    <string name="predictive_back_title">Animation de retour prédictif</string>
+    <string name="predictive_back_desc">L’écran suit le doigt lors du retour par glissement depuis le bord</string>
 </resources>

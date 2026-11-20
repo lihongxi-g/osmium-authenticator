@@ -666,6 +666,7 @@ private val HIDEABLE_ITEMS: List<Pair<String, Int>> = listOf(
     "fontFamily" to R.string.font_family_title,
     "fontSize" to R.string.font_size_title,
     "haptic" to R.string.haptic_title,
+    "predictiveBack" to R.string.predictive_back_title,
     "sort" to R.string.sort_mode,
     "tags" to R.string.tags_title,
     "language" to R.string.language,

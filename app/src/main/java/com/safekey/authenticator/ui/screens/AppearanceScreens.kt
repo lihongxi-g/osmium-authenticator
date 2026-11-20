@@ -161,6 +161,18 @@ fun AppearanceSettingsScreen(
                 onClick = { vm.nav.push(Screen.HapticSettings) }
             )
 
+            if ("predictiveBack" !in hiddenFeatures) SettingRow(
+                icon = AppIcons.ArrowBack,
+                title = stringResource(R.string.predictive_back_title),
+                description = stringResource(R.string.predictive_back_desc),
+                trailing = {
+                    Switch(
+                        checked = settings.predictiveBackAnimation,
+                        onCheckedChange = { vm.setPredictiveBackAnimation(it) }
+                    )
+                }
+            )
+
             if ("sort" !in hiddenFeatures) SettingRow(
                 icon = AppIcons.SwapVert,
                 title = stringResource(R.string.sort_mode),

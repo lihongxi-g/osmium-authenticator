@@ -716,4 +716,6 @@
     <string name="haptic_intensity">Интенсивность</string>
     <string name="haptic_intensity_desc">Потяните, чтобы настроить силу</string>
     <string name="haptic_off">Выкл.</string>
+    <string name="predictive_back_title">Анимация предсказуемого возврата</string>
+    <string name="predictive_back_desc">Экран следует за пальцем при свайпе назад от края</string>
 </resources>

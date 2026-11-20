@@ -716,4 +716,6 @@
     <string name="haptic_intensity">Intensität</string>
     <string name="haptic_intensity_desc">Ziehen, um die Stärke einzustellen</string>
     <string name="haptic_off">Aus</string>
+    <string name="predictive_back_title">Predictive-Back-Animation</string>
+    <string name="predictive_back_desc">Beim Zurückwischen vom Bildschirmrand folgt der Bildschirm dem Finger</string>
 </resources>

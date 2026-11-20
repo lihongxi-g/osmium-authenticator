@@ -733,4 +733,6 @@
     <string name="haptic_intensity">Intensity</string>
     <string name="haptic_intensity_desc">Drag to set how strong the vibration is</string>
     <string name="haptic_off">Off</string>
+    <string name="predictive_back_title">Predictive back animation</string>
+    <string name="predictive_back_desc">Screens follow your finger while you swipe back from the screen edge</string>
 </resources>
