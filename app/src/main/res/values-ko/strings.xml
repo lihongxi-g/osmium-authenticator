@@ -223,7 +223,8 @@
     <string name="sort_copies">복사 횟수</string>
     <string name="sort_copies_desc">많이 복사한 순</string>
     <string name="hide_codes">코드 숨기기</string>
-    <string name="hide_codes_desc">코드가 점으로 표시됩니다. 복사는 가능. 비밀키 보기/공유는 비활성화.</string>
+    <string name="hide_codes_desc">코드는 점으로 표시됩니다. 탭하면 바로 확인할 수 있고 다시 탭하면 복사됩니다. 비밀키 보기/공유는 계속 비활성화됩니다.</string>
+    <string name="tap_to_reveal">탭하여 표시</string>
     <string name="hide_codes_blocks_secret">코드 숨김 모드: 비밀키 보기와 공유가 비활성화됩니다</string>
     <string name="time_offset">시계 보정</string>
     <string name="time_offset_desc">현재 오프셋: %1$+d초 (0 = 자동)</string>

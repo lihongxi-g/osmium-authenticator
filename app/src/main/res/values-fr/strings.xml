@@ -223,7 +223,8 @@
     <string name="sort_copies">Nombre de copies</string>
     <string name="sort_copies_desc">Les plus copiés d’abord</string>
     <string name="hide_codes">Masquer les codes</string>
-    <string name="hide_codes_desc">Les codes s’affichent en points ; la copie fonctionne toujours. Voir/partager les secrets est désactivé.</string>
+    <string name="hide_codes_desc">Les codes s’affichent en points : touchez pour les lire, touchez encore pour les copier. Voir et partager les secrets reste désactivé.</string>
+    <string name="tap_to_reveal">Touchez pour afficher</string>
     <string name="hide_codes_blocks_secret">Mode codes masqués : la consultation et le partage des secrets sont désactivés</string>
     <string name="time_offset">Calibrage de l’horloge</string>
     <string name="time_offset_desc">Décalage actuel : %1$+d s (0 = auto)</string>

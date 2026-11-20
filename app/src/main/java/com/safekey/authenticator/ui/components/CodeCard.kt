@@ -16,14 +16,67 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import com.safekey.authenticator.AccountUi
+import com.safekey.authenticator.R
 import com.safekey.authenticator.ui.theme.LocalFontScale
 import com.safekey.authenticator.ui.theme.monospaceFamily
+import kotlinx.coroutines.delay
+
+/** What a hidden code shows instead of its digits. */
+private const val HiddenCodeDots = "\u2022\u2022\u2022\u2022\u2022\u2022"
+
+/** How long a revealed code stays readable before the dots come back. */
+private const val RevealTimeoutMs = 6_000L
+
+/**
+ * Reveal-on-tap state for accounts whose codes are hidden.
+ *
+ * Hidden codes used to be readable only by copying them out to another app.
+ * Tapping now reveals the digits in place; they go back behind dots after a
+ * timeout or as soon as Osmium leaves the foreground, so the setting still
+ * keeps codes off screen when nobody asked to see them.
+ */
+@Stable
+class CodeReveal internal constructor(private val state: MutableState<Boolean>) {
+    val revealed: Boolean get() = state.value
+    fun show() { state.value = true }
+    fun hide() { state.value = false }
+}
+
+@Composable
+fun rememberCodeReveal(): CodeReveal {
+    val state = remember { mutableStateOf(false) }
+    LaunchedEffect(state.value) {
+        if (state.value) {
+            delay(RevealTimeoutMs)
+            state.value = false
+        }
+    }
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_STOP) state.value = false
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+    return remember { CodeReveal(state) }
+}
 
 /**
  * One account row: issuer + account name on the left, prominent code +
@@ -40,6 +93,8 @@ fun CodeCard(
     hideCode: Boolean = false,
     showTags: Boolean = true
 ) {
+    val reveal = rememberCodeReveal()
+    val masked = hideCode && !reveal.revealed
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
@@ -62,10 +117,13 @@ fun CodeCard(
                     modifier = Modifier.weight(1f)
                 )
                 CodeDisplay(
-                    code = if (hideCode) "\u2022\u2022\u2022\u2022\u2022\u2022" else ui.code,
+                    code = if (masked) HiddenCodeDots else ui.code,
                     remainingSeconds = ui.remainingSeconds,
                     expiring = ui.remainingSeconds <= 5,
-                    onCopyCode = onCopyCode
+                    masked = masked,
+                    onTap = {
+                        if (masked) reveal.show() else onCopyCode()
+                    }
                 )
             }
             if (!ui.isHotp) {
@@ -119,12 +177,14 @@ private fun CodeDisplay(
     code: String,
     remainingSeconds: Int,
     expiring: Boolean,
-    onCopyCode: () -> Unit
+    masked: Boolean,
+    onTap: () -> Unit
 ) {
+    val actionLabel = stringResource(if (masked) R.string.tap_to_reveal else R.string.copy_code)
     Column(
         horizontalAlignment = Alignment.End,
-        modifier = Modifier.clickable(onClickLabel = "Copy code") {
-            onCopyCode()
+        modifier = Modifier.clickable(onClickLabel = actionLabel) {
+            onTap()
         }
     ) {
         Text(
@@ -146,7 +206,7 @@ private fun CodeDisplay(
             )
             Spacer(Modifier.width(4.dp))
             Icon(
-                imageVector = AppIcons.ContentCopy,
+                imageVector = if (masked) AppIcons.Visibility else AppIcons.ContentCopy,
                 contentDescription = null,
                 modifier = Modifier.size(14.dp),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant

@@ -223,7 +223,8 @@
     <string name="sort_copies">कॉपी संख्या</string>
     <string name="sort_copies_desc">सबसे अधिक कॉपी पहले</string>
     <string name="hide_codes">कोड छिपाएँ</string>
-    <string name="hide_codes_desc">कोड बिंदुओं के रूप में दिखते हैं; कॉपी फिर भी काम करती है। गुप्त कुंजी देखना/साझा करना बंद रहता है।</string>
+    <string name="hide_codes_desc">कोड बिंदुओं के रूप में दिखते हैं — पढ़ने के लिए टैप करें, फिर कॉपी करने के लिए दोबारा टैप करें। गुप्त कुंजी देखना/साझा करना अब भी बंद है।</string>
+    <string name="tap_to_reveal">दिखाने के लिए टैप करें</string>
     <string name="hide_codes_blocks_secret">छिपे कोड मोड: गुप्त कुंजी देखना और साझा करना अक्षम</string>
     <string name="time_offset">घड़ी कैलिब्रेशन</string>
     <string name="time_offset_desc">वर्तमान ऑफ़सेट: %1$+d सेकंड (0 = स्वतः)</string>

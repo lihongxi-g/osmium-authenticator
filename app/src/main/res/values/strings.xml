@@ -233,7 +233,8 @@
     <string name="sort_copies">Copy count</string>
     <string name="sort_copies_desc">Most copied first</string>
     <string name="hide_codes">Hide codes</string>
-    <string name="hide_codes_desc">Codes show as dots; copy still works. Viewing/sharing secrets is disabled.</string>
+    <string name="hide_codes_desc">Codes show as dots — tap one to read it, tap again to copy. Viewing/sharing secrets is disabled.</string>
+    <string name="tap_to_reveal">Tap to show</string>
     <string name="hide_codes_blocks_secret">Hidden codes mode: viewing and sharing secrets is disabled</string>
     <string name="time_offset">Clock calibration</string>
     <string name="time_offset_desc">Current offset: %1$+d s (0 = auto)</string>

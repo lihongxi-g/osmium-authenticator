@@ -46,6 +46,7 @@ import com.safekey.authenticator.security.ClipboardHelper
 import com.safekey.authenticator.ui.components.AppIcons
 import com.safekey.authenticator.ui.components.IconButtonCompat
 import com.safekey.authenticator.ui.components.SimpleTopBar
+import com.safekey.authenticator.ui.components.rememberCodeReveal
 import com.safekey.authenticator.ui.theme.LocalFontScale
 import com.safekey.authenticator.ui.theme.monospaceFamily
 
@@ -72,6 +73,8 @@ fun DetailScreen(
     val context = LocalContext.current
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showSecret by remember { mutableStateOf(false) }
+    // Hidden codes: tap once to read the digits in place, tap again to copy.
+    val codeReveal = rememberCodeReveal()
     // null | "view" | "edit" — protected action awaiting verification
     var pendingAction by remember { mutableStateOf<String?>(null) }
     var pinMode by remember { mutableStateOf(false) }
@@ -150,13 +153,20 @@ fun DetailScreen(
                     elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
+                    val codeMasked = settings.hideCodes && !codeReveal.revealed
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable {
-                                ClipboardHelper.copy(context, ui.code)
-                                vm.incrementCopyCount(account.id)
-                                vm.showToast(context.getString(R.string.code_copied))
+                            .clickable(onClickLabel = stringResource(
+                                if (codeMasked) R.string.tap_to_reveal else R.string.copy_code
+                            )) {
+                                if (codeMasked) {
+                                    codeReveal.show()
+                                } else {
+                                    ClipboardHelper.copy(context, ui.code)
+                                    vm.incrementCopyCount(account.id)
+                                    vm.showToast(context.getString(R.string.code_copied))
+                                }
                             }
                             .padding(vertical = 24.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
@@ -165,7 +175,7 @@ fun DetailScreen(
                         // cut, so it does not ride a type token: it gets its own
                         // size, capped by the width actually available.
                         val codeText =
-                            if (settings.hideCodes) "\u2022\u2022\u2022\u2022\u2022\u2022" else ui.code
+                            if (codeMasked) "\u2022\u2022\u2022\u2022\u2022\u2022" else ui.code
                         val fontScale = LocalFontScale.current
                         val chars = codeText.length.coerceAtLeast(1)
                         BoxWithConstraints(
@@ -218,13 +228,15 @@ fun DetailScreen(
                         Spacer(Modifier.height(4.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
-                                imageVector = AppIcons.ContentCopy,
+                                imageVector = if (codeMasked) AppIcons.Visibility else AppIcons.ContentCopy,
                                 contentDescription = null,
                                 modifier = Modifier.size(16.dp),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Text(
-                                text = stringResource(R.string.copy_code),
+                                text = stringResource(
+                                    if (codeMasked) R.string.tap_to_reveal else R.string.copy_code
+                                ),
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(start = 6.dp)

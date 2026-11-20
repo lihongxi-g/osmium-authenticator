@@ -231,7 +231,8 @@
     <string name="sort_copies">按复制次数</string>
     <string name="sort_copies_desc">复制最多的在前</string>
     <string name="hide_codes">隐藏验证码</string>
-    <string name="hide_codes_desc">验证码以圆点显示，复制功能不受影响；显示密钥和分享功能将被禁用。</string>
+    <string name="hide_codes_desc">验证码以圆点显示，点一下可直接查看，再点一下复制。查看和分享密钥仍被禁用。</string>
+    <string name="tap_to_reveal">点按显示</string>
     <string name="hide_codes_blocks_secret">隐藏验证码模式下无法显示和分享密钥</string>
     <string name="time_offset">时钟校准</string>
     <string name="time_offset_desc">当前偏移：%1$+d 秒（0 = 自动）</string>

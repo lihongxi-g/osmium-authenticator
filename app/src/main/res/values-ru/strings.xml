@@ -223,7 +223,8 @@
     <string name="sort_copies">Число копирований</string>
     <string name="sort_copies_desc">Сначала частые</string>
     <string name="hide_codes">Скрыть коды</string>
-    <string name="hide_codes_desc">Коды показываются точками; копирование работает. Просмотр и отправка секретов отключены.</string>
+    <string name="hide_codes_desc">Коды показаны точками: нажмите, чтобы прочитать, и ещё раз, чтобы скопировать. Просмотр и отправка секретов по-прежнему отключены.</string>
+    <string name="tap_to_reveal">Нажмите, чтобы показать</string>
     <string name="hide_codes_blocks_secret">Режим скрытых кодов: просмотр и отправка секретов отключены</string>
     <string name="time_offset">Калибровка часов</string>
     <string name="time_offset_desc">Текущее смещение: %1$+d с (0 = авто)</string>

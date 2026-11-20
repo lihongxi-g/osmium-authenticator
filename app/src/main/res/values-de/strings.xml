@@ -223,7 +223,8 @@
     <string name="sort_copies">Kopienzahl</string>
     <string name="sort_copies_desc">Meistkopierte zuerst</string>
     <string name="hide_codes">Codes ausblenden</string>
-    <string name="hide_codes_desc">Codes erscheinen als Punkte; Kopieren funktioniert weiter. Anzeigen/Teilen von Geheimnissen ist deaktiviert.</string>
+    <string name="hide_codes_desc">Codes erscheinen als Punkte – antippen zum Lesen, erneut antippen zum Kopieren. Anzeigen/Teilen von Geheimnissen bleibt deaktiviert.</string>
+    <string name="tap_to_reveal">Zum Anzeigen tippen</string>
     <string name="hide_codes_blocks_secret">Modus „Codes ausblenden“: Anzeigen und Teilen von Geheimnissen ist deaktiviert</string>
     <string name="time_offset">Uhrkalibrierung</string>
     <string name="time_offset_desc">Aktueller Versatz: %1$+d s (0 = automatisch)</string>

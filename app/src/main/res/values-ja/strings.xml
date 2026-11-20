@@ -223,7 +223,8 @@
     <string name="sort_copies">コピー回数</string>
     <string name="sort_copies_desc">コピー回数が多い順</string>
     <string name="hide_codes">コードを隠す</string>
-    <string name="hide_codes_desc">コードはドット表示。コピーは可能。秘密鍵の表示・共有は無効。</string>
+    <string name="hide_codes_desc">コードはドット表示です。タップで内容を確認、もう一度タップでコピー。秘密鍵の表示・共有は引き続き無効です。</string>
+    <string name="tap_to_reveal">タップで表示</string>
     <string name="hide_codes_blocks_secret">コード非表示モード：秘密鍵の表示と共有は無効です</string>
     <string name="time_offset">時計の較正</string>
     <string name="time_offset_desc">現在のオフセット: %1$+d秒（0 = 自動）</string>

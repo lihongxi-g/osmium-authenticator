@@ -230,7 +230,8 @@
     <string name="sort_copies">按複製次數</string>
     <string name="sort_copies_desc">複製最多的在前</string>
     <string name="hide_codes">隱藏驗證碼</string>
-    <string name="hide_codes_desc">驗證碼以圆點顯示，複製功能不受影響；顯示金鑰和分享功能將被禁用。</string>
+    <string name="hide_codes_desc">驗證碼以圓點顯示，點一下可直接查看，再點一下複製。檢視與分享金鑰仍被停用。</string>
+    <string name="tap_to_reveal">點按顯示</string>
     <string name="hide_codes_blocks_secret">隱藏驗證碼模式下無法顯示和分享金鑰</string>
     <string name="time_offset">時鐘校準</string>
     <string name="time_offset_desc">當前偏移：%1$+d 秒（0 = 自動）</string>
