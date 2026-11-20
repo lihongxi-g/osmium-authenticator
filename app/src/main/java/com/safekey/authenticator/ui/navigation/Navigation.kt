@@ -74,6 +74,8 @@ sealed class Screen {
     object Permissions : Screen()
     /** Hidden developer-mode panel (English / Simplified Chinese only). */
     object Developer : Screen()
+    /** Which sensitive actions still ask for identity verification. */
+    object VerifySettings : Screen()
 }
 
 /**
@@ -132,5 +134,8 @@ class NavigationState(initial: Screen = Screen.Accounts) {
 fun Screen.isRootBlocked(): Boolean = when (this) {
     is Screen.WebDav, is Screen.WebDavPassword, is Screen.AutoBackup, is Screen.LanTransfer,
     is Screen.ThirdPartyImport, is Screen.GoogleImport, is Screen.FileImport -> true
+    // The verification switches only weaken the app's own checks, so a
+    // compromised device must not reach them at all.
+    is Screen.VerifySettings -> true
     else -> false
 }

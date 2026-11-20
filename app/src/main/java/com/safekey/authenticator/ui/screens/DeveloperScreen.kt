@@ -675,6 +675,7 @@ private val HIDEABLE_ITEMS: List<Pair<String, Int>> = listOf(
     "hideCodes" to R.string.hide_codes,
     "timeOffset" to R.string.time_offset,
     AppSettings.HIDDEN_FEATURE_INTEGRITY to R.string.integrity_entry_title,
+    "verifySettings" to R.string.verify_settings_title,
     "pin" to R.string.settings_pin,
     "destroy" to R.string.settings_destroy,
     "thirdparty" to R.string.thirdparty_import_title,

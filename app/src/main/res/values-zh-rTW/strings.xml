@@ -731,4 +731,12 @@
     <string name="haptic_off">關閉</string>
     <string name="predictive_back_title">預測式返回動畫</string>
     <string name="predictive_back_desc">從螢幕邊緣滑動返回時，頁面跟著手指移動</string>
+    <string name="verify_settings_title">驗證設定</string>
+    <string name="verify_settings_desc">選擇哪些功能在動手前先驗證身分</string>
+    <string name="verify_settings_note">進入本頁始終需要先驗證身分；偵測到 root 時本頁無法使用。</string>
+    <string name="verify_always">始終驗證</string>
+    <string name="verify_no_method_title">還沒有可用的驗證方式</string>
+    <string name="verify_no_method_message">先在設定裡的「應用程式 PIN」設定 PIN，或在系統中錄入指紋/螢幕鎖定密碼，再回到這裡。</string>
+    <string name="verify_feature_developer">開發人員模式</string>
+    <string name="verify_developer_locked_desc">開發人員模式可以解除 root 限制，因此始終需要驗證</string>
 </resources>

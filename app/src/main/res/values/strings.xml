@@ -735,4 +735,12 @@
     <string name="haptic_off">Off</string>
     <string name="predictive_back_title">Predictive back animation</string>
     <string name="predictive_back_desc">Screens follow your finger while you swipe back from the screen edge</string>
+    <string name="verify_settings_title">Verification settings</string>
+    <string name="verify_settings_desc">Choose which actions ask for your identity first</string>
+    <string name="verify_settings_note">This page always asks for verification first, and it is unavailable while the device looks rooted.</string>
+    <string name="verify_always">Always</string>
+    <string name="verify_no_method_title">No verification method yet</string>
+    <string name="verify_no_method_message">Set an app PIN under App PIN, or add a fingerprint or a screen lock in the system settings, then come back.</string>
+    <string name="verify_feature_developer">Developer mode</string>
+    <string name="verify_developer_locked_desc">Developer mode can lift the root restriction, so it always verifies</string>
 </resources>

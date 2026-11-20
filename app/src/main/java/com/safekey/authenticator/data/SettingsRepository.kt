@@ -42,6 +42,12 @@ data class AppSettings(
      * preview.
      */
     val predictiveBackAnimation: Boolean = true,
+    /**
+     * Items on the Verification settings page whose identity check the user
+     * turned OFF (ids from [AppSettings.VERIFY_*]). Anything not in here still
+     * asks for verification. Empty by default = every sensitive action verifies.
+     */
+    val verifyOptOut: Set<String> = emptySet(),
     val gateOnOpen: Boolean = true,
     val allowScreenshots: Boolean = false,
     val hideCodes: Boolean = false,
@@ -292,6 +298,30 @@ data class AppSettings(
         const val AUTO_BACKUP_TARGET_WEBDAV = "webdav"
         const val AUTO_BACKUP_TARGET_LOCAL = "local"
 
+        // ---- Verification settings page (2.6.6) ---------------------------------
+        // Ids of the actions that ask for identity verification before they
+        // run. The Verification settings page lets the user turn that check
+        // off per id; the ids below are the single source of truth for both
+        // that page and the checks in SettingsScreen.
+        const val VERIFY_GATE = "gate"
+        const val VERIFY_SCREENSHOT = "screenshot"
+        const val VERIFY_HIDE_CODES = "hideCodes"
+        const val VERIFY_EXPORT = "export"
+        const val VERIFY_EXPORT_OTHER = "exportOther"
+        const val VERIFY_IMPORT = "import"
+        const val VERIFY_LAN = "lan"
+        const val VERIFY_WEBDAV = "webdav"
+        const val VERIFY_AUTO_BACKUP = "autobackup"
+        const val VERIFY_DEVELOPER = "developer"
+
+        /**
+         * Ids whose check can never be turned off from the page: entering
+         * developer mode can disable the root security restriction, so it
+         * always verifies. The page itself is not listed here — it is not a
+         * toggle at all, it always verifies on entry.
+         */
+        val VERIFY_ALWAYS_ON = setOf(VERIFY_DEVELOPER)
+
         /** How many auto-backups to keep per target; older ones are pruned. */
         const val AUTO_BACKUP_KEEP_DEFAULT = 5
         const val AUTO_BACKUP_KEEP_MAX = 10
@@ -357,6 +387,8 @@ class SettingsRepository(
         val DEV_PLAINTEXT_EXPORT = booleanPreferencesKey("dev_plaintext_export")
 
         val DEV_HIDDEN_FEATURES = stringSetPreferencesKey("dev_hidden_features")
+        /** Verification settings page: ids whose identity check is turned off. */
+        val VERIFY_OPT_OUT = stringSetPreferencesKey("verify_opt_out")
         val DEV_DETAILED_LOGGING = booleanPreferencesKey("dev_detailed_logging")
         val PIN_REMINDER_SILENCED = booleanPreferencesKey("pin_reminder_silenced")
     }
@@ -411,6 +443,7 @@ class SettingsRepository(
             devPlaintextExport = prefs[Keys.DEV_PLAINTEXT_EXPORT] ?: false,
 
             devHiddenFeatures = prefs[Keys.DEV_HIDDEN_FEATURES] ?: emptySet(),
+            verifyOptOut = prefs[Keys.VERIFY_OPT_OUT] ?: emptySet(),
             devDetailedLogging = prefs[Keys.DEV_DETAILED_LOGGING] ?: false,
             pinReminderSilenced = prefs[Keys.PIN_REMINDER_SILENCED] ?: false,
             welcomeShownVersion = prefs[Keys.WELCOME_SHOWN_VERSION] ?: "",
@@ -655,6 +688,15 @@ class SettingsRepository(
 
     suspend fun setDevHiddenFeatures(ids: Set<String>) {
         context.dataStore.edit { it[Keys.DEV_HIDDEN_FEATURES] = ids }
+    }
+
+    /** Turn the identity check for one [AppSettings.VERIFY_*] id on or off. */
+    suspend fun setVerifyRequired(id: String, required: Boolean) {
+        if (id in AppSettings.VERIFY_ALWAYS_ON) return
+        context.dataStore.edit { prefs ->
+            val current = prefs[Keys.VERIFY_OPT_OUT] ?: emptySet()
+            prefs[Keys.VERIFY_OPT_OUT] = if (required) current - id else current + id
+        }
     }
 
     suspend fun setPinReminderSilenced(silenced: Boolean) {

@@ -718,4 +718,12 @@
     <string name="haptic_off">Aus</string>
     <string name="predictive_back_title">Predictive-Back-Animation</string>
     <string name="predictive_back_desc">Beim Zurückwischen vom Bildschirmrand folgt der Bildschirm dem Finger</string>
+    <string name="verify_settings_title">Bestätigungseinstellungen</string>
+    <string name="verify_settings_desc">Wähle, welche Aktionen zuerst deine Identität verlangen</string>
+    <string name="verify_settings_note">Diese Seite verlangt immer zuerst eine Bestätigung und ist bei erkanntem Root nicht verfügbar.</string>
+    <string name="verify_always">Immer</string>
+    <string name="verify_no_method_title">Noch keine Bestätigungsmethode</string>
+    <string name="verify_no_method_message">Lege zuerst unter „App-PIN“ eine PIN an oder richte im System einen Fingerabdruck bzw. eine Bildschirmsperre ein.</string>
+    <string name="verify_feature_developer">Entwicklermodus</string>
+    <string name="verify_developer_locked_desc">Der Entwicklermodus kann die Root-Sperre aufheben und verlangt daher immer eine Bestätigung</string>
 </resources>

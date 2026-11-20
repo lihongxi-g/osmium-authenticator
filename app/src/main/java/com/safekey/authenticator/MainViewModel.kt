@@ -100,7 +100,14 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                 // Hardening overlay: force the protective settings on without
                 // touching the user's stored preferences — their own values
                 // restore as-is once the restriction is lifted.
-                s.copy(gateOnOpen = true, allowScreenshots = false, hideCodes = true)
+                s.copy(
+                    gateOnOpen = true,
+                    allowScreenshots = false,
+                    hideCodes = true,
+                    // Whatever the user turned off on the Verification settings
+                    // page does not apply while the device is compromised.
+                    verifyOptOut = emptySet()
+                )
             } else {
                 s
             }
@@ -768,6 +775,8 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch { settingsRepo.setHapticEnabled(enabled) }
     fun setPredictiveBackAnimation(enabled: Boolean) =
         viewModelScope.launch { settingsRepo.setPredictiveBackAnimation(enabled) }
+    fun setVerifyRequired(id: String, required: Boolean) =
+        viewModelScope.launch { settingsRepo.setVerifyRequired(id, required) }
     fun setHapticIntensityPercent(percent: Int) =
         viewModelScope.launch { settingsRepo.setHapticIntensityPercent(percent) }
     fun setGateOnOpen(enabled: Boolean) = viewModelScope.launch { settingsRepo.setGateOnOpen(enabled) }

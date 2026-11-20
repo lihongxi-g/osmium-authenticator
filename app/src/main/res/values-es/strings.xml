@@ -718,4 +718,12 @@
     <string name="haptic_off">Desactivado</string>
     <string name="predictive_back_title">Animación de retroceso predictivo</string>
     <string name="predictive_back_desc">Las pantallas siguen el dedo al deslizar desde el borde</string>
+    <string name="verify_settings_title">Ajustes de verificación</string>
+    <string name="verify_settings_desc">Elige qué acciones piden tu identidad primero</string>
+    <string name="verify_settings_note">Esta página siempre pide verificación y no está disponible si se detecta root.</string>
+    <string name="verify_always">Siempre</string>
+    <string name="verify_no_method_title">Aún no hay método de verificación</string>
+    <string name="verify_no_method_message">Primero define un PIN en «PIN de la app» o añade una huella o un bloqueo de pantalla en el sistema.</string>
+    <string name="verify_feature_developer">Modo desarrollador</string>
+    <string name="verify_developer_locked_desc">El modo desarrollador puede quitar la restricción de root, así que siempre pide verificación</string>
 </resources>

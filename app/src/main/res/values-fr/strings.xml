@@ -718,4 +718,12 @@
     <string name="haptic_off">Désactivé</string>
     <string name="predictive_back_title">Animation de retour prédictif</string>
     <string name="predictive_back_desc">L’écran suit le doigt lors du retour par glissement depuis le bord</string>
+    <string name="verify_settings_title">Réglages de vérification</string>
+    <string name="verify_settings_desc">Choisissez les actions qui demandent votre identité</string>
+    <string name="verify_settings_note">Cette page demande toujours une vérification et n’est pas disponible si un root est détecté.</string>
+    <string name="verify_always">Toujours</string>
+    <string name="verify_no_method_title">Aucune méthode de vérification</string>
+    <string name="verify_no_method_message">Définissez d’abord un PIN dans « PIN de l’application » ou ajoutez une empreinte ou un verrouillage d’écran dans le système.</string>
+    <string name="verify_feature_developer">Mode développeur</string>
+    <string name="verify_developer_locked_desc">Le mode développeur peut lever la restriction root, il demande donc toujours une vérification</string>
 </resources>

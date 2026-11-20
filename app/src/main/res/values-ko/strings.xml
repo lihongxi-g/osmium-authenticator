@@ -718,4 +718,12 @@
     <string name="haptic_off">끔</string>
     <string name="predictive_back_title">예측형 뒤로 가기 애니메이션</string>
     <string name="predictive_back_desc">화면 가장자리에서 스와이프해 돌아갈 때 화면이 손가락을 따라갑니다</string>
+    <string name="verify_settings_title">인증 설정</string>
+    <string name="verify_settings_desc">어떤 작업에서 먼저 본인 확인을 할지 선택합니다</string>
+    <string name="verify_settings_note">이 페이지는 항상 본인 확인이 필요하며, 루팅이 감지되면 사용할 수 없습니다.</string>
+    <string name="verify_always">항상 인증</string>
+    <string name="verify_no_method_title">사용할 수 있는 인증 수단이 없습니다</string>
+    <string name="verify_no_method_message">먼저 '앱 PIN'에서 PIN을 설정하거나 시스템에서 지문·화면 잠금을 등록한 뒤 다시 오세요.</string>
+    <string name="verify_feature_developer">개발자 모드</string>
+    <string name="verify_developer_locked_desc">개발자 모드는 루트 제한을 해제할 수 있어 항상 인증이 필요합니다</string>
 </resources>

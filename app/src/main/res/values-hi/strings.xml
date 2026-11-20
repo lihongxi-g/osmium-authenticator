@@ -718,4 +718,12 @@
     <string name="haptic_off">बंद</string>
     <string name="predictive_back_title">प्रेडिक्टिव बैक एनिमेशन</string>
     <string name="predictive_back_desc">स्क्रीन किनारे से स्वाइप करके लौटते समय स्क्रीन उंगली के साथ चलती है</string>
+    <string name="verify_settings_title">सत्यापन सेटिंग</string>
+    <string name="verify_settings_desc">चुनें कि कौन-सी क्रियाएँ पहले पहचान सत्यापित करें</string>
+    <string name="verify_settings_note">यह पेज हमेशा पहले सत्यापन मांगता है और रूट मिलने पर उपलब्ध नहीं होता।</string>
+    <string name="verify_always">हमेशा</string>
+    <string name="verify_no_method_title">अभी कोई सत्यापन तरीका नहीं</string>
+    <string name="verify_no_method_message">पहले “ऐप PIN” में PIN सेट करें या सिस्टम में फ़िंगरप्रिंट या स्क्रीन लॉक जोड़ें, फिर यहाँ लौटें।</string>
+    <string name="verify_feature_developer">डेवलपर मोड</string>
+    <string name="verify_developer_locked_desc">डेवलपर मोड रूट प्रतिबंध हटा सकता है, इसलिए यह हमेशा सत्यापन मांगता है</string>
 </resources>

@@ -132,6 +132,7 @@ import com.safekey.authenticator.ui.screens.SortOrderScreen
 import com.safekey.authenticator.ui.screens.ManualScreen
 import com.safekey.authenticator.ui.screens.WebDavPasswordScreen
 import com.safekey.authenticator.ui.screens.WebDavScreen
+import com.safekey.authenticator.ui.screens.VerifySettingsScreen
 import com.safekey.authenticator.ui.theme.SafeKeyTheme
 import com.safekey.authenticator.update.UpdateChecker
 import com.safekey.authenticator.update.UpdateInfo
@@ -1476,7 +1477,34 @@ private fun IntegrityNoticeDialog(
                         onError = { msg -> vm.showToast(msg) }
                     )
                 },
+                // Strict pair: null when the device has nothing that can really
+                // verify, so the Verification settings entry can refuse to open
+                // instead of falling through.
+                onRequireBiometricStrict = if (canAuthenticateBiometric()) {
+                    { onSuccess ->
+                        launchBiometric(
+                            onSuccess = onSuccess,
+                            onCancelled = { vm.showToast(context.getString(R.string.lock_cancelled)) },
+                            onError = { msg -> vm.showToast(msg) }
+                        )
+                    }
+                } else null,
+                onRequireCredentialStrict = if (isDeviceSecure()) {
+                    { onSuccess ->
+                        launchCredential(
+                            onSuccess = onSuccess,
+                            onCancelled = { vm.showToast(context.getString(R.string.lock_cancelled)) },
+                            onError = { msg -> vm.showToast(msg) }
+                        )
+                    }
+                } else null,
                 onIntegrity = { vm.nav.push(Screen.Integrity) }
+            )
+
+            is Screen.VerifySettings -> VerifySettingsScreen(
+                vm = vm,
+                hiddenFeatures = vm.settings.value.devHiddenFeatures,
+                onBack = { vm.nav.pop() }
             )
 
             is Screen.Permissions -> PermissionsScreen(

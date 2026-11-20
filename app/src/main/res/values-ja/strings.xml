@@ -718,4 +718,12 @@
     <string name="haptic_off">オフ</string>
     <string name="predictive_back_title">予測型戻るアニメーション</string>
     <string name="predictive_back_desc">画面端からスワイプして戻るとき、画面が指に追従します</string>
+    <string name="verify_settings_title">認証設定</string>
+    <string name="verify_settings_desc">どの操作で先に本人確認を行うかを選びます</string>
+    <string name="verify_settings_note">このページを開くには常に本人確認が必要です。root を検出した場合は使用できません。</string>
+    <string name="verify_always">常に認証</string>
+    <string name="verify_no_method_title">認証方法がありません</string>
+    <string name="verify_no_method_message">先に「アプリ PIN」で PIN を設定するか、システムで指紋・画面ロックを登録してから戻ってください。</string>
+    <string name="verify_feature_developer">開発者モード</string>
+    <string name="verify_developer_locked_desc">開発者モードは root 制限を解除できるため、常に認証が必要です</string>
 </resources>

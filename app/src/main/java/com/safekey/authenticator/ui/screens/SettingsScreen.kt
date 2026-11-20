@@ -78,7 +78,15 @@ fun SettingsScreen(
     onOpenPinSetup: () -> Unit,
     onOpenPinVerify: (String) -> Unit,
     onRequireBiometric: ((onSuccess: () -> Unit) -> Unit)? = null,
-    onRequireCredential: ((onSuccess: () -> Unit) -> Unit)? = null
+    onRequireCredential: ((onSuccess: () -> Unit) -> Unit)? = null,
+    /**
+     * Same two prompts, but only passed when the method really verifies on this
+     * device (biometrics enrolled / screen lock set). The Verification settings
+     * entry must not fall through when there is nothing to verify with, so it
+     * uses these instead of the pair above.
+     */
+    onRequireBiometricStrict: ((onSuccess: () -> Unit) -> Unit)? = null,
+    onRequireCredentialStrict: ((onSuccess: () -> Unit) -> Unit)? = null
 ) {
     val settings by vm.settings.collectAsState()
     val accounts by vm.accounts.collectAsState()
@@ -100,17 +108,16 @@ fun SettingsScreen(
     // navigation awaiting verification (e.g. entering the WebDAV screen)
     var pendingNav by remember { mutableStateOf<(() -> Unit)?>(null) }
     var showVerifyDialog by remember { mutableStateOf(false) }
+    // true while the prompt was opened for the Verification settings page: only
+    // the strict callbacks count as a real check there.
+    var verifyStrict by remember { mutableStateOf(false) }
+    var showNoMethodDialog by remember { mutableStateOf(false) }
     var pinMode by remember { mutableStateOf(false) }
     var pinError by remember { mutableStateOf<String?>(null) }
     // "feature" / "setting" while the root-blocked notice dialog is showing
     var rootDialogTarget by remember { mutableStateOf<String?>(null) }
 
-    fun executeToggle() {
-        // pendingToggle survives until verification completes — clearing it
-        // before the verify callback fires loses the target (the "switch
-        // bounces back" bug).
-        val p = pendingToggle ?: return
-        pendingToggle = null
+    fun executeToggle(p: Pair<String, Boolean>) {
         when (p.first) {
             "gate" -> vm.setGateOnOpen(p.second)
             "screenshot" -> vm.setAllowScreenshots(p.second)
@@ -118,15 +125,42 @@ fun SettingsScreen(
         }
     }
 
-    /** Run whatever verification-protected action is pending (toggle or nav). */
+    /**
+     * True when [id] (an AppSettings.VERIFY_* id) still asks for verification.
+     * The always-on ids and anything the user did not turn off keep the check;
+     * the root restriction clears the opt-out set in the view model.
+     */
+    fun verifyRequired(id: String): Boolean =
+        id in AppSettings.VERIFY_ALWAYS_ON || id !in settings.verifyOptOut
+
+    /** Queue [action] behind an identity check and open the method chooser. */
+    fun askVerify(strict: Boolean = false, action: () -> Unit) {
+        pendingNav = action
+        verifyStrict = strict
+        showVerifyDialog = true
+    }
+
+    /** Same for a settings toggle waiting on verification. */
+    fun askVerifyToggle(kind: String, target: Boolean) {
+        pendingToggle = kind to target
+        verifyStrict = false
+        showVerifyDialog = true
+    }
+
+    /**
+     * Run whatever verification-protected action is pending (toggle or nav).
+     *
+     * The pending target is copied to a local BEFORE the state is cleared: the
+     * old code cleared it inside executeToggle and lost the target whenever the
+     * callback fired late (the "switch bounces back" bug).
+     */
     fun executePending() {
         val nav = pendingNav
-        if (nav != null) {
-            pendingNav = null
-            nav()
-            return
-        }
-        executeToggle()
+        val toggle = pendingToggle
+        pendingNav = null
+        pendingToggle = null
+        verifyStrict = false
+        if (nav != null) nav() else if (toggle != null) executeToggle(toggle)
     }
 
     /**
@@ -191,8 +225,11 @@ fun SettingsScreen(
                         checked = settings.gateOnOpen,
                         onCheckedChange = { target ->
                             if (!rootBlocked("setting")) {
-                                pendingToggle = "gate" to target
-                                showVerifyDialog = true
+                                if (verifyRequired(AppSettings.VERIFY_GATE)) {
+                                    askVerifyToggle("gate", target)
+                                } else {
+                                    vm.setGateOnOpen(target)
+                                }
                             }
                         }
                     )
@@ -208,8 +245,11 @@ fun SettingsScreen(
                         checked = settings.allowScreenshots,
                         onCheckedChange = { target ->
                             if (!rootBlocked("setting")) {
-                                pendingToggle = "screenshot" to target
-                                showVerifyDialog = true
+                                if (verifyRequired(AppSettings.VERIFY_SCREENSHOT)) {
+                                    askVerifyToggle("screenshot", target)
+                                } else {
+                                    vm.setAllowScreenshots(target)
+                                }
                             }
                         }
                     )
@@ -225,8 +265,11 @@ fun SettingsScreen(
                         checked = settings.hideCodes,
                         onCheckedChange = { target ->
                             if (!rootBlocked("setting")) {
-                                pendingToggle = "hideCodes" to target
-                                showVerifyDialog = true
+                                if (verifyRequired(AppSettings.VERIFY_HIDE_CODES)) {
+                                    askVerifyToggle("hideCodes", target)
+                                } else {
+                                    vm.setHideCodes(target)
+                                }
                             }
                         }
                     )
@@ -259,6 +302,27 @@ fun SettingsScreen(
                     )
                 },
                 onClick = onIntegrity
+            )
+
+            // Which sensitive actions still verify. Opening it always verifies
+            // (it can only weaken checks) and it is closed on a rooted device.
+            if ("verifySettings" !in hiddenFeatures) SettingRow(
+                icon = AppIcons.Fingerprint,
+                title = stringResource(R.string.verify_settings_title),
+                description = stringResource(R.string.verify_settings_desc),
+                onClick = {
+                    if (!rootBlocked("feature")) {
+                        if (onRequireBiometricStrict == null &&
+                            onRequireCredentialStrict == null &&
+                            !hasPin
+                        ) {
+                            // Nothing on this device can verify — do not open.
+                            showNoMethodDialog = true
+                        } else {
+                            askVerify(strict = true) { vm.nav.push(Screen.VerifySettings) }
+                        }
+                    }
+                }
             )
 
             // -------------------------------------------------------- PIN
@@ -369,8 +433,11 @@ fun SettingsScreen(
                     // developer-mode export is armed): same identity check as the
                     // other sensitive entries on this screen.
                     if (!rootBlocked("feature")) {
-                        pendingNav = { onExport() }
-                        showVerifyDialog = true
+                        if (verifyRequired(AppSettings.VERIFY_EXPORT)) {
+                            askVerify { onExport() }
+                        } else {
+                            onExport()
+                        }
                     }
                 }
             )
@@ -383,8 +450,11 @@ fun SettingsScreen(
                     // Same identity check as the encrypted export: this writes
                     // every secret to a PLAINTEXT file.
                     if (!rootBlocked("feature")) {
-                        pendingNav = { vm.nav.push(Screen.ExportToOthers) }
-                        showVerifyDialog = true
+                        if (verifyRequired(AppSettings.VERIFY_EXPORT_OTHER)) {
+                            askVerify { vm.nav.push(Screen.ExportToOthers) }
+                        } else {
+                            vm.nav.push(Screen.ExportToOthers)
+                        }
                     }
                 }
             )
@@ -395,8 +465,11 @@ fun SettingsScreen(
                 description = stringResource(R.string.import_vault_desc),
                 onClick = {
                     if (!rootBlocked("feature")) {
-                        pendingNav = { onImport() }
-                        showVerifyDialog = true
+                        if (verifyRequired(AppSettings.VERIFY_IMPORT)) {
+                            askVerify { onImport() }
+                        } else {
+                            onImport()
+                        }
                     }
                 }
             )
@@ -407,8 +480,11 @@ fun SettingsScreen(
                 description = stringResource(R.string.lan_transfer_desc),
                 onClick = {
                     if (!rootBlocked("feature")) {
-                        pendingNav = { vm.nav.push(Screen.LanTransfer) }
-                        showVerifyDialog = true
+                        if (verifyRequired(AppSettings.VERIFY_LAN)) {
+                            askVerify { vm.nav.push(Screen.LanTransfer) }
+                        } else {
+                            vm.nav.push(Screen.LanTransfer)
+                        }
                     }
                 }
             )
@@ -420,8 +496,11 @@ fun SettingsScreen(
                 onClick = {
                     if (!rootBlocked("feature")) {
                         // Entering the WebDAV screen requires identity verification
-                        pendingNav = { onWebDav() }
-                        showVerifyDialog = true
+                        if (verifyRequired(AppSettings.VERIFY_WEBDAV)) {
+                            askVerify { onWebDav() }
+                        } else {
+                            onWebDav()
+                        }
                     }
                 }
             )
@@ -432,8 +511,11 @@ fun SettingsScreen(
                 description = stringResource(R.string.auto_backup_desc),
                 onClick = {
                     if (!rootBlocked("feature")) {
-                        pendingNav = { onAutoBackup() }
-                        showVerifyDialog = true
+                        if (verifyRequired(AppSettings.VERIFY_AUTO_BACKUP)) {
+                            askVerify { onAutoBackup() }
+                        } else {
+                            onAutoBackup()
+                        }
                     }
                 }
             )
@@ -509,8 +591,7 @@ fun SettingsScreen(
                     description = dev.entryDesc,
                     onClick = {
                         // Identity verification is required on EVERY entry.
-                        pendingNav = { vm.nav.push(Screen.Developer) }
-                        showVerifyDialog = true
+                        askVerify { vm.nav.push(Screen.Developer) }
                     }
                 )
             }
@@ -540,27 +621,32 @@ fun SettingsScreen(
                 pinError = null
                 pendingToggle = null
                 pendingNav = null
+                verifyStrict = false
             }
         )
     }
 
     // ---- verification method chooser for sensitive toggles ----
     if (showVerifyDialog && (pendingToggle != null || pendingNav != null) && !pinMode) {
+        // The Verification settings entry (and anything else that must not fall
+        // through) only accepts methods that really verify on this device.
+        val bio = if (verifyStrict) onRequireBiometricStrict else onRequireBiometric
+        val cred = if (verifyStrict) onRequireCredentialStrict else onRequireCredential
         AlertDialog(
             onDismissRequest = {},
             title = { Text(stringResource(R.string.verify_title)) },
             text = {
                 Column {
-                    if (onRequireBiometric != null) {
+                    if (bio != null) {
                         VerifyOptionRow(AppIcons.Fingerprint, stringResource(R.string.verify_biometric)) {
                             showVerifyDialog = false
-                            onRequireBiometric { executePending() }
+                            bio { executePending() }
                         }
                     }
-                    if (onRequireCredential != null) {
+                    if (cred != null) {
                         VerifyOptionRow(AppIcons.Security, stringResource(R.string.verify_credential)) {
                             showVerifyDialog = false
-                            onRequireCredential { executePending() }
+                            cred { executePending() }
                         }
                     }
                     if (hasPin) {
@@ -577,8 +663,23 @@ fun SettingsScreen(
                     showVerifyDialog = false
                     pendingToggle = null
                     pendingNav = null
+                    verifyStrict = false
                 }) {
                     Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+
+    // ---- "nothing can verify" notice ----
+    if (showNoMethodDialog) {
+        AlertDialog(
+            onDismissRequest = {},
+            title = { Text(stringResource(R.string.verify_no_method_title)) },
+            text = { Text(stringResource(R.string.verify_no_method_message)) },
+            confirmButton = {
+                TextButton(onClick = { showNoMethodDialog = false }) {
+                    Text(stringResource(R.string.close))
                 }
             }
         )
