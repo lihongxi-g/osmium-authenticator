@@ -118,9 +118,11 @@ fun AttributionsScreen(
                 description = stringResource(R.string.attributions_bouncycastle_desc),
                 onClick = { open("https://www.bouncycastle.org") }
             )
-            // Artwork, not code: the F-Droid mark shown on the welcome screen.
+            // Artwork, not code: the F-Droid mark on the welcome screen and in
+            // About → Follow Osmium. Dual-licensed by its authors, so both
+            // licenses are named.
             AttributionCard(
-                title = "F-Droid logo (GPL-3.0-or-later)",
+                title = "F-Droid logo (GPL-3.0-or-later / CC-BY-SA 3.0)",
                 description = stringResource(R.string.attributions_fdroid_logo_desc),
                 onClick = { open("https://gitlab.com/fdroid/artwork") }
             )
