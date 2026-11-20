@@ -303,7 +303,6 @@ data class AppSettings(
         // run. The Verification settings page lets the user turn that check
         // off per id; the ids below are the single source of truth for both
         // that page and the checks in SettingsScreen.
-        const val VERIFY_GATE = "gate"
         const val VERIFY_SCREENSHOT = "screenshot"
         const val VERIFY_HIDE_CODES = "hideCodes"
         const val VERIFY_EXPORT = "export"

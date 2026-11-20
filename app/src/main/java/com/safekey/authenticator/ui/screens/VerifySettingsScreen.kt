@@ -41,10 +41,6 @@ private data class VerifyItem(
 
 private val VERIFY_ITEMS: List<VerifyItem> = listOf(
     VerifyItem(
-        AppSettings.VERIFY_GATE, R.string.gate_on_open, R.string.gate_on_open_desc,
-        AppIcons.Fingerprint
-    ),
-    VerifyItem(
         AppSettings.VERIFY_SCREENSHOT, R.string.allow_screenshots, R.string.allow_screenshots_desc,
         AppIcons.Visibility
     ),
