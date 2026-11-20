@@ -739,5 +739,4 @@
     <string name="verify_no_method_message">先在設定裡的「應用程式 PIN」設定 PIN，或在系統中錄入指紋/螢幕鎖定密碼，再回到這裡。</string>
     <string name="verify_feature_developer">開發人員模式</string>
     <string name="verify_developer_locked_desc">開發人員模式可以解除 root 限制，因此始終需要驗證</string>
-    <string name="fdroid_entry_desc">在 F-Droid 上查看 Osmium</string>
 </resources>

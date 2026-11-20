@@ -285,6 +285,7 @@
     <string name="about_follow">Follow Osmium</string>
     <string name="social_telegram">Telegram</string>
     <string name="social_github">GitHub</string>
+    <string name="social_fdroid">F-Droid</string>
     <string name="social_mail">Email</string>
     <string name="social_website">Website</string>
     <string name="no_browser">No app available to open this link.</string>
@@ -743,5 +744,4 @@
     <string name="verify_no_method_message">Set an app PIN under App PIN, or add a fingerprint or a screen lock in the system settings, then come back.</string>
     <string name="verify_feature_developer">Developer mode</string>
     <string name="verify_developer_locked_desc">Developer mode can lift the root restriction, so it always verifies</string>
-    <string name="fdroid_entry_desc">Open the Osmium listing on F-Droid</string>
 </resources>

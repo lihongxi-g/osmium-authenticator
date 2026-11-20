@@ -41,14 +41,6 @@ private data class VerifyItem(
 
 private val VERIFY_ITEMS: List<VerifyItem> = listOf(
     VerifyItem(
-        AppSettings.VERIFY_SCREENSHOT, R.string.allow_screenshots, R.string.allow_screenshots_desc,
-        AppIcons.Visibility
-    ),
-    VerifyItem(
-        AppSettings.VERIFY_HIDE_CODES, R.string.hide_codes, R.string.hide_codes_desc,
-        AppIcons.VisibilityOff
-    ),
-    VerifyItem(
         AppSettings.VERIFY_EXPORT, R.string.export_vault, R.string.export_vault_desc,
         AppIcons.FileUpload
     ),

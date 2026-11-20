@@ -726,5 +726,4 @@
     <string name="verify_no_method_message">Primero define un PIN en «PIN de la app» o añade una huella o un bloqueo de pantalla en el sistema.</string>
     <string name="verify_feature_developer">Modo desarrollador</string>
     <string name="verify_developer_locked_desc">El modo desarrollador puede quitar la restricción de root, así que siempre pide verificación</string>
-    <string name="fdroid_entry_desc">Ver Osmium en F-Droid</string>
 </resources>

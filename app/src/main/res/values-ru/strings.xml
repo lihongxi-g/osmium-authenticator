@@ -726,5 +726,4 @@
     <string name="verify_no_method_message">Сначала задайте PIN в разделе «PIN приложения» или добавьте отпечаток либо блокировку экрана в системе.</string>
     <string name="verify_feature_developer">Режим разработчика</string>
     <string name="verify_developer_locked_desc">Режим разработчика может снять ограничение root, поэтому всегда требует подтверждения</string>
-    <string name="fdroid_entry_desc">Osmium в F-Droid</string>
 </resources>

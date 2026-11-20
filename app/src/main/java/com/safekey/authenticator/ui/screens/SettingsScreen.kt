@@ -1,7 +1,5 @@
 package com.safekey.authenticator.ui.screens
 
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -63,9 +61,6 @@ import com.safekey.authenticator.ui.navigation.Screen
  */
 private val APPEARANCE_FEATURES =
     listOf("theme", "fontFamily", "fontSize", "haptic", "predictiveBack", "sort", "tags", "language")
-
-/** Listing page of the app on F-Droid (also opened by the F-Droid client). */
-private const val FDROID_URL = "https://f-droid.org/packages/com.safekey.authenticator"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -247,11 +242,9 @@ fun SettingsScreen(
                         checked = settings.allowScreenshots,
                         onCheckedChange = { target ->
                             if (!rootBlocked("setting")) {
-                                if (verifyRequired(AppSettings.VERIFY_SCREENSHOT)) {
-                                    askVerifyToggle("screenshot", target)
-                                } else {
-                                    vm.setAllowScreenshots(target)
-                                }
+                                // Screenshots and hidden codes are always asked
+                                // for; they have no row on the verification page.
+                                askVerifyToggle("screenshot", target)
                             }
                         }
                     )
@@ -267,11 +260,7 @@ fun SettingsScreen(
                         checked = settings.hideCodes,
                         onCheckedChange = { target ->
                             if (!rootBlocked("setting")) {
-                                if (verifyRequired(AppSettings.VERIFY_HIDE_CODES)) {
-                                    askVerifyToggle("hideCodes", target)
-                                } else {
-                                    vm.setHideCodes(target)
-                                }
+                                askVerifyToggle("hideCodes", target)
                             }
                         }
                     )
@@ -580,21 +569,6 @@ fun SettingsScreen(
                 title = stringResource(R.string.update_settings_title),
                 description = stringResource(R.string.update_settings_desc),
                 onClick = { vm.nav.push(Screen.UpdateSettings) }
-            )
-
-            // Opens the F-Droid listing in a browser / the F-Droid client.
-            if ("fdroid" !in hiddenFeatures) SettingRow(
-                icon = AppIcons.FDroid,
-                title = "F-Droid",
-                description = stringResource(R.string.fdroid_entry_desc),
-                onClick = {
-                    try {
-                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(FDROID_URL)))
-                    } catch (_: Exception) {
-                        // No browser and no F-Droid client installed.
-                        vm.showToast(context.getString(R.string.no_browser))
-                    }
-                }
             )
 
             // ------------------------------------------ developer mode (2.4.2)

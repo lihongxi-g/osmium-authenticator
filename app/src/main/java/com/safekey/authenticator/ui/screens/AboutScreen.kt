@@ -216,6 +216,13 @@ fun AboutScreen(
                 SocialIcon(AppIcons.Globe, stringResource(R.string.social_website), "https://osmium.im") { url ->
                     openUrl(context, url, vm)
                 }
+                SocialIcon(
+                    AppIcons.FDroid,
+                    stringResource(R.string.social_fdroid),
+                    "https://f-droid.org/packages/com.safekey.authenticator"
+                ) { url ->
+                    openUrl(context, url, vm)
+                }
             }
 
             Spacer(Modifier.height(24.dp))

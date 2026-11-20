@@ -726,5 +726,4 @@
     <string name="verify_no_method_message">先に「アプリ PIN」で PIN を設定するか、システムで指紋・画面ロックを登録してから戻ってください。</string>
     <string name="verify_feature_developer">開発者モード</string>
     <string name="verify_developer_locked_desc">開発者モードは root 制限を解除できるため、常に認証が必要です</string>
-    <string name="fdroid_entry_desc">F-Droid で Osmium を見る</string>
 </resources>

@@ -726,5 +726,4 @@
     <string name="verify_no_method_message">먼저 ‘앱 PIN’에서 PIN을 설정하거나 시스템에서 지문·화면 잠금을 등록한 뒤 다시 오세요.</string>
     <string name="verify_feature_developer">개발자 모드</string>
     <string name="verify_developer_locked_desc">개발자 모드는 루트 제한을 해제할 수 있어 항상 인증이 필요합니다</string>
-    <string name="fdroid_entry_desc">F-Droid에서 Osmium 보기</string>
 </resources>
