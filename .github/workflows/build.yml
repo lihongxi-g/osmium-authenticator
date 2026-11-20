@@ -58,7 +58,7 @@ jobs:
               print(f'{mod}: {total} tests, {failed} failed')
           "
 
-      - name: Prepare release APKs
+      - name: Prepare release APK
         run: |
           set -euo pipefail
           version=$(grep -oP 'versionName\s*=\s*"\K[^"]+' app/build.gradle.kts)
@@ -68,12 +68,12 @@ jobs:
           echo "$version" | grep -Eq '^[0-9]+(\.[0-9]+)+(-[0-9A-Za-z.]+)?$'
           echo "building $version"
           mkdir -p dist
-          for abi in arm64-v8a armeabi-v7a x86_64; do
-            source="app/build/outputs/apk/release/app-${abi}-release.apk"
-            target="dist/osmium-${version}-${abi}.apk"
-            test -s "$source"
-            cp "$source" "$target"
-          done
+          # Single universal APK since 2026-11-20: no per-ABI splits, so the
+          # release output is app-release.apk and the asset name carries no
+          # architecture suffix (osmium-<version>.apk).
+          source="app/build/outputs/apk/release/app-release.apk"
+          test -s "$source"
+          cp "$source" "dist/osmium-${version}.apk"
           # Flat file names so `sha256sum -c SHA256SUMS.txt` works against the
           # release assets as they are uploaded (no dist/ prefix).
           (cd dist && sha256sum osmium-*.apk | sort -k2 > SHA256SUMS.txt)

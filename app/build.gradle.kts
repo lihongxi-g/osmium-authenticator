@@ -28,15 +28,10 @@ android {
         }
     }
 
-    splits {
-        abi {
-            isEnable = true
-            reset()
-            // x86_64 included for Android emulator builds (restored 2026-09-13).
-            include("arm64-v8a", "armeabi-v7a", "x86_64")
-            isUniversalApk = false
-        }
-    }
+    // 2026-11-20 起不再分 ABI 发包：只出一个通用包（内含 arm64-v8a /
+    // armeabi-v7a / x86_64 三套 .so，共比 arm64 单包大 ~235 KiB）。换来的是
+    // 单一 versionCode、CI 只产一个文件、F-Droid 的 suggestedVersionCode
+    // 不会再被某个 ABI 的派生号抢位。发布资产名固定为 osmium-<version>.apk。
 
 
     // The dependency-info block that AGP injects into release APKs is
@@ -109,26 +104,9 @@ kotlin {
     }
 }
 
-// Preserve the existing per-ABI version codes using AGP's public variant API.
-androidComponents {
-    onVariants { variant ->
-        for (output in variant.outputs) {
-            val abi = output.filters.firstOrNull {
-                it.filterType == com.android.build.api.variant.FilterConfiguration.FilterType.ABI
-            }?.identifier
-            val digit = when (abi) {
-                "armeabi-v7a" -> 1
-                "arm64-v8a" -> 2
-                "x86_64" -> 3
-                else -> 0
-            }
-            if (digit != 0) {
-                val baseCode = android.defaultConfig.versionCode!!
-                output.versionCode.set(baseCode * 10 + digit)
-            }
-        }
-    }
-}
+// 分 ABI 时这里给每个 ABI 派生 versionCode（base*10+1/2/3，历史版本 951/952/953
+// 就是这么来的）。不再分包后直接用 defaultConfig.versionCode，发版时手工递增。
+
 
 dependencies {
     // BOM 2024.09.03 = Compose 1.7.3 (runtime). Upgraded from 2024.01.00
