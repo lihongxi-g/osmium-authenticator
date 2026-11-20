@@ -17,6 +17,8 @@ import androidx.activity.viewModels
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
@@ -29,6 +31,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -37,6 +40,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.lazy.LazyListState
@@ -52,6 +56,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -64,7 +69,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.core.content.ContextCompat
+import kotlin.math.roundToInt
 import androidx.core.view.WindowCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
@@ -1250,395 +1257,475 @@ private fun IntegrityNoticeDialog(
         }
 
         BackHandler(enabled = vm.nav.canGoBack) { vm.nav.pop() }
-        Box(Modifier.fillMaxSize()) {
-            SwipeBackContainer(
-            canGoBack = vm.nav.canGoBack,
-            predictiveBack = settings.predictiveBackAnimation,
-            onBack = { vm.nav.pop() }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
         ) {
-            AnimatedContent(
-                targetState = current,
-                transitionSpec = {
-                    if (direction > 0) {
-                        (slideInHorizontally(tween(280)) { it / 3 } + fadeIn(tween(220))) togetherWith
-                            (slideOutHorizontally(tween(260)) { -it / 5 } + fadeOut(tween(200)))
-                    } else {
-                        (slideInHorizontally(tween(280)) { -it / 3 } + fadeIn(tween(220))) togetherWith
-                            (slideOutHorizontally(tween(260)) { it / 5 } + fadeOut(tween(200)))
+            SwipeBackContainer(
+                canGoBack = vm.nav.canGoBack,
+                predictiveBack = settings.predictiveBackAnimation,
+                // The gesture has already slid the screen away by the time this
+                // runs, so the pop itself must not animate again.
+                onBack = { vm.nav.popFromGesture() }
+            ) { progress ->
+                BoxWithConstraints(Modifier.fillMaxSize()) {
+                    val widthPx = constraints.maxWidth.toFloat()
+
+                    // The screen being returned to. Drawn only while a gesture is
+                    // running: composing it at rest would also start that
+                    // screen's side effects (the scanner's camera, for one).
+                    val previousScreen = vm.nav.previous
+                    val showingPreview by remember {
+                        derivedStateOf { progress.value > 0.004f }
                     }
-                },
-                label = "nav"
-            ) { screen ->
-                screenStateHolder.SaveableStateProvider(screen.toString()) {
-                when (screen) {
-                    is Screen.Accounts -> AccountsScreen(
-                        vm = vm,
-                        listState = accountsListState,
-                        tagRowState = accountTagRowState,
-                        onAddScan = { vm.nav.push(Screen.Scan) },
-                        onAddManual = { vm.nav.push(Screen.AccountForm(accountId = null, prefill = null)) },
-                        onAddPaste = {
-                            val clipboard = getSystemService(ClipboardManager::class.java)
-                            val clipText = clipboard?.primaryClip
-                                ?.takeIf { it.itemCount > 0 }
-                                ?.getItemAt(0)
-                                ?.coerceToText(this@MainActivity)
-                                ?.toString()
-                                .orEmpty()
-                            val parsed = try {
-                                OtpUriParser.parse(clipText)
-                            } catch (_: Exception) {
-                                null
-                            }
-                            if (parsed != null) {
-                                vm.nav.push(Screen.AccountForm(accountId = null, prefill = parsed))
-                            } else {
-                                if (clipText.contains("Steam", ignoreCase = true)) {
-                                    vm.showToast(context.getString(R.string.steam_manual_hint))
-                                } else {
-                                    vm.showToast(context.getString(R.string.error_uri_invalid))
+                    if (previousScreen != null && showingPreview) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .offset {
+                                    // Comes in from a third of a screen to the left,
+                                    // the same fraction the push animation slides.
+                                    IntOffset(
+                                        ((progress.value - 1f) * widthPx / 3f).roundToInt(),
+                                        0
+                                    )
                                 }
-                            }
-                        },
-                        onOpenDetail = { account -> vm.nav.push(Screen.Detail(account.id)) },
-                        onOpenSettings = { vm.nav.push(Screen.Settings) }
-                    )
-
-                    is Screen.AccountForm -> AccountFormScreen(
-                        vm = vm,
-                        accountId = screen.accountId,
-                        prefillUri = screen.prefill,
-                        // Leaving the form on purpose drops its draft, so
-                        // returning to edit the same account shows the stored
-                        // values rather than the previous typing.
-                        onDone = {
-                            screenStateHolder.removeState(screen.toString())
-                            vm.nav.pop()
-                        },
-                        onBack = {
-                            screenStateHolder.removeState(screen.toString())
-                            vm.nav.pop()
-                        }
-                    )
-
-                    is Screen.Detail -> DetailScreen(
-                        vm = vm,
-                        accountId = screen.accountId,
-                        onEdit = { account -> vm.nav.push(Screen.AccountForm(account.id)) },
-                        onDeleted = { vm.nav.popToRoot() },
-                        onBack = { vm.nav.pop() },
-                        onShare = { account -> vm.nav.push(Screen.ShareQr(account.id)) },
-                        // null when no biometrics on device — the option
-                        // simply doesn't show in the verification dialog
-                        onRequireBiometric = if (canAuthenticateBiometric()) {
-                            { onSuccess ->
-                                launchBiometric(
-                                    onSuccess = onSuccess,
-                                    onCancelled = { vm.showToast(context.getString(R.string.lock_cancelled)) },
-                                    onError = { msg -> vm.showToast(msg) }
-                                )
-                            }
-                        } else null,
-                        onRequireCredential = { onSuccess ->
-                            launchCredential(
-                                onSuccess = onSuccess,
-                                onCancelled = { vm.showToast(context.getString(R.string.lock_cancelled)) },
-                                onError = { msg -> vm.showToast(msg) }
+                        ) {
+                            // No SaveableStateProvider here on purpose: the key
+                            // would be the same one the current layer uses for a
+                            // frame after the pop, and this layer only lives for
+                            // the duration of the gesture anyway.
+                            ScreenContent(
+                                screen = previousScreen,
+                                accountsListState = accountsListState,
+                                accountTagRowState = accountTagRowState,
+                                settingsScrollState = settingsScrollState,
+                                screenStateHolder = screenStateHolder
                             )
                         }
-                    )
+                    }
 
-                    is Screen.Scan -> ScanScreen(
-                        vm = vm,
-                        onSaved = { vm.nav.pop() },
-                        onBack = { vm.nav.pop() }
-                    )
-
-                    is Screen.Settings -> SettingsScreen(
-                        vm = vm,
-                        scrollState = settingsScrollState,
-                        onBack = { vm.nav.pop() },
-                        onExport = { vm.nav.push(Screen.Export) },
-                        onImport = { vm.nav.push(Screen.Import) },
-                        onWebDav = { vm.nav.push(Screen.WebDav) },
-                        onAutoBackup = { vm.nav.push(Screen.AutoBackup) },
-                        onOpenPinSetup = { vm.nav.push(Screen.PinSetup("pin")) },
-                        onOpenPinVerify = { next -> vm.nav.push(Screen.PinVerify(next)) },
-                        onRequireBiometric = { onSuccess ->
-                            // Toggling the gate requires identity verification.
-                            if (canAuthenticateBiometric()) {
-                                launchBiometric(
-                                    onSuccess = onSuccess,
-                                    onCancelled = { vm.showToast(context.getString(R.string.lock_cancelled)) },
-                                    onError = { msg -> vm.showToast(msg) }
-                                )
-                            } else {
-                                // No biometrics enrolled — nothing to verify with
-                                AppLog.d("gate toggle without biometrics on device")
-                                onSuccess()
-                            }
-                        },
-                        onRequireCredential = { onSuccess ->
-                            launchCredential(
-                                onSuccess = onSuccess,
-                                onCancelled = { vm.showToast(context.getString(R.string.lock_cancelled)) },
-                                onError = { msg -> vm.showToast(msg) }
-                            )
-                        },
-                        onIntegrity = { vm.nav.push(Screen.Integrity) }
-                    )
-
-                    is Screen.Permissions -> PermissionsScreen(
-                        onBack = { vm.nav.pop() }
-                    )
-
-                    is Screen.Appearance -> AppearanceSettingsScreen(
-                        vm = vm,
-                        hiddenFeatures = vm.settings.value.devHiddenFeatures,
-                        onBack = { vm.nav.pop() }
-                    )
-
-                    is Screen.ThemeSettings -> ThemeSettingsScreen(
-                        vm = vm,
-                        hiddenFeatures = vm.settings.value.devHiddenFeatures,
-                        onBack = { vm.nav.pop() }
-                    )
-
-                    is Screen.FontFamilySettings -> FontFamilySettingsScreen(
-                        vm = vm,
-                        onBack = { vm.nav.pop() }
-                    )
-
-                    is Screen.FontNotes -> FontNotesScreen(onBack = { vm.nav.pop() })
-
-                    is Screen.FontSettings -> FontSizeSettingsScreen(
-                        vm = vm,
-                        onBack = { vm.nav.pop() }
-                    )
-
-                    is Screen.HapticSettings -> HapticSettingsScreen(
-                        vm = vm,
-                        onBack = { vm.nav.pop() }
-                    )
-
-                    is Screen.LanguageSettings -> LanguageSettingsScreen(
-                        onBack = { vm.nav.pop() },
-                        onLanguageChanged = { lang ->
-                            LanguagePrefs.set(this@MainActivity, lang)
-                            // None of the bundled fonts covers Chinese, so a
-                            // Chinese UI must not keep a third-party face.
-                            if (LanguagePrefs.resolvesToChinese(this@MainActivity, lang)) {
-                                vm.setFontFamily(AppSettings.FONT_FAMILY_SYSTEM)
-                            }
-                            recreate()
-                        }
-                    )
-
-                    is Screen.UpdateSettings -> UpdateSettingsScreen(
-                        vm = vm,
-                        onBack = { vm.nav.pop() }
-                    )
-
-                    is Screen.TagSettings -> TagSettingsScreen(
-                        vm = vm,
-                        onBack = { vm.nav.pop() },
-                        onManageTags = { vm.nav.push(Screen.Tags) }
-                    )
-
-                    is Screen.Export -> ExportScreen(
-                        vm = vm,
-                        onDone = { vm.nav.pop() },
-                        onBack = { vm.nav.pop() }
-                    )
-
-                    is Screen.ExportToOthers -> ExportToOthersScreen(
-                        vm = vm,
-                        onDone = { vm.nav.pop() },
-                        onBack = { vm.nav.pop() }
-                    )
-
-                    is Screen.Import -> ImportScreen(
-                        vm = vm,
-                        onDone = { vm.nav.pop() },
-                        onBack = { vm.nav.pop() }
-                    )
-
-                    is Screen.Integrity -> IntegrityScreen(
-                        vm = vm,
-                        onBack = { vm.nav.pop() }
-                    )
-
-                    is Screen.WebDav -> WebDavScreen(
-                        vm = vm,
-                        onBack = { vm.nav.pop() },
-                        onManagePassword = { vm.nav.push(Screen.WebDavPassword) }
-                    )
-
-                    is Screen.WebDavPassword -> WebDavPasswordScreen(
-                        vm = vm,
-                        onBack = { vm.nav.pop() }
-                    )
-
-                    is Screen.AutoBackup -> AutoBackupScreen(
-                        vm = vm,
-                        onBack = { vm.nav.pop() }
-                    )
-
-                    is Screen.LanTransfer -> LanTransferScreen(
-                        vm = vm,
-                        onBack = { vm.nav.pop() },
-                        // Blocking a peer device is a security decision: verify
-                        // identity first (same pattern as the settings toggles).
-                        onRequireBiometric = if (canAuthenticateBiometric()) {
-                            { onSuccess ->
-                                launchBiometric(
-                                    onSuccess = onSuccess,
-                                    onCancelled = {
-                                        vm.showToast(context.getString(R.string.lock_cancelled))
-                                    },
-                                    onError = { msg -> vm.showToast(msg) }
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .offset { IntOffset((progress.value * widthPx).roundToInt(), 0) }
+                    ) {
+                        AnimatedContent(
+                            targetState = current,
+                            transitionSpec = {
+                                if (vm.nav.instantTransition) {
+                                    // Swipe-back already moved both screens into
+                                    // place; animating here would snap them back
+                                    // to the start position first.
+                                    EnterTransition.None togetherWith ExitTransition.None
+                                } else if (direction > 0) {
+                                    (slideInHorizontally(tween(280)) { it / 3 } + fadeIn(tween(220))) togetherWith
+                                        (slideOutHorizontally(tween(260)) { -it / 5 } + fadeOut(tween(200)))
+                                } else {
+                                    (slideInHorizontally(tween(280)) { -it / 3 } + fadeIn(tween(220))) togetherWith
+                                        (slideOutHorizontally(tween(260)) { it / 5 } + fadeOut(tween(200)))
+                                }
+                            },
+                            label = "nav"
+                        ) { screen ->
+                            screenStateHolder.SaveableStateProvider(screen.toString()) {
+                                ScreenContent(
+                                    screen = screen,
+                                    accountsListState = accountsListState,
+                                    accountTagRowState = accountTagRowState,
+                                    settingsScrollState = settingsScrollState,
+                                    screenStateHolder = screenStateHolder
                                 )
                             }
-                        } else null,
-                        onRequireCredential = { onSuccess ->
-                            launchCredential(
-                                onSuccess = onSuccess,
-                                onCancelled = {
-                                    vm.showToast(context.getString(R.string.lock_cancelled))
-                                },
-                                onError = { msg -> vm.showToast(msg) }
-                            )
                         }
-                    )
-
-                    is Screen.PinSetup -> PinSetupScreen(
-                        title = if (screen.mode == "destroy_pin")
-                            stringResource(R.string.destroy_pin_title)
-                        else stringResource(R.string.pin_setup_title),
-                        description = if (screen.mode == "destroy_pin")
-                            stringResource(R.string.destroy_pin_desc)
-                        else stringResource(R.string.pin_setup_desc),
-                        onValidate = if (screen.mode == "destroy_pin") {
-                            // the destruct PIN must differ from the app PIN —
-                            // otherwise any normal unlock could trigger self-destruct
-                            { pin -> !(vm.hasLocalPin() && vm.verifyLocalPin(pin)) }
-                        } else null,
-                        validateError = if (screen.mode == "destroy_pin")
-                            stringResource(R.string.destroy_pin_same_as_pin)
-                        else null,
-                        onDone = { pin ->
-                            if (screen.mode == "destroy_pin") {
-                                vm.setSelfDestructPin(pin)
-                            } else {
-                                vm.setAppPin(pin)
-                            }
-                            vm.showToast(context.getString(R.string.pin_saved))
-                            vm.nav.pop()
-                        },
-                        onCancel = { vm.nav.pop() }
-                    )
-
-                    is Screen.PinVerify -> CurrentPinVerifyRoute(screen.next)
-
-                    is Screen.ShareQr -> ShareQrScreen(
-                        vm = vm,
-                        accountId = screen.accountId,
-                        onBack = { vm.nav.pop() }
-                    )
-
-                    is Screen.About -> AboutScreen(
-                        vm = vm,
-                        onBack = { vm.nav.pop() },
-                        onRequireBiometric = if (canAuthenticateBiometric()) {
-                            { onSuccess ->
-                                launchBiometric(
-                                    onSuccess = onSuccess,
-                                    onCancelled = { vm.showToast(context.getString(R.string.lock_cancelled)) },
-                                    onError = { msg -> vm.showToast(msg) }
-                                )
-                            }
-                        } else null,
-                        onRequireCredential = { onSuccess ->
-                            launchCredential(
-                                onSuccess = onSuccess,
-                                onCancelled = { vm.showToast(context.getString(R.string.lock_cancelled)) },
-                                onError = { msg -> vm.showToast(msg) }
-                            )
-                        }
-                    )
-
-                    is Screen.Developer -> DeveloperScreen(
-                        vm = vm,
-                        onBack = { vm.nav.pop() },
-                        onRequireBiometric = if (canAuthenticateBiometric()) {
-                            { onSuccess ->
-                                launchBiometric(
-                                    onSuccess = onSuccess,
-                                    onCancelled = { vm.showToast(context.getString(R.string.lock_cancelled)) },
-                                    onError = { msg -> vm.showToast(msg) }
-                                )
-                            }
-                        } else null,
-                        onRequireCredential = { onSuccess ->
-                            launchCredential(
-                                onSuccess = onSuccess,
-                                onCancelled = { vm.showToast(context.getString(R.string.lock_cancelled)) },
-                                onError = { msg -> vm.showToast(msg) }
-                            )
-                        }
-                    )
-
-                    is Screen.Manual -> ManualScreen(
-                        onBack = { vm.nav.pop() }
-                    )
-
-                    is Screen.SortOrder -> SortOrderScreen(
-                        vm = vm,
-                        onBack = { vm.nav.pop() }
-                    )
-
-                    is Screen.GoogleImport -> GoogleImportScreen(
-                        vm = vm,
-                        onBack = { vm.nav.pop() },
-                        onImported = { vm.nav.pop() }
-                    )
-
-                    is Screen.FileImport -> FileImportScreen(
-                        vm = vm,
-                        onBack = { vm.nav.pop() },
-                        onImported = { vm.nav.pop() }
-                    )
-
-                    is Screen.ThirdPartyImport -> ThirdPartyImportScreen(
-                        vm = vm,
-                        onBack = { vm.nav.pop() }
-                    )
-
-                    is Screen.Attributions -> AttributionsScreen(
-                        vm = vm,
-                        onBack = { vm.nav.pop() }
-                    )
-
-                    is Screen.Donation -> DonationScreen(
-                        vm = vm,
-                        onBack = { vm.nav.pop() }
-                    )
-
-                    is Screen.Tags -> TagsScreen(
-                        vm = vm,
-                        onBack = { vm.nav.pop() },
-                        onManageAccounts = { tag -> vm.nav.push(Screen.TagAccounts(tag.id)) }
-                    )
-
-                    is Screen.TagAccounts -> TagAccountsScreen(
-                        vm = vm,
-                        tagId = screen.tagId,
-                        onBack = { vm.nav.pop() }
-                    )
-                }
+                    }
                 }
             }
         }
     }
-}
+
+    /**
+     * Everything one screen needs to draw itself.
+     *
+     * Split out of the navigation host so a back gesture in progress can draw
+     * the screen underneath as well as the one being dragged away — the
+     * predictive preview needs both, and they must be the same composable.
+     */
+    @Composable
+    private fun ScreenContent(
+        screen: Screen,
+        accountsListState: LazyListState,
+        accountTagRowState: ScrollState,
+        settingsScrollState: ScrollState,
+        screenStateHolder: androidx.compose.runtime.saveable.SaveableStateHolder
+    ) {
+        val context = LocalContext.current
+        when (screen) {
+            is Screen.Accounts -> AccountsScreen(
+                vm = vm,
+                listState = accountsListState,
+                tagRowState = accountTagRowState,
+                onAddScan = { vm.nav.push(Screen.Scan) },
+                onAddManual = { vm.nav.push(Screen.AccountForm(accountId = null, prefill = null)) },
+                onAddPaste = {
+                    val clipboard = getSystemService(ClipboardManager::class.java)
+                    val clipText = clipboard?.primaryClip
+                        ?.takeIf { it.itemCount > 0 }
+                        ?.getItemAt(0)
+                        ?.coerceToText(this@MainActivity)
+                        ?.toString()
+                        .orEmpty()
+                    val parsed = try {
+                        OtpUriParser.parse(clipText)
+                    } catch (_: Exception) {
+                        null
+                    }
+                    if (parsed != null) {
+                        vm.nav.push(Screen.AccountForm(accountId = null, prefill = parsed))
+                    } else {
+                        if (clipText.contains("Steam", ignoreCase = true)) {
+                            vm.showToast(context.getString(R.string.steam_manual_hint))
+                        } else {
+                            vm.showToast(context.getString(R.string.error_uri_invalid))
+                        }
+                    }
+                },
+                onOpenDetail = { account -> vm.nav.push(Screen.Detail(account.id)) },
+                onOpenSettings = { vm.nav.push(Screen.Settings) }
+            )
+
+            is Screen.AccountForm -> AccountFormScreen(
+                vm = vm,
+                accountId = screen.accountId,
+                prefillUri = screen.prefill,
+                // Leaving the form on purpose drops its draft, so
+                // returning to edit the same account shows the stored
+                // values rather than the previous typing.
+                onDone = {
+                    screenStateHolder.removeState(screen.toString())
+                    vm.nav.pop()
+                },
+                onBack = {
+                    screenStateHolder.removeState(screen.toString())
+                    vm.nav.pop()
+                }
+            )
+
+            is Screen.Detail -> DetailScreen(
+                vm = vm,
+                accountId = screen.accountId,
+                onEdit = { account -> vm.nav.push(Screen.AccountForm(account.id)) },
+                onDeleted = { vm.nav.popToRoot() },
+                onBack = { vm.nav.pop() },
+                onShare = { account -> vm.nav.push(Screen.ShareQr(account.id)) },
+                // null when no biometrics on device — the option
+                // simply doesn't show in the verification dialog
+                onRequireBiometric = if (canAuthenticateBiometric()) {
+                    { onSuccess ->
+                        launchBiometric(
+                            onSuccess = onSuccess,
+                            onCancelled = { vm.showToast(context.getString(R.string.lock_cancelled)) },
+                            onError = { msg -> vm.showToast(msg) }
+                        )
+                    }
+                } else null,
+                onRequireCredential = { onSuccess ->
+                    launchCredential(
+                        onSuccess = onSuccess,
+                        onCancelled = { vm.showToast(context.getString(R.string.lock_cancelled)) },
+                        onError = { msg -> vm.showToast(msg) }
+                    )
+                }
+            )
+
+            is Screen.Scan -> ScanScreen(
+                vm = vm,
+                onSaved = { vm.nav.pop() },
+                onBack = { vm.nav.pop() }
+            )
+
+            is Screen.Settings -> SettingsScreen(
+                vm = vm,
+                scrollState = settingsScrollState,
+                onBack = { vm.nav.pop() },
+                onExport = { vm.nav.push(Screen.Export) },
+                onImport = { vm.nav.push(Screen.Import) },
+                onWebDav = { vm.nav.push(Screen.WebDav) },
+                onAutoBackup = { vm.nav.push(Screen.AutoBackup) },
+                onOpenPinSetup = { vm.nav.push(Screen.PinSetup("pin")) },
+                onOpenPinVerify = { next -> vm.nav.push(Screen.PinVerify(next)) },
+                onRequireBiometric = { onSuccess ->
+                    // Toggling the gate requires identity verification.
+                    if (canAuthenticateBiometric()) {
+                        launchBiometric(
+                            onSuccess = onSuccess,
+                            onCancelled = { vm.showToast(context.getString(R.string.lock_cancelled)) },
+                            onError = { msg -> vm.showToast(msg) }
+                        )
+                    } else {
+                        // No biometrics enrolled — nothing to verify with
+                        AppLog.d("gate toggle without biometrics on device")
+                        onSuccess()
+                    }
+                },
+                onRequireCredential = { onSuccess ->
+                    launchCredential(
+                        onSuccess = onSuccess,
+                        onCancelled = { vm.showToast(context.getString(R.string.lock_cancelled)) },
+                        onError = { msg -> vm.showToast(msg) }
+                    )
+                },
+                onIntegrity = { vm.nav.push(Screen.Integrity) }
+            )
+
+            is Screen.Permissions -> PermissionsScreen(
+                onBack = { vm.nav.pop() }
+            )
+
+            is Screen.Appearance -> AppearanceSettingsScreen(
+                vm = vm,
+                hiddenFeatures = vm.settings.value.devHiddenFeatures,
+                onBack = { vm.nav.pop() }
+            )
+
+            is Screen.ThemeSettings -> ThemeSettingsScreen(
+                vm = vm,
+                hiddenFeatures = vm.settings.value.devHiddenFeatures,
+                onBack = { vm.nav.pop() }
+            )
+
+            is Screen.FontFamilySettings -> FontFamilySettingsScreen(
+                vm = vm,
+                onBack = { vm.nav.pop() }
+            )
+
+            is Screen.FontNotes -> FontNotesScreen(onBack = { vm.nav.pop() })
+
+            is Screen.FontSettings -> FontSizeSettingsScreen(
+                vm = vm,
+                onBack = { vm.nav.pop() }
+            )
+
+            is Screen.HapticSettings -> HapticSettingsScreen(
+                vm = vm,
+                onBack = { vm.nav.pop() }
+            )
+
+            is Screen.LanguageSettings -> LanguageSettingsScreen(
+                onBack = { vm.nav.pop() },
+                onLanguageChanged = { lang ->
+                    LanguagePrefs.set(this@MainActivity, lang)
+                    // None of the bundled fonts covers Chinese, so a
+                    // Chinese UI must not keep a third-party face.
+                    if (LanguagePrefs.resolvesToChinese(this@MainActivity, lang)) {
+                        vm.setFontFamily(AppSettings.FONT_FAMILY_SYSTEM)
+                    }
+                    recreate()
+                }
+            )
+
+            is Screen.UpdateSettings -> UpdateSettingsScreen(
+                vm = vm,
+                onBack = { vm.nav.pop() }
+            )
+
+            is Screen.TagSettings -> TagSettingsScreen(
+                vm = vm,
+                onBack = { vm.nav.pop() },
+                onManageTags = { vm.nav.push(Screen.Tags) }
+            )
+
+            is Screen.Export -> ExportScreen(
+                vm = vm,
+                onDone = { vm.nav.pop() },
+                onBack = { vm.nav.pop() }
+            )
+
+            is Screen.ExportToOthers -> ExportToOthersScreen(
+                vm = vm,
+                onDone = { vm.nav.pop() },
+                onBack = { vm.nav.pop() }
+            )
+
+            is Screen.Import -> ImportScreen(
+                vm = vm,
+                onDone = { vm.nav.pop() },
+                onBack = { vm.nav.pop() }
+            )
+
+            is Screen.Integrity -> IntegrityScreen(
+                vm = vm,
+                onBack = { vm.nav.pop() }
+            )
+
+            is Screen.WebDav -> WebDavScreen(
+                vm = vm,
+                onBack = { vm.nav.pop() },
+                onManagePassword = { vm.nav.push(Screen.WebDavPassword) }
+            )
+
+            is Screen.WebDavPassword -> WebDavPasswordScreen(
+                vm = vm,
+                onBack = { vm.nav.pop() }
+            )
+
+            is Screen.AutoBackup -> AutoBackupScreen(
+                vm = vm,
+                onBack = { vm.nav.pop() }
+            )
+
+            is Screen.LanTransfer -> LanTransferScreen(
+                vm = vm,
+                onBack = { vm.nav.pop() },
+                // Blocking a peer device is a security decision: verify
+                // identity first (same pattern as the settings toggles).
+                onRequireBiometric = if (canAuthenticateBiometric()) {
+                    { onSuccess ->
+                        launchBiometric(
+                            onSuccess = onSuccess,
+                            onCancelled = {
+                                vm.showToast(context.getString(R.string.lock_cancelled))
+                            },
+                            onError = { msg -> vm.showToast(msg) }
+                        )
+                    }
+                } else null,
+                onRequireCredential = { onSuccess ->
+                    launchCredential(
+                        onSuccess = onSuccess,
+                        onCancelled = {
+                            vm.showToast(context.getString(R.string.lock_cancelled))
+                        },
+                        onError = { msg -> vm.showToast(msg) }
+                    )
+                }
+            )
+
+            is Screen.PinSetup -> PinSetupScreen(
+                title = if (screen.mode == "destroy_pin")
+                    stringResource(R.string.destroy_pin_title)
+                else stringResource(R.string.pin_setup_title),
+                description = if (screen.mode == "destroy_pin")
+                    stringResource(R.string.destroy_pin_desc)
+                else stringResource(R.string.pin_setup_desc),
+                onValidate = if (screen.mode == "destroy_pin") {
+                    // the destruct PIN must differ from the app PIN —
+                    // otherwise any normal unlock could trigger self-destruct
+                    { pin -> !(vm.hasLocalPin() && vm.verifyLocalPin(pin)) }
+                } else null,
+                validateError = if (screen.mode == "destroy_pin")
+                    stringResource(R.string.destroy_pin_same_as_pin)
+                else null,
+                onDone = { pin ->
+                    if (screen.mode == "destroy_pin") {
+                        vm.setSelfDestructPin(pin)
+                    } else {
+                        vm.setAppPin(pin)
+                    }
+                    vm.showToast(context.getString(R.string.pin_saved))
+                    vm.nav.pop()
+                },
+                onCancel = { vm.nav.pop() }
+            )
+
+            is Screen.PinVerify -> CurrentPinVerifyRoute(screen.next)
+
+            is Screen.ShareQr -> ShareQrScreen(
+                vm = vm,
+                accountId = screen.accountId,
+                onBack = { vm.nav.pop() }
+            )
+
+            is Screen.About -> AboutScreen(
+                vm = vm,
+                onBack = { vm.nav.pop() },
+                onRequireBiometric = if (canAuthenticateBiometric()) {
+                    { onSuccess ->
+                        launchBiometric(
+                            onSuccess = onSuccess,
+                            onCancelled = { vm.showToast(context.getString(R.string.lock_cancelled)) },
+                            onError = { msg -> vm.showToast(msg) }
+                        )
+                    }
+                } else null,
+                onRequireCredential = { onSuccess ->
+                    launchCredential(
+                        onSuccess = onSuccess,
+                        onCancelled = { vm.showToast(context.getString(R.string.lock_cancelled)) },
+                        onError = { msg -> vm.showToast(msg) }
+                    )
+                }
+            )
+
+            is Screen.Developer -> DeveloperScreen(
+                vm = vm,
+                onBack = { vm.nav.pop() },
+                onRequireBiometric = if (canAuthenticateBiometric()) {
+                    { onSuccess ->
+                        launchBiometric(
+                            onSuccess = onSuccess,
+                            onCancelled = { vm.showToast(context.getString(R.string.lock_cancelled)) },
+                            onError = { msg -> vm.showToast(msg) }
+                        )
+                    }
+                } else null,
+                onRequireCredential = { onSuccess ->
+                    launchCredential(
+                        onSuccess = onSuccess,
+                        onCancelled = { vm.showToast(context.getString(R.string.lock_cancelled)) },
+                        onError = { msg -> vm.showToast(msg) }
+                    )
+                }
+            )
+
+            is Screen.Manual -> ManualScreen(
+                onBack = { vm.nav.pop() }
+            )
+
+            is Screen.SortOrder -> SortOrderScreen(
+                vm = vm,
+                onBack = { vm.nav.pop() }
+            )
+
+            is Screen.GoogleImport -> GoogleImportScreen(
+                vm = vm,
+                onBack = { vm.nav.pop() },
+                onImported = { vm.nav.pop() }
+            )
+
+            is Screen.FileImport -> FileImportScreen(
+                vm = vm,
+                onBack = { vm.nav.pop() },
+                onImported = { vm.nav.pop() }
+            )
+
+            is Screen.ThirdPartyImport -> ThirdPartyImportScreen(
+                vm = vm,
+                onBack = { vm.nav.pop() }
+            )
+
+            is Screen.Attributions -> AttributionsScreen(
+                vm = vm,
+                onBack = { vm.nav.pop() }
+            )
+
+            is Screen.Donation -> DonationScreen(
+                vm = vm,
+                onBack = { vm.nav.pop() }
+            )
+
+            is Screen.Tags -> TagsScreen(
+                vm = vm,
+                onBack = { vm.nav.pop() },
+                onManageAccounts = { tag -> vm.nav.push(Screen.TagAccounts(tag.id)) }
+            )
+
+            is Screen.TagAccounts -> TagAccountsScreen(
+                vm = vm,
+                tagId = screen.tagId,
+                onBack = { vm.nav.pop() }
+            )
+        }
+    }
 }

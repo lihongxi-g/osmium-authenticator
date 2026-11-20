@@ -86,18 +86,35 @@ class NavigationState(initial: Screen = Screen.Accounts) {
     var direction by mutableStateOf(1) // +1 push, -1 pop
         private set
 
+    /**
+     * True when the last pop came from the swipe-back gesture: the gesture
+     * container already animated both screens into place, so the navigation
+     * host must swap them without running its own slide again.
+     */
+    var instantTransition by mutableStateOf(false)
+        private set
+
     val current: Screen get() = stack.last()
+    /** The screen a pop would reveal; null at the root. */
+    val previous: Screen? get() = if (stack.size > 1) stack[stack.size - 2] else null
     val canGoBack: Boolean get() = stack.size > 1
     val size: Int get() = stack.size
 
     fun push(screen: Screen) {
         direction = 1
+        instantTransition = false
         stack.add(screen)
     }
 
-    fun pop(): Boolean {
+    fun pop(): Boolean = doPop(fromGesture = false)
+
+    /** Pop requested by a gesture that already slid the screen away. */
+    fun popFromGesture(): Boolean = doPop(fromGesture = true)
+
+    private fun doPop(fromGesture: Boolean): Boolean {
         if (stack.size <= 1) return false
         direction = -1
+        instantTransition = fromGesture
         stack.removeAt(stack.lastIndex)
         return true
     }
@@ -106,6 +123,7 @@ class NavigationState(initial: Screen = Screen.Accounts) {
     fun popToRoot() {
         if (stack.size <= 1) return
         direction = -1
+        instantTransition = false
         while (stack.size > 1) stack.removeAt(stack.lastIndex)
     }
 }
