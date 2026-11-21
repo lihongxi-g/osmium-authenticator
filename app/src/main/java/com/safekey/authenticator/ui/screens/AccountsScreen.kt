@@ -3,26 +3,29 @@ package com.safekey.authenticator.ui.screens
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
@@ -30,41 +33,36 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import com.safekey.authenticator.AccountUi
 import com.safekey.authenticator.MainViewModel
 import com.safekey.authenticator.R
 import com.safekey.authenticator.model.Account
 import com.safekey.authenticator.security.ClipboardHelper
+import com.safekey.authenticator.tags.TagPresentation
 import com.safekey.authenticator.ui.components.AppIcons
 import com.safekey.authenticator.ui.components.CodeCard
 import com.safekey.authenticator.ui.components.FilterChipRow
 import com.safekey.authenticator.ui.components.IconButtonCompat
 import com.safekey.authenticator.ui.components.SimpleTopBar
-import kotlin.math.roundToInt
-import androidx.compose.foundation.layout.statusBarsPadding
-import com.safekey.authenticator.tags.TagPresentation
 
 private val ItemSpacingPx = 8.dp
+// Clears the standard 56dp FAB, Scaffold's 16dp offset, and 16dp above it.
+private val AccountListFabClearance = 88.dp
 
 /**
  * Floor, not a fixed height: the text-size setting can grow the title block
@@ -98,7 +96,7 @@ fun AccountsScreen(
     var searching by rememberSaveable { mutableStateOf(false) }
     var showAddSheet by remember { mutableStateOf(false) }
     val context = androidx.compose.ui.platform.LocalContext.current
-    val filtered = uiList
+    val showAccountList = accountsLoaded && allUiList.isNotEmpty() && uiList.isNotEmpty()
 
     Scaffold(
         topBar = {
@@ -114,6 +112,7 @@ fun AccountsScreen(
             } else {
                 SimpleTopBar(
                     title = stringResource(R.string.app_name),
+                    expandedHeight = 56.dp,
                     actions = {
                         IconButtonCompat(
                             icon = AppIcons.Search,
@@ -139,7 +138,19 @@ fun AccountsScreen(
             }
         }
     ) { padding ->
-        Column(Modifier.fillMaxSize().padding(padding)) {
+        val layoutDirection = LocalLayoutDirection.current
+        val bottomInset = padding.calculateBottomPadding()
+        // The list draws to the window edge. Its tail scrolls above the FAB and
+        // navigation bar; the other states stay within the safe area as before.
+        val bodyPadding = PaddingValues(
+            start = padding.calculateStartPadding(layoutDirection),
+            top = padding.calculateTopPadding(),
+            end = padding.calculateEndPadding(layoutDirection),
+            bottom = if (showAccountList) 0.dp else bottomInset
+        )
+        Column(
+            Modifier.fillMaxSize().padding(bodyPadding).consumeWindowInsets(bodyPadding)
+        ) {
             if (TagPresentation.shouldShowFilterRow(settings.tagsEnabled, tags)) {
                 FilterChipRow(tags, selectedTagIds, vm, tagRowState)
             }
@@ -148,34 +159,39 @@ fun AccountsScreen(
                     .fillMaxWidth()
                     .weight(1f)
             ) {
-            when {
-                !accountsLoaded -> LoadingState(
-                    modifier = Modifier.align(Alignment.Center)
-                )
-                allUiList.isEmpty() -> EmptyState(
-                    onAdd = { showAddSheet = true },
-                    modifier = Modifier.align(Alignment.Center)
-                )
-                filtered.isEmpty() -> Text(
-                    text = stringResource(R.string.no_results),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.align(Alignment.Center)
-                )
-                else -> AccountList(
-                    items = filtered,
-                    hideCodes = settings.hideCodes,
-                    showTags = settings.tagsEnabled,
-                    onCopyCode = { ui ->
-                        ClipboardHelper.copy(context, ui.code)
-                        vm.incrementCopyCount(ui.account.id)
-                        vm.showToast(context.getString(R.string.code_copied))
-                    },
-                    onOpen = onOpenDetail,
-                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 96.dp),
-                    state = listState
-                )
-            }
+                when {
+                    !accountsLoaded -> LoadingState(
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                    allUiList.isEmpty() -> EmptyState(
+                        onAdd = { showAddSheet = true },
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                    !showAccountList -> Text(
+                        text = stringResource(R.string.no_results),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                    else -> AccountList(
+                        items = uiList,
+                        hideCodes = settings.hideCodes,
+                        showTags = settings.tagsEnabled,
+                        onCopyCode = { ui ->
+                            ClipboardHelper.copy(context, ui.code)
+                            vm.incrementCopyCount(ui.account.id)
+                            vm.showToast(context.getString(R.string.code_copied))
+                        },
+                        onOpen = onOpenDetail,
+                        contentPadding = PaddingValues(
+                            start = 16.dp,
+                            top = 4.dp,
+                            end = 16.dp,
+                            bottom = bottomInset + AccountListFabClearance
+                        ),
+                        state = listState
+                    )
+                }
             }
         }
     }
@@ -367,6 +383,7 @@ private fun AccountList(
     state: LazyListState
 ) {
     LazyColumn(
+        modifier = Modifier.fillMaxSize(),
         state = state,
         contentPadding = contentPadding,
         verticalArrangement = Arrangement.spacedBy(ItemSpacingPx)

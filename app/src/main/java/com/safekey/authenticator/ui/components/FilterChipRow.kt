@@ -35,7 +35,7 @@ fun FilterChipRow(
     Row(
         Modifier
             .horizontalScroll(scrollState)
-            .padding(horizontal = 16.dp, vertical = 6.dp),
+            .padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         FilterChip(

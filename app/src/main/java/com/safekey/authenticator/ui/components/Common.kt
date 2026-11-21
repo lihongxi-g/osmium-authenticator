@@ -47,6 +47,7 @@ fun SimpleTopBar(
     title: String,
     onBack: (() -> Unit)? = null,
     titleStyle: TextStyle = MaterialTheme.typography.titleLarge,
+    expandedHeight: Dp = TopAppBarDefaults.TopAppBarExpandedHeight,
     actions: @Composable RowScope.() -> Unit = {}
 ) {
     TopAppBar(
@@ -72,6 +73,7 @@ fun SimpleTopBar(
             }
         },
         actions = actions,
+        expandedHeight = expandedHeight,
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = Color.Transparent
         )
