@@ -1,5 +1,6 @@
 package com.safekey.authenticator.ui.components
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -47,7 +49,6 @@ fun SimpleTopBar(
     title: String,
     onBack: (() -> Unit)? = null,
     titleStyle: TextStyle = MaterialTheme.typography.titleLarge,
-    expandedHeight: Dp = TopAppBarDefaults.TopAppBarExpandedHeight,
     actions: @Composable RowScope.() -> Unit = {}
 ) {
     TopAppBar(
@@ -73,11 +74,32 @@ fun SimpleTopBar(
             }
         },
         actions = actions,
-        expandedHeight = expandedHeight,
+        // M3 uses the larger of this height and the measured title height.
+        expandedHeight = 48.dp,
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = Color.Transparent
         )
     )
+}
+
+/** Keep the top bar clear, but let the last row scroll above the navigation bar. */
+@Composable
+fun Modifier.scrollBelowTopBar(
+    padding: PaddingValues,
+    state: ScrollState = rememberScrollState()
+): Modifier {
+    // Keep these reads in layout: Scaffold updates its padding during measurement.
+    val fixedPadding = object : PaddingValues by padding {
+        override fun calculateBottomPadding() = 0.dp
+    }
+    val scrollPadding = object : PaddingValues by PaddingValues(0.dp) {
+        override fun calculateBottomPadding() = padding.calculateBottomPadding()
+    }
+    return this.padding(fixedPadding)
+        .consumeWindowInsets(fixedPadding)
+        .verticalScroll(state)
+        .padding(scrollPadding)
+        .consumeWindowInsets(scrollPadding)
 }
 
 /** Minimal icon-button wrapper with a 48dp touch target. */
@@ -105,12 +127,12 @@ fun IconButtonCompat(
 }
 
 @Composable
-fun SectionHeader(text: String) {
+fun SectionHeader(text: String, topSpacing: Dp = 20.dp) {
     Text(
         text = text,
         style = MaterialTheme.typography.labelLarge,
         color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 8.dp)
+        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = topSpacing, bottom = 8.dp)
     )
 }
 

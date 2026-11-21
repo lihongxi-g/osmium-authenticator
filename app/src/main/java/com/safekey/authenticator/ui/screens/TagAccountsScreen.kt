@@ -3,6 +3,8 @@ package com.safekey.authenticator.ui.screens
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -96,7 +98,10 @@ fun TagAccountsScreen(vm: MainViewModel, tagId: String, onBack: () -> Unit) {
             )
         }
     ) { padding ->
-        Column(Modifier.fillMaxSize().padding(padding)) {
+        val bodyPadding = object : PaddingValues by padding {
+            override fun calculateBottomPadding() = 0.dp
+        }
+        Column(Modifier.fillMaxSize().padding(bodyPadding).consumeWindowInsets(bodyPadding)) {
             Text(
                 text = stringResource(R.string.tag_accounts_hint, tag?.name.orEmpty()),
                 style = MaterialTheme.typography.bodySmall,
@@ -112,7 +117,7 @@ fun TagAccountsScreen(vm: MainViewModel, tagId: String, onBack: () -> Unit) {
                         modifier = Modifier.align(Alignment.Center)
                     )
                 } else {
-                    LazyColumn(contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 4.dp)) {
+                    LazyColumn(contentPadding = PaddingValues(vertical = 4.dp)) {
                         items(accounts, key = { it.id }) { account ->
                             AccountPickRow(
                                 account = account,
@@ -126,7 +131,9 @@ fun TagAccountsScreen(vm: MainViewModel, tagId: String, onBack: () -> Unit) {
             }
             Surface(color = MaterialTheme.colorScheme.surfaceVariant) {
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(bottom = padding.calculateBottomPadding())
+                        .padding(horizontal = 16.dp, vertical = 10.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(

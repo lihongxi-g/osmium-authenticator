@@ -5,6 +5,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -43,6 +44,7 @@ import com.safekey.authenticator.repository.ImportPlan
 import com.safekey.authenticator.security.VaultFormatException
 import com.safekey.authenticator.security.VaultIO
 import com.safekey.authenticator.ui.components.SimpleTopBar
+import com.safekey.authenticator.ui.components.scrollBelowTopBar
 import com.safekey.authenticator.ui.dev.DevStrings
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -77,7 +79,7 @@ fun ExportScreen(vm: MainViewModel, onDone: () -> Unit, onBack: () -> Unit) {
         }
     }
     Scaffold(topBar = { SimpleTopBar(stringResource(R.string.export_vault), onBack) }) { padding ->
-        Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(Modifier.fillMaxSize().scrollBelowTopBar(padding).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             if (plaintextMode) {
                 // Developer-mode plaintext export — warn on EVERY export.
                 Text(dev.plainExportWarningTitle, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.error)
@@ -166,7 +168,7 @@ fun ImportScreen(vm: MainViewModel, onDone: () -> Unit, onBack: () -> Unit) {
     }
     Scaffold(topBar = { SimpleTopBar(stringResource(R.string.import_vault), onBack) }) { padding ->
         val parsed = vault
-        if (parsed == null) Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        if (parsed == null) Column(Modifier.fillMaxSize().scrollBelowTopBar(padding).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             if (devMode) {
                 // Developer-mode-only: import a file produced by plaintext export.
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { plaintextImport = !plaintextImport; error = null }) {
@@ -185,7 +187,9 @@ fun ImportScreen(vm: MainViewModel, onDone: () -> Unit, onBack: () -> Unit) {
                 try { launcher.launch(arrayOf("*/*")) }
                 catch (e: Exception) { vm.setTransferPickerActive(false); vm.showToast(e.message ?: "Error") }
             }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.import_vault)) }
-        } else VaultImportFlow(vm, parsed, onDone) { vault = null; error = null }
+        } else Box(Modifier.fillMaxSize().padding(padding)) {
+            VaultImportFlow(vm, parsed, onDone) { vault = null; error = null }
+        }
     }
 }
 

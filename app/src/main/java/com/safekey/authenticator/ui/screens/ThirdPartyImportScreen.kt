@@ -22,6 +22,7 @@ import com.safekey.authenticator.R
 import com.safekey.authenticator.ui.components.AppIcons
 import com.safekey.authenticator.ui.components.SettingRow
 import com.safekey.authenticator.ui.components.SimpleTopBar
+import com.safekey.authenticator.ui.components.scrollBelowTopBar
 import com.safekey.authenticator.ui.navigation.Screen
 
 /**
@@ -42,8 +43,7 @@ fun ThirdPartyImportScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
-                .verticalScroll(rememberScrollState())
+                .scrollBelowTopBar(padding)
         ) {
             Text(
                 text = stringResource(R.string.thirdparty_intro),

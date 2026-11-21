@@ -97,6 +97,10 @@ fun AccountsScreen(
     var showAddSheet by remember { mutableStateOf(false) }
     val context = androidx.compose.ui.platform.LocalContext.current
     val showAccountList = accountsLoaded && allUiList.isNotEmpty() && uiList.isNotEmpty()
+    val filterRow: (@Composable () -> Unit)? =
+        if (TagPresentation.shouldShowFilterRow(settings.tagsEnabled, tags)) {
+            @Composable { FilterChipRow(tags, selectedTagIds, vm, tagRowState) }
+        } else null
 
     Scaffold(
         topBar = {
@@ -112,7 +116,6 @@ fun AccountsScreen(
             } else {
                 SimpleTopBar(
                     title = stringResource(R.string.app_name),
-                    expandedHeight = 56.dp,
                     actions = {
                         IconButtonCompat(
                             icon = AppIcons.Search,
@@ -151,9 +154,7 @@ fun AccountsScreen(
         Column(
             Modifier.fillMaxSize().padding(bodyPadding).consumeWindowInsets(bodyPadding)
         ) {
-            if (TagPresentation.shouldShowFilterRow(settings.tagsEnabled, tags)) {
-                FilterChipRow(tags, selectedTagIds, vm, tagRowState)
-            }
+            if (!showAccountList) filterRow?.invoke()
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -183,10 +184,9 @@ fun AccountsScreen(
                             vm.showToast(context.getString(R.string.code_copied))
                         },
                         onOpen = onOpenDetail,
+                        filterRow = filterRow,
                         contentPadding = PaddingValues(
-                            start = 16.dp,
-                            top = 4.dp,
-                            end = 16.dp,
+                            top = if (filterRow == null) 4.dp else 0.dp,
                             bottom = bottomInset + AccountListFabClearance
                         ),
                         state = listState
@@ -379,6 +379,7 @@ private fun AccountList(
     showTags: Boolean,
     onCopyCode: (AccountUi) -> Unit,
     onOpen: (Account) -> Unit,
+    filterRow: (@Composable () -> Unit)?,
     contentPadding: PaddingValues,
     state: LazyListState
 ) {
@@ -388,6 +389,8 @@ private fun AccountList(
         contentPadding = contentPadding,
         verticalArrangement = Arrangement.spacedBy(ItemSpacingPx)
     ) {
+        // Account keys are strings; a numeric key cannot collide with imported accounts.
+        if (filterRow != null) item(key = 0) { filterRow() }
         items(items, key = { it.account.id }) { ui ->
             CodeCard(
                 ui = ui,
@@ -395,6 +398,7 @@ private fun AccountList(
                 showTags = showTags,
                 onCopyCode = { onCopyCode(ui) },
                 modifier = Modifier
+                    .padding(horizontal = 16.dp)
                     .heightIn(min = CardMinHeightPx)
                     .combinedClickable(
                         onClick = { onOpen(ui.account) },

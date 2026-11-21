@@ -64,6 +64,7 @@ import com.safekey.authenticator.ui.components.LocalNetworkPermissionGate
 import com.safekey.authenticator.ui.components.rememberLocalNetworkPermissionRequest
 import com.safekey.authenticator.ui.components.SettingRow
 import com.safekey.authenticator.ui.components.SimpleTopBar
+import com.safekey.authenticator.ui.components.scrollBelowTopBar
 import java.text.SimpleDateFormat
 import java.time.ZoneId
 import java.util.Date
@@ -333,8 +334,7 @@ fun AutoBackupScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
-                .verticalScroll(rememberScrollState())
+                .scrollBelowTopBar(padding)
         ) {
             // Beta badge + mandatory system-permission warning. Scheduled
             // backups rely on the system scheduler, which OEM battery

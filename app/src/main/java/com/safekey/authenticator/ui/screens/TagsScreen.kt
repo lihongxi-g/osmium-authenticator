@@ -8,8 +8,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -67,14 +69,23 @@ fun TagsScreen(vm: MainViewModel, onBack: () -> Unit, onManageAccounts: (Tag) ->
     var deleting by remember { mutableStateOf<Tag?>(null) }
 
     Scaffold(topBar = { SimpleTopBar(stringResource(R.string.tags_title), onBack) }) { padding ->
-        Column(Modifier.padding(padding).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        val headerPadding = object : PaddingValues by padding {
+            override fun calculateBottomPadding() = 0.dp
+        }
+        Column(
+            Modifier.fillMaxSize().padding(headerPadding).padding(start = 16.dp, top = 8.dp, end = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
             Button(onClick = { creating = true }, modifier = Modifier.fillMaxWidth()) {
                 Text(stringResource(R.string.tags_create))
             }
             if (tags.isEmpty()) {
                 Text(stringResource(R.string.tags_empty), color = MaterialTheme.colorScheme.onSurfaceVariant)
             } else {
-                LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                LazyColumn(
+                    contentPadding = PaddingValues(bottom = padding.calculateBottomPadding() + 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
                     items(tags, key = { it.id }) { tag ->
                         val count = accounts.count { account -> account.tags.any { it.id == tag.id } }
                         Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {

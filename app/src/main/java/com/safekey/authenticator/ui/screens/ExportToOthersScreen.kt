@@ -44,6 +44,7 @@ import com.safekey.authenticator.totp.exporter.ExportFormat
 import com.safekey.authenticator.totp.exporter.Exporters
 import com.safekey.authenticator.ui.components.DialogBodyText
 import com.safekey.authenticator.ui.components.SimpleTopBar
+import com.safekey.authenticator.ui.components.scrollBelowTopBar
 import com.safekey.authenticator.ui.components.sendFeedbackWithLog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -216,8 +217,7 @@ fun ExportToOthersScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
-                .verticalScroll(rememberScrollState())
+                .scrollBelowTopBar(padding)
                 .padding(horizontal = 20.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {

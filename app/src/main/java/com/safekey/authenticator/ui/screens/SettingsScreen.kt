@@ -51,6 +51,7 @@ import com.safekey.authenticator.ui.components.AppIcons
 import com.safekey.authenticator.ui.components.SectionHeader
 import com.safekey.authenticator.ui.components.SettingRow
 import com.safekey.authenticator.ui.components.SimpleTopBar
+import com.safekey.authenticator.ui.components.scrollBelowTopBar
 import com.safekey.authenticator.ui.components.integrityLevelLabel
 import com.safekey.authenticator.ui.dev.DevStrings
 import com.safekey.authenticator.ui.navigation.Screen
@@ -178,10 +179,9 @@ fun SettingsScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
-                .verticalScroll(scrollState)
+                .scrollBelowTopBar(padding, scrollState)
         ) {
-            SectionHeader(stringResource(R.string.settings_appearance))
+            SectionHeader(stringResource(R.string.settings_appearance), topSpacing = 4.dp)
 
             // Appearance is one page now: its rows had grown to six here, and
             // each of them is a page of its own one level down.
