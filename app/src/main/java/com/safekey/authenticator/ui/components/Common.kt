@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -158,25 +157,22 @@ fun SettingRow(
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 4.dp)
     ) {
-        Row(
+        AdaptiveTrailingRow(
             modifier = Modifier
                 .fillMaxWidth()
                 .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier)
                 .padding(horizontal = 16.dp, vertical = 14.dp),
-            verticalAlignment = Alignment.CenterVertically
+            leading = {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            },
+            trailing = trailing
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                modifier = Modifier.size(24.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 16.dp, end = 8.dp),
-                verticalArrangement = Arrangement.Center
-            ) {
+            Column {
                 Text(
                     text = title,
                     style = MaterialTheme.typography.bodyLarge,
@@ -190,7 +186,6 @@ fun SettingRow(
                     )
                 }
             }
-            if (trailing != null) trailing()
         }
     }
 }

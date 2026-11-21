@@ -39,6 +39,7 @@ import com.safekey.authenticator.integrity.IntegrityLevel
 import com.safekey.authenticator.integrity.IntegrityReport
 import com.safekey.authenticator.integrity.attestation.RevocationData
 import com.safekey.authenticator.security.RootState
+import com.safekey.authenticator.ui.components.AdaptiveTrailingRow
 import com.safekey.authenticator.ui.components.IntegrityVerdictGlyph
 import com.safekey.authenticator.ui.components.SectionHeader
 import com.safekey.authenticator.ui.components.SimpleTopBar
@@ -302,17 +303,20 @@ private fun CheckRow(
             .clickable(onClick = onToggle)
             .padding(vertical = 8.dp)
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        AdaptiveTrailingRow(
+            modifier = Modifier.fillMaxWidth(),
+            trailing = {
+                Text(
+                    text = stringResource(integrityStatusRes(check)),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = statusColor
+                )
+            }
+        ) {
             Text(
                 text = integrityCheckTitle(check.id),
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.weight(1f)
-            )
-            Text(
-                text = stringResource(integrityStatusRes(check)),
-                style = MaterialTheme.typography.labelLarge,
-                color = statusColor
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
         if (expanded && check.detail.isNotBlank()) {

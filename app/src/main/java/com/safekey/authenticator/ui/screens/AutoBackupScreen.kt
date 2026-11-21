@@ -59,6 +59,7 @@ import com.safekey.authenticator.data.AppSettings
 import com.safekey.authenticator.network.LocalNetworkAccess
 import com.safekey.authenticator.notify.BackupNotifier
 import com.safekey.authenticator.network.LocalNetworkPermissionException
+import com.safekey.authenticator.ui.components.AdaptiveTrailingRow
 import com.safekey.authenticator.ui.components.AppIcons
 import com.safekey.authenticator.ui.components.LocalNetworkPermissionGate
 import com.safekey.authenticator.ui.components.rememberLocalNetworkPermissionRequest
@@ -363,12 +364,17 @@ fun AutoBackupScreen(
                 modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 8.dp)
             )
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            AdaptiveTrailingRow(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 20.dp, end = 20.dp, top = 6.dp)
+                    .padding(start = 20.dp, end = 20.dp, top = 6.dp),
+                trailing = {
+                    if (!bgAllowed) {
+                        TextButton(onClick = { requestBackgroundActivity() }) {
+                            Text(stringResource(R.string.auto_backup_grant_button))
+                        }
+                    }
+                }
             ) {
                 Text(
                     text = stringResource(
@@ -377,14 +383,8 @@ fun AutoBackupScreen(
                     ),
                     style = MaterialTheme.typography.bodySmall,
                     color = if (bgAllowed) MaterialTheme.colorScheme.tertiary
-                    else MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.weight(1f)
+                    else MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                if (!bgAllowed) {
-                    TextButton(onClick = { requestBackgroundActivity() }) {
-                        Text(stringResource(R.string.auto_backup_grant_button))
-                    }
-                }
             }
 
             SettingRow(

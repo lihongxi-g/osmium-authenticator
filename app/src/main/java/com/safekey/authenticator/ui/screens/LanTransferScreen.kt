@@ -94,6 +94,7 @@ import com.safekey.authenticator.network.LanThreatReport
 import com.safekey.authenticator.network.LanThreatSeverity
 import com.safekey.authenticator.network.LanTransferClient
 import com.safekey.authenticator.network.LanTransferServer
+import com.safekey.authenticator.ui.components.AdaptiveTrailingRow
 import com.safekey.authenticator.ui.components.AppIcons
 import com.safekey.authenticator.ui.components.CodeField
 import com.safekey.authenticator.ui.components.IconButtonCompat
@@ -893,12 +894,23 @@ private fun ReceiveTabContent(
                 shape = RoundedCornerShape(12.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Row(
+                AdaptiveTrailingRow(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    trailing = {
+                        if (!isDone) {
+                            OutlinedButton(onClick = { startServer() }) {
+                                Icon(
+                                    AppIcons.Refresh,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(Modifier.width(4.dp))
+                                Text(stringResource(R.string.refresh))
+                            }
+                        }
+                    }
                 ) {
                     Column {
                         Text(
@@ -913,17 +925,6 @@ private fun ReceiveTabContent(
                             ),
                             color = MaterialTheme.colorScheme.onSurface
                         )
-                    }
-                    if (!isDone) {
-                        OutlinedButton(onClick = { startServer() }) {
-                            Icon(
-                                AppIcons.Refresh,
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Spacer(Modifier.width(4.dp))
-                            Text(stringResource(R.string.refresh))
-                        }
                     }
                 }
             }
