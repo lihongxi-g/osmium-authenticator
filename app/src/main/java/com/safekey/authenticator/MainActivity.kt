@@ -221,11 +221,11 @@ class MainActivity : FragmentActivity() {
                     window.isNavigationBarContrastEnforced = false
                 }
             }
-            val locked by vm.locked.collectAsState()
-            val pinRequired by vm.pinRequired.collectAsState()
+            val gate by vm.appGate.collectAsState()
             val destroyed by vm.destroyed.collectAsState()
             // Signature mismatch keeps the UI closed until acknowledged.
             val tamperBlocked = tampered && !tamperAcknowledged
+            val canShowMain = settings.loaded && gate.isOpen && !destroyed && !tamperBlocked
             val toast by vm.toast.collectAsState()
             val integrityNotice by vm.integrityNotice.collectAsState()
             val biometric by vm.biometricState.collectAsState()
@@ -251,11 +251,10 @@ class MainActivity : FragmentActivity() {
             // only after a separate identity check, since it can change the
             // backup password.
             LaunchedEffect(
-                notificationEntry, locked, pinRequired, destroyed, tamperBlocked,
+                notificationEntry, canShowMain,
                 settings.autoBackupNotifyRequireAuth, settings.gateOnOpen, pinSet
             ) {
-                if (!notificationEntry) return@LaunchedEffect
-                if (locked || pinRequired || destroyed || tamperBlocked) return@LaunchedEffect
+                if (!notificationEntry || !canShowMain) return@LaunchedEffect
                 notificationEntry = false
                 // "Verify on open" has just verified this very entry; a second
                 // prompt back to back is what makes people switch protection off.
@@ -339,9 +338,10 @@ class MainActivity : FragmentActivity() {
                             onContinue = { tamperAcknowledged = true }
                         )
                         destroyed -> DestroyedScreen()
-                        pinRequired -> PinGate()
-                        locked -> LockGate()
-                        else -> MainNavHost(
+                        !gate.ready -> Unit
+                        gate.pinRequired -> PinGate()
+                        gate.locked -> LockGate()
+                        canShowMain -> MainNavHost(
                             accountsListState = accountsListState,
                             accountTagRowState = accountTagRowState,
                             settingsScrollState = settingsScrollState,
@@ -351,9 +351,7 @@ class MainActivity : FragmentActivity() {
                     // Identity check for a page opened from a notification. It
                     // sits above the real UI, so no part of that page is visible
                     // before it passes.
-                    if (entryAuthPending && !locked && !pinRequired &&
-                        !destroyed && !tamperBlocked
-                    ) {
+                    if (entryAuthPending && canShowMain) {
                         if (entryPinMode) {
                             val entryPinError by vm.pinError.collectAsState()
                             PinVerifyScreen(
@@ -404,8 +402,7 @@ class MainActivity : FragmentActivity() {
                     // update channels are asked here instead of three menus
                     // deep, and a fresh install learns where the project lives.
                     val firstEverWelcome = settings.welcomeShownVersion.isEmpty()
-                    val showWelcome = settings.loaded && !locked && !pinRequired &&
-                        !destroyed && !tamperBlocked &&
+                    val showWelcome = canShowMain &&
                         settings.welcomeShownVersion != BuildConfig.VERSION_NAME
                     if (showWelcome) {
                         WelcomeDialog(
@@ -422,9 +419,7 @@ class MainActivity : FragmentActivity() {
                     // Update notification only over the unlocked main UI, and
                     // never stacked on top of the welcome dialog.
                     val update = pendingUpdate
-                    if (update != null && !locked && !pinRequired && !showWelcome &&
-                        !destroyed && !tamperBlocked
-                    ) {
+                    if (update != null && canShowMain && !showWelcome) {
                         UpdateAvailableDialog(
                             tag = update.tag,
                             notes = update.notes,
@@ -443,8 +438,7 @@ class MainActivity : FragmentActivity() {
                         )
                     }
                     val showPinReminder = pinReminderVisible && noBiometricCredential && !pinSet &&
-                        !settings.pinReminderSilenced && !locked && !pinRequired &&
-                        !destroyed && !tamperBlocked
+                        !settings.pinReminderSilenced && canShowMain
                     if (showPinReminder) {
                         PinReminderDialog(
                             onSetup = {
@@ -460,7 +454,7 @@ class MainActivity : FragmentActivity() {
                     // Enter-app integrity reminder (L2/L3), debounced in the
                     // ViewModel; suppressed while the restriction is lifted.
                     val notice = integrityNotice
-                    if (notice != null && !locked && !pinRequired && !destroyed && !tamperBlocked) {
+                    if (notice != null && canShowMain) {
                         IntegrityNoticeDialog(
                             notice = notice,
                             onViewReport = {
@@ -790,7 +784,7 @@ class MainActivity : FragmentActivity() {
                     val state = biometricState()
                     vm.setBiometricState(state)
                     if (state == BiometricState.AVAILABLE) {
-                        if (vm.locked.value) {
+                        if (vm.appGate.value.locked) {
                             launchBiometric(
                                 onSuccess = { vm.unlock() },
                                 onCancelled = { errorMessage = context.getString(R.string.lock_cancelled) },
@@ -808,7 +802,7 @@ class MainActivity : FragmentActivity() {
                         break
                     }
                     // UNAVAILABLE — keep waiting on the lock screen.
-                    if (!vm.locked.value) break
+                    if (!vm.appGate.value.locked) break
                     errorMessage = context.getString(R.string.biometric_temporarily_unavailable)
                     delay(2_000)
                 }

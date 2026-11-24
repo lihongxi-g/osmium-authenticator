@@ -15,6 +15,7 @@ import com.safekey.authenticator.model.VaultTag
 import com.safekey.authenticator.repository.ImportMerger
 import com.safekey.authenticator.repository.ImportPlan
 import com.safekey.authenticator.repository.TagImportPlanner
+import com.safekey.authenticator.security.AppGateState
 import com.safekey.authenticator.security.AppLog
 import com.safekey.authenticator.security.BiometricState
 import com.safekey.authenticator.security.GateAction
@@ -84,6 +85,9 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     /** Latest device-integrity report (null until the first scan lands). */
     val rootReport: StateFlow<IntegrityReport?> = RootState.report
 
+    private fun isRootRestricted(s: AppSettings, report: IntegrityReport?): Boolean =
+        report?.compromised == true && !s.devDisableRootSecurity
+
     /**
      * True while the root security restriction is active: the device is
      * rooted and developer mode has not disabled the restriction. Security
@@ -91,12 +95,13 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
      */
     val rootRestricted: StateFlow<Boolean> =
         combine(settingsRepo.settings, RootState.report) { s, report ->
-            report?.compromised == true && !s.devDisableRootSecurity
+            isRootRestricted(s, report)
         }.stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     val settings: StateFlow<AppSettings> =
-        combine(settingsRepo.settings, rootRestricted) { s, restricted ->
-            if (restricted) {
+        combine(settingsRepo.settings, RootState.report) { s, report ->
+            // Apply an already-known report before publishing loaded settings.
+            if (isRootRestricted(s, report)) {
                 // Hardening overlay: force the protective settings on without
                 // touching the user's stored preferences — their own values
                 // restore as-is once the restriction is lifted.
@@ -343,12 +348,10 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         list.filter { it.account.id in filteredIds }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    private val _locked = MutableStateFlow(true)
-    val locked: StateFlow<Boolean> = _locked
-
-    // ---- PIN gate state (overrides everything) ----
-    private val _pinRequired = MutableStateFlow(false)
-    val pinRequired: StateFlow<Boolean> = _pinRequired
+    // Publish readiness and both gate flags together so Compose cannot draw
+    // the provisional lock between settings loading and the first decision.
+    private val _appGate = MutableStateFlow(AppGateState())
+    internal val appGate: StateFlow<AppGateState> = _appGate
 
     private val _pinError = MutableStateFlow<String?>(null)
     val pinError: StateFlow<String?> = _pinError
@@ -397,15 +400,14 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     val localPinSet: StateFlow<Boolean> = _localPinSet
 
     init {
-        // Re-evaluate the gate whenever settings load/change — e.g. the user
-        // just disabled "verify on open", or the DataStore first read lands
-        // after onStart already locked the app.
+        // The initial decision requires both persisted settings and onStart's
+        // biometric check. Whichever arrives second makes the decision.
         viewModelScope.launch {
             settings.collect { s ->
-                if (_destroyed.value) return@collect
+                if (_destroyed.value || !s.loaded) return@collect
+                if (!appInForeground && !_appGate.value.ready) return@collect
                 if (!s.gateOnOpen) {
-                    _locked.value = false
-                    _pinRequired.value = false
+                    _appGate.value = _appGate.value.applyDecision(GateAction.UNLOCK)
                     return@collect
                 }
                 // The gate can also turn ON *after* the foreground callback ran:
@@ -416,7 +418,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                 // the app kept showing codes, and only a background round-trip
                 // produced the gate.
                 if (!appInForeground || verifiedThisSession || transferPickerActive) return@collect
-                engageGate()
+                applyGate(s)
             }
         }
         // Detection logs stay off by default; the developer-mode "detailed
@@ -449,7 +451,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         // A system file picker (backup export/import) is still on top — do
         // not gate, or the transfer screen's state would be lost on return.
         if (transferPickerActive) return
-        applyGate()
+        applyGate(settings.value)
     }
 
     /**
@@ -458,24 +460,12 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
      * (sensor busy, temporary lockout) — that case keeps the app locked and
      * lets the lock screen offer the system credential or the app PIN.
      */
-    private fun applyGate() {
-        when (gateAction(settings.value.gateOnOpen, _biometricState.value, pinManager.hasPin())) {
-            GateAction.UNLOCK -> {
-                _locked.value = false
-                _pinRequired.value = false
-            }
-            GateAction.LOCK_BIOMETRIC, GateAction.STAY_LOCKED -> {
-                _locked.value = true
-                _pinRequired.value = false
-            }
-            GateAction.REQUIRE_PIN -> {
-                _pinRequired.value = true
-            }
-        }
+    private fun applyGate(s: AppSettings) {
+        if (!s.loaded) return
+        _appGate.value = _appGate.value.applyDecision(
+            gateAction(s.gateOnOpen, _biometricState.value, pinManager.hasPin())
+        )
     }
-
-    /** Called when the integrity scan or the user turns the gate on. */
-    private fun engageGate() = applyGate()
 
     /** Called when the activity goes to the background. */
     fun onAppBackground() {
@@ -483,14 +473,15 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         AppLog.d("background")
         // Skip the lock while a system file picker covers the app — see
         // [transferPickerActive].
-        if (settings.value.gateOnOpen && !transferPickerActive) _locked.value = true
+        if (settings.value.gateOnOpen && !transferPickerActive) {
+            _appGate.value = _appGate.value.copy(locked = true)
+        }
     }
 
     fun unlock() {
         AppLog.d("unlocked")
         verifiedThisSession = true
-        _locked.value = false
-        _pinRequired.value = false
+        _appGate.value = _appGate.value.copy(locked = false, pinRequired = false)
     }
 
     // ---------------------------------------------------------------- PIN
@@ -500,7 +491,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         if (pinManager.hasPin() && !_destroyed.value) {
             AppLog.d("pin gate shown")
             _pinError.value = null
-            _pinRequired.value = true
+            _appGate.value = _appGate.value.copy(pinRequired = true)
         }
     }
 
@@ -511,7 +502,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     suspend fun onPinEntered(pin: String): Boolean {
         if (withContext(Dispatchers.Default) { pinManager.verifyPin(pin) }) {
             AppLog.d("pin verified")
-            _pinRequired.value = false
+            _appGate.value = _appGate.value.copy(pinRequired = false)
             _pinError.value = null
             viewModelScope.launch {
                 settingsRepo.setPinFailCount(0)
@@ -546,7 +537,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun cancelPinGate() {
-        _pinRequired.value = false
+        _appGate.value = _appGate.value.copy(pinRequired = false)
         _pinError.value = null
     }
 
@@ -602,9 +593,8 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                 pinManager.wipeAll()
                 _localPinSet.value = false
                 settingsRepo.wipeSettings()
-                _pinRequired.value = false
-                _locked.value = false
                 _destroyed.value = true
+                _appGate.value = _appGate.value.copy(locked = false, pinRequired = false)
                 AppLog.d("self-destruct complete: key destroyed, data wiped")
             } catch (e: Exception) {
                 // nothing sensible left to do — surface the state anyway

@@ -49,6 +49,21 @@ enum class GateAction {
     STAY_LOCKED
 }
 
+/** An unresolved startup is neither a visible lock screen nor an open app. */
+internal data class AppGateState(
+    val ready: Boolean = false,
+    val locked: Boolean = true,
+    val pinRequired: Boolean = false
+) {
+    val isOpen: Boolean get() = ready && !locked && !pinRequired
+
+    fun applyDecision(action: GateAction): AppGateState = when (action) {
+        GateAction.UNLOCK -> AppGateState(ready = true, locked = false)
+        GateAction.LOCK_BIOMETRIC, GateAction.STAY_LOCKED -> AppGateState(ready = true)
+        GateAction.REQUIRE_PIN -> copy(ready = true, pinRequired = true)
+    }
+}
+
 /**
  * The single decision point for the enter-app gate.
  *
