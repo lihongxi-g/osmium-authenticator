@@ -47,11 +47,11 @@ The live test page at **https://otp.osmium.im** supports TOTP, HOTP and Steam Gu
 
 ## Download
 
-Latest stable release: **Osmium v2.6.6.2** (`versionCode 962`, one universal APK carrying arm64-v8a, armeabi-v7a and x86_64 — there is no ABI to pick):
+Latest stable release: **Osmium v2.6.6.2** (`versionCode 962`, one universal APK carrying arm64-v8a, armeabi-v7a, x86 and x86_64 — there is no ABI to pick):
 
 | File | Architectures | Download |
 |---|---|---|
-| `osmium-2.6.6.2.apk` | arm64-v8a, armeabi-v7a, x86_64 | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.6.6.2/osmium-2.6.6.2.apk) |
+| `osmium-2.6.6.2.apk` | arm64-v8a, armeabi-v7a, x86, x86_64 | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.6.6.2/osmium-2.6.6.2.apk) |
 
 Signing certificate SHA-256 fingerprint: `B65BB0131CAA22C45D99EA4E2C3E99B3980EAE0DC5647190F41A2878E6D88412`.
 
@@ -87,7 +87,7 @@ Scheduled backups use the Android system scheduler: the app wakes briefly for a 
 ./gradlew testDebugUnitTest
 ```
 
-Release builds are minified with R8 and shipped as one universal APK covering arm64-v8a, armeabi-v7a and x86_64. Build environment: Gradle 9.6.0, AGP 9.5.1, Kotlin 2.4.21, Jetpack Compose BOM 2026.09.00, `compileSdk 37`, `minSdk 26`, `targetSdk 37`. GitHub Actions runs unit tests and builds Release APKs. Official release assets always use the format `osmium-<version>.apk`.
+Release builds are minified with R8 and shipped as one universal APK covering arm64-v8a, armeabi-v7a, x86 and x86_64. Build environment: Gradle 9.6.0, AGP 9.5.1, Kotlin 2.4.21, Jetpack Compose BOM 2026.09.00, `compileSdk 37`, `minSdk 26`, `targetSdk 37`. GitHub Actions runs unit tests and builds Release APKs. Official release assets always use the format `osmium-<version>.apk`.
 
 ## Embedded components
 

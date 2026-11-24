@@ -1,6 +1,6 @@
 # Osmium v2.6.6.2
 
-versionCode 962 · 通用 APK / Universal APK (arm64-v8a, armeabi-v7a, x86_64)
+versionCode 962 · 通用 APK / Universal APK (arm64-v8a, armeabi-v7a, x86, x86_64)
 
 ## 更新内容
 

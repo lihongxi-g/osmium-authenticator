@@ -47,11 +47,11 @@ Osmium 是一款隐私优先的 Android TOTP/HOTP 验证器。本项目基于 GN
 
 ## 下载
 
-最新正式版：**Osmium v2.6.6.2**（versionCode 962，一个通用包，内含 arm64-v8a、armeabi-v7a 与 x86_64，不用再挑架构）：
+最新正式版：**Osmium v2.6.6.2**（versionCode 962，一个通用包，内含 arm64-v8a、armeabi-v7a、x86 与 x86_64，不用再挑架构）：
 
 | 文件 | 架构 | 下载 |
 |---|---|---|
-| `osmium-2.6.6.2.apk` | arm64-v8a、armeabi-v7a、x86_64 | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.6.6.2/osmium-2.6.6.2.apk) |
+| `osmium-2.6.6.2.apk` | arm64-v8a、armeabi-v7a、x86、x86_64 | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.6.6.2/osmium-2.6.6.2.apk) |
 
 签名证书 SHA-256 指纹：`B65BB0131CAA22C45D99EA4E2C3E99B3980EAE0DC5647190F41A2878E6D88412`。
 
@@ -87,7 +87,7 @@ F-Droid 独立更新，实际可安装版本以 [F-Droid 包页面](https://f-dr
 ./gradlew testDebugUnitTest
 ```
 
-Release 构建启用 R8，只出一个通用包（arm64-v8a、armeabi-v7a、x86_64）。构建环境：Gradle 9.6.0、AGP 9.5.1、Kotlin 2.4.21、Jetpack Compose BOM 2026.09.00、`compileSdk 37`、`minSdk 26`、`targetSdk 37`。GitHub Actions 会运行单元测试并构建 Release APK；正式发布资产固定命名为 `osmium-版本号.apk`。
+Release 构建启用 R8，只出一个通用包（arm64-v8a、armeabi-v7a、x86、x86_64）。构建环境：Gradle 9.6.0、AGP 9.5.1、Kotlin 2.4.21、Jetpack Compose BOM 2026.09.00、`compileSdk 37`、`minSdk 26`、`targetSdk 37`。GitHub Actions 会运行单元测试并构建 Release APK；正式发布资产固定命名为 `osmium-版本号.apk`。
 
 ## 内置组件
 
