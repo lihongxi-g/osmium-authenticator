@@ -25,10 +25,10 @@ The app itself fetches the Terms of Use and Privacy Policy from osmium.im when y
 - **Update checks** — optionally query two independent sources per channel: the GitHub Releases API and the public version file on osmium.im (`release.json` for stable, `release-preview.json` for previews), so a blocked GitHub API does not turn a working connection into a failed check. Two independent channels (stable releases, or stable plus preview builds), asked once on that welcome screen and changeable in Settings at any time; no account or device data is sent, and the app never downloads or installs updates automatically
 - **Dialogs stay put** — tapping outside a dialog no longer dismisses it, so a mistimed tap cannot throw away a confirmation; only the dialog's own buttons close it
 - **Steam Guard** — manually add Steam accounts and generate 5-character alphanumeric codes
-- **Hidden codes mode** — render codes as dots; copying still works, while editing and sharing remain locked
+- **Hidden codes mode** — tap the dots to reveal the code and tap again to copy. Codes hide again after six seconds or when the app goes into the background. Editing and sharing stay disabled in this mode
 - **Sort and search** — random, alphabetical, date-added or copy-count order; search by account name or issuer
 - **Optional tags** — enable under Settings → Appearance → Tags; create multiple tags, filter accounts, and choose palette or custom `#RRGGBB` colors. When no tags exist, `Uncategorized` is not shown on the home screen
-- **Security gate** — optional verification on open (biometrics / device credential / app PIN), self-destruct PIN, and screenshots blocked by default
+- **Security gate** — Osmium reads your saved verification preference before showing codes or a lock screen. Verification uses biometrics, your device credential or your app PIN when required. Self-destruct PIN is optional and screenshots are blocked by default
 - **Verification settings** — Settings → Security → Verification settings decides which actions still ask for your identity first: export, plaintext export, import, LAN transfer, WebDAV, auto backup. The page itself is opened only after verification and is unavailable while the device looks rooted; developer mode always verifies
 - **Predictive back** — the back gesture previews the transition: the screen being left follows your finger while the one underneath slides in. Switched off under Settings → Appearance
 - **Device-integrity detection (on-device, offline)** — a three-layer evidence chain plus hardware-backed Key Attestation (an embedded, pinned copy of Google's verifier) rates the device L0–L3 and lists every check in the in-app integrity report; no network, no telemetry. A root-manager app alone is treated as a hint, never as proof. When root is detected, the security features are forced on and five sensitive features (LAN transfer, WebDAV backup, auto backup, self-destruct setup, third-party import) are disabled until you lift the restriction in developer mode; a reminder appears when the app opens. Only matched signal names are logged — never secrets
@@ -47,23 +47,23 @@ The live test page at **https://otp.osmium.im** supports TOTP, HOTP and Steam Gu
 
 ## Download
 
-Latest stable release: **Osmium v2.6.6** (`versionCode 956`, one universal APK carrying arm64-v8a, armeabi-v7a and x86_64 — there is no ABI to pick):
+Latest stable release: **Osmium v2.6.6.2** (`versionCode 962`, one universal APK carrying arm64-v8a, armeabi-v7a and x86_64 — there is no ABI to pick):
 
 | File | Architectures | Download |
 |---|---|---|
-| `osmium-2.6.6.apk` | arm64-v8a, armeabi-v7a, x86_64 | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.6.6/osmium-2.6.6.apk) |
+| `osmium-2.6.6.2.apk` | arm64-v8a, armeabi-v7a, x86_64 | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.6.6.2/osmium-2.6.6.2.apk) |
 
 Signing certificate SHA-256 fingerprint: `B65BB0131CAA22C45D99EA4E2C3E99B3980EAE0DC5647190F41A2878E6D88412`.
 
-APK SHA-256 checksums are listed in the [v2.6.6 release notes](release-notes-v2.6.6.md) and in `SHA256SUMS.txt` on the GitHub Release page.
+Verify the APK with `SHA256SUMS.txt` on the [GitHub Release page](https://github.com/lihongxi-g/osmium-authenticator/releases/tag/v2.6.6.2). See the [release notes](release-notes-v2.6.6.2.md) for changes.
 
 ### F-Droid
 
 Osmium is on F-Droid: **https://f-droid.org/packages/com.safekey.authenticator/**
 
-F-Droid builds from the same source and signs with the same certificate as the GitHub release (the recipe pins the signing key), so the two are the same app — moving between them is an in-place update, and for a 2FA app that matters because uninstalling deletes every local account. Note that the two channels number their versions differently: GitHub uses the versionCode above (956 for 2.6.6), while F-Droid derives its own number for the same source and currently serves 2.6.5.2 (versionCode 941–943). The GitHub number is the higher one, so switching from F-Droid to GitHub is an upgrade; switching back waits until an F-Droid build catches up.
+F-Droid builds from source and its recipe pins the same signing certificate as GitHub. An in-place upgrade is possible when the package and signature match and the destination version code is not lower. Do not uninstall just to switch channels: uninstalling removes your local accounts.
 
-F-Droid's index refreshes on its own schedule, so a brand-new release can take a few days to appear there; the [package page](https://f-droid.org/packages/com.safekey.authenticator/) always shows the version actually installable right now. As of this release it offers **2.6.5.2**.
+F-Droid updates independently. Check its [package page](https://f-droid.org/packages/com.safekey.authenticator/) for the versions it currently offers.
 
 ## Privacy & Terms
 
@@ -87,7 +87,7 @@ Scheduled backups use the Android system scheduler: the app wakes briefly for a 
 ./gradlew testDebugUnitTest
 ```
 
-Release builds are minified with R8 and shipped as one universal APK covering arm64-v8a, armeabi-v7a and x86_64. Build environment: Gradle 9.3.1, AGP 9.1.1, Kotlin 2.2.10, Jetpack Compose BOM 2024.09.03, `compileSdk 37`, `minSdk 26`, `targetSdk 37`. GitHub Actions runs unit tests and builds Release APKs. Official release assets always use the format `osmium-<version>.apk`.
+Release builds are minified with R8 and shipped as one universal APK covering arm64-v8a, armeabi-v7a and x86_64. Build environment: Gradle 9.6.0, AGP 9.5.1, Kotlin 2.4.21, Jetpack Compose BOM 2026.09.00, `compileSdk 37`, `minSdk 26`, `targetSdk 37`. GitHub Actions runs unit tests and builds Release APKs. Official release assets always use the format `osmium-<version>.apk`.
 
 ## Embedded components
 

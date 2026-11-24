@@ -25,10 +25,10 @@ Osmium 是一款隐私优先的 Android TOTP/HOTP 验证器。本项目基于 GN
 - **更新检查**——可选查询两个相互独立的来源：GitHub Releases API 与官网 osmium.im 上的公开版本文件（正式版取 `release.json`，预览版取 `release-preview.json`），GitHub 被拦截时不会把正常网络误报成检查失败；只读取公开版本信息，分两个独立通道（正式版、或正式版+预览版），在欢迎页上询问一次，之后随时可在设置中更改，不发送账户或设备数据，也不会自动下载或安装
 - **弹窗不再被误触关闭**——点到弹窗外面不会再关掉它，确认信息不会被手快抹掉，只有弹窗上的按钮才会关闭
 - **Steam Guard**——手动添加 Steam 账户，生成 5 位字母数字验证码
-- **隐藏验证码模式**——验证码以圆点显示，复制不受影响；编辑与分享在关闭该模式前被锁定
+- **隐藏验证码模式**——点一下圆点查看验证码，再点一下复制；6 秒后或切到后台时重新隐藏。该模式下不能编辑或分享
 - **排序与搜索**——支持随机、字母、添加时间、复制次数排序，并可按账户名或服务商搜索
 - **可选标签**——在 设置 → 外观 → 标签 中开启标签功能；可创建多标签、筛选账户，并使用调色盘或自定义 `#RRGGBB` 颜色。没有创建标签时，主页不会显示 `Uncategorized`
-- **安全门禁**——可选的打开时验证（指纹 / 系统凭据 / 应用 PIN）、自毁 PIN、默认禁止截屏
+- **安全门禁**——应用先读取保存的「打开时验证」设置，再显示验证码或锁定页；需要验证时使用指纹、系统凭据或应用 PIN。可选自毁 PIN，默认禁止截屏
 - **验证设置** —— 设置 → 安全 → 验证设置决定哪些操作仍需先验证身份：导出、明文导出、导入、局域网传输、WebDAV、自动备份。本页必须先验证身份才能进入，检测到 root 时不可用；开发者模式始终需要验证
 - **预测式返回** —— 返回手势会预览过渡：当前页跟着手指移动，下面那页同时滑入。可在 设置 → 外观 中关闭
 - **设备完整性检测（纯离线）**——三层证据链 + 硬件级 Key Attestation 证明（内嵌 Google 官方验证器），以 L0–L3 分级呈现，报告页逐项列出全部检查与证据；不联网、不上报。只装有 Root 管理器应用时按「提示」处理，不会判定 Root。检测到 Root 后，安全功能强制开启，局域网快捷传输、WebDAV 备份、自动备份、自毁模式设置、从第三方验证器导入五项敏感功能停用，打开应用时会提醒；可在开发者模式中解除限制。日志仅记录命中的信号名称，绝不记录密钥内容
@@ -47,23 +47,23 @@ Osmium 是一款隐私优先的 Android TOTP/HOTP 验证器。本项目基于 GN
 
 ## 下载
 
-最新正式版：**Osmium v2.6.6**（versionCode 956，一个通用包，内含 arm64-v8a、armeabi-v7a 与 x86_64，不用再挑架构）：
+最新正式版：**Osmium v2.6.6.2**（versionCode 962，一个通用包，内含 arm64-v8a、armeabi-v7a 与 x86_64，不用再挑架构）：
 
 | 文件 | 架构 | 下载 |
 |---|---|---|
-| `osmium-2.6.6.apk` | arm64-v8a、armeabi-v7a、x86_64 | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.6.6/osmium-2.6.6.apk) |
+| `osmium-2.6.6.2.apk` | arm64-v8a、armeabi-v7a、x86_64 | [GitHub](https://github.com/lihongxi-g/osmium-authenticator/releases/download/v2.6.6.2/osmium-2.6.6.2.apk) |
 
 签名证书 SHA-256 指纹：`B65BB0131CAA22C45D99EA4E2C3E99B3980EAE0DC5647190F41A2878E6D88412`。
 
-APK 的 SHA-256 校验和见 [v2.6.6 发布说明](release-notes-v2.6.6.md) 及 Release 页面的 `SHA256SUMS.txt`。
+可用 [GitHub 发布页](https://github.com/lihongxi-g/osmium-authenticator/releases/tag/v2.6.6.2)的 `SHA256SUMS.txt` 校验 APK；本版改动见[发布说明](release-notes-v2.6.6.2.md)。
 
 ### F-Droid
 
 Osmium 已上架 F-Droid：**https://f-droid.org/packages/com.safekey.authenticator/**
 
-F-Droid 用同一份源码构建、并使用同一张签名证书（配方钉死了签名密钥），所以两边是同一个应用：在两个渠道之间切换属于覆盖升级，不用卸载——对 2FA 应用来说这点很关键，卸载意味着本地账户全丢。需要注意两边版本号规则不同：GitHub 用上表的 versionCode（2.6.6 为 956），F-Droid 用同一份源码自己推导版本号，目前提供的是 2.6.5.2（versionCode 941–943）。GitHub 的号更高，因此从 F-Droid 换到 GitHub 是升级；反向换回去要等 F-Droid 那边的构建追上来。
+F-Droid 从源码构建，其配方指定的签名证书与 GitHub 版相同。包名和签名一致、目标版本码不低于已装版本时，可以覆盖安装。不要为了换渠道直接卸载，卸载会删除本地账户。
 
-F-Droid 的索引按它自己的节奏刷新，新版本可能要几天才会出现；[包页面](https://f-droid.org/packages/com.safekey.authenticator/)上显示的就是当前真正能安装的版本——截至目前是 **2.6.5.2**。
+F-Droid 独立更新，实际可安装版本以 [F-Droid 包页面](https://f-droid.org/packages/com.safekey.authenticator/)为准。
 
 ## 隐私与条款
 
@@ -87,7 +87,7 @@ F-Droid 的索引按它自己的节奏刷新，新版本可能要几天才会出
 ./gradlew testDebugUnitTest
 ```
 
-Release 构建启用 R8，只出一个通用包（arm64-v8a、armeabi-v7a、x86_64）。构建环境：Gradle 9.3.1、AGP 9.1.1、Kotlin 2.2.10、Jetpack Compose BOM 2024.09.03、`compileSdk 37`、`minSdk 26`、`targetSdk 37`。GitHub Actions 会运行单元测试并构建 Release APK；正式发布资产固定命名为 `osmium-版本号-架构.apk`。
+Release 构建启用 R8，只出一个通用包（arm64-v8a、armeabi-v7a、x86_64）。构建环境：Gradle 9.6.0、AGP 9.5.1、Kotlin 2.4.21、Jetpack Compose BOM 2026.09.00、`compileSdk 37`、`minSdk 26`、`targetSdk 37`。GitHub Actions 会运行单元测试并构建 Release APK；正式发布资产固定命名为 `osmium-版本号.apk`。
 
 ## 内置组件
 

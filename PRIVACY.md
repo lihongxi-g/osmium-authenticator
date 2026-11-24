@@ -1,6 +1,6 @@
 # Privacy Policy
 
-*Effective date: November 20, 2026 · Applies to Osmium v2.6.6 and later*
+*Effective date: November 24, 2026 · Applies to Osmium v2.6.6.2 and later*
 
 *Current version, published at osmium.im. The app reads it when you open About → Privacy Policy.*
 
@@ -32,7 +32,7 @@ Automatic backups use Android system scheduling and may be deferred by manufactu
 
 Notifications and diagnostics: automatic backups report their outcome through a local Android notification — a successful run stays silent, a failed or skipped one alerts, and the lock screen shows only that a background task finished. Notifications need the system notification permission on Android 13 and later, can be switched off in Settings at any time, and are never sent to any server. The app also keeps a diagnostic log in its private storage (a rotating file next to the in-memory copy) so that a scheduled backup which did not run can be investigated; it records events such as scheduling, wake-ups, results and error messages, never your secrets, codes, PIN or backup password. Nothing in that log is transmitted: the export in About copies it to the clipboard only when you ask, and you decide whether to share it. Detailed integrity-detection logging stays off unless you enable it in developer mode.
 
-Download site and cookies: the download page at download.osmium.im is delivered through Cloudflare, and before an installer can be fetched the page asks your browser to pass a Cloudflare Turnstile check. Turnstile may set its own cookies and collects the technical signals it needs to decide whether the request comes from a person; that processing is Cloudflare's and is described in Cloudflare's privacy policy. When the check passes, our server sets a single cookie of our own, osmium_dl. It holds only an expiry time and a signature — your IP address is not stored in it in readable form, but the signature is computed over it, so the cookie cannot be reused from another connection. It lasts 15 minutes, is used only to let the installer download proceed, and is never used to track you or to build a profile. The site sets no advertising or analytics cookies. If you clear cookies or wait 15 minutes, the check simply runs again the next time you download.
+Downloads: download.osmium.im redirects your browser to GitHub Releases and does not set an Osmium download cookie. Cloudflare handles the redirect request for the download domain, and GitHub handles access to the release page and files. Their respective privacy policies apply to the data they process.
 
 We do not share data with advertisers, analytics services or an Osmium cloud. A WebDAV server receives encrypted files you upload; the intended LAN receiver receives data from a transfer you start; GitHub receives only a public version query; Google's attestation status endpoint receives only the request for its public revocation list when you refresh it manually; osmium.im serves the public legal documents the app reads and the public version files the update check reads, and no user data is sent to it. Uninstalling or clearing app data does not delete copies you saved elsewhere.
 

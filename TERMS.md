@@ -1,6 +1,6 @@
 # Terms of Use
 
-*Effective date: November 20, 2026 · Applies to Osmium v2.6.6 and later*
+*Effective date: November 24, 2026 · Applies to Osmium v2.6.6.2 and later*
 
 *Current version, published at osmium.im. The app reads it when you open About → Terms of Use.*
 
@@ -32,6 +32,8 @@ You may use Osmium for your own two-factor authentication and for devices you co
 Osmium has no account system and no cloud synchronization; all import features run entirely on this device. The app makes no network request at start-up unless you accept the update-check question on the welcome screen shown the first time you open each version (or switch it on later in Settings). Otherwise it connects only when you use a feature that needs it: the WebDAV server you configure, the GitHub Releases API and the public version files on osmium.im (release.json, release-preview.json) for the optional version check (asked once on that welcome screen, with the stable channel preselected and the preview channel off; both can be changed in Settings at any time), the osmium.im website to read the current versions of these Terms of Use and of the Privacy Policy when you open them in About, Google's public attestation status list when you refresh the revocation data on the integrity screen, or the other device during a LAN transfer. LAN transfer uses AES-256-GCM encryption derived from the pairing code and does not pass through an Osmium cloud server.
 
 The current versions of these Terms of Use and of the Privacy Policy are published on the osmium.im website, and the versions published there are the ones that apply. The app reads them when you open the document from About and keeps the copy it read so you can read it again without a connection. If a fetch fails, the app shows a failure notice with a link to the website.
+
+Verification on open: Osmium first reads your saved setting before showing verification codes or the lock screen. Turning it off does not disable verification required by device-integrity restrictions or by individual sensitive actions.
 
 Backup notifications and verification: automatic backups can post a local notification with the result. It can be switched off and it can also be delayed or suppressed by the system and by battery policies, so a notification is a convenience, not proof that a backup ran. The automatic-backup page can change the backup password, so keep "verify before opening from a notification" (on by default) or "verify on open" switched on: with both off, anyone holding your unlocked device can reach that page from the notification and change the backup password.
 
