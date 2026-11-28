@@ -33,6 +33,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -200,7 +201,7 @@ private fun IconTile(label: String, icon: PackIcon?, onClick: () -> Unit) {
 
 @Composable
 private fun PackIconBitmap(icon: PackIcon, size: Dp) {
-    val bitmap by produceState(initialValue = null, key1 = icon.file.path) {
+    val bitmap by produceState<ImageBitmap?>(initialValue = null, key1 = icon.file.path) {
         value = withContext(Dispatchers.IO) {
             runCatching {
                 val bytes = icon.file.readBytes()

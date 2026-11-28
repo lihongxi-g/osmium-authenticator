@@ -337,6 +337,9 @@ class AccountRepository(
             dao.updateIcon(accountId, null, null, null)
             return
         }
+        // Defensive: callers rasterise to <= 256 px, but never write an
+        // unbounded blob into the database or the next backup.
+        if (bytes.size > IconLimits.MAX_STORED_BYTES) return
         val encrypted = crypto.encryptBytes(bytes)
         dao.updateIcon(
             accountId,
@@ -357,6 +360,7 @@ class AccountRepository(
      */
     private fun decodeImportedIcon(v: VaultAccount): Pair<ByteArray, String>? {
         if (v.icon.isBlank()) return null
+        if (v.icon.length > MAX_ICON_BASE64_CHARS) return null
         val mime = v.iconMime.trim().lowercase()
         if (mime !in IconLimits.ALLOWED_MIME) return null
         val bytes = try {
@@ -366,5 +370,10 @@ class AccountRepository(
         }
         if (bytes.isEmpty() || bytes.size > IconLimits.MAX_STORED_BYTES) return null
         return bytes to mime
+    }
+
+    private companion object {
+        /** Ceiling on the Base64 text itself (≈ 512 KB of bytes plus padding). */
+        const val MAX_ICON_BASE64_CHARS = 700_000
     }
 }

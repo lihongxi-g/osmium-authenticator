@@ -93,6 +93,9 @@ object AegisImporter : AuthenticatorImporter {
     /** Base64 icon → bytes + MIME, rejecting unknown types and oversized payloads. */
     private fun decodeIcon(base64: String?, mime: String?): Pair<String, String>? {
         if (base64.isNullOrBlank()) return null
+        // Bound the string before decoding: a multi-megabyte Base64 payload
+        // would allocate its bytes before the size check below could run.
+        if (base64.length > MAX_ICON_BASE64_CHARS) return null
         val normalizedMime = mime?.trim()?.lowercase() ?: return null
         if (normalizedMime !in IconLimits.ALLOWED_MIME) return null
         val bytes = try {
@@ -115,4 +118,7 @@ object AegisImporter : AuthenticatorImporter {
         if (!primitive.isString) return null
         return primitive.content.takeIf { it.isNotBlank() }
     }
+
+    /** Ceiling on the Base64 text itself (≈ 512 KB of bytes plus padding). */
+    private const val MAX_ICON_BASE64_CHARS = 700_000
 }

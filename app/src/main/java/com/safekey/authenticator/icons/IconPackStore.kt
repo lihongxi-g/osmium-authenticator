@@ -60,7 +60,7 @@ class IconPackStore(private val packsDir: File) {
                 val defBytes = readBounded(zip, defEntry, IconLimits.MAX_PACK_JSON_BYTES)
                 val def = IconPackFormat.parse(defBytes)
 
-                var total = defBytes.size.toLong()
+                var total = 0L
                 for (icon in def.icons) {
                     // Re-checked here as well: validation and extraction must
                     // not be able to drift apart.
@@ -264,12 +264,11 @@ class IconPackStore(private val packsDir: File) {
 
     private fun containsDoctype(file: File): Boolean {
         return try {
-            val head = file.inputStream().use { input ->
-                val buffer = ByteArray(4096)
-                val read = input.read(buffer)
-                if (read <= 0) "" else String(buffer, 0, read, Charsets.UTF_8).lowercase()
-            }
-            "<!doctype" in head || "<!entity" in head
+            // The extraction cap bounds this read at 1 MB, so scanning the
+            // whole file (not just the first block) is affordable and a
+            // DOCTYPE hidden behind a long comment cannot slip through.
+            val text = file.readBytes().toString(Charsets.UTF_8).lowercase()
+            "<!doctype" in text || "<!entity" in text
         } catch (e: Exception) {
             true
         }
