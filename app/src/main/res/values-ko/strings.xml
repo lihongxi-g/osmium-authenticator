@@ -781,4 +781,8 @@
     <string name="icon_row_change">변경</string>
     <string name="icon_row_none">설정 안 됨</string>
     <string name="attributions_android_svg_desc">© AndroidSVG 기여자 (Apache-2.0). 가져온 아이콘 팩의 SVG 아이콘을 렌더링합니다.</string>
+    <string name="icon_letter_title">문자 아이콘</string>
+    <string name="icon_letter_desc">아이콘이 없으면 테마 색의 첫 글자 표시</string>
+    <string name="icon_custom_pick">갤러리에서 선택</string>
+    <string name="icon_custom_failed">이미지를 읽을 수 없습니다</string>
 </resources>

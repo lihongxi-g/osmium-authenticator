@@ -3,6 +3,8 @@ package com.safekey.authenticator.icons
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.Path
 import com.caverock.androidsvg.SVG
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -13,8 +15,9 @@ import kotlin.math.roundToInt
  * Renders pack icons and entry icons to bitmaps.
  *
  * Everything here is CPU-bound and must run off the main thread. Results are
- * bounded by [IconLimits]: source bitmaps are rejected above 4096 px per edge
- * (decompression bombs) and every render is capped at the requested size.
+ * bounded by [IconLimits]: decoding is downsampled with inSampleSize so even a
+ * 48 MP gallery image fits in bounded memory, and every render is capped at the
+ * requested size.
  */
 object IconRenderer {
 
@@ -60,6 +63,72 @@ object IconRenderer {
         }
     }
 
+    /**
+     * Decodes an icon for on-screen display at exactly [px]×[px].
+     *
+     * Two things happen here that must not happen per frame:
+     *  - a centre-crop to a square, so `ContentScale.Crop` never resamples the
+     *    bitmap while a list scrolls;
+     *  - an anti-aliased circular mask baked into the pixels, instead of a
+     *    `Modifier.clip(CircleShape)` draw-time clip on every row.
+     *
+     * A draw-time clip on a bitmap edge is what made list icons shimmer and
+     * look soft while scrolling on Android 16: the clipped texture was
+     * resampled every frame. With the mask in the bitmap the row is a plain
+     * 1:1 bitmap draw.
+     */
+    fun decodeForDisplay(bytes: ByteArray, mime: String?, px: Int): Bitmap? {
+        val size = px.coerceIn(16, IconLimits.MAX_SOURCE_PX)
+        val decoded = decode(bytes, mime, size) ?: return null
+        return try {
+            circleMask(centerSquare(decoded, size))
+        } catch (e: OutOfMemoryError) {
+            decoded.recycle()
+            null
+        } catch (e: Exception) {
+            decoded.recycle()
+            null
+        }
+    }
+
+    private fun centerSquare(src: Bitmap, size: Int): Bitmap {
+        var current = src
+        val side = min(current.width, current.height)
+        if (current.width != side || current.height != side) {
+            val cropped = Bitmap.createBitmap(
+                current,
+                (current.width - side) / 2,
+                (current.height - side) / 2,
+                side,
+                side
+            )
+            if (cropped !== current) {
+                current.recycle()
+                current = cropped
+            }
+        }
+        if (current.width != size) {
+            val scaled = Bitmap.createScaledBitmap(current, size, size, true)
+            if (scaled !== current) {
+                current.recycle()
+                current = scaled
+            }
+        }
+        return current
+    }
+
+    private fun circleMask(src: Bitmap): Bitmap {
+        val out = Bitmap.createBitmap(src.width, src.height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(out)
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG)
+        val radius = src.width / 2f
+        val path = Path().apply { addCircle(radius, radius, radius, Path.Direction.CW) }
+        canvas.clipPath(path)
+        canvas.drawBitmap(src, 0f, 0f, paint)
+        src.recycle()
+        return out
+    }
+
     private fun renderSvg(bytes: ByteArray, px: Int): Bitmap? {
         val svg = SVG.getFromInputStream(ByteArrayInputStream(bytes))
         var width = svg.documentWidth
@@ -87,12 +156,13 @@ object IconRenderer {
         val width = bounds.outWidth
         val height = bounds.outHeight
         if (width <= 0 || height <= 0) return null
-        // Refuse absurd dimensions before allocating anything: a 30000×30000
-        // PNG is a memory bomb even with inSampleSize.
-        if (width > 4096 || height > 4096) return null
+        // Huge images are not rejected outright: inSampleSize bounds the
+        // allocation, so a 48 MP gallery photo still becomes a 256 px icon.
+        // Only dimensions that cannot be a real image are refused.
+        if (width > 100_000 || height > 100_000) return null
 
         var sample = 1
-        while (width / (sample * 2) >= px && height / (sample * 2) >= px) sample *= 2
+        while (max(width, height) / (sample * 2) >= px * 2) sample *= 2
         val options = BitmapFactory.Options().apply {
             inSampleSize = sample
             inPreferredConfig = Bitmap.Config.ARGB_8888

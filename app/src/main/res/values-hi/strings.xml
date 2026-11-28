@@ -781,4 +781,8 @@
     <string name="icon_row_change">बदलें</string>
     <string name="icon_row_none">सेट नहीं</string>
     <string name="attributions_android_svg_desc">© AndroidSVG योगदानकर्ता (Apache-2.0)। आयातित आइकन पैक से SVG आइकन रेंडर करता है।</string>
+    <string name="icon_letter_title">अक्षर आइकन</string>
+    <string name="icon_letter_desc">आइकन न होने पर थीम रंग में पहला अक्षर दिखाएँ</string>
+    <string name="icon_custom_pick">गैलरी से चुनें</string>
+    <string name="icon_custom_failed">वह छवि पढ़ी नहीं जा सकी</string>
 </resources>

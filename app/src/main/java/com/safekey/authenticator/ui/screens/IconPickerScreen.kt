@@ -1,5 +1,8 @@
 package com.safekey.authenticator.ui.screens
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,10 +17,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -32,9 +35,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -53,9 +57,10 @@ import kotlinx.coroutines.withContext
  * Full-screen icon picker over the installed Aegis-format packs.
  *
  * Layout follows Aegis' picker: search field on top, pack switcher when more
- * than one pack is installed, then a grid whose first items are the issuer
- * suggestions (Aegis rule + Chinese alias table), followed by every icon.
- * Picking writes the rasterised icon to the account immediately and returns.
+ * than one pack is installed, then a grid whose first items are "No icon" and
+ * a gallery import, followed by the issuer suggestions (Aegis rule + Chinese
+ * alias table) and every icon. Picking writes the rasterised icon to the
+ * account immediately and returns.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,6 +73,19 @@ fun IconPickerScreen(
     val packs by vm.iconPacks.collectAsState()
     var query by rememberSaveable { mutableStateOf("") }
     var packIndex by rememberSaveable { mutableStateOf(0) }
+    var importingCustom by remember { mutableStateOf(false) }
+
+    val imagePicker = rememberLauncherForActivityResult(
+        ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        if (uri != null) {
+            importingCustom = true
+            vm.setAccountIconFromImage(accountId, uri) { ok ->
+                importingCustom = false
+                if (ok) onBack()
+            }
+        }
+    }
 
     val pack = packs.getOrNull(packIndex.coerceIn(0, (packs.size - 1).coerceAtLeast(0)))
     val suggested = remember(pack?.uuid, pack?.version, issuer) {
@@ -104,35 +122,44 @@ fun IconPickerScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
-                return@Column
             }
 
-            OutlinedTextField(
-                value = query,
-                onValueChange = { query = it },
-                label = { Text(stringResource(R.string.icon_pick_search)) },
-                singleLine = true,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-            )
+            if (pack != null) {
+                OutlinedTextField(
+                    value = query,
+                    onValueChange = { query = it },
+                    label = { Text(stringResource(R.string.icon_pick_search)) },
+                    singleLine = true,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                )
 
-            if (packs.size > 1) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                ) {
-                    packs.forEachIndexed { index, item ->
-                        FilterChip(
-                            selected = index == packIndex,
-                            onClick = {
-                                packIndex = index
-                                query = ""
-                            },
-                            label = { Text(item.name, maxLines = 1, overflow = TextOverflow.Ellipsis) }
-                        )
+                if (packs.size > 1) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    ) {
+                        packs.forEachIndexed { index, item ->
+                            FilterChip(
+                                selected = index == packIndex,
+                                onClick = {
+                                    packIndex = index
+                                    query = ""
+                                },
+                                label = { Text(item.name, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+                            )
+                        }
                     }
                 }
+            }
+
+            if (importingCustom) {
+                LinearProgressIndicator(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 4.dp)
+                )
             }
 
             LazyVerticalGrid(
@@ -146,12 +173,25 @@ fun IconPickerScreen(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 item(key = "__none__") {
-                    IconTile(
+                    GlyphTile(
                         label = stringResource(R.string.icon_pick_none),
-                        icon = null,
+                        vector = AppIcons.Close,
                         onClick = {
                             vm.clearAccountIcon(accountId)
                             onBack()
+                        }
+                    )
+                }
+                item(key = "__custom__") {
+                    GlyphTile(
+                        label = stringResource(R.string.icon_custom_pick),
+                        vector = AppIcons.ImageIcon,
+                        onClick = {
+                            if (!importingCustom) {
+                                imagePicker.launch(
+                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                )
+                            }
                         }
                     )
                 }
@@ -171,23 +211,41 @@ fun IconPickerScreen(
 
 @Composable
 private fun IconTile(label: String, icon: PackIcon?, onClick: () -> Unit) {
+    IconTileFrame(label = label, onClick = onClick) {
+        if (icon != null) {
+            PackIconBitmap(icon = icon, size = 48.dp)
+        } else {
+            Icon(
+                imageVector = AppIcons.Close,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+/** A picker tile that is not backed by a pack icon (none / gallery). */
+@Composable
+private fun GlyphTile(label: String, vector: ImageVector, onClick: () -> Unit) {
+    IconTileFrame(label = label, onClick = onClick) {
+        Icon(
+            imageVector = vector,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
+private fun IconTileFrame(label: String, onClick: () -> Unit, content: @Composable () -> Unit) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-            .clip(MaterialTheme.shapes.medium)
             .clickable(onClick = onClick)
             .padding(vertical = 8.dp, horizontal = 2.dp)
     ) {
         Box(modifier = Modifier.size(48.dp), contentAlignment = Alignment.Center) {
-            if (icon != null) {
-                PackIconBitmap(icon = icon, size = 48.dp)
-            } else {
-                Icon(
-                    imageVector = AppIcons.Close,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+            content()
         }
         Text(
             text = label,
@@ -201,11 +259,15 @@ private fun IconTile(label: String, icon: PackIcon?, onClick: () -> Unit) {
 
 @Composable
 private fun PackIconBitmap(icon: PackIcon, size: Dp) {
-    val bitmap by produceState<ImageBitmap?>(initialValue = null, key1 = icon.file.path) {
+    // Decode at the exact slot size: a fixed 128 px bitmap drawn into a
+    // 48 dp (≈144 px) slot was being upscaled, which made the grid soft.
+    val px = with(LocalDensity.current) { size.roundToPx() }.coerceIn(16, 512)
+    val key = remember(icon.file.path, px) { icon.file.path + "@" + px }
+    val bitmap by produceState<ImageBitmap?>(initialValue = null, key1 = key) {
         value = withContext(Dispatchers.IO) {
             runCatching {
                 val bytes = icon.file.readBytes()
-                IconBitmapCache.getOrDecode(bytes, icon.type.mime, 128)
+                IconBitmapCache.getOrDecode(bytes, icon.type.mime, px)
             }.getOrNull()?.asImageBitmap()
         }
     }
@@ -213,9 +275,7 @@ private fun PackIconBitmap(icon: PackIcon, size: Dp) {
         Image(
             bitmap = image,
             contentDescription = null,
-            modifier = Modifier
-                .size(size)
-                .clip(CircleShape)
+            modifier = Modifier.size(size)
         )
     }
 }

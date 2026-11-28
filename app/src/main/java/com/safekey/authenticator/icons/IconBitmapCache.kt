@@ -25,11 +25,11 @@ object IconBitmapCache {
     /** Synchronous lookup (no decode), for a composition's first frame. */
     fun peek(key: String): Bitmap? = cache.get(key)
 
-    /** Cached decode. Safe to call from a background thread. */
+    /** Cached decode for on-screen use (square, circle-masked). Safe off-main. */
     fun getOrDecode(bytes: ByteArray, mime: String?, px: Int): Bitmap? {
         val key = key(bytes, px)
         cache.get(key)?.let { return it }
-        val bitmap = IconRenderer.decode(bytes, mime, px) ?: return null
+        val bitmap = IconRenderer.decodeForDisplay(bytes, mime, px) ?: return null
         cache.put(key, bitmap)
         return bitmap
     }

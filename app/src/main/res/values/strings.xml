@@ -798,4 +798,8 @@
     <string name="icon_row_change">Change</string>
     <string name="icon_row_none">Not set</string>
     <string name="attributions_android_svg_desc">© AndroidSVG contributors (Apache-2.0). Renders SVG icons from imported icon packs.</string>
+    <string name="icon_letter_title">Letter icons</string>
+    <string name="icon_letter_desc">Use the first letter in a theme colour when no icon is set</string>
+    <string name="icon_custom_pick">Choose from gallery</string>
+    <string name="icon_custom_failed">Image could not be read</string>
 </resources>

@@ -58,6 +58,11 @@ data class AppSettings(
      * this on in Settings → Appearance → Icons.
      */
     val showIcons: Boolean = false,
+    /**
+     * Fallback for entries without an icon: a first-letter avatar in a theme
+     * colour. Independent of [showIcons] so it can be switched off on its own.
+     */
+    val letterIcons: Boolean = true,
     val timeOffsetSeconds: Int = 0,
     val sortMode: String = SORT_ADDED,
     val destroyMode: String = DESTROY_OFF,
@@ -368,6 +373,7 @@ class SettingsRepository(
         val ALLOW_SCREENSHOTS = booleanPreferencesKey("allow_screenshots")
         val HIDE_CODES = booleanPreferencesKey("hide_codes")
         val SHOW_ICONS = booleanPreferencesKey("show_icons")
+        val LETTER_ICONS = booleanPreferencesKey("letter_icons")
         val SORT_MODE = stringPreferencesKey("sort_mode")
         val TIME_OFFSET = intPreferencesKey("time_offset_seconds")
         val DESTROY_MODE = stringPreferencesKey("destroy_mode")
@@ -441,6 +447,7 @@ class SettingsRepository(
             allowScreenshots = prefs[Keys.ALLOW_SCREENSHOTS] ?: false,
             hideCodes = prefs[Keys.HIDE_CODES] ?: false,
             showIcons = prefs[Keys.SHOW_ICONS] ?: false,
+            letterIcons = prefs[Keys.LETTER_ICONS] ?: true,
             sortMode = prefs[Keys.SORT_MODE] ?: AppSettings.SORT_ADDED,
             timeOffsetSeconds = prefs[Keys.TIME_OFFSET] ?: 0,
             destroyMode = prefs[Keys.DESTROY_MODE] ?: AppSettings.DESTROY_OFF,
@@ -570,6 +577,10 @@ class SettingsRepository(
 
     suspend fun setShowIcons(enabled: Boolean) {
         context.dataStore.edit { it[Keys.SHOW_ICONS] = enabled }
+    }
+
+    suspend fun setLetterIcons(enabled: Boolean) {
+        context.dataStore.edit { it[Keys.LETTER_ICONS] = enabled }
     }
 
     suspend fun setSortMode(mode: String) {

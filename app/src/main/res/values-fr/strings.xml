@@ -781,4 +781,8 @@
     <string name="icon_row_change">Modifier</string>
     <string name="icon_row_none">Non défini</string>
     <string name="attributions_android_svg_desc">© Contributeurs d’AndroidSVG (Apache-2.0). Rendu des icônes SVG des packs importés.</string>
+    <string name="icon_letter_title">Icônes à initiale</string>
+    <string name="icon_letter_desc">Afficher l\'initiale dans une couleur du thème quand aucune icône n\'est définie</string>
+    <string name="icon_custom_pick">Choisir dans la galerie</string>
+    <string name="icon_custom_failed">Impossible de lire cette image</string>
 </resources>

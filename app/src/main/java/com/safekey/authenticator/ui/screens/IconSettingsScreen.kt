@@ -85,6 +85,18 @@ fun IconSettingsScreen(vm: MainViewModel, onBack: () -> Unit) {
                 }
             )
 
+            SettingRow(
+                icon = AppIcons.TextFields,
+                title = stringResource(R.string.icon_letter_title),
+                description = stringResource(R.string.icon_letter_desc),
+                trailing = {
+                    Switch(
+                        checked = settings.letterIcons,
+                        onCheckedChange = { vm.setLetterIcons(it) }
+                    )
+                }
+            )
+
             SectionHeader(stringResource(R.string.icon_packs_title))
 
             SettingRow(

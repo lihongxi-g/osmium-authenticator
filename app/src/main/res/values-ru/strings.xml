@@ -781,4 +781,8 @@
     <string name="icon_row_change">Изменить</string>
     <string name="icon_row_none">Не задан</string>
     <string name="attributions_android_svg_desc">© Участники AndroidSVG (Apache-2.0). Отрисовывает значки SVG из импортированных наборов.</string>
+    <string name="icon_letter_title">Буквенные значки</string>
+    <string name="icon_letter_desc">Показывать первую букву в цвете темы, если значка нет</string>
+    <string name="icon_custom_pick">Выбрать из галереи</string>
+    <string name="icon_custom_failed">Не удалось прочитать изображение</string>
 </resources>

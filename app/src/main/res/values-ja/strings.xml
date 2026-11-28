@@ -781,4 +781,8 @@
     <string name="icon_row_change">変更</string>
     <string name="icon_row_none">未設定</string>
     <string name="attributions_android_svg_desc">© AndroidSVG 貢献者 (Apache-2.0)。読み込んだアイコンパックの SVG アイコンを描画します。</string>
+    <string name="icon_letter_title">文字アイコン</string>
+    <string name="icon_letter_desc">アイコンがない場合はテーマ色の頭文字を表示</string>
+    <string name="icon_custom_pick">ギャラリーから選択</string>
+    <string name="icon_custom_failed">この画像を読み込めませんでした</string>
 </resources>

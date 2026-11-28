@@ -794,4 +794,8 @@
     <string name="icon_row_change">變更</string>
     <string name="icon_row_none">未設定</string>
     <string name="attributions_android_svg_desc">© AndroidSVG 貢獻者（Apache-2.0）。用於轉譯匯入圖示包中的 SVG 圖示。</string>
+    <string name="icon_letter_title">首字母圖示</string>
+    <string name="icon_letter_desc">沒有圖示時，以主題色的首字母代替</string>
+    <string name="icon_custom_pick">從相簿選擇</string>
+    <string name="icon_custom_failed">無法讀取這張圖片</string>
 </resources>

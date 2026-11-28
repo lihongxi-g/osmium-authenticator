@@ -781,4 +781,8 @@
     <string name="icon_row_change">Ändern</string>
     <string name="icon_row_none">Nicht festgelegt</string>
     <string name="attributions_android_svg_desc">© AndroidSVG-Mitwirkende (Apache-2.0). Rendert SVG-Symbole aus importierten Symbolpaketen.</string>
+    <string name="icon_letter_title">Buchstaben-Symbole</string>
+    <string name="icon_letter_desc">Ohne Symbol den Anfangsbuchstaben in einer Themenfarbe zeigen</string>
+    <string name="icon_custom_pick">Aus Galerie wählen</string>
+    <string name="icon_custom_failed">Bild konnte nicht gelesen werden</string>
 </resources>

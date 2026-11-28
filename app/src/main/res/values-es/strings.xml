@@ -781,4 +781,8 @@
     <string name="icon_row_change">Cambiar</string>
     <string name="icon_row_none">Sin definir</string>
     <string name="attributions_android_svg_desc">© Colaboradores de AndroidSVG (Apache-2.0). Renderiza iconos SVG de los paquetes importados.</string>
+    <string name="icon_letter_title">Iconos con letra</string>
+    <string name="icon_letter_desc">Mostrar la inicial en un color del tema cuando no hay icono</string>
+    <string name="icon_custom_pick">Elegir de la galería</string>
+    <string name="icon_custom_failed">No se pudo leer esa imagen</string>
 </resources>

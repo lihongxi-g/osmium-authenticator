@@ -13,6 +13,7 @@ import com.safekey.authenticator.icons.IconLimits
 import com.safekey.authenticator.icons.IconPackException
 import com.safekey.authenticator.icons.IconPackStore
 import com.safekey.authenticator.icons.IconRenderer
+import com.safekey.authenticator.icons.IconType
 import com.safekey.authenticator.icons.InstalledIconPack
 import com.safekey.authenticator.icons.PackIcon
 import com.safekey.authenticator.integrity.IntegrityLevel
@@ -748,6 +749,9 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     fun setShowIcons(enabled: Boolean) =
         viewModelScope.launch { settingsRepo.setShowIcons(enabled) }
 
+    fun setLetterIcons(enabled: Boolean) =
+        viewModelScope.launch { settingsRepo.setLetterIcons(enabled) }
+
     /**
      * Copies a picked document into the cache and imports it as an Aegis icon
      * pack. The copy is bounded while streaming, so a huge URI cannot fill the
@@ -828,6 +832,48 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
+    /**
+     * Imports a user-picked image (photo picker / gallery) as this account's
+     * icon. The stream is bounded while reading, then rasterised to the same
+     * 256 px PNG used for pack icons and stored through the encrypted path.
+     */
+    fun setAccountIconFromImage(accountId: String, uri: Uri, onDone: (Boolean) -> Unit) {
+        val application = getApplication<Application>()
+        viewModelScope.launch {
+            val stored = withContext(Dispatchers.IO) {
+                try {
+                    val mime = application.contentResolver.getType(uri)
+                    val bytes = application.contentResolver.openInputStream(uri)?.use { input ->
+                        val out = java.io.ByteArrayOutputStream()
+                        val buffer = ByteArray(64 * 1024)
+                        var total = 0L
+                        while (true) {
+                            val read = input.read(buffer)
+                            if (read < 0) break
+                            total += read
+                            if (total > MAX_CUSTOM_ICON_BYTES) return@use null
+                            out.write(buffer, 0, read)
+                        }
+                        out.toByteArray()
+                    } ?: return@withContext null
+                    IconRenderer.prepareForStorage(bytes, mime)
+                } catch (e: OutOfMemoryError) {
+                    null
+                } catch (e: Exception) {
+                    null
+                }
+            }
+            if (stored == null) {
+                showToast(application.getString(R.string.icon_custom_failed))
+                onDone(false)
+            } else {
+                repo.setIcon(accountId, stored.bytes, stored.mime)
+                showToast(application.getString(R.string.icon_changed))
+                onDone(true)
+            }
+        }
+    }
+
     fun clearAccountIcon(accountId: String) {
         viewModelScope.launch {
             repo.setIcon(accountId, null, null)
@@ -866,7 +912,15 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     private fun loadStoredIcon(icon: PackIcon): IconRenderer.StoredIcon? {
         if (icon.file.length() > IconLimits.MAX_ICON_FILE_BYTES) return null
         return try {
-            IconRenderer.prepareForStorage(icon.file.readBytes(), icon.type.mime)
+            val bytes = icon.file.readBytes()
+            if (icon.type == IconType.SVG && bytes.size <= IconLimits.MAX_STORED_BYTES) {
+                // Keep the vector. Rasterising a 256 px PNG here and then
+                // scaling it down to a 40 dp slot is what made list icons look
+                // soft; the renderer can hit the exact display size from SVG.
+                IconRenderer.StoredIcon(bytes, IconType.SVG.mime)
+            } else {
+                IconRenderer.prepareForStorage(bytes, icon.type.mime)
+            }
         } catch (e: OutOfMemoryError) {
             null
         } catch (e: Exception) {
@@ -1124,5 +1178,8 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     companion object {
         /** Upper bound for the ZIP copied out of a SAF URI (packs are ~1 MB). */
         private const val MAX_ICON_PACK_IMPORT_BYTES = 96L * 1024 * 1024
+
+        /** Upper bound for a user-picked image (48 MP JPEGs sit around 10–20 MB). */
+        private const val MAX_CUSTOM_ICON_BYTES = 24L * 1024 * 1024
     }
 }

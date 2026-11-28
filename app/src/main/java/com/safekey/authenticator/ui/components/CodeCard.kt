@@ -92,7 +92,8 @@ fun CodeCard(
     modifier: Modifier = Modifier,
     hideCode: Boolean = false,
     showTags: Boolean = true,
-    showIcons: Boolean = false
+    showIcons: Boolean = false,
+    letterIcons: Boolean = true
 ) {
     val reveal = rememberCodeReveal()
     val masked = hideCode && !reveal.revealed
@@ -116,6 +117,7 @@ fun CodeCard(
                     subtitle = ui.account.displaySubtitle,
                     uiTags = if (showTags) ui.account.tags else emptyList(),
                     showIcon = showIcons,
+                    letterIcons = letterIcons,
                     account = ui.account,
                     modifier = Modifier.weight(1f)
                 )
@@ -152,16 +154,18 @@ private fun AccountHeader(
     uiTags: List<com.safekey.authenticator.model.Tag>,
     account: com.safekey.authenticator.model.Account,
     showIcon: Boolean,
+    letterIcons: Boolean,
     modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (showIcon && account.hasIcon) {
+        if (showIcon) {
             AccountIcon(
                 account = account,
                 size = 40.dp,
+                fallbackLetter = letterIcons,
                 modifier = Modifier.padding(end = 12.dp)
             )
         }
