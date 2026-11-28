@@ -18,6 +18,10 @@ sealed class Screen {
     object Settings : Screen()
     /** Second-level settings page: everything appearance-related lives here. */
     object Appearance : Screen()
+    /** Third-level page under Appearance: entry icons (visibility + icon packs). */
+    object IconSettings : Screen()
+    /** Full-screen icon picker for one saved account. */
+    data class IconPicker(val accountId: String, val issuer: String) : Screen()
     /** Third-level settings page: theme (design system) options. */
     object ThemeSettings : Screen()
     /** Third-level settings page: interface typeface (system / Lora). */

@@ -52,6 +52,12 @@ data class AppSettings(
     val gateOnOpen: Boolean = true,
     val allowScreenshots: Boolean = false,
     val hideCodes: Boolean = false,
+    /**
+     * Show entry icons in the account list. Off by default: a fresh install
+     * keeps the text-only cards, and icons only appear after the user turns
+     * this on in Settings → Appearance → Icons.
+     */
+    val showIcons: Boolean = false,
     val timeOffsetSeconds: Int = 0,
     val sortMode: String = SORT_ADDED,
     val destroyMode: String = DESTROY_OFF,
@@ -361,6 +367,7 @@ class SettingsRepository(
         val GATE_ON_OPEN = booleanPreferencesKey("gate_on_open")
         val ALLOW_SCREENSHOTS = booleanPreferencesKey("allow_screenshots")
         val HIDE_CODES = booleanPreferencesKey("hide_codes")
+        val SHOW_ICONS = booleanPreferencesKey("show_icons")
         val SORT_MODE = stringPreferencesKey("sort_mode")
         val TIME_OFFSET = intPreferencesKey("time_offset_seconds")
         val DESTROY_MODE = stringPreferencesKey("destroy_mode")
@@ -433,6 +440,7 @@ class SettingsRepository(
             gateOnOpen = prefs[Keys.GATE_ON_OPEN] ?: true,
             allowScreenshots = prefs[Keys.ALLOW_SCREENSHOTS] ?: false,
             hideCodes = prefs[Keys.HIDE_CODES] ?: false,
+            showIcons = prefs[Keys.SHOW_ICONS] ?: false,
             sortMode = prefs[Keys.SORT_MODE] ?: AppSettings.SORT_ADDED,
             timeOffsetSeconds = prefs[Keys.TIME_OFFSET] ?: 0,
             destroyMode = prefs[Keys.DESTROY_MODE] ?: AppSettings.DESTROY_OFF,
@@ -558,6 +566,10 @@ class SettingsRepository(
 
     suspend fun setHideCodes(enabled: Boolean) {
         context.dataStore.edit { it[Keys.HIDE_CODES] = enabled }
+    }
+
+    suspend fun setShowIcons(enabled: Boolean) {
+        context.dataStore.edit { it[Keys.SHOW_ICONS] = enabled }
     }
 
     suspend fun setSortMode(mode: String) {

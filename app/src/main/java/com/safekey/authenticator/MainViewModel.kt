@@ -1,12 +1,20 @@
 package com.safekey.authenticator
 
 import android.app.Application
+import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.safekey.authenticator.backup.AutoBackupRunner
 import com.safekey.authenticator.backup.AutoBackupScheduler
 import com.safekey.authenticator.data.AppSettings
 import com.safekey.authenticator.data.WebDavServerConfig
+import com.safekey.authenticator.icons.IconMatcher
+import com.safekey.authenticator.icons.IconLimits
+import com.safekey.authenticator.icons.IconPackException
+import com.safekey.authenticator.icons.IconPackStore
+import com.safekey.authenticator.icons.IconRenderer
+import com.safekey.authenticator.icons.InstalledIconPack
+import com.safekey.authenticator.icons.PackIcon
 import com.safekey.authenticator.integrity.IntegrityLevel
 import com.safekey.authenticator.integrity.IntegrityReport
 import com.safekey.authenticator.model.Account
@@ -33,6 +41,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
@@ -66,6 +75,26 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     private val selfDestruct = SelfDestructManager()
 
     val nav = NavigationState()
+
+    // ------------------------------------------------------------- icon packs
+
+    /** Installed Aegis-format packs (files/icons/packs/<uuid>/<version>/). */
+    private val iconPackStore = IconPackStore(java.io.File(app.filesDir, "icons/packs"))
+
+    private val _iconPacks = MutableStateFlow<List<InstalledIconPack>>(emptyList())
+    val iconPacks: StateFlow<List<InstalledIconPack>> = _iconPacks.asStateFlow()
+
+    init {
+        refreshIconPacks()
+    }
+
+    fun refreshIconPacks() {
+        viewModelScope.launch {
+            _iconPacks.value = withContext(Dispatchers.IO) {
+                runCatching { iconPackStore.list() }.getOrDefault(emptyList())
+            }
+        }
+    }
 
     /**
      * Random-order shuffle, computed once per app launch (see sortMode).
@@ -682,7 +711,12 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     ) {
         viewModelScope.launch {
             try {
-                repo.add(issuer, label, secret, algorithm, digits, period, type, counter, tagIds)
+                val account = repo.add(issuer, label, secret, algorithm, digits, period, type, counter, tagIds)
+                // Icons are opt-in (Settings → Appearance → Icons): only
+                // auto-assign once the user has turned the list icons on.
+                if (settings.value.showIcons) {
+                    withContext(Dispatchers.IO) { assignMatchedIcon(account) }
+                }
                 showToast(getApplication<Application>().getString(R.string.account_added))
             } catch (e: Exception) {
                 showToast(e.message ?: "Error")
@@ -706,6 +740,143 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch {
             repo.delete(account)
             showToast(getApplication<Application>().getString(R.string.deleted))
+        }
+    }
+
+    // ------------------------------------------------------------------ icons
+
+    fun setShowIcons(enabled: Boolean) =
+        viewModelScope.launch { settingsRepo.setShowIcons(enabled) }
+
+    /**
+     * Copies a picked document into the cache and imports it as an Aegis icon
+     * pack. The copy is bounded while streaming, so a huge URI cannot fill the
+     * disk before the pack reader sees it.
+     */
+    fun installIconPack(uri: Uri, onResult: (Boolean, String?) -> Unit) {
+        val application = getApplication<Application>()
+        viewModelScope.launch {
+            val error = withContext(Dispatchers.IO) {
+                var temp: java.io.File? = null
+                try {
+                    val dir = java.io.File(application.cacheDir, "icon-pack-import")
+                    if (!dir.isDirectory && !dir.mkdirs()) {
+                        throw IconPackException(application.getString(R.string.icon_pack_invalid))
+                    }
+                    val tempFile = java.io.File(dir, "pack-${System.currentTimeMillis()}.zip")
+                    temp = tempFile
+                    val stream = application.contentResolver.openInputStream(uri)
+                        ?: throw IconPackException(application.getString(R.string.icon_pack_invalid))
+                    stream.use { input ->
+                        tempFile.outputStream().use { output ->
+                            val buffer = ByteArray(64 * 1024)
+                            var total = 0L
+                            while (true) {
+                                val read = input.read(buffer)
+                                if (read < 0) break
+                                total += read
+                                if (total > MAX_ICON_PACK_IMPORT_BYTES) {
+                                    throw IconPackException(
+                                        application.getString(R.string.icon_pack_too_large)
+                                    )
+                                }
+                                output.write(buffer, 0, read)
+                            }
+                        }
+                    }
+                    iconPackStore.install(temp)
+                    null
+                } catch (e: OutOfMemoryError) {
+                    application.getString(R.string.icon_pack_too_large)
+                } catch (e: Exception) {
+                    e.message ?: application.getString(R.string.icon_pack_invalid)
+                } finally {
+                    temp?.delete()
+                }
+            }
+            refreshIconPacks()
+            onResult(error == null, error)
+        }
+    }
+
+    fun removeIconPack(pack: InstalledIconPack) {
+        viewModelScope.launch {
+            val error = withContext(Dispatchers.IO) {
+                runCatching { iconPackStore.remove(pack) }.exceptionOrNull()?.message
+            }
+            refreshIconPacks()
+            if (error != null) showToast(error)
+        }
+    }
+
+    /** Rasterises [icon] and stores it on the account (encrypted). */
+    fun setAccountIconFromPack(accountId: String, icon: PackIcon, onDone: () -> Unit = {}) {
+        viewModelScope.launch {
+            val stored = withContext(Dispatchers.IO) { loadStoredIcon(icon) }
+            if (stored == null) {
+                showToast(getApplication<Application>().getString(R.string.icon_pack_invalid))
+            } else {
+                repo.setIcon(accountId, stored.bytes, stored.mime)
+                showToast(getApplication<Application>().getString(R.string.icon_changed))
+            }
+            onDone()
+        }
+    }
+
+    fun clearAccountIcon(accountId: String) {
+        viewModelScope.launch {
+            repo.setIcon(accountId, null, null)
+            showToast(getApplication<Application>().getString(R.string.icon_removed))
+        }
+    }
+
+    /** Assigns the best pack match to every entry that has no icon yet. */
+    fun autoAssignIcons() {
+        viewModelScope.launch {
+            val packs = withContext(Dispatchers.IO) {
+                runCatching { iconPackStore.list() }.getOrDefault(emptyList())
+            }
+            if (packs.isEmpty()) {
+                showToast(getApplication<Application>().getString(R.string.icon_packs_none))
+                return@launch
+            }
+            val targets = repo.accountsWithoutIcon()
+            var assigned = 0
+            withContext(Dispatchers.IO) {
+                for (account in targets) {
+                    val icon = packs.firstNotNullOfOrNull {
+                        IconMatcher.bestMatch(it, account.issuer)
+                    } ?: continue
+                    val stored = loadStoredIcon(icon) ?: continue
+                    repo.setIcon(account.id, stored.bytes, stored.mime)
+                    assigned++
+                }
+            }
+            showToast(
+                getApplication<Application>().getString(R.string.icon_auto_assigned, assigned)
+            )
+        }
+    }
+
+    private fun loadStoredIcon(icon: PackIcon): IconRenderer.StoredIcon? {
+        if (icon.file.length() > IconLimits.MAX_ICON_FILE_BYTES) return null
+        return try {
+            IconRenderer.prepareForStorage(icon.file.readBytes(), icon.type.mime)
+        } catch (e: OutOfMemoryError) {
+            null
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    /** Best match across all installed packs; called on a background thread. */
+    private suspend fun assignMatchedIcon(account: Account) {
+        val packs = runCatching { iconPackStore.list() }.getOrDefault(emptyList())
+        for (pack in packs) {
+            val icon = IconMatcher.bestMatch(pack, account.issuer) ?: continue
+            val stored = loadStoredIcon(icon) ?: continue
+            repo.setIcon(account.id, stored.bytes, stored.mime)
+            return
         }
     }
 
@@ -943,5 +1114,10 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     fun clearDestroyPin() {
         pinManager.clearDestroyPin()
         AppLog.d("destruct pin cleared")
+    }
+
+    companion object {
+        /** Upper bound for the ZIP copied out of a SAF URI (packs are ~1 MB). */
+        private const val MAX_ICON_PACK_IMPORT_BYTES = 96L * 1024 * 1024
     }
 }

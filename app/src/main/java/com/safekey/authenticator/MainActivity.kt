@@ -96,6 +96,8 @@ import com.safekey.authenticator.notify.BackupNotifier
 import com.safekey.authenticator.ui.navigation.isRootBlocked
 import com.safekey.authenticator.ui.screens.AboutScreen
 import com.safekey.authenticator.ui.screens.AppearanceSettingsScreen
+import com.safekey.authenticator.ui.screens.IconPickerScreen
+import com.safekey.authenticator.ui.screens.IconSettingsScreen
 import com.safekey.authenticator.ui.screens.FontFamilySettingsScreen
 import com.safekey.authenticator.ui.screens.FontNotesScreen
 import com.safekey.authenticator.ui.screens.PermissionsScreen
@@ -1510,6 +1512,18 @@ private fun IntegrityNoticeDialog(
             is Screen.Appearance -> AppearanceSettingsScreen(
                 vm = vm,
                 hiddenFeatures = vm.settings.value.devHiddenFeatures,
+                onBack = { vm.nav.pop() }
+            )
+
+            is Screen.IconSettings -> IconSettingsScreen(
+                vm = vm,
+                onBack = { vm.nav.pop() }
+            )
+
+            is Screen.IconPicker -> IconPickerScreen(
+                vm = vm,
+                accountId = screen.accountId,
+                issuer = screen.issuer,
                 onBack = { vm.nav.pop() }
             )
 

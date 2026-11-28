@@ -108,6 +108,11 @@ fun AttributionsScreen(
                 description = stringResource(R.string.attributions_keyattestation_desc),
                 onClick = { open("https://github.com/android/keyattestation") }
             )
+            AttributionCard(
+                title = "AndroidSVG (Apache-2.0)",
+                description = stringResource(R.string.attributions_android_svg_desc),
+                onClick = { open("https://github.com/BigBadaboom/androidsvg") }
+            )
             // Pulled in by the verifier module; MIT requires the notice to
             // travel with binary distributions, and the APK carries its text
             // as assets/licenses/bouncycastle_LICENSE.md.

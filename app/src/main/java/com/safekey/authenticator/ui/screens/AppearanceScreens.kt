@@ -160,6 +160,22 @@ fun AppearanceSettingsScreen(
                 onClick = { vm.nav.push(Screen.HapticSettings) }
             )
 
+            if ("icons" !in hiddenFeatures) SettingRow(
+                icon = AppIcons.ImageIcon,
+                title = stringResource(R.string.icon_settings_title),
+                description = stringResource(R.string.icon_settings_desc),
+                trailing = {
+                    Text(
+                        text = stringResource(
+                            if (settings.showIcons) R.string.icon_show_on else R.string.icon_show_off
+                        ),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
+                onClick = { vm.nav.push(Screen.IconSettings) }
+            )
+
             if ("predictiveBack" !in hiddenFeatures) SettingRow(
                 icon = AppIcons.ArrowBack,
                 title = stringResource(R.string.predictive_back_title),

@@ -91,7 +91,8 @@ fun CodeCard(
     onCopyCode: () -> Unit,
     modifier: Modifier = Modifier,
     hideCode: Boolean = false,
-    showTags: Boolean = true
+    showTags: Boolean = true,
+    showIcons: Boolean = false
 ) {
     val reveal = rememberCodeReveal()
     val masked = hideCode && !reveal.revealed
@@ -114,6 +115,8 @@ fun CodeCard(
                     title = ui.account.displayTitle,
                     subtitle = ui.account.displaySubtitle,
                     uiTags = if (showTags) ui.account.tags else emptyList(),
+                    showIcon = showIcons,
+                    account = ui.account,
                     modifier = Modifier.weight(1f)
                 )
                 CodeDisplay(
@@ -143,29 +146,46 @@ fun CodeCard(
 
 /** Static per-account identity — skipped by Compose when unchanged. */
 @Composable
-private fun AccountHeader(title: String, subtitle: String, uiTags: List<com.safekey.authenticator.model.Tag>, modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier
+private fun AccountHeader(
+    title: String,
+    subtitle: String,
+    uiTags: List<com.safekey.authenticator.model.Tag>,
+    account: com.safekey.authenticator.model.Account,
+    showIcon: Boolean,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleMedium,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-        Text(
-            text = subtitle,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-        if (uiTags.isNotEmpty()) {
-            Row(horizontalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.padding(top = 3.dp)) {
-                uiTags.take(2).forEach { tag ->
-                    Text(tag.name, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        if (showIcon && account.hasIcon) {
+            AccountIcon(
+                account = account,
+                size = 40.dp,
+                modifier = Modifier.padding(end = 12.dp)
+            )
+        }
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            if (uiTags.isNotEmpty()) {
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.padding(top = 3.dp)) {
+                    uiTags.take(2).forEach { tag ->
+                        Text(tag.name, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    }
+                    if (uiTags.size > 2) Text("+${uiTags.size - 2}", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-                if (uiTags.size > 2) Text("+${uiTags.size - 2}", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }

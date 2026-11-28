@@ -178,6 +178,7 @@ fun AccountsScreen(
                         items = uiList,
                         hideCodes = settings.hideCodes,
                         showTags = settings.tagsEnabled,
+                        showIcons = settings.showIcons,
                         onCopyCode = { ui ->
                             ClipboardHelper.copy(context, ui.code)
                             vm.incrementCopyCount(ui.account.id)
@@ -377,6 +378,7 @@ private fun AccountList(
     items: List<AccountUi>,
     hideCodes: Boolean,
     showTags: Boolean,
+    showIcons: Boolean,
     onCopyCode: (AccountUi) -> Unit,
     onOpen: (Account) -> Unit,
     filterRow: (@Composable () -> Unit)?,
@@ -396,6 +398,7 @@ private fun AccountList(
                 ui = ui,
                 hideCode = hideCodes,
                 showTags = showTags,
+                showIcons = showIcons,
                 onCopyCode = { onCopyCode(ui) },
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
