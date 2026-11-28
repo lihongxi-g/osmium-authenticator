@@ -728,9 +728,9 @@
     <string name="verify_no_method_message">先に「アプリ PIN」で PIN を設定するか、システムで指紋・画面ロックを登録してから戻ってください。</string>
     <string name="verify_feature_developer">開発者モード</string>
     <string name="verify_developer_locked_desc">開発者モードは root 制限を解除できるため、常に認証が必要です</string>
-    <string name="backup_kdf_level_standard">標準</string>
-    <string name="backup_kdf_level_medium">中 · 64 MB</string>
-    <string name="backup_kdf_level_high">高 · 128 MB</string>
+    <string name="backup_kdf_level_standard">標準 · PBKDF2</string>
+    <string name="backup_kdf_level_medium">中 · Argon2id</string>
+    <string name="backup_kdf_level_high">高 · Argon2id</string>
     <string name="backup_kdf_note">新しく作成するバックアップにのみ適用されます。開くときはファイルに記録された設定が使われます。</string>
     <string name="error_import_needs_update">このバックアップは新しい暗号化方式です。Osmium を更新してからもう一度お試しください。</string>
     <string name="error_import_low_memory">この端末のメモリが足りないため、このバックアップを開けません。</string>

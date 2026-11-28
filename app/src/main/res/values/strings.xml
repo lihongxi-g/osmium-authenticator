@@ -745,9 +745,9 @@
     <string name="verify_no_method_message">Set an app PIN under App PIN, or add a fingerprint or a screen lock in the system settings, then come back.</string>
     <string name="verify_feature_developer">Developer mode</string>
     <string name="verify_developer_locked_desc">Developer mode can lift the root restriction, so it always verifies</string>
-    <string name="backup_kdf_level_standard">Standard</string>
-    <string name="backup_kdf_level_medium">Medium · 64 MB</string>
-    <string name="backup_kdf_level_high">High · 128 MB</string>
+    <string name="backup_kdf_level_standard">Standard · PBKDF2</string>
+    <string name="backup_kdf_level_medium">Medium · Argon2id</string>
+    <string name="backup_kdf_level_high">High · Argon2id</string>
     <string name="backup_kdf_note">Applies to new backups only; opening a backup always uses the settings stored in that file.</string>
     <string name="error_import_needs_update">This backup was made with a newer encryption method. Update Osmium, then try again.</string>
     <string name="error_import_low_memory">Not enough memory on this phone to open this backup.</string>

@@ -728,9 +728,9 @@
     <string name="verify_no_method_message">먼저 ‘앱 PIN’에서 PIN을 설정하거나 시스템에서 지문·화면 잠금을 등록한 뒤 다시 오세요.</string>
     <string name="verify_feature_developer">개발자 모드</string>
     <string name="verify_developer_locked_desc">개발자 모드는 루트 제한을 해제할 수 있어 항상 인증이 필요합니다</string>
-    <string name="backup_kdf_level_standard">표준</string>
-    <string name="backup_kdf_level_medium">중간 · 64 MB</string>
-    <string name="backup_kdf_level_high">높음 · 128 MB</string>
+    <string name="backup_kdf_level_standard">표준 · PBKDF2</string>
+    <string name="backup_kdf_level_medium">중간 · Argon2id</string>
+    <string name="backup_kdf_level_high">높음 · Argon2id</string>
     <string name="backup_kdf_note">새 백업에만 적용됩니다. 열 때는 파일에 기록된 설정을 사용합니다.</string>
     <string name="error_import_needs_update">이 백업은 더 새로운 암호화 방식을 사용합니다. Osmium을 업데이트한 뒤 다시 시도하세요.</string>
     <string name="error_import_low_memory">이 휴대폰의 메모리가 부족하여 이 백업을 열 수 없습니다.</string>

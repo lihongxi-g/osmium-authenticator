@@ -1,10 +1,7 @@
 package com.safekey.authenticator.ui.screens
 
 import android.app.ActivityManager
-import android.content.ComponentName
 import android.content.Context
-import android.content.Intent
-import android.provider.Settings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -102,11 +99,7 @@ fun SecurityLevelScreen(
                 icon = AppIcons.Info,
                 title = stringResource(R.string.security_level_memory_link),
                 value = "",
-                onClick = {
-                    // System page when this build has one; otherwise the
-                    // numbers are read directly, which always works.
-                    if (!openRunningServices(context)) showMemoryDialog = true
-                },
+                onClick = { showMemoryDialog = true },
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
             )
 
@@ -255,60 +248,3 @@ fun backupLevelName(level: BackupEncryptionLevel): String = stringResource(
         BackupEncryptionLevel.HIGH -> R.string.backup_kdf_level_high
     }
 )
-
-/**
- * Opens the "Running services" screen under Developer options.
- *
- * There is no public action for it, so the known Settings activity names are
- * tried in order (AOSP and the path used by recent releases). When none
- * resolves — some OEM skins drop or rename it — the app's own details page is
- * opened instead, which still shows live memory use.
- */
-private fun openRunningServices(context: Context): Boolean {
-    val settingsPackage = "com.android.settings"
-    val fragment = ":settings:show_fragment"
-
-    // AOSP hosts Running services as a fragment inside SubSettings, so the
-    // supported way in is the fragment extra — not an activity name. Every
-    // entry is tried in order; a wrong guess is a no-op, not a crash.
-    val intents = buildList {
-        // Current AOSP: com.android.settings.applications.RunningServices.
-        add(
-            Intent()
-                .setComponent(ComponentName(settingsPackage, "$settingsPackage.SubSettings"))
-                .putExtra(fragment, "$settingsPackage.applications.RunningServices")
-        )
-        // Older AOSP kept the fragment one package up.
-        add(
-            Intent()
-                .setComponent(ComponentName(settingsPackage, "$settingsPackage.SubSettings"))
-                .putExtra(fragment, "$settingsPackage.RunningServices")
-        )
-        // Builds that do publish a dedicated activity.
-        add(Intent().setComponent(ComponentName(settingsPackage, "$settingsPackage.RunningServices")))
-        add(Intent().setComponent(ComponentName(settingsPackage, "$settingsPackage.Settings\$RunningServicesActivity")))
-    }
-
-    for (intent in intents) {
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        try {
-            if (context.packageManager.resolveActivity(intent, 0) != null) {
-                context.startActivity(intent)
-                return true
-            }
-        } catch (_: Exception) {
-            // Not exported or not present on this build; try the next one.
-        }
-    }
-    return try {
-        // Last resort: developer options, where the user can open the same
-        // page one tap further in.
-        context.startActivity(
-            Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        )
-        true
-    } catch (_: Exception) {
-        false
-    }
-}
