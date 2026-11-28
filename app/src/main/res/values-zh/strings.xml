@@ -771,6 +771,13 @@
     <string name="icon_packs_title">图标包</string>
     <string name="icon_packs_none">尚未导入图标包</string>
     <string name="icon_packs_empty_hint">支持 Aegis 格式的 .zip 图标包，例如 aegis-icons。</string>
+    <string name="icon_packs_multi_hint">开启多个图标包即可一起使用其中的图标。</string>
+    <string name="icon_packs_all_off">所有图标包均已关闭</string>
+    <string name="icon_pick_all_packs">全部图标包</string>
+    <string name="icon_pick_turn_on_hint">请在 设置 → 外观 → 图标 中开启一个图标包</string>
+    <string name="icon_crop_title">裁剪图标</string>
+    <string name="icon_crop_hint">双指缩放，拖动调整位置。圆圈内即为保存的内容。</string>
+    <string name="icon_crop_done">完成</string>
     <string name="icon_pack_import">导入图标包</string>
     <string name="icon_pack_import_desc">选择一个 .zip 文件</string>
     <string name="icon_pack_importing">正在导入…</string>

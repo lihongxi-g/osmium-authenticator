@@ -756,6 +756,13 @@
     <string name="icon_packs_title">Packs d’icônes</string>
     <string name="icon_packs_none">Aucun pack d’icônes installé</string>
     <string name="icon_packs_empty_hint">Osmium accepte les packs .zip au format Aegis, par exemple aegis-icons.</string>
+    <string name="icon_packs_multi_hint">Activez plusieurs packs pour utiliser leurs icônes ensemble.</string>
+    <string name="icon_packs_all_off">Tous les packs d’icônes sont désactivés</string>
+    <string name="icon_pick_all_packs">Tous les packs</string>
+    <string name="icon_pick_turn_on_hint">Activez un pack dans Paramètres → Apparence → Icônes</string>
+    <string name="icon_crop_title">Recadrer l’icône</string>
+    <string name="icon_crop_hint">Pincez pour zoomer, faites glisser pour déplacer. Le cercle est ce qui sera enregistré.</string>
+    <string name="icon_crop_done">Terminé</string>
     <string name="icon_pack_import">Importer un pack d’icônes</string>
     <string name="icon_pack_import_desc">Choisir un fichier .zip</string>
     <string name="icon_pack_importing">Importation…</string>

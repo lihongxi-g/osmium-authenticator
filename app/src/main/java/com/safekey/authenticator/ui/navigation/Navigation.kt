@@ -22,6 +22,8 @@ sealed class Screen {
     object IconSettings : Screen()
     /** Full-screen icon picker for one saved account. */
     data class IconPicker(val accountId: String, val issuer: String) : Screen()
+    /** Square-crop step after picking a gallery image as an account icon. */
+    data class IconCrop(val accountId: String, val uri: String) : Screen()
     /** Third-level settings page: theme (design system) options. */
     object ThemeSettings : Screen()
     /** Third-level settings page: interface typeface (system / Lora). */

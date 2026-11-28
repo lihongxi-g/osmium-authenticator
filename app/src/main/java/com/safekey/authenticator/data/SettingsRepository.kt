@@ -63,6 +63,13 @@ data class AppSettings(
      * colour. Independent of [showIcons] so it can be switched off on its own.
      */
     val letterIcons: Boolean = true,
+    /**
+     * UUIDs of installed icon packs the user switched off. Packs are on by
+     * default (so a freshly imported pack is usable immediately), and every
+     * pack not listed here contributes icons to the picker, search and
+     * auto-matching. Several packs can therefore be used together.
+     */
+    val disabledIconPacks: Set<String> = emptySet(),
     val timeOffsetSeconds: Int = 0,
     val sortMode: String = SORT_ADDED,
     val destroyMode: String = DESTROY_OFF,
@@ -374,6 +381,8 @@ class SettingsRepository(
         val HIDE_CODES = booleanPreferencesKey("hide_codes")
         val SHOW_ICONS = booleanPreferencesKey("show_icons")
         val LETTER_ICONS = booleanPreferencesKey("letter_icons")
+        /** Icon pack UUIDs the user switched off; absent = every pack is on. */
+        val ICON_PACKS_DISABLED = stringSetPreferencesKey("icon_packs_disabled")
         val SORT_MODE = stringPreferencesKey("sort_mode")
         val TIME_OFFSET = intPreferencesKey("time_offset_seconds")
         val DESTROY_MODE = stringPreferencesKey("destroy_mode")
@@ -448,6 +457,7 @@ class SettingsRepository(
             hideCodes = prefs[Keys.HIDE_CODES] ?: false,
             showIcons = prefs[Keys.SHOW_ICONS] ?: false,
             letterIcons = prefs[Keys.LETTER_ICONS] ?: true,
+            disabledIconPacks = prefs[Keys.ICON_PACKS_DISABLED] ?: emptySet(),
             sortMode = prefs[Keys.SORT_MODE] ?: AppSettings.SORT_ADDED,
             timeOffsetSeconds = prefs[Keys.TIME_OFFSET] ?: 0,
             destroyMode = prefs[Keys.DESTROY_MODE] ?: AppSettings.DESTROY_OFF,
@@ -581,6 +591,14 @@ class SettingsRepository(
 
     suspend fun setLetterIcons(enabled: Boolean) {
         context.dataStore.edit { it[Keys.LETTER_ICONS] = enabled }
+    }
+
+    /** Turns one installed icon pack on or off for picking and auto-matching. */
+    suspend fun setIconPackEnabled(uuid: String, enabled: Boolean) {
+        context.dataStore.edit { prefs ->
+            val disabled = prefs[Keys.ICON_PACKS_DISABLED] ?: emptySet()
+            prefs[Keys.ICON_PACKS_DISABLED] = if (enabled) disabled - uuid else disabled + uuid
+        }
     }
 
     suspend fun setSortMode(mode: String) {

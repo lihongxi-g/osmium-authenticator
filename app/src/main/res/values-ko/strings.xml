@@ -756,6 +756,13 @@
     <string name="icon_packs_title">아이콘 팩</string>
     <string name="icon_packs_none">설치된 아이콘 팩 없음</string>
     <string name="icon_packs_empty_hint">Osmium은 Aegis 형식의 .zip 아이콘 팩을 지원합니다(예: aegis-icons).</string>
+    <string name="icon_packs_multi_hint">여러 팩을 켜면 아이콘을 함께 사용할 수 있습니다.</string>
+    <string name="icon_packs_all_off">모든 아이콘 팩이 꺼져 있습니다</string>
+    <string name="icon_pick_all_packs">모든 팩</string>
+    <string name="icon_pick_turn_on_hint">설정 → 화면 표시 → 아이콘에서 팩을 켜세요</string>
+    <string name="icon_crop_title">아이콘 자르기</string>
+    <string name="icon_crop_hint">두 손가락으로 확대하고 끌어서 이동하세요. 원 안의 내용이 저장됩니다.</string>
+    <string name="icon_crop_done">완료</string>
     <string name="icon_pack_import">아이콘 팩 가져오기</string>
     <string name="icon_pack_import_desc">.zip 파일 선택</string>
     <string name="icon_pack_importing">가져오는 중…</string>

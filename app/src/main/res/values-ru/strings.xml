@@ -756,6 +756,13 @@
     <string name="icon_packs_title">Наборы значков</string>
     <string name="icon_packs_none">Наборы значков не установлены</string>
     <string name="icon_packs_empty_hint">Osmium поддерживает наборы значков в формате Aegis (.zip), например aegis-icons.</string>
+    <string name="icon_packs_multi_hint">Включите несколько наборов, чтобы использовать их значки вместе.</string>
+    <string name="icon_packs_all_off">Все наборы значков выключены</string>
+    <string name="icon_pick_all_packs">Все наборы</string>
+    <string name="icon_pick_turn_on_hint">Включите набор в Настройки → Оформление → Значки</string>
+    <string name="icon_crop_title">Обрезать значок</string>
+    <string name="icon_crop_hint">Сведите пальцы для масштаба, перетащите для сдвига. Сохранится то, что в круге.</string>
+    <string name="icon_crop_done">Готово</string>
     <string name="icon_pack_import">Импортировать набор значков</string>
     <string name="icon_pack_import_desc">Выберите файл .zip</string>
     <string name="icon_pack_importing">Импорт…</string>

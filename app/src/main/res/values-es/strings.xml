@@ -756,6 +756,13 @@
     <string name="icon_packs_title">Paquetes de iconos</string>
     <string name="icon_packs_none">No hay paquetes de iconos instalados</string>
     <string name="icon_packs_empty_hint">Osmium admite paquetes .zip en formato Aegis, por ejemplo aegis-icons.</string>
+    <string name="icon_packs_multi_hint">Activa varios paquetes para usar sus iconos juntos.</string>
+    <string name="icon_packs_all_off">Todos los paquetes de iconos están desactivados</string>
+    <string name="icon_pick_all_packs">Todos los paquetes</string>
+    <string name="icon_pick_turn_on_hint">Activa un paquete en Ajustes → Apariencia → Iconos</string>
+    <string name="icon_crop_title">Recortar icono</string>
+    <string name="icon_crop_hint">Pellizca para ampliar y arrastra para mover. El círculo es lo que se guardará.</string>
+    <string name="icon_crop_done">Listo</string>
     <string name="icon_pack_import">Importar paquete de iconos</string>
     <string name="icon_pack_import_desc">Elige un archivo .zip</string>
     <string name="icon_pack_importing">Importando…</string>

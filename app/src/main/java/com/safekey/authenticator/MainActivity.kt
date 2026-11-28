@@ -96,6 +96,7 @@ import com.safekey.authenticator.notify.BackupNotifier
 import com.safekey.authenticator.ui.navigation.isRootBlocked
 import com.safekey.authenticator.ui.screens.AboutScreen
 import com.safekey.authenticator.ui.screens.AppearanceSettingsScreen
+import com.safekey.authenticator.ui.screens.IconCropScreen
 import com.safekey.authenticator.ui.screens.IconPickerScreen
 import com.safekey.authenticator.ui.screens.IconSettingsScreen
 import com.safekey.authenticator.ui.screens.FontFamilySettingsScreen
@@ -1525,6 +1526,19 @@ private fun IntegrityNoticeDialog(
                 accountId = screen.accountId,
                 issuer = screen.issuer,
                 onBack = { vm.nav.pop() }
+            )
+
+            is Screen.IconCrop -> IconCropScreen(
+                vm = vm,
+                accountId = screen.accountId,
+                uri = screen.uri,
+                onBack = { vm.nav.pop() },
+                // Saving closes both the crop step and the picker underneath,
+                // returning to the account form with the new icon visible.
+                onSaved = {
+                    vm.nav.pop()
+                    vm.nav.pop()
+                }
             )
 
             is Screen.ThemeSettings -> ThemeSettingsScreen(

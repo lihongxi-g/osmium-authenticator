@@ -773,6 +773,13 @@
     <string name="icon_packs_title">Icon packs</string>
     <string name="icon_packs_none">No icon packs installed</string>
     <string name="icon_packs_empty_hint">Osmium accepts Aegis-format .zip icon packs, for example aegis-icons.</string>
+    <string name="icon_packs_multi_hint">Turn on more than one pack to use their icons together.</string>
+    <string name="icon_packs_all_off">All icon packs are turned off</string>
+    <string name="icon_pick_all_packs">All packs</string>
+    <string name="icon_pick_turn_on_hint">Turn a pack on in Settings → Appearance → Icons</string>
+    <string name="icon_crop_title">Crop icon</string>
+    <string name="icon_crop_hint">Pinch to zoom, drag to move. The circle is what will be saved.</string>
+    <string name="icon_crop_done">Done</string>
     <string name="icon_pack_import">Import icon pack</string>
     <string name="icon_pack_import_desc">Choose a .zip file</string>
     <string name="icon_pack_importing">Importing…</string>

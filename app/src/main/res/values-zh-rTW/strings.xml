@@ -769,6 +769,13 @@
     <string name="icon_packs_title">圖示包</string>
     <string name="icon_packs_none">尚未匯入圖示包</string>
     <string name="icon_packs_empty_hint">支援 Aegis 格式的 .zip 圖示包，例如 aegis-icons。</string>
+    <string name="icon_packs_multi_hint">開啟多個圖示包即可一起使用其中的圖示。</string>
+    <string name="icon_packs_all_off">所有圖示包均已關閉</string>
+    <string name="icon_pick_all_packs">全部圖示包</string>
+    <string name="icon_pick_turn_on_hint">請在 設定 → 外觀 → 圖示 中開啟一個圖示包</string>
+    <string name="icon_crop_title">裁剪圖示</string>
+    <string name="icon_crop_hint">雙指縮放，拖曳調整位置。圓圈內即為儲存的內容。</string>
+    <string name="icon_crop_done">完成</string>
     <string name="icon_pack_import">匯入圖示包</string>
     <string name="icon_pack_import_desc">選擇一個 .zip 檔案</string>
     <string name="icon_pack_importing">正在匯入…</string>

@@ -3,6 +3,7 @@ package com.safekey.authenticator.ui.screens
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -99,6 +100,15 @@ fun IconSettingsScreen(vm: MainViewModel, onBack: () -> Unit) {
 
             SectionHeader(stringResource(R.string.icon_packs_title))
 
+            if (packs.size > 1) {
+                Text(
+                    text = stringResource(R.string.icon_packs_multi_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                )
+            }
+
             SettingRow(
                 icon = AppIcons.Add,
                 title = stringResource(R.string.icon_pack_import),
@@ -135,6 +145,7 @@ fun IconSettingsScreen(vm: MainViewModel, onBack: () -> Unit) {
                 )
             } else {
                 packs.forEach { pack ->
+                    val enabled = pack.uuid !in settings.disabledIconPacks
                     SettingRow(
                         icon = AppIcons.Palette,
                         title = pack.name,
@@ -144,11 +155,17 @@ fun IconSettingsScreen(vm: MainViewModel, onBack: () -> Unit) {
                             pack.iconCount
                         ),
                         trailing = {
-                            IconButton(onClick = { pendingDelete = pack }) {
-                                Icon(
-                                    imageVector = AppIcons.Delete,
-                                    contentDescription = stringResource(R.string.icon_pack_delete)
+                            Row {
+                                Switch(
+                                    checked = enabled,
+                                    onCheckedChange = { vm.setIconPackEnabled(pack.uuid, it) }
                                 )
+                                IconButton(onClick = { pendingDelete = pack }) {
+                                    Icon(
+                                        imageVector = AppIcons.Delete,
+                                        contentDescription = stringResource(R.string.icon_pack_delete)
+                                    )
+                                }
                             }
                         }
                     )

@@ -756,6 +756,13 @@
     <string name="icon_packs_title">आइकन पैक</string>
     <string name="icon_packs_none">कोई आइकन पैक इंस्टॉल नहीं है</string>
     <string name="icon_packs_empty_hint">Osmium Aegis फ़ॉर्मेट के .zip आइकन पैक स्वीकार करता है, जैसे aegis-icons।</string>
+    <string name="icon_packs_multi_hint">एक साथ आइकन उपयोग करने के लिए एक से अधिक पैक चालू करें।</string>
+    <string name="icon_packs_all_off">सभी आइकन पैक बंद हैं</string>
+    <string name="icon_pick_all_packs">सभी पैक</string>
+    <string name="icon_pick_turn_on_hint">सेटिंग्स → रूप → आइकन में कोई पैक चालू करें</string>
+    <string name="icon_crop_title">आइकन क्रॉप करें</string>
+    <string name="icon_crop_hint">ज़ूम के लिए पिंच करें, हिलाने के लिए खींचें। घेरे के अंदर वाला भाग सेव होगा।</string>
+    <string name="icon_crop_done">हो गया</string>
     <string name="icon_pack_import">आइकन पैक आयात करें</string>
     <string name="icon_pack_import_desc">.zip फ़ाइल चुनें</string>
     <string name="icon_pack_importing">आयात हो रहा है…</string>

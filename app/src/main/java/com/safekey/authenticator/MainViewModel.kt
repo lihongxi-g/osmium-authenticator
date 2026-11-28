@@ -752,6 +752,10 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     fun setLetterIcons(enabled: Boolean) =
         viewModelScope.launch { settingsRepo.setLetterIcons(enabled) }
 
+    /** Switches one installed pack in or out of picking and auto-matching. */
+    fun setIconPackEnabled(uuid: String, enabled: Boolean) =
+        viewModelScope.launch { settingsRepo.setIconPackEnabled(uuid, enabled) }
+
     /**
      * Copies a picked document into the cache and imports it as an Aegis icon
      * pack. The copy is bounded while streaming, so a huge URI cannot fill the
@@ -833,30 +837,17 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     /**
-     * Imports a user-picked image (photo picker / gallery) as this account's
-     * icon. The stream is bounded while reading, then rasterised to the same
-     * 256 px PNG used for pack icons and stored through the encrypted path.
+     * Stores a square crop produced by [com.safekey.authenticator.ui.screens.IconCropScreen].
+     * The crop arrives as PNG bytes; it is re-encoded through the same bounded
+     * 256 px path as pack icons and written through the encrypted icon columns.
      */
-    fun setAccountIconFromImage(accountId: String, uri: Uri, onDone: (Boolean) -> Unit) {
+    fun setAccountIconFromPng(accountId: String, png: ByteArray, onDone: (Boolean) -> Unit) {
         val application = getApplication<Application>()
         viewModelScope.launch {
             val stored = withContext(Dispatchers.IO) {
                 try {
-                    val mime = application.contentResolver.getType(uri)
-                    val bytes = application.contentResolver.openInputStream(uri)?.use { input ->
-                        val out = java.io.ByteArrayOutputStream()
-                        val buffer = ByteArray(64 * 1024)
-                        var total = 0L
-                        while (true) {
-                            val read = input.read(buffer)
-                            if (read < 0) break
-                            total += read
-                            if (total > MAX_CUSTOM_ICON_BYTES) return@use null
-                            out.write(buffer, 0, read)
-                        }
-                        out.toByteArray()
-                    } ?: return@withContext null
-                    IconRenderer.prepareForStorage(bytes, mime)
+                    if (png.isEmpty() || png.size > IconLimits.MAX_STORED_BYTES) null
+                    else IconRenderer.prepareForStorage(png, "image/png")
                 } catch (e: OutOfMemoryError) {
                     null
                 } catch (e: Exception) {
@@ -884,11 +875,14 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     /** Assigns the best pack match to every entry that has no icon yet. */
     fun autoAssignIcons() {
         viewModelScope.launch {
+            val disabled = settings.value.disabledIconPacks
             val packs = withContext(Dispatchers.IO) {
                 runCatching { iconPackStore.list() }.getOrDefault(emptyList())
-            }
+            }.filter { it.uuid !in disabled }
             if (packs.isEmpty()) {
-                showToast(getApplication<Application>().getString(R.string.icon_packs_none))
+                val message = if (iconPacks.value.isEmpty()) R.string.icon_packs_none
+                else R.string.icon_packs_all_off
+                showToast(getApplication<Application>().getString(message))
                 return@launch
             }
             val targets = repo.accountsWithoutIcon()
@@ -928,9 +922,12 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    /** Best match across all installed packs; called on a background thread. */
+    /** Best match across all enabled packs; called on a background thread. */
     private suspend fun assignMatchedIcon(account: Account) {
-        val packs = runCatching { iconPackStore.list() }.getOrDefault(emptyList())
+        val disabled = settings.value.disabledIconPacks
+        val packs = runCatching { iconPackStore.list() }
+            .getOrDefault(emptyList())
+            .filter { it.uuid !in disabled }
         for (pack in packs) {
             val icon = IconMatcher.bestMatch(pack, account.issuer) ?: continue
             val stored = loadStoredIcon(icon) ?: continue
@@ -1178,8 +1175,5 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     companion object {
         /** Upper bound for the ZIP copied out of a SAF URI (packs are ~1 MB). */
         private const val MAX_ICON_PACK_IMPORT_BYTES = 96L * 1024 * 1024
-
-        /** Upper bound for a user-picked image (48 MP JPEGs sit around 10–20 MB). */
-        private const val MAX_CUSTOM_ICON_BYTES = 24L * 1024 * 1024
     }
 }

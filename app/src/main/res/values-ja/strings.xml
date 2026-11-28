@@ -756,6 +756,13 @@
     <string name="icon_packs_title">アイコンパック</string>
     <string name="icon_packs_none">アイコンパックがありません</string>
     <string name="icon_packs_empty_hint">Aegis 形式の .zip アイコンパックに対応しています（例: aegis-icons）。</string>
+    <string name="icon_packs_multi_hint">複数のパックをオンにすると、アイコンをまとめて使えます。</string>
+    <string name="icon_packs_all_off">すべてのアイコンパックがオフです</string>
+    <string name="icon_pick_all_packs">すべてのパック</string>
+    <string name="icon_pick_turn_on_hint">設定 → 外観 → アイコン でパックをオンにしてください</string>
+    <string name="icon_crop_title">アイコンを切り抜く</string>
+    <string name="icon_crop_hint">ピンチで拡大、ドラッグで移動。円の内側が保存されます。</string>
+    <string name="icon_crop_done">完了</string>
     <string name="icon_pack_import">アイコンパックを読み込む</string>
     <string name="icon_pack_import_desc">.zip ファイルを選択</string>
     <string name="icon_pack_importing">読み込み中…</string>

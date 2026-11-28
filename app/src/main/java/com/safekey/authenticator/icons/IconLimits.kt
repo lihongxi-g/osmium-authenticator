@@ -58,5 +58,15 @@ object IconLimits {
     /** Largest source icon dimension accepted (Aegis uses the same 512 cap). */
     const val MAX_SOURCE_PX = 512
 
+    /**
+     * Longest edge used while the user crops a gallery image. Big enough to
+     * keep a 4x zoom sharp on a 1080 px-wide crop frame, small enough that a
+     * 48 MP photo never has to be decoded at full size.
+     */
+    const val CROP_SOURCE_PX = 1600
+
+    /** Upper bound for a user-picked image (48 MP JPEGs sit around 10–20 MB). */
+    const val MAX_CUSTOM_SOURCE_BYTES = 24L * 1024 * 1024
+
     val ALLOWED_MIME: Set<String> = setOf("image/svg+xml", "image/png", "image/jpeg")
 }

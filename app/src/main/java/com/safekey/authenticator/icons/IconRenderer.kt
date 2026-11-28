@@ -3,8 +3,10 @@ package com.safekey.authenticator.icons
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
+import android.graphics.Matrix
 import android.graphics.Paint
 import android.graphics.Path
+import android.media.ExifInterface
 import com.caverock.androidsvg.SVG
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -89,6 +91,96 @@ object IconRenderer {
         } catch (e: Exception) {
             decoded.recycle()
             null
+        }
+    }
+
+    /**
+     * Decodes a gallery image for the crop screen. Unlike [decode], this keeps
+     * up to [IconLimits.CROP_SOURCE_PX] on the long edge and applies the EXIF
+     * orientation: phones write camera photos rotated with an orientation tag,
+     * and BitmapFactory ignores it. Both are needed for the crop rectangle the
+     * user sees to match the pixels that are cut out.
+     */
+    fun decodeForCrop(bytes: ByteArray, mime: String?): Bitmap? {
+        if (bytes.isEmpty()) return null
+        return try {
+            if (isSvg(bytes, mime)) {
+                renderSvg(bytes, IconLimits.CROP_SOURCE_PX)
+            } else {
+                val decoded = decodeRasterForCrop(bytes, IconLimits.CROP_SOURCE_PX) ?: return null
+                applyExifOrientation(decoded, bytes)
+            }
+        } catch (e: OutOfMemoryError) {
+            null
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    /**
+     * Downsample-first decode for cropping. The sampling loop targets
+     * [maxPx] directly (the icon path deliberately ends up at least 2x its
+     * slot first for quality); at 1600 px this keeps a 12 MP photo around
+     * 16 MB instead of decoding it at full 48 MB.
+     */
+    private fun decodeRasterForCrop(bytes: ByteArray, maxPx: Int): Bitmap? {
+        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        BitmapFactory.decodeByteArray(bytes, 0, bytes.size, bounds)
+        val width = bounds.outWidth
+        val height = bounds.outHeight
+        if (width <= 0 || height <= 0) return null
+        if (width > 100_000 || height > 100_000) return null
+
+        var sample = 1
+        while (max(width, height) / (sample * 2) >= maxPx) sample *= 2
+        val options = BitmapFactory.Options().apply {
+            inSampleSize = sample
+            inPreferredConfig = Bitmap.Config.ARGB_8888
+        }
+        val decoded = BitmapFactory.decodeByteArray(bytes, 0, bytes.size, options) ?: return null
+        if (decoded.width <= maxPx && decoded.height <= maxPx) return decoded
+
+        val scale = maxPx.toFloat() / max(decoded.width, decoded.height)
+        val scaled = Bitmap.createScaledBitmap(
+            decoded,
+            (decoded.width * scale).roundToInt().coerceIn(1, maxPx),
+            (decoded.height * scale).roundToInt().coerceIn(1, maxPx),
+            true
+        )
+        if (scaled !== decoded) decoded.recycle()
+        return scaled
+    }
+
+    private fun applyExifOrientation(src: Bitmap, bytes: ByteArray): Bitmap {
+        val orientation = try {
+            ExifInterface(ByteArrayInputStream(bytes))
+                .getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
+        } catch (e: Exception) {
+            return src
+        }
+        val matrix = Matrix()
+        when (orientation) {
+            ExifInterface.ORIENTATION_ROTATE_90 -> matrix.postRotate(90f)
+            ExifInterface.ORIENTATION_ROTATE_180 -> matrix.postRotate(180f)
+            ExifInterface.ORIENTATION_ROTATE_270 -> matrix.postRotate(270f)
+            ExifInterface.ORIENTATION_FLIP_HORIZONTAL -> matrix.postScale(-1f, 1f)
+            ExifInterface.ORIENTATION_FLIP_VERTICAL -> matrix.postScale(1f, -1f)
+            ExifInterface.ORIENTATION_TRANSPOSE -> {
+                matrix.postRotate(90f)
+                matrix.postScale(-1f, 1f)
+            }
+            ExifInterface.ORIENTATION_TRANSVERSE -> {
+                matrix.postRotate(270f)
+                matrix.postScale(-1f, 1f)
+            }
+            else -> return src
+        }
+        return try {
+            val rotated = Bitmap.createBitmap(src, 0, 0, src.width, src.height, matrix, true)
+            if (rotated !== src) src.recycle()
+            rotated
+        } catch (e: OutOfMemoryError) {
+            src
         }
     }
 

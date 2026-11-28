@@ -756,6 +756,13 @@
     <string name="icon_packs_title">Symbolpakete</string>
     <string name="icon_packs_none">Keine Symbolpakete installiert</string>
     <string name="icon_packs_empty_hint">Osmium unterstützt Symbolpakete im Aegis-Format (.zip), z. B. aegis-icons.</string>
+    <string name="icon_packs_multi_hint">Mehrere Pakete einschalten, um ihre Symbole gemeinsam zu nutzen.</string>
+    <string name="icon_packs_all_off">Alle Symbolpakete sind ausgeschaltet</string>
+    <string name="icon_pick_all_packs">Alle Pakete</string>
+    <string name="icon_pick_turn_on_hint">Ein Paket unter Einstellungen → Darstellung → Symbole einschalten</string>
+    <string name="icon_crop_title">Symbol zuschneiden</string>
+    <string name="icon_crop_hint">Zum Zoomen zusammenziehen, zum Verschieben ziehen. Der Kreis wird gespeichert.</string>
+    <string name="icon_crop_done">Fertig</string>
     <string name="icon_pack_import">Symbolpaket importieren</string>
     <string name="icon_pack_import_desc">.zip-Datei auswählen</string>
     <string name="icon_pack_importing">Wird importiert…</string>

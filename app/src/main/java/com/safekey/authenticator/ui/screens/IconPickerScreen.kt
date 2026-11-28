@@ -5,6 +5,7 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,10 +18,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -47,20 +48,31 @@ import com.safekey.authenticator.MainViewModel
 import com.safekey.authenticator.R
 import com.safekey.authenticator.icons.IconBitmapCache
 import com.safekey.authenticator.icons.IconMatcher
+import com.safekey.authenticator.icons.InstalledIconPack
 import com.safekey.authenticator.icons.PackIcon
 import com.safekey.authenticator.ui.components.AppIcons
 import com.safekey.authenticator.ui.components.SimpleTopBar
+import com.safekey.authenticator.ui.navigation.Screen
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+
+/** One icon plus the pack it came from, so keys stay unique across packs. */
+private data class PickIcon(val packUuid: String, val icon: PackIcon) {
+    val key: String get() = packUuid + "/" + icon.relativePath
+}
 
 /**
  * Full-screen icon picker over the installed Aegis-format packs.
  *
- * Layout follows Aegis' picker: search field on top, pack switcher when more
- * than one pack is installed, then a grid whose first items are "No icon" and
- * a gallery import, followed by the issuer suggestions (Aegis rule + Chinese
- * alias table) and every icon. Picking writes the rasterised icon to the
- * account immediately and returns.
+ * Every pack that is switched on in Settings → Appearance → Icons contributes
+ * icons here, so two packs can be used together to fill each other's gaps. The
+ * chips filter the grid to one pack ("All packs" is the default when more than
+ * one is enabled). Layout follows Aegis' picker: search field on top, then a
+ * grid whose first items are "No icon" and a gallery import, followed by the
+ * issuer suggestions (Aegis rule + Chinese alias table) and every icon.
+ *
+ * Gallery import opens [IconCropScreen] first; the cropped square is written
+ * to the account, then the crop and picker screens both close.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -71,35 +83,36 @@ fun IconPickerScreen(
     onBack: () -> Unit
 ) {
     val packs by vm.iconPacks.collectAsState()
+    val settings by vm.settings.collectAsState()
     var query by rememberSaveable { mutableStateOf("") }
-    var packIndex by rememberSaveable { mutableStateOf(0) }
-    var importingCustom by remember { mutableStateOf(false) }
+    var packFilter by rememberSaveable { mutableStateOf<String?>(null) }
+
+    val enabledPacks = remember(packs, settings.disabledIconPacks) {
+        packs.filter { it.uuid !in settings.disabledIconPacks }
+    }
+    // A pack that was switched off while the picker was open must not remain
+    // selected, and a single remaining pack needs no filter chip.
+    LaunchedEffect(enabledPacks, packFilter) {
+        if (packFilter != null && enabledPacks.none { it.uuid == packFilter }) {
+            packFilter = null
+        }
+    }
+    val activePacks = remember(enabledPacks, packFilter) {
+        packFilter?.let { selected -> enabledPacks.filter { it.uuid == selected } }
+            ?: enabledPacks
+    }
 
     val imagePicker = rememberLauncherForActivityResult(
         ActivityResultContracts.PickVisualMedia()
     ) { uri ->
         if (uri != null) {
-            importingCustom = true
-            vm.setAccountIconFromImage(accountId, uri) { ok ->
-                importingCustom = false
-                if (ok) onBack()
-            }
+            vm.nav.push(Screen.IconCrop(accountId, uri.toString()))
         }
     }
 
-    val pack = packs.getOrNull(packIndex.coerceIn(0, (packs.size - 1).coerceAtLeast(0)))
-    val suggested = remember(pack?.uuid, pack?.version, issuer) {
-        pack?.let { IconMatcher.suggestions(it, issuer) }.orEmpty()
-    }
-    val icons = remember(pack?.uuid, pack?.version, query, suggested) {
-        when {
-            pack == null -> emptyList()
-            query.isBlank() -> {
-                val seen = suggested.mapTo(HashSet()) { it.relativePath }
-                suggested + pack.icons.filter { it.relativePath !in seen }
-            }
-            else -> IconMatcher.search(pack, query, 400)
-        }
+    val packKey = activePacks.joinToString("|") { it.uuid + ":" + it.version }
+    val (_, icons) = remember(packKey, query, issuer) {
+        mergeIcons(activePacks, issuer, query)
     }
 
     Scaffold(
@@ -110,21 +123,26 @@ fun IconPickerScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            if (pack == null) {
+            if (enabledPacks.isEmpty()) {
                 Text(
-                    text = stringResource(R.string.icon_pick_empty),
+                    text = stringResource(
+                        if (packs.isEmpty()) R.string.icon_pick_empty else R.string.icon_packs_all_off
+                    ),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(16.dp)
                 )
                 Text(
-                    text = stringResource(R.string.icon_pick_import_hint),
+                    text = stringResource(
+                        if (packs.isEmpty()) R.string.icon_pick_import_hint
+                        else R.string.icon_pick_turn_on_hint
+                    ),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
             }
 
-            if (pack != null) {
+            if (enabledPacks.isNotEmpty()) {
                 OutlinedTextField(
                     value = query,
                     onValueChange = { query = it },
@@ -135,31 +153,40 @@ fun IconPickerScreen(
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                 )
 
-                if (packs.size > 1) {
+                if (enabledPacks.size > 1) {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.padding(horizontal = 16.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState())
+                            .padding(horizontal = 16.dp)
                     ) {
-                        packs.forEachIndexed { index, item ->
+                        FilterChip(
+                            selected = packFilter == null,
+                            onClick = { packFilter = null },
+                            label = {
+                                Text(
+                                    stringResource(R.string.icon_pick_all_packs),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                        )
+                        enabledPacks.forEach { item ->
                             FilterChip(
-                                selected = index == packIndex,
-                                onClick = {
-                                    packIndex = index
-                                    query = ""
-                                },
-                                label = { Text(item.name, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+                                selected = packFilter == item.uuid,
+                                onClick = { packFilter = item.uuid },
+                                label = {
+                                    Text(
+                                        item.name,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
                             )
                         }
                     }
                 }
-            }
-
-            if (importingCustom) {
-                LinearProgressIndicator(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 4.dp)
-                )
             }
 
             LazyVerticalGrid(
@@ -187,26 +214,74 @@ fun IconPickerScreen(
                         label = stringResource(R.string.icon_custom_pick),
                         vector = AppIcons.ImageIcon,
                         onClick = {
-                            if (!importingCustom) {
-                                imagePicker.launch(
-                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                                )
-                            }
+                            imagePicker.launch(
+                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                            )
                         }
                     )
                 }
-                items(icons, key = { it.relativePath }) { icon ->
+                items(icons, key = { it.key }) { picked ->
                     IconTile(
-                        label = icon.name,
-                        icon = icon,
+                        label = picked.icon.name,
+                        icon = picked.icon,
                         onClick = {
-                            vm.setAccountIconFromPack(accountId, icon) { onBack() }
+                            vm.setAccountIconFromPack(accountId, picked.icon) { onBack() }
                         }
                     )
                 }
             }
         }
     }
+}
+
+/**
+ * Combines the enabled packs into the two lists the grid shows: suggestions
+ * for this issuer (before the full set) and every icon or search result.
+ *
+ * With several packs, duplicates are removed by icon name so a 1000-icon pack
+ * dropped next to another does not show the same brand twice. Selecting a
+ * single pack chip still exposes that pack's own variant.
+ */
+private fun mergeIcons(
+    packs: List<InstalledIconPack>,
+    issuer: String,
+    query: String
+): Pair<List<PickIcon>, List<PickIcon>> {
+    val dedupeNames = packs.size > 1
+    val suggested = ArrayList<PickIcon>()
+    val seen = HashSet<String>()
+
+    fun add(target: MutableList<PickIcon>, pack: InstalledIconPack, icon: PackIcon): Boolean {
+        val dedupeKey = if (dedupeNames) IconMatcher.normalize(icon.name)
+        else pack.uuid + "/" + icon.relativePath
+        if (!seen.add(dedupeKey)) return false
+        target.add(PickIcon(pack.uuid, icon))
+        return true
+    }
+
+    if (query.isNotBlank()) {
+        val results = ArrayList<PickIcon>()
+        outer@ for (pack in packs) {
+            for (icon in IconMatcher.search(pack, query, 400)) {
+                add(results, pack, icon)
+                if (results.size >= 400) break@outer
+            }
+        }
+        return emptyList<PickIcon>() to results
+    }
+
+    for (pack in packs) {
+        for (icon in IconMatcher.suggestions(pack, issuer)) {
+            add(suggested, pack, icon)
+        }
+    }
+    val all = ArrayList(suggested)
+    for (pack in packs) {
+        for (icon in pack.icons) {
+            add(all, pack, icon)
+        }
+    }
+    return suggested to all
 }
 
 @Composable
