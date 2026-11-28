@@ -94,11 +94,14 @@ import com.safekey.authenticator.network.LanThreatReport
 import com.safekey.authenticator.network.LanThreatSeverity
 import com.safekey.authenticator.network.LanTransferClient
 import com.safekey.authenticator.network.LanTransferServer
+import com.safekey.authenticator.security.BackupEncryptionGate
+import com.safekey.authenticator.security.BackupEncryptionLevel
 import com.safekey.authenticator.ui.components.AdaptiveTrailingRow
 import com.safekey.authenticator.ui.components.AppIcons
 import com.safekey.authenticator.ui.components.CodeField
 import com.safekey.authenticator.ui.components.IconButtonCompat
 import com.safekey.authenticator.ui.components.LocalNetworkPermissionGate
+import com.safekey.authenticator.ui.components.SettingLinkRow
 import com.safekey.authenticator.ui.components.QrCameraPreview
 import com.safekey.authenticator.ui.components.renderQrBitmap
 import com.safekey.authenticator.ui.components.SimpleTopBar
@@ -136,11 +139,13 @@ fun LanTransferScreen(
     vm: MainViewModel,
     onBack: () -> Unit,
     onRequireBiometric: ((onSuccess: () -> Unit) -> Unit)? = null,
-    onRequireCredential: ((onSuccess: () -> Unit) -> Unit)? = null
+    onRequireCredential: ((onSuccess: () -> Unit) -> Unit)? = null,
+    onOpenSecurityLevel: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val app = context.applicationContext as SafeKeyApp
     val lan = remember { LanStrings.forContext(context) }
+    val settings by vm.settings.collectAsState()
     val scope = rememberCoroutineScope()
     var selectedTab by remember { mutableIntStateOf(0) }
     var receivedVault by remember { mutableStateOf<VaultFile?>(null) }
@@ -217,26 +222,40 @@ fun LanTransferScreen(
                     )
                 }
 
-                LocalNetworkPermissionGate {
-                    if (selectedTab == 0) {
-                        SendTabContent(
-                            vm = vm,
-                            lan = lan,
-                            blocks = blocks,
-                            onBlockPeer = { onBlockPeer(it) },
-                            onUnblock = { onUnblock(it) }
-                        )
-                    } else {
-                        ReceiveTabContent(
-                            vm = vm,
-                            lan = lan,
-                            blocks = blocks,
-                            onVaultReceived = { receivedVault = it },
-                            onBlockPeer = { onBlockPeer(it) },
-                            onUnblock = { onUnblock(it) }
-                        )
+                Box(modifier = Modifier.weight(1f)) {
+                    LocalNetworkPermissionGate {
+                        if (selectedTab == 0) {
+                            SendTabContent(
+                                vm = vm,
+                                lan = lan,
+                                blocks = blocks,
+                                onBlockPeer = { onBlockPeer(it) },
+                                onUnblock = { onUnblock(it) }
+                            )
+                        } else {
+                            ReceiveTabContent(
+                                vm = vm,
+                                lan = lan,
+                                blocks = blocks,
+                                onVaultReceived = { receivedVault = it },
+                                onBlockPeer = { onBlockPeer(it) },
+                                onUnblock = { onUnblock(it) }
+                            )
+                        }
                     }
                 }
+                SettingLinkRow(
+                    icon = AppIcons.Security,
+                    title = stringResource(R.string.security_level_title),
+                    value = backupLevelName(
+                        BackupEncryptionGate.clamp(
+                            context,
+                            BackupEncryptionLevel.fromId(settings.backupKdfLevel)
+                        )
+                    ),
+                    onClick = onOpenSecurityLevel,
+                    modifier = Modifier.padding(horizontal = 20.dp)
+                )
             }
         }
     }

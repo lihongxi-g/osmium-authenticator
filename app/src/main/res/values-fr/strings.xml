@@ -582,7 +582,7 @@
     <string name="integrity_dialog_dismiss">Compris</string>
     <string name="attributions_bundled_title">Bibliothèques intégrées</string>
     <string name="attributions_keyattestation_desc">© Google LLC (Apache-2.0). Copie intégrée et épinglée d\'android/keyattestation avec des modifications locales ; non approuvée par Google.</string>
-    <string name="attributions_bouncycastle_desc">© The Legion of the Bouncy Castle Inc. (MIT). Bibliothèque cryptographique du vérificateur d\'attestation ; texte de licence fourni dans l\'app.</string>
+    <string name="attributions_bouncycastle_desc">© The Legion of the Bouncy Castle Inc. (MIT). Bibliothèque cryptographique du vérificateur d\'attestation et de la dérivation Argon2id des sauvegardes ; texte de licence fourni dans l\'app.</string>
     <string name="attributions_integrity_note">Les vérifications d\'intégrité s\'inspirent de recherches communautaires (par exemple le projet Duck Detector) ; aucun code de ces projets n\'est réutilisé.</string>
 
     <!-- K2 consistency checks (2026-09) -->
@@ -728,13 +728,18 @@
     <string name="verify_no_method_message">Définissez d’abord un PIN dans « PIN de l’application » ou ajoutez une empreinte ou un verrouillage d’écran dans le système.</string>
     <string name="verify_feature_developer">Mode développeur</string>
     <string name="verify_developer_locked_desc">Le mode développeur peut lever la restriction root, il demande donc toujours une vérification</string>
-    <string name="backup_kdf_title">Chiffrement de la sauvegarde</string>
     <string name="backup_kdf_level_standard">Standard</string>
     <string name="backup_kdf_level_medium">Moyen · 64 MB</string>
     <string name="backup_kdf_level_high">Élevé · 128 MB</string>
-    <string name="backup_kdf_requires">Nécessite un téléphone avec au moins %1$s Go de RAM</string>
-    <string name="backup_kdf_only_standard">Ce téléphone n’a pas assez de RAM pour les niveaux supérieurs ; les sauvegardes restent en Standard.</string>
     <string name="backup_kdf_note">S’applique uniquement aux nouvelles sauvegardes ; l’ouverture utilise toujours les paramètres inscrits dans le fichier.</string>
     <string name="error_import_needs_update">Cette sauvegarde utilise un chiffrement plus récent. Mettez Osmium à jour, puis réessayez.</string>
     <string name="error_import_low_memory">Mémoire insuffisante sur ce téléphone pour ouvrir cette sauvegarde.</string>
+    <string name="security_level_title">Niveau de sécurité</string>
+    <string name="security_level_intro">Le coût pour deviner le mot de passe d’une nouvelle sauvegarde. Ne concerne que les nouvelles sauvegardes ; à l’ouverture, les paramètres du fichier font foi.</string>
+    <string name="security_level_this_phone">Ce téléphone annonce %1$s Go de RAM.</string>
+    <string name="security_level_standard_desc">PBKDF2 · aucune mémoire supplémentaire · lisible par toutes les versions d’Osmium.</string>
+    <string name="security_level_medium_desc">Argon2id · 64 Mo · nécessite un téléphone avec au moins 6 Go de RAM.</string>
+    <string name="security_level_high_desc">Argon2id · 128 Mo · nécessite un téléphone avec au moins 8 Go de RAM.</string>
+    <string name="security_level_fallback">Ce téléphone ne peut pas exécuter le niveau enregistré ; %1$s est utilisé.</string>
+    <string name="security_level_lan_note">Le transfert LAN n’est pas concerné : il utilise une clé éphémère négociée entre les deux téléphones, pas le mot de passe de sauvegarde.</string>
 </resources>

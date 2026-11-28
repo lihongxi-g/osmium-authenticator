@@ -582,7 +582,7 @@
     <string name="integrity_dialog_dismiss">Понятно</string>
     <string name="attributions_bundled_title">Встроенные библиотеки</string>
     <string name="attributions_keyattestation_desc">© Google LLC (Apache-2.0). Встроенная копия android/keyattestation с фиксированным коммитом и локальными изменениями; не одобрено Google.</string>
-    <string name="attributions_bouncycastle_desc">© The Legion of the Bouncy Castle Inc. (MIT). Криптобиблиотека, используемая проверкой аттестации; текст лицензии в приложении.</string>
+    <string name="attributions_bouncycastle_desc">© The Legion of the Bouncy Castle Inc. (MIT). Криптобиблиотека, используемая проверкой аттестации и для вывода ключей Argon2id в резервных копиях; текст лицензии в приложении.</string>
     <string name="attributions_integrity_note">Проверки целостности вдохновлены исследованиями сообщества (например, проектом Duck Detector); код этих проектов не используется.</string>
 
     <!-- K2 consistency checks (2026-09) -->
@@ -728,13 +728,18 @@
     <string name="verify_no_method_message">Сначала задайте PIN в разделе «PIN приложения» или добавьте отпечаток либо блокировку экрана в системе.</string>
     <string name="verify_feature_developer">Режим разработчика</string>
     <string name="verify_developer_locked_desc">Режим разработчика может снять ограничение root, поэтому всегда требует подтверждения</string>
-    <string name="backup_kdf_title">Шифрование резервной копии</string>
     <string name="backup_kdf_level_standard">Обычное</string>
     <string name="backup_kdf_level_medium">Среднее · 64 MB</string>
     <string name="backup_kdf_level_high">Высокое · 128 MB</string>
-    <string name="backup_kdf_requires">Нужен телефон с объёмом ОЗУ не менее %1$s ГБ</string>
-    <string name="backup_kdf_only_standard">На этом телефоне недостаточно ОЗУ для повышенных уровней, поэтому копии остаются «Обычное».</string>
     <string name="backup_kdf_note">Действует только для новых копий; при открытии всегда используются параметры из файла.</string>
     <string name="error_import_needs_update">Эта копия создана более новым способом шифрования. Обновите Osmium и повторите попытку.</string>
     <string name="error_import_low_memory">На этом телефоне недостаточно памяти, чтобы открыть эту копию.</string>
+    <string name="security_level_title">Уровень безопасности</string>
+    <string name="security_level_intro">Сколько усилий нужно, чтобы угадать пароль новой резервной копии. Действует только для новых копий; при открытии используются параметры из файла.</string>
+    <string name="security_level_this_phone">Этот телефон сообщает %1$s ГБ ОЗУ.</string>
+    <string name="security_level_standard_desc">PBKDF2 · без дополнительной памяти · читается любой версией Osmium.</string>
+    <string name="security_level_medium_desc">Argon2id · 64 MB · нужен телефон с ОЗУ не менее 6 ГБ.</string>
+    <string name="security_level_high_desc">Argon2id · 128 MB · нужен телефон с ОЗУ не менее 8 ГБ.</string>
+    <string name="security_level_fallback">Этот телефон не может выполнить сохранённый уровень, поэтому используется %1$s.</string>
+    <string name="security_level_lan_note">Передача по локальной сети не затрагивается: используется одноразовый ключ, согласованный двумя телефонами, а не пароль резервной копии.</string>
 </resources>

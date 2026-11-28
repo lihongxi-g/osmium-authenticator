@@ -595,7 +595,7 @@
     <string name="integrity_dialog_dismiss">知道了</string>
     <string name="attributions_bundled_title">內建開源庫</string>
     <string name="attributions_keyattestation_desc">© Google LLC（Apache-2.0）。內嵌 android/keyattestation 的固定版本副本並含本地修改；不代表 Google 認可。</string>
-    <string name="attributions_bouncycastle_desc">© The Legion of the Bouncy Castle Inc.（MIT）。金鑰認證驗證器使用的加密函式庫；授權全文隨應用程式提供。</string>
+    <string name="attributions_bouncycastle_desc">© The Legion of the Bouncy Castle Inc.（MIT）。金鑰認證驗證器與備份加密（Argon2id）使用的加密函式庫；授權全文隨應用程式提供。</string>
     <string name="attributions_integrity_note">裝置完整性檢測的思路借鑑自社群研究（如 Duck Detector 專案），未重用其任何程式碼。</string>
 
     <!-- K2 consistency checks (2026-09) -->
@@ -741,13 +741,18 @@
     <string name="verify_no_method_message">先在設定裡的「應用程式 PIN」設定 PIN，或在系統中錄入指紋/螢幕鎖定密碼，再回到這裡。</string>
     <string name="verify_feature_developer">開發人員模式</string>
     <string name="verify_developer_locked_desc">開發人員模式可以解除 root 限制，因此始終需要驗證</string>
-    <string name="backup_kdf_title">備份加密</string>
     <string name="backup_kdf_level_standard">一般</string>
     <string name="backup_kdf_level_medium">中 · 64 MB</string>
     <string name="backup_kdf_level_high">高 · 128 MB</string>
-    <string name="backup_kdf_requires">需要執行記憶體至少 %1$s GB 的手機</string>
-    <string name="backup_kdf_only_standard">本機記憶體不足，無法使用更高檔位，備份將使用一般加密。</string>
     <string name="backup_kdf_note">只影響新備份；開啟備份時以檔案裡記錄的參數為準。</string>
     <string name="error_import_needs_update">此備份使用了更新的加密方式，請先更新 Osmium 再試。</string>
     <string name="error_import_low_memory">本機記憶體不足，無法開啟此備份。</string>
+    <string name="security_level_title">安全級別</string>
+    <string name="security_level_intro">猜出備份密碼要花多少代價。只影響新備份；開啟備份時只認檔案裡記錄的參數。</string>
+    <string name="security_level_this_phone">本機回報的執行記憶體：%1$s GB。</string>
+    <string name="security_level_standard_desc">一般：PBKDF2 · 不額外佔記憶體 · 任何 Osmium 版本都能讀。</string>
+    <string name="security_level_medium_desc">中：Argon2id · 64 MB · 需要至少 6 GB 執行記憶體的手機。</string>
+    <string name="security_level_high_desc">高：Argon2id · 128 MB · 需要至少 8 GB 執行記憶體的手機。</string>
+    <string name="security_level_fallback">本機無法執行已儲存的檔位，已改用「%1$s」。</string>
+    <string name="security_level_lan_note">區域網路傳輸不受影響：它用的是兩台手機當場協商的一次性金鑰，不是備份密碼。</string>
 </resources>

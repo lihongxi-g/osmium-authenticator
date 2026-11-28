@@ -46,11 +46,14 @@ import com.safekey.authenticator.network.LocalNetworkPermissionException
 import com.safekey.authenticator.network.WebDavClient
 import com.safekey.authenticator.network.WebDavException
 import com.safekey.authenticator.network.WebDavFile
+import com.safekey.authenticator.security.BackupEncryptionGate
+import com.safekey.authenticator.security.BackupEncryptionLevel
 import com.safekey.authenticator.security.VaultFormatException
 import com.safekey.authenticator.security.VaultIO
 import com.safekey.authenticator.ui.components.AppIcons
 import com.safekey.authenticator.ui.components.DialogBodyText
 import com.safekey.authenticator.ui.components.LocalNetworkPermissionGate
+import com.safekey.authenticator.ui.components.SettingLinkRow
 import com.safekey.authenticator.ui.components.rememberLocalNetworkPermissionRequest
 import com.safekey.authenticator.ui.components.SimpleTopBar
 import com.safekey.authenticator.ui.components.scrollBelowTopBar
@@ -73,12 +76,18 @@ import java.util.Locale
 fun WebDavScreen(
     vm: MainViewModel,
     onBack: () -> Unit,
-    onManagePassword: () -> Unit = {}
+    onManagePassword: () -> Unit = {},
+    onOpenSecurityLevel: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val savedConfig by vm.webDavConfig.collectAsState()
     val settings by vm.settings.collectAsState()
+    // Same stored level as the file export; restoring always follows the file.
+    val securityLevel = BackupEncryptionGate.clamp(
+        context,
+        BackupEncryptionLevel.fromId(settings.backupKdfLevel)
+    )
 
     // The form fields use rememberSaveable, not remember: with "verify on
     // open" enabled (the default) going to the background locks the app, and
@@ -200,8 +209,12 @@ fun WebDavScreen(
             } catch (e: VaultFormatException) {
                 vm.showToast(
                     context.getString(
-                        if (e.wrongPassword) R.string.error_import_wrong_password
-                        else R.string.error_import_format
+                        when {
+                            e.needsNewerApp -> R.string.error_import_needs_update
+                            e.outOfMemory -> R.string.error_import_low_memory
+                            e.wrongPassword -> R.string.error_import_wrong_password
+                            else -> R.string.error_import_format
+                        }
                     )
                 )
             } catch (e: kotlinx.coroutines.CancellationException) {
@@ -246,7 +259,9 @@ fun WebDavScreen(
                     "${export.dropped} accounts could not be decrypted — upload aborted"
                 )
             }
-            val payload = VaultIO.encrypt(export.vault, exportPassword.toCharArray())
+            val payload = withContext(Dispatchers.Default) {
+                VaultIO.encrypt(export.vault, exportPassword.toCharArray(), securityLevel)
+            }
             try {
                 WebDavClient.upload(currentConfig(), fileName, payload.toByteArray(Charsets.UTF_8))
             } catch (e: WebDavException) {
@@ -474,6 +489,12 @@ fun WebDavScreen(
                     text = stringResource(R.string.webdav_warning),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                SettingLinkRow(
+                    icon = AppIcons.Security,
+                    title = stringResource(R.string.security_level_title),
+                    value = backupLevelName(securityLevel),
+                    onClick = onOpenSecurityLevel
                 )
             }
         }

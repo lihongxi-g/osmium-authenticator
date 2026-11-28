@@ -17,6 +17,8 @@ import com.safekey.authenticator.notify.BackupNotifier
 import com.safekey.authenticator.security.AppLog
 import com.safekey.authenticator.security.PinManager
 import com.safekey.authenticator.security.RootState
+import com.safekey.authenticator.security.BackupEncryptionGate
+import com.safekey.authenticator.security.BackupEncryptionLevel
 import com.safekey.authenticator.security.VaultIO
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
@@ -201,7 +203,14 @@ object AutoBackupRunner {
         }
 
         val accounts = export.vault.accounts.size
-        val payload = VaultIO.encrypt(export.vault, password.toCharArray())
+        // Same stored level as the manual exports. Clamped to this phone's
+        // real RAM: a preference carried over from a bigger device must never
+        // produce a backup that cannot be opened here.
+        val level = BackupEncryptionGate.clamp(
+            app,
+            BackupEncryptionLevel.fromId(settings.backupKdfLevel)
+        )
+        val payload = VaultIO.encrypt(export.vault, password.toCharArray(), level)
             .toByteArray(Charsets.UTF_8)
         val fileName = "$FILE_PREFIX${
             SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US).format(Date())

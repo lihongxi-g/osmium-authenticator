@@ -148,6 +148,22 @@ class BackupEncryptionTest {
     }
 
     @Test
+    fun `vault io writes and reads the chosen level`() {
+        // The shared path used by WebDAV upload and scheduled backup.
+        val vault = VaultFile(
+            accounts = listOf(VaultAccount("Google", "user@gmail.com", "JBSWY3DPEHPK3PXP"))
+        )
+        val text = VaultIO.encrypt(vault, "pw".toCharArray(), BackupEncryptionLevel.HIGH)
+        val root = envelope(text)
+        assertEquals("argon2id", root["kdf"]!!.jsonPrimitive.content)
+        assertEquals("131072", root["memory_kib"]!!.jsonPrimitive.content)
+
+        val restored = VaultIO.decrypt(text.toByteArray(Charsets.UTF_8), "pw".toCharArray())
+        assertEquals(1, restored.accounts.size)
+        assertEquals("user@gmail.com", restored.accounts.first().label)
+    }
+
+    @Test
     fun `missing params are rejected instead of deriving`() {
         val broken = """{"version":2,"format":"osmium-encrypted","kdf":"argon2id",
             "salt":"AAAAAAAAAAAAAAAAAAAAAA==","iv":"AAAAAAAAAAAAAAAA",

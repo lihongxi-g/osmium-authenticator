@@ -599,7 +599,7 @@
     <string name="integrity_dialog_dismiss">Got it</string>
     <string name="attributions_bundled_title">Bundled libraries</string>
     <string name="attributions_keyattestation_desc">© Google LLC (Apache-2.0). An embedded, pinned copy of android/keyattestation with local modifications; not endorsed by Google.</string>
-    <string name="attributions_bouncycastle_desc">© The Legion of the Bouncy Castle Inc. (MIT). Crypto provider used by the attestation verifier; licence text ships in the app.</string>
+    <string name="attributions_bouncycastle_desc">© The Legion of the Bouncy Castle Inc. (MIT). Crypto provider used by the attestation verifier and for Argon2id backup key derivation; licence text ships in the app.</string>
     <string name="attributions_integrity_note">The device-integrity checks take inspiration from community research (for example the Duck Detector project); no code from those projects is reused.</string>
 
     <!-- K2 consistency checks (2026-09) -->
@@ -745,13 +745,18 @@
     <string name="verify_no_method_message">Set an app PIN under App PIN, or add a fingerprint or a screen lock in the system settings, then come back.</string>
     <string name="verify_feature_developer">Developer mode</string>
     <string name="verify_developer_locked_desc">Developer mode can lift the root restriction, so it always verifies</string>
-    <string name="backup_kdf_title">Backup encryption</string>
     <string name="backup_kdf_level_standard">Standard</string>
     <string name="backup_kdf_level_medium">Medium · 64 MB</string>
     <string name="backup_kdf_level_high">High · 128 MB</string>
-    <string name="backup_kdf_requires">Needs a phone with at least %1$s GB of RAM</string>
-    <string name="backup_kdf_only_standard">This phone does not have enough RAM for the stronger levels, so backups stay Standard.</string>
     <string name="backup_kdf_note">Applies to new backups only; opening a backup always uses the settings stored in that file.</string>
     <string name="error_import_needs_update">This backup was made with a newer encryption method. Update Osmium, then try again.</string>
     <string name="error_import_low_memory">Not enough memory on this phone to open this backup.</string>
+    <string name="security_level_title">Security level</string>
+    <string name="security_level_intro">How much work guessing your backup password takes. Only new backups use this; opening a backup always follows what is stored in that file.</string>
+    <string name="security_level_this_phone">This phone reports %1$s GB of RAM.</string>
+    <string name="security_level_standard_desc">PBKDF2 · no extra memory · readable by every Osmium version.</string>
+    <string name="security_level_medium_desc">Argon2id · 64 MB · needs a phone with at least 6 GB of RAM.</string>
+    <string name="security_level_high_desc">Argon2id · 128 MB · needs a phone with at least 8 GB of RAM.</string>
+    <string name="security_level_fallback">This phone cannot run the saved level, so %1$s is used.</string>
+    <string name="security_level_lan_note">LAN transfer is not affected: it uses a one-time key agreed by both phones, not the backup password.</string>
 </resources>

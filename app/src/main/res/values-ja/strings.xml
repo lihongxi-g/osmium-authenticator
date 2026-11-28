@@ -582,7 +582,7 @@
     <string name="integrity_dialog_dismiss">了解</string>
     <string name="attributions_bundled_title">同梱ライブラリ</string>
     <string name="attributions_keyattestation_desc">© Google LLC（Apache-2.0）。android/keyattestation の固定コミット版を同梱し、ローカル修正を加えています。Googleによる承認ではありません。</string>
-    <string name="attributions_bouncycastle_desc">© The Legion of the Bouncy Castle Inc.（MIT）。証明書検証器が使用する暗号ライブラリ。ライセンス全文はアプリ内に収録。</string>
+    <string name="attributions_bouncycastle_desc">© The Legion of the Bouncy Castle Inc.（MIT）。証明書検証器とバックアップの Argon2id 鍵導出に使う暗号ライブラリ。ライセンス全文はアプリ内に収録。</string>
     <string name="attributions_integrity_note">デバイス整合性チェックはコミュニティの研究成果（例：Duck Detector プロジェクト）に着想を得ていますが、コードは一切再利用していません。</string>
 
     <!-- K2 consistency checks (2026-09) -->
@@ -728,13 +728,18 @@
     <string name="verify_no_method_message">先に「アプリ PIN」で PIN を設定するか、システムで指紋・画面ロックを登録してから戻ってください。</string>
     <string name="verify_feature_developer">開発者モード</string>
     <string name="verify_developer_locked_desc">開発者モードは root 制限を解除できるため、常に認証が必要です</string>
-    <string name="backup_kdf_title">バックアップの暗号化</string>
     <string name="backup_kdf_level_standard">標準</string>
     <string name="backup_kdf_level_medium">中 · 64 MB</string>
     <string name="backup_kdf_level_high">高 · 128 MB</string>
-    <string name="backup_kdf_requires">%1$s GB 以上の RAM を搭載した端末が必要です</string>
-    <string name="backup_kdf_only_standard">この端末は上位レベルに必要な RAM が足りないため、バックアップは標準のままです。</string>
     <string name="backup_kdf_note">新しく作成するバックアップにのみ適用されます。開くときはファイルに記録された設定が使われます。</string>
     <string name="error_import_needs_update">このバックアップは新しい暗号化方式です。Osmium を更新してからもう一度お試しください。</string>
     <string name="error_import_low_memory">この端末のメモリが足りないため、このバックアップを開けません。</string>
+    <string name="security_level_title">セキュリティレベル</string>
+    <string name="security_level_intro">新しいバックアップのパスワードを推測するコストです。新規バックアップにのみ適用され、開くときはファイルに記録された設定が使われます。</string>
+    <string name="security_level_this_phone">この端末の RAM は %1$s GB です。</string>
+    <string name="security_level_standard_desc">PBKDF2 · 追加メモリなし · すべての Osmium バージョンで読めます。</string>
+    <string name="security_level_medium_desc">Argon2id · 64 MB · 6 GB 以上の RAM を搭載した端末が必要です。</string>
+    <string name="security_level_high_desc">Argon2id · 128 MB · 8 GB 以上の RAM を搭載した端末が必要です。</string>
+    <string name="security_level_fallback">この端末では保存されたレベルを実行できないため、%1$s を使用します。</string>
+    <string name="security_level_lan_note">LAN 転送は影響を受けません。2 台の端末がその場で合意した一時キーを使い、バックアップのパスワードは使いません。</string>
 </resources>

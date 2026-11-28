@@ -107,6 +107,7 @@ import com.safekey.authenticator.ui.screens.DonationScreen
 import com.safekey.authenticator.ui.screens.AutoBackupScreen
 import com.safekey.authenticator.ui.screens.DetailScreen
 import com.safekey.authenticator.ui.screens.ExportScreen
+import com.safekey.authenticator.ui.screens.SecurityLevelScreen
 import com.safekey.authenticator.ui.screens.ExportToOthersScreen
 import com.safekey.authenticator.ui.screens.FileImportScreen
 import com.safekey.authenticator.ui.screens.FontSizeSettingsScreen
@@ -1561,6 +1562,12 @@ private fun IntegrityNoticeDialog(
             is Screen.Export -> ExportScreen(
                 vm = vm,
                 onDone = { vm.nav.pop() },
+                onBack = { vm.nav.pop() },
+                onOpenSecurityLevel = { vm.nav.push(Screen.SecurityLevel) }
+            )
+
+            is Screen.SecurityLevel -> SecurityLevelScreen(
+                vm = vm,
                 onBack = { vm.nav.pop() }
             )
 
@@ -1584,7 +1591,8 @@ private fun IntegrityNoticeDialog(
             is Screen.WebDav -> WebDavScreen(
                 vm = vm,
                 onBack = { vm.nav.pop() },
-                onManagePassword = { vm.nav.push(Screen.WebDavPassword) }
+                onManagePassword = { vm.nav.push(Screen.WebDavPassword) },
+                onOpenSecurityLevel = { vm.nav.push(Screen.SecurityLevel) }
             )
 
             is Screen.WebDavPassword -> WebDavPasswordScreen(
@@ -1594,12 +1602,14 @@ private fun IntegrityNoticeDialog(
 
             is Screen.AutoBackup -> AutoBackupScreen(
                 vm = vm,
-                onBack = { vm.nav.pop() }
+                onBack = { vm.nav.pop() },
+                onOpenSecurityLevel = { vm.nav.push(Screen.SecurityLevel) }
             )
 
             is Screen.LanTransfer -> LanTransferScreen(
                 vm = vm,
                 onBack = { vm.nav.pop() },
+                onOpenSecurityLevel = { vm.nav.push(Screen.SecurityLevel) },
                 // Blocking a peer device is a security decision: verify
                 // identity first (same pattern as the settings toggles).
                 onRequireBiometric = if (canAuthenticateBiometric()) {

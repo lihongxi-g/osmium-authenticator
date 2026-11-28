@@ -47,6 +47,12 @@ sealed class Screen {
     object AutoBackup : Screen()
     /** Quick LAN transfer between nearby devices over Wi-Fi. */
     object LanTransfer : Screen()
+    /**
+     * Shared second-level page: the encryption strength used when a backup is
+     * written (file export, WebDAV, scheduled backup). Reachable from a footer
+     * row on each of those pages.
+     */
+    object SecurityLevel : Screen()
     /** mode: "pin" = app PIN, "destroy_pin" = self-destruct PIN */
     data class PinSetup(val mode: String) : Screen()
     /** Verify the current app PIN before a sensitive action.

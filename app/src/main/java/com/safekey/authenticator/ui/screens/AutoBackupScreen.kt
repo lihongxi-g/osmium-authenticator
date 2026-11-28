@@ -58,11 +58,14 @@ import com.safekey.authenticator.backup.AutoBackupScheduler
 import com.safekey.authenticator.data.AppSettings
 import com.safekey.authenticator.network.LocalNetworkAccess
 import com.safekey.authenticator.notify.BackupNotifier
+import com.safekey.authenticator.security.BackupEncryptionGate
+import com.safekey.authenticator.security.BackupEncryptionLevel
 import com.safekey.authenticator.network.LocalNetworkPermissionException
 import com.safekey.authenticator.ui.components.AdaptiveTrailingRow
 import com.safekey.authenticator.ui.components.AppIcons
 import com.safekey.authenticator.ui.components.LocalNetworkPermissionGate
 import com.safekey.authenticator.ui.components.rememberLocalNetworkPermissionRequest
+import com.safekey.authenticator.ui.components.SettingLinkRow
 import com.safekey.authenticator.ui.components.SettingRow
 import com.safekey.authenticator.ui.components.SimpleTopBar
 import com.safekey.authenticator.ui.components.scrollBelowTopBar
@@ -90,10 +93,16 @@ import kotlinx.coroutines.withContext
 @Composable
 fun AutoBackupScreen(
     vm: MainViewModel,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onOpenSecurityLevel: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val settings by vm.settings.collectAsState()
+    // Unattended runs read the same stored level; see AutoBackupRunner.
+    val securityLevel = BackupEncryptionGate.clamp(
+        context,
+        BackupEncryptionLevel.fromId(settings.backupKdfLevel)
+    )
     val webDavConfig by vm.webDavConfig.collectAsState()
     val backupRunning by vm.autoBackupRunning.collectAsState()
     val backupOutcome by vm.autoBackupOutcome.collectAsState()
@@ -537,6 +546,14 @@ fun AutoBackupScreen(
                             .padding(horizontal = 20.dp, vertical = 4.dp)
                     )
                 }
+
+                SettingLinkRow(
+                    icon = AppIcons.Security,
+                    title = stringResource(R.string.security_level_title),
+                    value = backupLevelName(securityLevel),
+                    onClick = onOpenSecurityLevel,
+                    modifier = Modifier.padding(horizontal = 20.dp)
+                )
 
                 // ---- status block
 

@@ -21,14 +21,12 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -47,33 +45,35 @@ import com.safekey.authenticator.security.BackupEncryptionGate
 import com.safekey.authenticator.security.BackupEncryptionLevel
 import com.safekey.authenticator.security.VaultFormatException
 import com.safekey.authenticator.security.VaultIO
+import com.safekey.authenticator.ui.components.AppIcons
+import com.safekey.authenticator.ui.components.SettingLinkRow
 import com.safekey.authenticator.ui.components.SimpleTopBar
 import com.safekey.authenticator.ui.components.scrollBelowTopBar
 import com.safekey.authenticator.ui.dev.DevStrings
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ExportScreen(vm: MainViewModel, onDone: () -> Unit, onBack: () -> Unit) {
+fun ExportScreen(
+    vm: MainViewModel,
+    onDone: () -> Unit,
+    onBack: () -> Unit,
+    onOpenSecurityLevel: () -> Unit = {}
+) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val settings by vm.settings.collectAsState()
     val dev = DevStrings.forContext(context)
     val plaintextMode = settings.devPlaintextExport
-    // Encryption level applies to this export only; restoring follows the file.
-    val highestLevel = remember(context) { BackupEncryptionGate.highestSupported(context) }
-    var levelIndex by remember(settings.backupKdfLevel, highestLevel) {
-        mutableIntStateOf(
-            BackupEncryptionLevel.fromId(settings.backupKdfLevel).ordinal
-                .coerceIn(0, highestLevel.ordinal)
-        )
-    }
-    val exportLevel = BackupEncryptionLevel.entries[
-        levelIndex.coerceIn(0, highestLevel.ordinal)
-    ]
+    // Strength for this export. Restoring always follows the file, so this is
+    // read at write time only; the saved value is clamped to what this phone
+    // can actually run.
+    val securityLevel = BackupEncryptionGate.clamp(
+        context,
+        BackupEncryptionLevel.fromId(settings.backupKdfLevel)
+    )
     var password by remember { mutableStateOf("") }
     var confirm by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
@@ -108,14 +108,6 @@ fun ExportScreen(vm: MainViewModel, onDone: () -> Unit, onBack: () -> Unit) {
                     Text(dev.plainExportAccept)
                 }
             } else {
-                EncryptionLevelPicker(
-                    highest = highestLevel,
-                    selected = exportLevel,
-                    onSelect = { level ->
-                        levelIndex = level.ordinal
-                        vm.setBackupKdfLevel(level.id)
-                    }
-                )
                 Text(stringResource(R.string.export_password_desc), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 OutlinedTextField(password, { password = it }, label = { Text(stringResource(R.string.export_password_hint)) }, visualTransformation = PasswordVisualTransformation(), singleLine = true, modifier = Modifier.fillMaxWidth())
                 OutlinedTextField(confirm, { confirm = it }, label = { Text(stringResource(R.string.export_confirm_hint)) }, visualTransformation = PasswordVisualTransformation(), singleLine = true, isError = error != null, modifier = Modifier.fillMaxWidth())
@@ -137,7 +129,7 @@ fun ExportScreen(vm: MainViewModel, onDone: () -> Unit, onBack: () -> Unit) {
                                 )
                             }
                             if (plaintextMode) VaultIO.encodePlain(export.vault) else withContext(Dispatchers.Default) {
-                                VaultIO.encrypt(export.vault, password.toCharArray(), exportLevel)
+                                VaultIO.encrypt(export.vault, password.toCharArray(), securityLevel)
                             }
                         }
                         pendingJson = json
@@ -147,6 +139,15 @@ fun ExportScreen(vm: MainViewModel, onDone: () -> Unit, onBack: () -> Unit) {
                     } catch (e: Exception) { error = context.getString(R.string.export_failed, e.message ?: "Error"); exporting = false }
                 }
             }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.export_vault)) }
+
+            // Footer link: the strength is a property of the file being
+            // written, so it lives on its own page instead of in this form.
+            SettingLinkRow(
+                icon = AppIcons.Security,
+                title = stringResource(R.string.security_level_title),
+                value = backupLevelName(securityLevel),
+                onClick = onOpenSecurityLevel
+            )
         }
     }
 }
@@ -283,86 +284,3 @@ fun VaultImportFlow(vm: MainViewModel, vault: VaultFile, onDone: () -> Unit, onB
     }
 }
 
-/**
- * Three-stop strength slider for the backup being exported right now.
- *
- * Stops above what this phone can actually run (or restore elsewhere after a
- * phone swap) are not reachable: the slider's range ends at [highest]. When
- * even the middle stop is out of reach the slider is replaced by an
- * explanation, because a one-position slider is just a decoration.
- */
-@Composable
-private fun EncryptionLevelPicker(
-    highest: BackupEncryptionLevel,
-    selected: BackupEncryptionLevel,
-    onSelect: (BackupEncryptionLevel) -> Unit
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(stringResource(R.string.backup_kdf_title), style = MaterialTheme.typography.titleSmall)
-            Text(
-                levelName(selected),
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.primary
-            )
-        }
-        if (highest.ordinal > 0) {
-            Slider(
-                value = selected.ordinal.toFloat(),
-                onValueChange = { raw ->
-                    val level = BackupEncryptionLevel.entries[
-                        raw.roundToInt().coerceIn(0, highest.ordinal)
-                    ]
-                    if (level != selected) onSelect(level)
-                },
-                valueRange = 0f..highest.ordinal.toFloat(),
-                steps = (highest.ordinal - 1).coerceAtLeast(0),
-                modifier = Modifier.fillMaxWidth()
-            )
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                BackupEncryptionLevel.entries.take(highest.ordinal + 1).forEach { level ->
-                    Text(
-                        levelName(level),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = if (level == selected) MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-            if (selected.isArgon2) {
-                Text(
-                    stringResource(
-                        R.string.backup_kdf_requires,
-                        selected.requiredTotalMemGb.toString()
-                    ),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        } else {
-            Text(
-                stringResource(R.string.backup_kdf_only_standard),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-        Text(
-            stringResource(R.string.backup_kdf_note),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}
-
-@Composable
-private fun levelName(level: BackupEncryptionLevel): String = stringResource(
-    when (level) {
-        BackupEncryptionLevel.STANDARD -> R.string.backup_kdf_level_standard
-        BackupEncryptionLevel.MEDIUM -> R.string.backup_kdf_level_medium
-        BackupEncryptionLevel.HIGH -> R.string.backup_kdf_level_high
-    }
-)
