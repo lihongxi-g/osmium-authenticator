@@ -1,6 +1,6 @@
 # Política de privacidad
 
-*Fecha de entrada en vigor: 24 de noviembre de 2026 · Se aplica a Osmium v2.6.6.2 y versiones posteriores*
+*Fecha de entrada en vigor: 28 de noviembre de 2026 · Se aplica a Osmium v2.6.6.3 y versiones posteriores*
 
 *Versión actual, publicada en osmium.im. La aplicación la lee cuando abres Acerca de → Política de privacidad.*
 
@@ -36,6 +36,8 @@ Notificaciones y diagnóstico: las copias automáticas comunican su resultado me
 Descargas: download.osmium.im redirige tu navegador a GitHub Releases y no establece ninguna cookie de descarga de Osmium. Cloudflare procesa la solicitud de redirección del dominio de descargas y GitHub gestiona el acceso a la página de versiones y a los archivos. El tratamiento de datos por cada servicio se rige por su propia política de privacidad.
 
 No compartimos datos con anunciantes, servicios de analítica ni una nube de Osmium. Un servidor WebDAV recibe archivos cifrados que tú subes; el receptor LAN previsto recibe datos de una transferencia que tú inicias; GitHub recibe solo una consulta pública de versiones; el punto de conexión de estado de atestación de Google solo recibe la solicitud de su lista pública de revocación cuando la actualizas manualmente; osmium.im proporciona los documentos legales públicos que la aplicación lee y los archivos de versión públicos que lee la comprobación de versiones, y no se le envía ningún dato del usuario. Desinstalar la aplicación o borrar sus datos no elimina las copias que hayas guardado en otro lugar.
+
+**Nivel de cifrado de las copias.** La clave de un archivo de copia se deriva con PBKDF2-HMAC-SHA256 (120.000 iteraciones) o con Argon2id, según el nivel que elijas por separado para la exportación a archivo, la copia WebDAV y la copia automática; en ambos casos los datos se cifran después con AES-256-GCM. Argon2id se ejecuta por completo en este dispositivo y reserva 64 MB o 128 MB de memoria mientras se escribe o se abre una copia. Estos ajustes se guardan solo en este dispositivo y nunca se transmiten.
 
 **Idiomas:** este documento se publica en varios idiomas. La versión en inglés es el original; las traducciones se ofrecen por comodidad. Si una traducción entra en conflicto con la versión en inglés, prevalece la versión en inglés.
 

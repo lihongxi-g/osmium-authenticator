@@ -1,6 +1,6 @@
 # Nutzungsbedingungen
 
-*Gültig ab: 24. November 2026 · Gilt für Osmium v2.6.6.2 und spätere Versionen*
+*Gültig ab: 28. November 2026 · Gilt für Osmium v2.6.6.3 und spätere Versionen*
 
 *Aktuelle Fassung, veröffentlicht auf osmium.im. Die App liest sie, wenn du sie unter „Über → Nutzungsbedingungen“ öffnest.*
 
@@ -36,6 +36,8 @@ Die aktuellen Fassungen dieser Nutzungsbedingungen und der Datenschutzerklärung
 Verifizierung beim Öffnen: Osmium liest zuerst Ihre gespeicherte Einstellung, bevor es Einmalcodes oder den Sperrbildschirm anzeigt. Das Abschalten dieser Option hebt eine aufgrund von Geräteintegritätsbeschränkungen oder für einzelne sensible Vorgänge erforderliche Verifizierung nicht auf.
 
 Backup-Benachrichtigungen und Verifizierung: Automatische Backups können ihr Ergebnis per lokaler Benachrichtigung melden. Diese lässt sich abschalten und kann zudem vom System und von Akku-Richtlinien verzögert oder unterdrückt werden; eine Benachrichtigung ist daher eine Annehmlichkeit und kein Beweis, dass ein Backup gelaufen ist. Die Seite für automatische Backups kann das Backup-Passwort ändern – lassen Sie deshalb „vor dem Öffnen aus einer Benachrichtigung bestätigen“ (standardmäßig an) oder „beim Öffnen bestätigen“ eingeschaltet: Sind beide aus, kann jede Person mit Ihrem entsperrten Gerät über die Benachrichtigung diese Seite erreichen und das Backup-Passwort ändern.
+
+**Verschlüsselung der Sicherung.** Für eine exportierte oder hochgeladene Sicherung wird der Schlüssel mit PBKDF2-HMAC-SHA256 (120.000 Iterationen) oder mit Argon2id abgeleitet; welche Variante und welche Stärke gilt, wird unter Einstellungen → Sicherheit → Sicherheitsstufe getrennt für Dateiexport, WebDAV-Sicherung und automatische Sicherung gewählt und in der Datei vermerkt. Argon2id benötigt beim Schreiben oder Öffnen einer Sicherung 64 MB oder 128 MB Arbeitsspeicher; eine mit einer höheren Stufe erstellte Sicherung lässt sich daher auf einem Telefon mit weniger Speicher möglicherweise nicht öffnen. Solange Sie die Ausnahme im Entwicklermodus nicht akzeptieren, verweigert die App eine Stufe, die dieses Telefon nicht ausführen kann, und meldet, dass sie eine solche Sicherung nicht öffnen kann, statt zu raten. Entscheidend bleibt das Passwort – eine höhere Stufe macht ein schwaches Passwort nicht stark – und eine ältere Osmium-Version kann eine Sicherung nicht öffnen, die mit einer ihr unbekannten Stufe erstellt wurde.
 
 **Sprachfassungen:** Dieses Dokument wird in mehreren Sprachen veröffentlicht. Die englische Fassung ist das Original; die Übersetzungen dienen der Verständlichkeit. Bei Widersprüchen zwischen einer Übersetzung und der englischen Fassung gilt die englische Fassung.
 

@@ -1,6 +1,6 @@
 # Privacy Policy
 
-*Effective date: November 24, 2026 · Applies to Osmium v2.6.6.2 and later*
+*Effective date: November 28, 2026 · Applies to Osmium v2.6.6.3 and later*
 
 *Current version, published at osmium.im. The app reads it when you open About → Privacy Policy.*
 
@@ -35,6 +35,8 @@ Notifications and diagnostics: automatic backups report their outcome through a 
 Downloads: download.osmium.im redirects your browser to GitHub Releases and does not set an Osmium download cookie. Cloudflare handles the redirect request for the download domain, and GitHub handles access to the release page and files. Their respective privacy policies apply to the data they process.
 
 We do not share data with advertisers, analytics services or an Osmium cloud. A WebDAV server receives encrypted files you upload; the intended LAN receiver receives data from a transfer you start; GitHub receives only a public version query; Google's attestation status endpoint receives only the request for its public revocation list when you refresh it manually; osmium.im serves the public legal documents the app reads and the public version files the update check reads, and no user data is sent to it. Uninstalling or clearing app data does not delete copies you saved elsewhere.
+
+**Backup encryption level.** The key for a backup file is derived with PBKDF2-HMAC-SHA256 (120,000 iterations) or with Argon2id, depending on the level you choose separately for file export, WebDAV backup and automatic backup; in both cases the payload is then encrypted with AES-256-GCM. Argon2id runs entirely on this device and reserves 64 MB or 128 MB of memory while a backup is written or opened. These level settings are stored on this device and are never transmitted.
 
 **Languages:** this document is published in several languages. The English version is the original; the translations are provided for convenience. If a translation conflicts with the English version, the English version prevails.
 

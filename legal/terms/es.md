@@ -1,6 +1,6 @@
 # Términos de uso
 
-*Fecha de entrada en vigor: 24 de noviembre de 2026 · Se aplica a Osmium v2.6.6.2 y versiones posteriores*
+*Fecha de entrada en vigor: 28 de noviembre de 2026 · Se aplica a Osmium v2.6.6.3 y versiones posteriores*
 
 *Versión actual, publicada en osmium.im. La aplicación la lee cuando abres Acerca de → Términos de uso.*
 
@@ -36,6 +36,8 @@ Las versiones actuales de estos Términos de uso y de la Política de privacidad
 Verificación al abrir: Osmium lee primero el ajuste guardado antes de mostrar los códigos de verificación o la pantalla de bloqueo. Desactivar esta opción no elimina la verificación exigida por las restricciones de integridad del dispositivo ni por determinadas acciones sensibles.
 
 Notificaciones de copia y verificación: las copias automáticas pueden publicar una notificación local con el resultado. Puede desactivarse y también puede ser retrasada o suprimida por el sistema y por las políticas de batería, así que una notificación es una comodidad, no una prueba de que la copia se ejecutó. La página de copia automática puede cambiar la contraseña de la copia, así que mantén activado «verificar antes de abrir desde una notificación» (activado por defecto) o «verificar al abrir»: con ambos desactivados, cualquiera que tenga tu dispositivo desbloqueado puede llegar a esa página desde la notificación y cambiar la contraseña.
+
+**Cifrado de las copias.** El archivo exportado o subido deriva su clave con PBKDF2-HMAC-SHA256 (120.000 iteraciones) o con Argon2id; cuál se usa y con qué fuerza se elige por separado para la exportación a archivo, la copia WebDAV y la copia automática en Ajustes → Seguridad → Nivel de seguridad, y la elección queda registrada en el archivo. Argon2id necesita 64 MB o 128 MB de memoria mientras se escribe o se abre una copia, así que una copia creada con un nivel alto puede no abrirse en un teléfono con menos memoria: salvo que aceptes la excepción del modo desarrollador, la app se niega a escribir un nivel que este teléfono no pueda ejecutar y avisa de que no puede abrir esa copia en lugar de adivinar. La contraseña sigue siendo lo decisivo —un nivel más alto no hace fuerte una contraseña débil— y una versión anterior de Osmium no puede abrir una copia escrita con un nivel que no conoce.
 
 **Idiomas:** este documento se publica en varios idiomas. La versión en inglés es el original; las traducciones se ofrecen por comodidad. Si una traducción entra en conflicto con la versión en inglés, prevalece la versión en inglés.
 

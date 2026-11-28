@@ -1,6 +1,6 @@
 # Politique de confidentialité
 
-*Date d’entrée en vigueur : 24 novembre 2026 · S’applique à Osmium v2.6.6.2 et versions ultérieures*
+*Date d’entrée en vigueur : 28 novembre 2026 · S’applique à Osmium v2.6.6.3 et versions ultérieures*
 
 *Version actuelle, publiée sur osmium.im. L’application la lit lorsque vous ouvrez À propos → Politique de confidentialité.*
 
@@ -36,6 +36,8 @@ Notifications et journal de diagnostic : les sauvegardes automatiques signalent 
 Téléchargements : download.osmium.im redirige votre navigateur vers GitHub Releases et ne dépose pas de cookie de téléchargement Osmium. Cloudflare traite la demande de redirection sur le domaine de téléchargement, et GitHub gère l’accès à la page des versions et aux fichiers. Le traitement des données par chaque service relève de sa propre politique de confidentialité.
 
 Nous ne partageons aucune donnée avec des annonceurs, des services d’analyse ou un cloud Osmium. Un serveur WebDAV reçoit les fichiers chiffrés que vous envoyez ; le destinataire LAN prévu reçoit les données d’un transfert que vous lancez ; GitHub ne reçoit qu’une requête publique de version ; le service d’état des attestations de Google ne reçoit que la requête de sa liste publique de révocations, lorsque vous l’actualisez manuellement ; osmium.im fournit les documents juridiques publics que l’application lit ainsi que les fichiers de version publics lus par la vérification de version, et aucune donnée utilisateur ne lui est envoyée. Désinstaller l’application ou effacer ses données ne supprime pas les copies que vous avez enregistrées ailleurs.
+
+**Niveau de chiffrement des sauvegardes.** La clé d’un fichier de sauvegarde est dérivée avec PBKDF2-HMAC-SHA256 (120 000 itérations) ou avec Argon2id, selon le niveau choisi séparément pour l’export de fichier, la sauvegarde WebDAV et la sauvegarde automatique ; dans les deux cas, les données sont ensuite chiffrées avec AES-256-GCM. Argon2id s’exécute entièrement sur cet appareil et réserve 64 Mo ou 128 Mo de mémoire pendant l’écriture ou l’ouverture d’une sauvegarde. Ces réglages sont stockés uniquement sur cet appareil et ne sont jamais transmis.
 
 **Langues :** ce document est publié en plusieurs langues. La version anglaise est l’original ; les traductions sont fournies pour votre commodité. En cas de contradiction entre une traduction et la version anglaise, la version anglaise prévaut.
 

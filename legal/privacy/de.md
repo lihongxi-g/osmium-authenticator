@@ -1,6 +1,6 @@
 # Datenschutzerklärung
 
-*Gültig ab: 24. November 2026 · Gilt für Osmium v2.6.6.2 und spätere Versionen*
+*Gültig ab: 28. November 2026 · Gilt für Osmium v2.6.6.3 und spätere Versionen*
 
 *Aktuelle Fassung, veröffentlicht auf osmium.im. Die App liest sie, wenn du sie unter „Über → Datenschutzerklärung“ öffnest.*
 
@@ -36,6 +36,8 @@ Benachrichtigungen und Diagnoseprotokoll: Automatische Backups melden ihr Ergebn
 Downloads: download.osmium.im leitet Ihren Browser zu GitHub Releases weiter und setzt kein Osmium-Download-Cookie. Cloudflare verarbeitet die Weiterleitungsanfrage für die Download-Domain, GitHub den Zugriff auf die Release-Seite und die Dateien. Für die jeweils verarbeiteten Daten gelten die jeweiligen Datenschutzerklärungen.
 
 Wir geben keine Daten an Werbetreibende, Analysedienste oder eine Osmium-Cloud weiter. Ein WebDAV-Server erhält verschlüsselte Dateien, die du hochlädst; der vorgesehene LAN-Empfänger erhält Daten aus einer von dir gestarteten Übertragung; GitHub erhält nur eine öffentliche Versionsabfrage; Googles Attestierungsstatus-Endpunkt erhält nur die Anfrage nach seiner öffentlichen Sperrliste, wenn du sie manuell aktualisierst; osmium.im stellt die öffentlichen rechtlichen Dokumente bereit, die die App liest, sowie die öffentlichen Versionsdateien, die die Versionsprüfung liest, und es werden keine Nutzerdaten dorthin gesendet. Das Deinstallieren der App oder das Löschen ihrer Daten entfernt keine Kopien, die du woanders gespeichert hast.
+
+**Sicherheitsstufe der Sicherung.** Der Schlüssel für eine Sicherungsdatei wird mit PBKDF2-HMAC-SHA256 (120.000 Iterationen) oder mit Argon2id abgeleitet, je nach Stufe, die Sie getrennt für Dateiexport, WebDAV-Sicherung und automatische Sicherung wählen; in beiden Fällen werden die Daten anschließend mit AES-256-GCM verschlüsselt. Argon2id läuft vollständig auf diesem Gerät und belegt beim Schreiben oder Öffnen einer Sicherung 64 MB oder 128 MB Arbeitsspeicher. Diese Einstellungen werden nur auf diesem Gerät gespeichert und niemals übertragen.
 
 **Sprachfassungen:** Dieses Dokument wird in mehreren Sprachen veröffentlicht. Die englische Fassung ist das Original; die Übersetzungen dienen der Verständlichkeit. Bei Widersprüchen zwischen einer Übersetzung und der englischen Fassung gilt die englische Fassung.
 

@@ -1,6 +1,6 @@
 # Terms of Use
 
-*Effective date: November 24, 2026 · Applies to Osmium v2.6.6.2 and later*
+*Effective date: November 28, 2026 · Applies to Osmium v2.6.6.3 and later*
 
 *Current version, published at osmium.im. The app reads it when you open About → Terms of Use.*
 
@@ -36,6 +36,8 @@ The current versions of these Terms of Use and of the Privacy Policy are publish
 Verification on open: Osmium first reads your saved setting before showing verification codes or the lock screen. Turning it off does not disable verification required by device-integrity restrictions or by individual sensitive actions.
 
 Backup notifications and verification: automatic backups can post a local notification with the result. It can be switched off and it can also be delayed or suppressed by the system and by battery policies, so a notification is a convenience, not proof that a backup ran. The automatic-backup page can change the backup password, so keep "verify before opening from a notification" (on by default) or "verify on open" switched on: with both off, anyone holding your unlocked device can reach that page from the notification and change the backup password.
+
+**Backup encryption.** An exported or uploaded backup derives its key with PBKDF2-HMAC-SHA256 (120,000 iterations) or with Argon2id; which one, and how strong, is chosen separately for file export, WebDAV backup and automatic backup under Settings → Security → Security level, and the choice is recorded in the file. Argon2id needs 64 MB or 128 MB of memory while a backup is written or opened, so a backup made at a higher level may not open on a phone with less memory: unless you accept the developer-mode override, the app refuses to write a level this phone cannot run, and it reports that it cannot open such a backup instead of guessing. The password remains the decisive factor — a higher level does not make a weak password strong — and an older Osmium version cannot open a backup written with a level it does not know.
 
 **Languages:** this document is published in several languages. The English version is the original; the translations are provided for convenience. If a translation conflicts with the English version, the English version prevails.
 

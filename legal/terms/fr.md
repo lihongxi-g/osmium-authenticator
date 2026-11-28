@@ -1,6 +1,6 @@
 # Conditions d’utilisation
 
-*Date d’entrée en vigueur : 24 novembre 2026 · S’applique à Osmium v2.6.6.2 et versions ultérieures*
+*Date d’entrée en vigueur : 28 novembre 2026 · S’applique à Osmium v2.6.6.3 et versions ultérieures*
 
 *Version actuelle, publiée sur osmium.im. L’application la lit lorsque vous ouvrez À propos → Conditions d’utilisation.*
 
@@ -36,6 +36,8 @@ Les versions actuelles des présentes Conditions d’utilisation et de la Politi
 Vérification à l’ouverture : Osmium lit d’abord votre réglage enregistré avant d’afficher les codes de vérification ou l’écran de verrouillage. Désactiver cette option ne supprime pas la vérification exigée par les restrictions d’intégrité de l’appareil ou pour certaines actions sensibles.
 
 Notifications de sauvegarde et vérification : les sauvegardes automatiques peuvent publier une notification locale avec le résultat. Elle peut être désactivée et peut aussi être retardée ou supprimée par le système et par les politiques de batterie : une notification est un confort, pas une preuve qu’une sauvegarde a eu lieu. La page de sauvegarde automatique permet de modifier le mot de passe de sauvegarde ; gardez donc « vérifier avant d’ouvrir depuis une notification » (activé par défaut) ou « vérifier à l’ouverture » activé : si les deux sont désactivés, toute personne ayant votre appareil déverrouillé peut atteindre cette page depuis la notification et modifier le mot de passe.
+
+**Chiffrement des sauvegardes.** Le fichier exporté ou téléversé dérive sa clé avec PBKDF2-HMAC-SHA256 (120 000 itérations) ou avec Argon2id ; le choix et la force se règlent séparément pour l’export de fichier, la sauvegarde WebDAV et la sauvegarde automatique dans Réglages → Sécurité → Niveau de sécurité, et le choix est inscrit dans le fichier. Argon2id a besoin de 64 Mo ou 128 Mo de mémoire pendant l’écriture ou l’ouverture d’une sauvegarde : une sauvegarde créée à un niveau élevé peut donc ne pas s’ouvrir sur un téléphone moins doté. Sauf si vous acceptez la dérogation du mode développeur, l’application refuse d’écrire un niveau que ce téléphone ne peut pas exécuter et signale qu’elle ne peut pas ouvrir une telle sauvegarde au lieu de deviner. Le mot de passe reste déterminant — un niveau plus élevé ne rend pas un mot de passe faible robuste — et une version antérieure d’Osmium ne peut pas ouvrir une sauvegarde écrite avec un niveau qu’elle ne connaît pas.
 
 **Langues :** ce document est publié en plusieurs langues. La version anglaise est l’original ; les traductions sont fournies pour votre commodité. En cas de contradiction entre une traduction et la version anglaise, la version anglaise prévaut.
 
