@@ -342,6 +342,9 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
             settingsRepo.setDevModeEnabled(false)
             settingsRepo.setDevDisableRootSecurity(false)
             settingsRepo.setDevPlaintextExport(false)
+            // The memory override weakens a safety check; it must not outlive
+            // developer mode either.
+            settingsRepo.setIgnoreBackupMemoryLimit(false)
         }
     }
 
