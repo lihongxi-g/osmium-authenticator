@@ -243,6 +243,16 @@ class IconPackStoreTest {
     }
 
     @Test
+    fun `pack with more than 2000 icons installs`() {
+        setUp()
+        // Real multi-brand packs pass 2000 entries; the old cap rejected them
+        // with "pack.json declares too many icons" before reading anything.
+        val icons = (1..2501).map { i -> "icons/$i.svg" to svg }
+        val installed = store.install(validPack(icons = icons))
+        assertEquals(2501, installed.iconCount)
+    }
+
+    @Test
     fun `date style pack version installs`() {
         setUp()
         // aegis-icons ships "version": 20260701; the old 999999 cap rejected

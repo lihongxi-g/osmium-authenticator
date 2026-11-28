@@ -8,9 +8,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.produceState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
@@ -51,9 +53,13 @@ fun AccountIcon(
     val px = with(LocalDensity.current) { size.roundToPx() }.coerceIn(16, 512)
     val key = remember(bytes, px) { IconBitmapCache.key(bytes, px) }
     val mime = account.iconMime
-    val bitmap by produceState(initialValue = IconBitmapCache.peek(key)?.asImageBitmap(), key1 = key) {
-        if (value == null) {
-            value = withContext(Dispatchers.Default) {
+    // Keyed by content, not by slot: a lazy list can reuse this composition for
+    // a different account, and produceState would keep the previous bitmap
+    // until the new decode finished — a one-frame ghost of the row above.
+    var bitmap by remember(key) { mutableStateOf(IconBitmapCache.peek(key)?.asImageBitmap()) }
+    LaunchedEffect(key) {
+        if (bitmap == null) {
+            bitmap = withContext(Dispatchers.Default) {
                 IconBitmapCache.getOrDecode(bytes, mime, px)?.asImageBitmap()
             }
         }

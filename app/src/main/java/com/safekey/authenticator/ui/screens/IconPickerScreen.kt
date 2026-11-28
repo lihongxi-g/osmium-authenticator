@@ -26,10 +26,10 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -263,8 +263,9 @@ private fun PackIconBitmap(icon: PackIcon, size: Dp) {
     // 48 dp (≈144 px) slot was being upscaled, which made the grid soft.
     val px = with(LocalDensity.current) { size.roundToPx() }.coerceIn(16, 512)
     val key = remember(icon.file.path, px) { icon.file.path + "@" + px }
-    val bitmap by produceState<ImageBitmap?>(initialValue = null, key1 = key) {
-        value = withContext(Dispatchers.IO) {
+    var bitmap by remember(key) { mutableStateOf<ImageBitmap?>(null) }
+    LaunchedEffect(key) {
+        bitmap = withContext(Dispatchers.IO) {
             runCatching {
                 val bytes = icon.file.readBytes()
                 IconBitmapCache.getOrDecode(bytes, icon.type.mime, px)

@@ -21,11 +21,16 @@ object IconLimits {
     /** Total uncompressed bytes written for one pack (all icons + pack.json). */
     const val MAX_PACK_TOTAL_BYTES = 64L * 1024 * 1024
 
-    /** Maximum number of icons declared by one pack. */
-    const val MAX_ICONS = 2_000
+    /**
+     * Maximum number of icons declared by one pack. Aegis packs are much
+     * smaller, but real-world collections (multi-brand packs with one icon per
+     * service) pass 2000 icons easily; the byte and ZIP-entry caps are what
+     * actually bound disk/memory use.
+     */
+    const val MAX_ICONS = 20_000
 
     /** Maximum number of entries in the ZIP itself (declared or not). */
-    const val MAX_ZIP_ENTRIES = 20_000
+    const val MAX_ZIP_ENTRIES = 40_000
 
     /**
      * pack.json version must be a non-negative int. There is deliberately no
