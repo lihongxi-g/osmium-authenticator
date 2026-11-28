@@ -306,10 +306,13 @@ object VaultCrypto {
             .withMemoryAsKB(memoryKib)
             .withIterations(timeCost)
             .build()
-        val generator = Argon2BytesGenerator()
-        generator.init(parameters)
         val keyBytes = ByteArray(KEY_BITS / 8)
         try {
+            val generator = Argon2BytesGenerator()
+            // init() allocates the block matrix, so it has to sit inside the
+            // catch: with the developer override on, this is where an
+            // over-sized level actually runs out of memory.
+            generator.init(parameters)
             generator.generateBytes(password, keyBytes)
         } catch (e: OutOfMemoryError) {
             // Last line of defence behind requireHeapForArgon2.
