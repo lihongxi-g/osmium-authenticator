@@ -17,8 +17,20 @@ import kotlinx.serialization.json.contentOrNull
  */
 class VaultFormatException(
     val wrongPassword: Boolean,
+    /** The envelope names a KDF this build does not implement. */
+    val needsNewerApp: Boolean = false,
+    /** The KDF's working memory does not fit in this process. */
+    val outOfMemory: Boolean = false,
     cause: Throwable? = null
-) : Exception(if (wrongPassword) "Wrong password or corrupted data" else "Not an Osmium vault", cause)
+) : Exception(
+    when {
+        wrongPassword -> "Wrong password or corrupted data"
+        needsNewerApp -> "Backup needs a newer Osmium"
+        outOfMemory -> "Not enough memory for this backup"
+        else -> "Not an Osmium vault"
+    },
+    cause
+)
 
 /**
  * Shared encrypt/decrypt helpers for the portable vault format, used by both
@@ -34,9 +46,14 @@ object VaultIO {
     private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
 
     /** Serialize + password-encrypt a vault into the portable envelope JSON. */
-    fun encrypt(vault: VaultFile, password: CharArray): String {
+    @JvmOverloads
+    fun encrypt(
+        vault: VaultFile,
+        password: CharArray,
+        level: BackupEncryptionLevel = BackupEncryptionLevel.STANDARD
+    ): String {
         val plain = json.encodeToString(vault)
-        return VaultCrypto.encrypt(plain, password)
+        return VaultCrypto.encrypt(plain, password, level)
     }
 
     /**
@@ -130,6 +147,10 @@ object VaultIO {
         }
         val plainJson = try {
             VaultCrypto.decrypt(String(payload, Charsets.UTF_8), password)
+        } catch (e: UnsupportedKdfException) {
+            throw VaultFormatException(wrongPassword = false, needsNewerApp = true, cause = e)
+        } catch (e: KdfMemoryException) {
+            throw VaultFormatException(wrongPassword = false, outOfMemory = true, cause = e)
         } catch (e: IllegalArgumentException) {
             throw VaultFormatException(wrongPassword = true, cause = e)
         }

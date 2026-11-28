@@ -741,4 +741,13 @@
     <string name="verify_no_method_message">先在設定裡的「應用程式 PIN」設定 PIN，或在系統中錄入指紋/螢幕鎖定密碼，再回到這裡。</string>
     <string name="verify_feature_developer">開發人員模式</string>
     <string name="verify_developer_locked_desc">開發人員模式可以解除 root 限制，因此始終需要驗證</string>
+    <string name="backup_kdf_title">備份加密</string>
+    <string name="backup_kdf_level_standard">一般</string>
+    <string name="backup_kdf_level_medium">中 · 64 MB</string>
+    <string name="backup_kdf_level_high">高 · 128 MB</string>
+    <string name="backup_kdf_requires">需要執行記憶體至少 %1$s GB 的手機</string>
+    <string name="backup_kdf_only_standard">本機記憶體不足，無法使用更高檔位，備份將使用一般加密。</string>
+    <string name="backup_kdf_note">只影響新備份；開啟備份時以檔案裡記錄的參數為準。</string>
+    <string name="error_import_needs_update">此備份使用了更新的加密方式，請先更新 Osmium 再試。</string>
+    <string name="error_import_low_memory">本機記憶體不足，無法開啟此備份。</string>
 </resources>

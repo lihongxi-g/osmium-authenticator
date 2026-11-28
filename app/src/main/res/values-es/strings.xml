@@ -728,4 +728,13 @@
     <string name="verify_no_method_message">Primero define un PIN en «PIN de la app» o añade una huella o un bloqueo de pantalla en el sistema.</string>
     <string name="verify_feature_developer">Modo desarrollador</string>
     <string name="verify_developer_locked_desc">El modo desarrollador puede quitar la restricción de root, así que siempre pide verificación</string>
+    <string name="backup_kdf_title">Cifrado de la copia</string>
+    <string name="backup_kdf_level_standard">Estándar</string>
+    <string name="backup_kdf_level_medium">Media · 64 MB</string>
+    <string name="backup_kdf_level_high">Alta · 128 MB</string>
+    <string name="backup_kdf_requires">Requiere un teléfono con al menos %1$s GB de RAM</string>
+    <string name="backup_kdf_only_standard">Este teléfono no tiene RAM suficiente para los niveles más altos; las copias seguirán en Estándar.</string>
+    <string name="backup_kdf_note">Solo afecta a las copias nuevas; al abrir una copia se usan los ajustes guardados en el archivo.</string>
+    <string name="error_import_needs_update">Esta copia usa un cifrado más reciente. Actualiza Osmium e inténtalo de nuevo.</string>
+    <string name="error_import_low_memory">No hay memoria suficiente en este teléfono para abrir esta copia.</string>
 </resources>

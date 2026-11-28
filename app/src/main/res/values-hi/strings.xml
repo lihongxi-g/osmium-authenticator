@@ -728,4 +728,13 @@
     <string name="verify_no_method_message">पहले “ऐप PIN” में PIN सेट करें या सिस्टम में फ़िंगरप्रिंट या स्क्रीन लॉक जोड़ें, फिर यहाँ लौटें।</string>
     <string name="verify_feature_developer">डेवलपर मोड</string>
     <string name="verify_developer_locked_desc">डेवलपर मोड रूट प्रतिबंध हटा सकता है, इसलिए यह हमेशा सत्यापन मांगता है</string>
+    <string name="backup_kdf_title">बैकअप एन्क्रिप्शन</string>
+    <string name="backup_kdf_level_standard">सामान्य</string>
+    <string name="backup_kdf_level_medium">मध्यम · 64 MB</string>
+    <string name="backup_kdf_level_high">उच्च · 128 MB</string>
+    <string name="backup_kdf_requires">कम से कम %1$s GB RAM वाला फ़ोन चाहिए</string>
+    <string name="backup_kdf_only_standard">इस फ़ोन में मज़बूत स्तरों के लिए पर्याप्त RAM नहीं है, इसलिए बैकअप सामान्य ही रहेगा।</string>
+    <string name="backup_kdf_note">सिर्फ़ नए बैकअप पर लागू; खोलते समय फ़ाइल में लिखी सेटिंग्स ही मानी जाती हैं।</string>
+    <string name="error_import_needs_update">यह बैकअप नए एन्क्रिप्शन से बना है। Osmium अपडेट करके फिर कोशिश करें।</string>
+    <string name="error_import_low_memory">इस बैकअप को खोलने के लिए इस फ़ोन में पर्याप्त मेमोरी नहीं है।</string>
 </resources>

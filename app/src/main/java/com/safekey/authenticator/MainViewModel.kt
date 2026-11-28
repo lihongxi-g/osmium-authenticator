@@ -305,6 +305,11 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch { settingsRepo.setDevPlaintextExport(enabled) }
     }
 
+    /** File-export encryption level (see BackupEncryptionLevel). */
+    fun setBackupKdfLevel(level: String) {
+        viewModelScope.launch { settingsRepo.setBackupKdfLevel(level) }
+    }
+
     fun setDevHiddenFeatures(ids: Set<String>) {
         viewModelScope.launch { settingsRepo.setDevHiddenFeatures(ids) }
     }

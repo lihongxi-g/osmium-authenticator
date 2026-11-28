@@ -728,4 +728,13 @@
     <string name="verify_no_method_message">Сначала задайте PIN в разделе «PIN приложения» или добавьте отпечаток либо блокировку экрана в системе.</string>
     <string name="verify_feature_developer">Режим разработчика</string>
     <string name="verify_developer_locked_desc">Режим разработчика может снять ограничение root, поэтому всегда требует подтверждения</string>
+    <string name="backup_kdf_title">Шифрование резервной копии</string>
+    <string name="backup_kdf_level_standard">Обычное</string>
+    <string name="backup_kdf_level_medium">Среднее · 64 MB</string>
+    <string name="backup_kdf_level_high">Высокое · 128 MB</string>
+    <string name="backup_kdf_requires">Нужен телефон с объёмом ОЗУ не менее %1$s ГБ</string>
+    <string name="backup_kdf_only_standard">На этом телефоне недостаточно ОЗУ для повышенных уровней, поэтому копии остаются «Обычное».</string>
+    <string name="backup_kdf_note">Действует только для новых копий; при открытии всегда используются параметры из файла.</string>
+    <string name="error_import_needs_update">Эта копия создана более новым способом шифрования. Обновите Osmium и повторите попытку.</string>
+    <string name="error_import_low_memory">На этом телефоне недостаточно памяти, чтобы открыть эту копию.</string>
 </resources>

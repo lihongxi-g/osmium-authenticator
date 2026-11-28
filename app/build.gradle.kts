@@ -13,8 +13,8 @@ android {
         applicationId = "com.safekey.authenticator"
         minSdk = 26
         targetSdk = 37
-        versionCode = 962
-        versionName = "2.6.6.2"
+        versionCode = 963
+        versionName = "2.6.6.3"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
     }
@@ -159,6 +159,14 @@ dependencies {
     // Vendored Google Android Key Attestation verifier (see keyattestation/NOTICE).
     implementation(project(":keyattestation"))
 
+    // Argon2id for the opt-in backup encryption levels. bcpkix already reaches
+    // the APK through :keyattestation (runtime classpath only), which is why
+    // the packaging block above already carries the BouncyCastle META-INF
+    // exclusions; this line only puts bcprov on *this* module's compile
+    // classpath. Keep the version identical to keyattestation's to avoid two
+    // copies of org.bouncycastle.* classes in the dex.
+    implementation("org.bouncycastle:bcprov-jdk18on:1.86")
+
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.11.0")
     // XmlPullParser on the JVM for unit-testing the WebDAV multistatus parser
@@ -174,5 +182,9 @@ dependencies {
 // HttpURLConnection 'method' field (fine on Android, no module system).
 // On the JVM test host the java.net package is not opened — allow it there.
 tasks.withType<Test>().configureEach {
+    // Argon2id backup tests allocate the KDF's 64/128 MiB block matrix inside
+    // the test JVM; the default 512 MiB is not enough headroom for both the
+    // matrix and the vault JSON.
+    maxHeapSize = "1536m"
     jvmArgs("--add-opens", "java.base/java.net=ALL-UNNAMED")
 }

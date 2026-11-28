@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.safekey.authenticator.security.BackupEncryptionLevel
 import com.safekey.authenticator.security.CryptoManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -102,6 +103,12 @@ data class AppSettings(
      * open" is on — the open gate already verified that same entry.
      */
     val autoBackupNotifyRequireAuth: Boolean = true,
+    /**
+     * Encryption level for *file* exports only ([BackupEncryptionLevel.id]).
+     * WebDAV, scheduled backup and LAN transfer keep writing the PBKDF2 format
+     * until they are migrated one by one.
+     */
+    val backupKdfLevel: String = BackupEncryptionLevel.MEDIUM.id,
     val autoCheckUpdates: Boolean = false,
     /**
      * Also look at pre-releases (beta / preview builds). Off by default: a
@@ -388,6 +395,8 @@ class SettingsRepository(
         val VERIFY_OPT_OUT = stringSetPreferencesKey("verify_opt_out")
         val DEV_DETAILED_LOGGING = booleanPreferencesKey("dev_detailed_logging")
         val PIN_REMINDER_SILENCED = booleanPreferencesKey("pin_reminder_silenced")
+        /** File-export encryption level; see [BackupEncryptionLevel]. */
+        val BACKUP_KDF_LEVEL = stringPreferencesKey("backup_kdf_level")
     }
 
     val settings: Flow<AppSettings> = context.dataStore.data.map { prefs ->
@@ -443,6 +452,7 @@ class SettingsRepository(
             verifyOptOut = prefs[Keys.VERIFY_OPT_OUT] ?: emptySet(),
             devDetailedLogging = prefs[Keys.DEV_DETAILED_LOGGING] ?: false,
             pinReminderSilenced = prefs[Keys.PIN_REMINDER_SILENCED] ?: false,
+            backupKdfLevel = BackupEncryptionLevel.fromId(prefs[Keys.BACKUP_KDF_LEVEL]).id,
             welcomeShownVersion = prefs[Keys.WELCOME_SHOWN_VERSION] ?: "",
             // Anything that arrived from DataStore is, by definition, loaded.
             loaded = true
@@ -698,6 +708,14 @@ class SettingsRepository(
 
     suspend fun setPinReminderSilenced(silenced: Boolean) {
         context.dataStore.edit { it[Keys.PIN_REMINDER_SILENCED] = silenced }
+    }
+
+    /**
+     * Stored as-is; the export screen clamps it to what the current phone can
+     * run, so a preference synced from a bigger device never blocks an export.
+     */
+    suspend fun setBackupKdfLevel(level: String) {
+        context.dataStore.edit { it[Keys.BACKUP_KDF_LEVEL] = level }
     }
 
     suspend fun setDevDetailedLogging(enabled: Boolean) {

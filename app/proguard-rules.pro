@@ -27,3 +27,11 @@
 -dontwarn javax.naming.**
 -dontwarn java.awt.**
 -dontwarn org.bouncycastle.**
+
+# ---- Argon2id (backup encryption levels) ----
+# BouncyCastle's Argon2 generator is called directly, so R8 keeps it anyway;
+# the explicit rule guards against future restructuring of the class and is
+# cheap (a handful of classes, no reflection inside).
+-keep class org.bouncycastle.crypto.generators.Argon2BytesGenerator { *; }
+-keep class org.bouncycastle.crypto.params.Argon2Parameters { *; }
+-keep class org.bouncycastle.crypto.params.Argon2Parameters$* { *; }

@@ -1,5 +1,6 @@
 package com.safekey.authenticator.model
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
@@ -45,6 +46,32 @@ data class EncryptedVault(
     val format: String = "osmium-encrypted",
     val kdf: String = "PBKDF2-HMAC-SHA256",
     val iterations: Int = 0,
+    val salt: String = "",
+    val iv: String = "",
+    val ciphertext: String = ""
+)
+
+/**
+ * Version 2 envelope: Argon2id. Kept as a separate class on purpose.
+ *
+ * [EncryptedVault] is left byte-for-byte alone so a PBKDF2 export still
+ * serializes exactly as it did before (`encodeDefaults = true` would otherwise
+ * start emitting the new fields with default values into old-format files).
+ *
+ * [memoryKib], [timeCost] and [parallelism] are the only inputs to decryption;
+ * [level] is a display hint and must never be trusted. [iterations] does not
+ * exist here — reusing it for Argon2's t would make the two formats
+ * indistinguishable.
+ */
+@Serializable
+data class EncryptedVaultArgon2(
+    val version: Int = 2,
+    val format: String = "osmium-encrypted",
+    val kdf: String = "argon2id",
+    @SerialName("memory_kib") val memoryKib: Int = 0,
+    @SerialName("time_cost") val timeCost: Int = 0,
+    val parallelism: Int = 0,
+    val level: String = "",
     val salt: String = "",
     val iv: String = "",
     val ciphertext: String = ""
