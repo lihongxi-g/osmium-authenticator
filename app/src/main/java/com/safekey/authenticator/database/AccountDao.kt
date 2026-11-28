@@ -38,6 +38,13 @@ interface AccountDao {
     @Query("UPDATE accounts SET sortOrder = :sortOrder WHERE id = :id")
     suspend fun updateSortOrder(id: String, sortOrder: Long)
 
+    /**
+     * Assigns or clears the encrypted entry icon. Passing null for every icon
+     * column removes the icon (used by "no icon" in the picker).
+     */
+    @Query("UPDATE accounts SET iconMime = :mime, iconIv = :iv, iconCiphertext = :ciphertext WHERE id = :id")
+    suspend fun updateIcon(id: String, mime: String?, iv: String?, ciphertext: String?)
+
     @Query("SELECT COALESCE(MAX(sortOrder), -1) FROM accounts")
     suspend fun maxSortOrder(): Long
 

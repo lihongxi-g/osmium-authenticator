@@ -51,10 +51,17 @@ class CryptoManager {
         }
     }
 
-    fun encrypt(plaintext: String): EncryptedField {
+    fun encrypt(plaintext: String): EncryptedField =
+        encryptBytes(plaintext.toByteArray(Charsets.UTF_8))
+
+    fun decrypt(field: EncryptedField): String =
+        String(decryptBytes(field), Charsets.UTF_8)
+
+    /** Byte-level variant, used for entry icons (never stored as plaintext). */
+    fun encryptBytes(plaintext: ByteArray): EncryptedField {
         val cipher = Cipher.getInstance(TRANSFORMATION)
         cipher.init(Cipher.ENCRYPT_MODE, getOrCreateKey())
-        val ciphertext = cipher.doFinal(plaintext.toByteArray(Charsets.UTF_8))
+        val ciphertext = cipher.doFinal(plaintext)
         val iv = cipher.iv
         return EncryptedField(
             iv = Base64.encodeToString(iv, Base64.NO_WRAP),
@@ -62,12 +69,12 @@ class CryptoManager {
         )
     }
 
-    fun decrypt(field: EncryptedField): String {
+    fun decryptBytes(field: EncryptedField): ByteArray {
         val cipher = Cipher.getInstance(TRANSFORMATION)
         val iv = Base64.decode(field.iv, Base64.NO_WRAP)
         val ct = Base64.decode(field.ciphertext, Base64.NO_WRAP)
         cipher.init(Cipher.DECRYPT_MODE, getOrCreateKey(), GCMParameterSpec(128, iv))
-        return String(cipher.doFinal(ct), Charsets.UTF_8)
+        return cipher.doFinal(ct)
     }
 
     data class EncryptedField(val iv: String, val ciphertext: String)

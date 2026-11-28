@@ -27,5 +27,11 @@ data class AccountEntity(
     val counter: Long = 0,
     /** Kept only for schema compatibility with the rolled-back 2.1.3
      *  (hidden-accounts) database — unused by the UI. */
-    val hidden: Boolean = false
+    val hidden: Boolean = false,
+    /** Optional entry icon (pack icon or imported from Aegis), stored
+     *  encrypted like the other identity fields: an icon tells an attacker
+     *  which services the vault holds. Null when the entry has no icon. */
+    val iconMime: String? = null,
+    val iconIv: String? = null,
+    val iconCiphertext: String? = null
 )

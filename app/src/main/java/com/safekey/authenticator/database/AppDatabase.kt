@@ -7,7 +7,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [AccountEntity::class, TagEntity::class, AccountTagCrossRef::class], version = 5, exportSchema = false)
+@Database(entities = [AccountEntity::class, TagEntity::class, AccountTagCrossRef::class], version = 6, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun accountDao(): AccountDao
@@ -57,6 +57,16 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // Optional entry icon, encrypted per field. Nullable: existing
+                // rows keep no icon and the UI falls back to text-only cards.
+                db.execSQL("ALTER TABLE accounts ADD COLUMN iconMime TEXT")
+                db.execSQL("ALTER TABLE accounts ADD COLUMN iconIv TEXT")
+                db.execSQL("ALTER TABLE accounts ADD COLUMN iconCiphertext TEXT")
+            }
+        }
+
         @Volatile
         private var instance: AppDatabase? = null
 
@@ -66,7 +76,7 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "safekey.db"
-                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5).build().also { instance = it }
+                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6).build().also { instance = it }
             }
     }
 }

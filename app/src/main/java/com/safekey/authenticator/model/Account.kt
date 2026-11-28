@@ -19,8 +19,17 @@ data class Account(
     val type: String = TYPE_TOTP,
     val counter: Long = 0,
     val hidden: Boolean = false,
-    val tags: List<Tag> = emptyList()
+    val tags: List<Tag> = emptyList(),
+    /**
+     * Optional entry icon bytes (PNG/JPEG/SVG as stored). Kept in the domain
+     * model so the list and the picker can render without another DB read;
+     * encryption/decryption happens in the repository.
+     */
+    val icon: ByteArray? = null,
+    val iconMime: String? = null
 ) {
+    /** True when an icon is present and non-empty. */
+    val hasIcon: Boolean get() = icon != null && icon.isNotEmpty()
     /** Service (issuer) is the title; a blank issuer shows "Unknown".
      *  Account names are auto-generated at add time when left blank, so
      *  [label] is never empty in practice (falls back to "Unknown" anyway). */

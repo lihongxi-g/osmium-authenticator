@@ -5,6 +5,7 @@ import com.safekey.authenticator.database.AccountEntity
 import com.safekey.authenticator.database.AccountTagCrossRef
 import com.safekey.authenticator.database.AppDatabase
 import com.safekey.authenticator.database.TagDao
+import com.safekey.authenticator.icons.IconLimits
 import com.safekey.authenticator.model.Account
 import com.safekey.authenticator.model.VaultAccount
 import com.safekey.authenticator.model.Tag
@@ -135,6 +136,7 @@ class AccountRepository(
             var order = dao.maxSortOrder()
             for (v in toAdd) {
                 order += 1
+                val icon = decodeImportedIcon(v)
                 val account = Account(
                     id = UUID.randomUUID().toString(),
                     issuer = v.issuer.trim(),
@@ -147,12 +149,15 @@ class AccountRepository(
                     createdAt = now,
                     updatedAt = now,
                     type = v.type,
-                    counter = v.counter
+                    counter = v.counter,
+                    icon = icon?.first,
+                    iconMime = icon?.second
                 )
                 dao.insert(account.toEntity(crypto))
                 tagDao?.insertRefs(v.tagIds.map { com.safekey.authenticator.database.AccountTagCrossRef(account.id, it) })
             }
             for ((existing, v) in toUpdate) {
+                val icon = decodeImportedIcon(v)
                 val updated = existing.copy(
                     issuer = v.issuer.trim(),
                     label = v.label.trim(),
@@ -160,7 +165,11 @@ class AccountRepository(
                     algorithm = v.algorithm,
                     digits = v.digits,
                     period = v.period,
-                    updatedAt = now
+                    updatedAt = now,
+                    // An incoming entry without an icon must not erase one the
+                    // user already assigned locally.
+                    icon = icon?.first ?: existing.icon,
+                    iconMime = icon?.second ?: existing.iconMime
                 )
                 dao.update(updated.toEntity(crypto))
                 tagDao?.deleteRefsForAccount(updated.id)
@@ -192,7 +201,9 @@ class AccountRepository(
                 period = domain.period,
                 type = domain.type,
                 counter = domain.counter,
-                tagIds = refsByAccount[id].orEmpty()
+                tagIds = refsByAccount[id].orEmpty(),
+                icon = domain.icon?.let { java.util.Base64.getEncoder().encodeToString(it) }.orEmpty(),
+                iconMime = if (domain.icon != null) (domain.iconMime ?: "image/png") else ""
             )
         }
         return ExportResult(
@@ -213,6 +224,12 @@ class AccountRepository(
         val issuer = crypto.encrypt(issuer)
         val label = crypto.encrypt(label)
         val secret = crypto.encrypt(secret)
+        val iconBytes = icon
+        val encryptedIcon = if (iconBytes != null && iconBytes.isNotEmpty()) {
+            crypto.encryptBytes(iconBytes)
+        } else {
+            null
+        }
         return AccountEntity(
             id = id,
             issuerIv = issuer.iv,
@@ -230,7 +247,10 @@ class AccountRepository(
             copyCount = copyCount,
             type = type,
             counter = counter,
-            hidden = hidden
+            hidden = hidden,
+            iconMime = if (encryptedIcon != null) iconMime else null,
+            iconIv = encryptedIcon?.iv,
+            iconCiphertext = encryptedIcon?.ciphertext
         )
     }
 
@@ -239,6 +259,17 @@ class AccountRepository(
             val issuer = crypto.decrypt(CryptoManager.EncryptedField(issuerIv, issuerCiphertext))
             val label = crypto.decrypt(CryptoManager.EncryptedField(labelIv, labelCiphertext))
             val secret = crypto.decrypt(CryptoManager.EncryptedField(secretIv, secretCiphertext))
+            // A corrupt icon must not hide the account: fall back to no icon.
+            val icon = if (iconIv != null && iconCiphertext != null) {
+                try {
+                    crypto.decryptBytes(CryptoManager.EncryptedField(iconIv, iconCiphertext))
+                } catch (e: Exception) {
+                    com.safekey.authenticator.security.AppLog.d("icon decrypt failed for account $id: ${e.message}")
+                    null
+                }
+            } else {
+                null
+            }
             Account(
                 id = id,
                 issuer = issuer,
@@ -253,7 +284,9 @@ class AccountRepository(
                 copyCount = copyCount,
                 type = type,
                 counter = counter,
-                hidden = hidden
+                hidden = hidden,
+                icon = icon,
+                iconMime = if (icon != null) iconMime else null
             )
         } catch (e: Exception) {
             // One corrupt row must never take down the whole app on launch
@@ -292,5 +325,46 @@ class AccountRepository(
 
     suspend fun incrementCounter(id: String) {
         dao.incrementCounter(id)
+    }
+
+    /**
+     * Assigns (or clears, when [bytes] is null/empty) the entry icon.
+     * Bytes are stored encrypted with the same per-field scheme as issuer and
+     * label: an icon reveals which service the entry belongs to.
+     */
+    suspend fun setIcon(accountId: String, bytes: ByteArray?, mime: String?) {
+        if (bytes == null || bytes.isEmpty()) {
+            dao.updateIcon(accountId, null, null, null)
+            return
+        }
+        val encrypted = crypto.encryptBytes(bytes)
+        dao.updateIcon(
+            accountId,
+            mime?.takeIf { it.isNotBlank() } ?: "image/png",
+            encrypted.iv,
+            encrypted.ciphertext
+        )
+    }
+
+    /** Applies an icon to every account that does not have one yet. */
+    suspend fun accountsWithoutIcon(): List<Account> =
+        dao.getAll().mapNotNull { it.toDomain(crypto) }.filter { !it.hasIcon }
+
+    /**
+     * Decodes an icon that arrived inside a vault or third-party export.
+     * Untrusted: unknown MIME types, malformed Base64 and oversized payloads
+     * are dropped instead of failing the whole import.
+     */
+    private fun decodeImportedIcon(v: VaultAccount): Pair<ByteArray, String>? {
+        if (v.icon.isBlank()) return null
+        val mime = v.iconMime.trim().lowercase()
+        if (mime !in IconLimits.ALLOWED_MIME) return null
+        val bytes = try {
+            java.util.Base64.getDecoder().decode(v.icon)
+        } catch (e: IllegalArgumentException) {
+            return null
+        }
+        if (bytes.isEmpty() || bytes.size > IconLimits.MAX_STORED_BYTES) return null
+        return bytes to mime
     }
 }

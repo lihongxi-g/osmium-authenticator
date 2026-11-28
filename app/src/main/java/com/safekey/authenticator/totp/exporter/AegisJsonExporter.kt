@@ -1,8 +1,11 @@
 package com.safekey.authenticator.totp.exporter
 
+import com.safekey.authenticator.icons.IconLimits
 import com.safekey.authenticator.model.Account
 import com.safekey.authenticator.model.VaultAccount
 import java.nio.charset.StandardCharsets
+import java.security.MessageDigest
+import java.util.Base64
 import java.util.UUID
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
@@ -78,9 +81,30 @@ internal object AegisJsonExporter {
             put("name", JsonPrimitive(account.label))
             put("issuer", JsonPrimitive(account.issuer))
             put("note", JsonNull)
-            put("icon", JsonNull)
+            // Aegis stores the icon inside the vault entry as standard Base64
+            // with its MIME type; `icon_hash` is SHA-256 over mime+bytes.
+            val mime = account.iconMime.trim().lowercase()
+            val iconBytes = if (account.icon.isNotBlank()) {
+                runCatching { Base64.getDecoder().decode(account.icon) }.getOrNull()
+            } else {
+                null
+            }
+            if (iconBytes != null && iconBytes.isNotEmpty() && mime in IconLimits.ALLOWED_MIME) {
+                put("icon", JsonPrimitive(Base64.getEncoder().encodeToString(iconBytes)))
+                put("icon_mime", JsonPrimitive(mime))
+                put("icon_hash", JsonPrimitive(iconHash(iconBytes, mime)))
+            } else {
+                put("icon", JsonNull)
+            }
             put("info", info)
         }
+    }
+
+    /** Aegis' `VaultEntryIcon.generateHash`: SHA-256 over the MIME bytes, then the icon. */
+    private fun iconHash(bytes: ByteArray, mime: String): String {
+        val digest = MessageDigest.getInstance("SHA-256")
+        digest.update(mime.toByteArray(StandardCharsets.UTF_8))
+        return digest.digest(bytes).joinToString("") { "%02x".format(it) }
     }
 
     /** Deterministic, format-valid UUID so re-exports keep the same identity. */

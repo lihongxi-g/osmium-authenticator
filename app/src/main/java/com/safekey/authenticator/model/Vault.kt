@@ -24,7 +24,15 @@ data class VaultAccount(
     val period: Int = 30,
     val type: String = "totp",
     val counter: Long = 0,
-    val tagIds: List<String> = emptyList()
+    val tagIds: List<String> = emptyList(),
+    /**
+     * Optional entry icon as standard Base64 (same representation Aegis uses
+     * in its `icon` field). Empty means "no icon". Defaults keep older
+     * backups readable and let older builds ignore the field
+     * (`ignoreUnknownKeys`), so the vault version does not have to change.
+     */
+    val icon: String = "",
+    val iconMime: String = ""
 )
 
 @Serializable

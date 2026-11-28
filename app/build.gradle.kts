@@ -13,8 +13,8 @@ android {
         applicationId = "com.safekey.authenticator"
         minSdk = 26
         targetSdk = 37
-        versionCode = 963
-        versionName = "2.6.6.3"
+        versionCode = 970
+        versionName = "2.7.0-preview.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
     }
@@ -136,6 +136,9 @@ dependencies {
 
     // QR generation + scanning for account sharing / imports (core only, no camera bloat)
     implementation("com.google.zxing:core:3.5.4")
+    // SVG rendering for Aegis-format icon packs (Apache-2.0). Packs are read
+    // with java.util.zip and rendered off the main thread; no Glide/zip4j.
+    implementation("com.caverock:androidsvg-aar:1.4")
     implementation("androidx.datastore:datastore-preferences:1.3.0")
 
     // Scheduled auto-backup (WebDAV / local storage). Google first-party;
