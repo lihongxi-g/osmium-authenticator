@@ -40,6 +40,10 @@ data class InstalledIconPack(
  * Installation is staged in a hidden directory next to the packs and moved
  * into place only after the whole pack has been validated, so a rejected or
  * interrupted import never leaves a half-installed pack behind.
+ *
+ * Derived from Aegis Authenticator's IconPackManager (GPL-3.0-or-later),
+ * rewritten in Kotlin with stricter validation and documented limits
+ * (2026-11). Aegis is credited in Settings → About → Attributions.
  */
 class IconPackStore(private val packsDir: File) {
 

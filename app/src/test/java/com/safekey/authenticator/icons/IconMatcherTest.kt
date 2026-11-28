@@ -33,10 +33,10 @@ class IconMatcherTest {
     }
 
     @Test
-    fun `issuer containing the alias is still suggested, after normal matches`() {
+    fun `issuer containing the alias is suggested after normal matches`() {
         val p = pack(
             icon("workspace", listOf("workspace")),
-            icon("google", listOf("google"))
+            icon("google", listOf("google workspace"))
         )
         val result = IconMatcher.suggestions(p, "Google Workspace")
         assertEquals("google", result.first().name)
@@ -77,10 +77,16 @@ class IconMatcherTest {
     }
 
     @Test
+    fun `search understands chinese product names`() {
+        val p = pack(icon("WeChat", listOf("wechat")))
+        assertEquals(1, IconMatcher.search(p, "微信").size)
+    }
+
+    @Test
     fun `best match returns the first suggestion`() {
         val p = pack(
             icon("workspace", listOf("workspace")),
-            icon("google", listOf("google"))
+            icon("google", listOf("google workspace"))
         )
         assertEquals("google", IconMatcher.bestMatch(p, "Google Workspace")?.name)
     }

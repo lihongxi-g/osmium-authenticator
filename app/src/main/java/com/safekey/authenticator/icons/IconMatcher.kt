@@ -117,12 +117,16 @@ object IconMatcher {
 
     /** Free-text search over icon names, aliases and categories. */
     fun search(pack: InstalledIconPack, query: String, limit: Int = 60): List<PackIcon> {
-        val q = normalize(query)
-        if (q.isEmpty()) return emptyList()
+        // expandIssuer also maps Chinese queries to their English names, so
+        // typing "微信" finds the wechat icon instead of nothing.
+        val terms = expandIssuer(query)
+        if (terms.isEmpty()) return emptyList()
         return pack.icons.filter { icon ->
-            normalize(icon.name).contains(q) ||
-                icon.issuers.any { normalize(it).contains(q) } ||
-                normalize(icon.category.orEmpty()).contains(q)
+            terms.any { q ->
+                normalize(icon.name).contains(q) ||
+                    icon.issuers.any { normalize(it).contains(q) } ||
+                    normalize(icon.category.orEmpty()).contains(q)
+            }
         }.take(limit)
     }
 }
