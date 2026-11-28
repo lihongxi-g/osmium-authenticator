@@ -755,7 +755,10 @@
     <string name="security_level_webdav">WebDAV 备份</string>
     <string name="security_level_autobackup">自动备份</string>
     <string name="security_level_memory_link">点击查看设备实时内存占用情况</string>
-    <string name="security_level_memory_failed">无法打开内存页面</string>
     <string name="security_level_locked">本机内存不足，无法使用更高档位。</string>
     <string name="security_level_desc">导出与备份使用的加密强度</string>
+    <string name="memory_dialog_title">内存使用情况</string>
+    <string name="memory_total">总内存：%1$s</string>
+    <string name="memory_available">可用：%1$s</string>
+    <string name="memory_app_heap">本应用占用：%1$s（上限 %2$s）</string>
 </resources>

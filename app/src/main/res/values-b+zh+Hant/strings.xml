@@ -753,7 +753,10 @@
     <string name="security_level_webdav">WebDAV 備份</string>
     <string name="security_level_autobackup">自動備份</string>
     <string name="security_level_memory_link">點擊查看裝置即時記憶體使用情況</string>
-    <string name="security_level_memory_failed">無法開啟記憶體頁面</string>
     <string name="security_level_locked">本機記憶體不足，無法使用更高檔位。</string>
     <string name="security_level_desc">匯出與備份使用的加密強度</string>
+    <string name="memory_dialog_title">記憶體使用情況</string>
+    <string name="memory_total">總記憶體：%1$s</string>
+    <string name="memory_available">可用：%1$s</string>
+    <string name="memory_app_heap">本應用程式：%1$s（上限 %2$s）</string>
 </resources>

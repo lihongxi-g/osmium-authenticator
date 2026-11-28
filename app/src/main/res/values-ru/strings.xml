@@ -740,7 +740,10 @@
     <string name="security_level_webdav">Резервная копия WebDAV</string>
     <string name="security_level_autobackup">Автоматическая копия</string>
     <string name="security_level_memory_link">Нажмите, чтобы увидеть использование памяти</string>
-    <string name="security_level_memory_failed">Не удалось открыть экран памяти</string>
     <string name="security_level_locked">На этом телефоне недостаточно ОЗУ для повышенных уровней.</string>
     <string name="security_level_desc">Стойкость шифрования экспорта и копий</string>
+    <string name="memory_dialog_title">Использование памяти</string>
+    <string name="memory_total">Всего: %1$s</string>
+    <string name="memory_available">Свободно: %1$s</string>
+    <string name="memory_app_heap">Это приложение: %1$s из %2$s</string>
 </resources>

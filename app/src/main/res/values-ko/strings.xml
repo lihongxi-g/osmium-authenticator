@@ -740,7 +740,10 @@
     <string name="security_level_webdav">WebDAV 백업</string>
     <string name="security_level_autobackup">자동 백업</string>
     <string name="security_level_memory_link">탭하여 기기의 실시간 메모리 사용량 보기</string>
-    <string name="security_level_memory_failed">메모리 화면을 열 수 없습니다</string>
     <string name="security_level_locked">이 휴대폰은 더 높은 단계에 필요한 RAM이 부족합니다.</string>
     <string name="security_level_desc">내보내기와 백업의 암호화 강도</string>
+    <string name="memory_dialog_title">메모리 사용량</string>
+    <string name="memory_total">전체: %1$s</string>
+    <string name="memory_available">사용 가능: %1$s</string>
+    <string name="memory_app_heap">이 앱: %1$s / %2$s</string>
 </resources>

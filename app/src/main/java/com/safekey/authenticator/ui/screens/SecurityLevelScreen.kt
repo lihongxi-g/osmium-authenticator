@@ -1,9 +1,9 @@
 package com.safekey.authenticator.ui.screens
 
+import android.app.ActivityManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.provider.Settings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,15 +11,20 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -32,6 +37,8 @@ import com.safekey.authenticator.ui.components.AppIcons
 import com.safekey.authenticator.ui.components.SettingLinkRow
 import com.safekey.authenticator.ui.components.SimpleTopBar
 import com.safekey.authenticator.ui.components.scrollBelowTopBar
+import kotlinx.coroutines.delay
+import java.util.Locale
 import kotlin.math.roundToInt
 
 /**
@@ -58,6 +65,7 @@ fun SecurityLevelScreen(
     val highest = remember(context, ignore) {
         BackupEncryptionGate.highestSupported(context, ignore)
     }
+    var showMemoryDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -95,9 +103,9 @@ fun SecurityLevelScreen(
                 title = stringResource(R.string.security_level_memory_link),
                 value = "",
                 onClick = {
-                    if (!openRunningServices(context)) {
-                        vm.showToast(context.getString(R.string.security_level_memory_failed))
-                    }
+                    // System page when this build has one; otherwise the
+                    // numbers are read directly, which always works.
+                    if (!openRunningServices(context)) showMemoryDialog = true
                 },
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
             )
@@ -110,6 +118,70 @@ fun SecurityLevelScreen(
             )
         }
     }
+
+    if (showMemoryDialog) {
+        MemoryUsageDialog(onDismiss = { showMemoryDialog = false })
+    }
+}
+
+/**
+ * Fallback when the OEM build has no reachable Running-services screen:
+ * the same numbers, read from ActivityManager once a second.
+ */
+@Composable
+private fun MemoryUsageDialog(onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    val snapshot by produceState(initialValue = readMemory(context), context) {
+        while (true) {
+            value = readMemory(context)
+            delay(1_000)
+        }
+    }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.memory_dialog_title)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(stringResource(R.string.memory_total, formatBytes(snapshot.totalBytes)))
+                Text(stringResource(R.string.memory_available, formatBytes(snapshot.availableBytes)))
+                Text(
+                    stringResource(
+                        R.string.memory_app_heap,
+                        formatBytes(snapshot.heapUsedBytes),
+                        formatBytes(snapshot.heapLimitBytes)
+                    )
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.close)) }
+        }
+    )
+}
+
+private data class MemorySnapshot(
+    val totalBytes: Long,
+    val availableBytes: Long,
+    val heapUsedBytes: Long,
+    val heapLimitBytes: Long
+)
+
+private fun readMemory(context: Context): MemorySnapshot {
+    val am = context.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager
+    val info = ActivityManager.MemoryInfo()
+    am?.getMemoryInfo(info)
+    val runtime = Runtime.getRuntime()
+    return MemorySnapshot(
+        totalBytes = info.totalMem,
+        availableBytes = info.availMem,
+        heapUsedBytes = runtime.totalMemory() - runtime.freeMemory(),
+        heapLimitBytes = runtime.maxMemory()
+    )
+}
+
+private fun formatBytes(bytes: Long): String = when {
+    bytes >= 1024L * 1024 * 1024 -> String.format(Locale.US, "%.1f GB", bytes / 1024.0 / 1024 / 1024)
+    else -> String.format(Locale.US, "%.0f MB", bytes / 1024.0 / 1024)
 }
 
 @Composable
@@ -194,30 +266,46 @@ fun backupLevelName(level: BackupEncryptionLevel): String = stringResource(
  */
 private fun openRunningServices(context: Context): Boolean {
     val settingsPackage = "com.android.settings"
-    val candidates = listOf(
-        "com.android.settings.RunningServices",
-        "com.android.settings.applications.running.RunningServices",
-        "com.android.settings.Settings\$RunningServicesActivity"
-    )
-    for (name in candidates) {
-        val intent = Intent()
-            .setComponent(ComponentName(settingsPackage, name))
-            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    val fragment = ":settings:show_fragment"
+
+    // AOSP hosts Running services as a fragment inside SubSettings, so the
+    // supported way in is the fragment extra — not an activity name. Every
+    // entry is tried in order; a wrong guess is a no-op, not a crash.
+    val intents = buildList {
+        // Current AOSP: com.android.settings.applications.RunningServices.
+        add(
+            Intent()
+                .setComponent(ComponentName(settingsPackage, "$settingsPackage.SubSettings"))
+                .putExtra(fragment, "$settingsPackage.applications.RunningServices")
+        )
+        // Older AOSP kept the fragment one package up.
+        add(
+            Intent()
+                .setComponent(ComponentName(settingsPackage, "$settingsPackage.SubSettings"))
+                .putExtra(fragment, "$settingsPackage.RunningServices")
+        )
+        // Builds that do publish a dedicated activity.
+        add(Intent().setComponent(ComponentName(settingsPackage, "$settingsPackage.RunningServices")))
+        add(Intent().setComponent(ComponentName(settingsPackage, "$settingsPackage.Settings\$RunningServicesActivity")))
+    }
+
+    for (intent in intents) {
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         try {
             if (context.packageManager.resolveActivity(intent, 0) != null) {
                 context.startActivity(intent)
                 return true
             }
         } catch (_: Exception) {
-            // Not exported or not present on this build; try the next name.
+            // Not exported or not present on this build; try the next one.
         }
     }
     return try {
+        // Last resort: developer options, where the user can open the same
+        // page one tap further in.
         context.startActivity(
-            Intent(
-                Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                Uri.parse("package:${context.packageName}")
-            ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         )
         true
     } catch (_: Exception) {

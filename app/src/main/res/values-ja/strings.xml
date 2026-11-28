@@ -740,7 +740,10 @@
     <string name="security_level_webdav">WebDAV バックアップ</string>
     <string name="security_level_autobackup">自動バックアップ</string>
     <string name="security_level_memory_link">タップして端末のメモリ使用状況を表示</string>
-    <string name="security_level_memory_failed">メモリ画面を開けませんでした</string>
     <string name="security_level_locked">この端末は上位レベルに必要な RAM が足りません。</string>
     <string name="security_level_desc">書き出しとバックアップの暗号化強度</string>
+    <string name="memory_dialog_title">メモリ使用状況</string>
+    <string name="memory_total">合計: %1$s</string>
+    <string name="memory_available">空き: %1$s</string>
+    <string name="memory_app_heap">このアプリ: %1$s / %2$s</string>
 </resources>

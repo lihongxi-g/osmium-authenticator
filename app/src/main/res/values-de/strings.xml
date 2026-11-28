@@ -740,7 +740,10 @@
     <string name="security_level_webdav">WebDAV-Sicherung</string>
     <string name="security_level_autobackup">Automatische Sicherung</string>
     <string name="security_level_memory_link">Tippen, um den aktuellen Speicherverbrauch zu sehen</string>
-    <string name="security_level_memory_failed">Speicheransicht konnte nicht geöffnet werden</string>
     <string name="security_level_locked">Dieses Telefon hat zu wenig RAM für die stärkeren Stufen.</string>
     <string name="security_level_desc">Verschlüsselungsstärke für Exporte und Sicherungen</string>
+    <string name="memory_dialog_title">Speicherverbrauch</string>
+    <string name="memory_total">Gesamt: %1$s</string>
+    <string name="memory_available">Verfügbar: %1$s</string>
+    <string name="memory_app_heap">Diese App: %1$s von %2$s</string>
 </resources>

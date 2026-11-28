@@ -740,7 +740,10 @@
     <string name="security_level_webdav">Copia WebDAV</string>
     <string name="security_level_autobackup">Copia automática</string>
     <string name="security_level_memory_link">Toca para ver el uso de memoria en tiempo real</string>
-    <string name="security_level_memory_failed">No se pudo abrir la pantalla de memoria</string>
     <string name="security_level_locked">Este teléfono no tiene RAM suficiente para los niveles más altos.</string>
     <string name="security_level_desc">Fuerza de cifrado para exportaciones y copias</string>
+    <string name="memory_dialog_title">Uso de memoria</string>
+    <string name="memory_total">Total: %1$s</string>
+    <string name="memory_available">Disponible: %1$s</string>
+    <string name="memory_app_heap">Esta app: %1$s de %2$s</string>
 </resources>

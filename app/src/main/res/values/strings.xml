@@ -757,7 +757,10 @@
     <string name="security_level_webdav">WebDAV backup</string>
     <string name="security_level_autobackup">Scheduled backup</string>
     <string name="security_level_memory_link">Tap to see this device’s live memory use</string>
-    <string name="security_level_memory_failed">Could not open the memory screen</string>
     <string name="security_level_locked">This phone does not have enough RAM for the stronger levels.</string>
     <string name="security_level_desc">Encryption strength for exports and backups</string>
+    <string name="memory_dialog_title">Memory use</string>
+    <string name="memory_total">Total RAM: %1$s</string>
+    <string name="memory_available">Available: %1$s</string>
+    <string name="memory_app_heap">This app: %1$s of %2$s</string>
 </resources>
