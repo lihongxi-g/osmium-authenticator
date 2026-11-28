@@ -104,11 +104,20 @@ data class AppSettings(
      */
     val autoBackupNotifyRequireAuth: Boolean = true,
     /**
-     * Encryption level for *file* exports only ([BackupEncryptionLevel.id]).
-     * WebDAV, scheduled backup and LAN transfer keep writing the PBKDF2 format
-     * until they are migrated one by one.
+     * Encryption level per write path ([BackupEncryptionLevel.id]). Each
+     * feature is chosen separately so a user can keep the scheduled backup
+     * compatible while exporting a stronger file, or the other way round.
+     * LAN transfer has no level: it uses its own ephemeral session key.
      */
-    val backupKdfLevel: String = BackupEncryptionLevel.MEDIUM.id,
+    val backupKdfExportLevel: String = BackupEncryptionLevel.MEDIUM.id,
+    val backupKdfWebDavLevel: String = BackupEncryptionLevel.MEDIUM.id,
+    val backupKdfAutoLevel: String = BackupEncryptionLevel.MEDIUM.id,
+    /**
+     * Developer-mode override: ignore both the per-device RAM gate and the
+     * heap headroom check for Argon2. Accepted only after the disclaimer, and
+     * it can turn a backup write into an OutOfMemoryError.
+     */
+    val ignoreBackupMemoryLimit: Boolean = false,
     val autoCheckUpdates: Boolean = false,
     /**
      * Also look at pre-releases (beta / preview builds). Off by default: a
@@ -397,6 +406,10 @@ class SettingsRepository(
         val PIN_REMINDER_SILENCED = booleanPreferencesKey("pin_reminder_silenced")
         /** File-export encryption level; see [BackupEncryptionLevel]. */
         val BACKUP_KDF_LEVEL = stringPreferencesKey("backup_kdf_level")
+        val BACKUP_KDF_EXPORT = stringPreferencesKey("backup_kdf_export_level")
+        val BACKUP_KDF_WEBDAV = stringPreferencesKey("backup_kdf_webdav_level")
+        val BACKUP_KDF_AUTO = stringPreferencesKey("backup_kdf_auto_level")
+        val IGNORE_BACKUP_MEMORY = booleanPreferencesKey("backup_ignore_memory_limit")
     }
 
     val settings: Flow<AppSettings> = context.dataStore.data.map { prefs ->
@@ -452,7 +465,17 @@ class SettingsRepository(
             verifyOptOut = prefs[Keys.VERIFY_OPT_OUT] ?: emptySet(),
             devDetailedLogging = prefs[Keys.DEV_DETAILED_LOGGING] ?: false,
             pinReminderSilenced = prefs[Keys.PIN_REMINDER_SILENCED] ?: false,
-            backupKdfLevel = BackupEncryptionLevel.fromId(prefs[Keys.BACKUP_KDF_LEVEL]).id,
+            // The single pre-2.6.6.3 key seeds all three paths on upgrade.
+            backupKdfExportLevel = BackupEncryptionLevel.fromId(
+                prefs[Keys.BACKUP_KDF_EXPORT] ?: prefs[Keys.BACKUP_KDF_LEVEL]
+            ).id,
+            backupKdfWebDavLevel = BackupEncryptionLevel.fromId(
+                prefs[Keys.BACKUP_KDF_WEBDAV] ?: prefs[Keys.BACKUP_KDF_LEVEL]
+            ).id,
+            backupKdfAutoLevel = BackupEncryptionLevel.fromId(
+                prefs[Keys.BACKUP_KDF_AUTO] ?: prefs[Keys.BACKUP_KDF_LEVEL]
+            ).id,
+            ignoreBackupMemoryLimit = prefs[Keys.IGNORE_BACKUP_MEMORY] ?: false,
             welcomeShownVersion = prefs[Keys.WELCOME_SHOWN_VERSION] ?: "",
             // Anything that arrived from DataStore is, by definition, loaded.
             loaded = true
@@ -711,11 +734,23 @@ class SettingsRepository(
     }
 
     /**
-     * Stored as-is; the export screen clamps it to what the current phone can
+     * Stored as-is; every write path clamps it to what the current phone can
      * run, so a preference synced from a bigger device never blocks an export.
      */
-    suspend fun setBackupKdfLevel(level: String) {
-        context.dataStore.edit { it[Keys.BACKUP_KDF_LEVEL] = level }
+    suspend fun setBackupExportLevel(level: String) {
+        context.dataStore.edit { it[Keys.BACKUP_KDF_EXPORT] = level }
+    }
+
+    suspend fun setBackupWebDavLevel(level: String) {
+        context.dataStore.edit { it[Keys.BACKUP_KDF_WEBDAV] = level }
+    }
+
+    suspend fun setBackupAutoLevel(level: String) {
+        context.dataStore.edit { it[Keys.BACKUP_KDF_AUTO] = level }
+    }
+
+    suspend fun setIgnoreBackupMemoryLimit(ignore: Boolean) {
+        context.dataStore.edit { it[Keys.IGNORE_BACKUP_MEMORY] = ignore }
     }
 
     suspend fun setDevDetailedLogging(enabled: Boolean) {

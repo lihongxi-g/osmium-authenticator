@@ -735,12 +735,12 @@
     <string name="error_import_needs_update">यह बैकअप नए एन्क्रिप्शन से बना है। Osmium अपडेट करके फिर कोशिश करें।</string>
     <string name="error_import_low_memory">इस बैकअप को खोलने के लिए इस फ़ोन में पर्याप्त मेमोरी नहीं है।</string>
     <string name="security_level_title">सुरक्षा स्तर</string>
-    <string name="security_level_intro">नए बैकअप का पासवर्ड अनुमान लगाने में कितनी मेहनत लगेगी। सिर्फ़ नए बैकअप पर लागू; खोलते समय फ़ाइल में लिखी सेटिंग्स ही मानी जाती हैं।</string>
-    <string name="security_level_this_phone">यह फ़ोन %1$s GB RAM बताता है।</string>
-    <string name="security_level_standard_desc">PBKDF2 · अतिरिक्त मेमोरी नहीं · Osmium के हर संस्करण में पढ़ा जा सकता है।</string>
-    <string name="security_level_medium_desc">Argon2id · 64 MB · कम से कम 6 GB RAM वाला फ़ोन चाहिए।</string>
-    <string name="security_level_high_desc">Argon2id · 128 MB · कम से कम 8 GB RAM वाला फ़ोन चाहिए।</string>
-    <string name="security_level_fallback">यह फ़ोन सहेजा गया स्तर नहीं चला सकता, इसलिए %1$s इस्तेमाल हो रहा है।</string>
-    <string name="security_level_lan_note">LAN ट्रांसफ़र पर असर नहीं: यह दोनों फ़ोन के बीच तय एक बार वाली कुंजी से एन्क्रिप्ट होता है, बैकअप पासवर्ड से नहीं।</string>
     <string name="error_export_low_memory">इस फ़ोन में इस स्तर के लिए पर्याप्त मेमोरी नहीं है। निचला स्तर चुनें।</string>
+    <string name="security_level_export">फ़ाइल निर्यात</string>
+    <string name="security_level_webdav">WebDAV बैकअप</string>
+    <string name="security_level_autobackup">स्वचालित बैकअप</string>
+    <string name="security_level_memory_link">डिवाइस की मेमोरी का लाइव उपयोग देखने के लिए टैप करें</string>
+    <string name="security_level_memory_failed">मेमोरी स्क्रीन नहीं खुल सकी</string>
+    <string name="security_level_locked">इस फ़ोन में मज़बूत स्तरों के लिए पर्याप्त RAM नहीं है।</string>
+    <string name="security_level_desc">निर्यात और बैकअप के लिए एन्क्रिप्शन की मज़बूती</string>
 </resources>

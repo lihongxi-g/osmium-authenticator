@@ -305,9 +305,22 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch { settingsRepo.setDevPlaintextExport(enabled) }
     }
 
-    /** File-export encryption level (see BackupEncryptionLevel). */
-    fun setBackupKdfLevel(level: String) {
-        viewModelScope.launch { settingsRepo.setBackupKdfLevel(level) }
+    /** Per-path backup encryption level (see BackupEncryptionLevel). */
+    fun setBackupExportLevel(level: String) {
+        viewModelScope.launch { settingsRepo.setBackupExportLevel(level) }
+    }
+
+    fun setBackupWebDavLevel(level: String) {
+        viewModelScope.launch { settingsRepo.setBackupWebDavLevel(level) }
+    }
+
+    fun setBackupAutoLevel(level: String) {
+        viewModelScope.launch { settingsRepo.setBackupAutoLevel(level) }
+    }
+
+    /** Developer-mode override; only reachable after the disclaimer. */
+    fun setIgnoreBackupMemoryLimit(ignore: Boolean) {
+        viewModelScope.launch { settingsRepo.setIgnoreBackupMemoryLimit(ignore) }
     }
 
     fun setDevHiddenFeatures(ids: Set<String>) {

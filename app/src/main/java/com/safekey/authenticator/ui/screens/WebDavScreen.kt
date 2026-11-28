@@ -54,7 +54,6 @@ import com.safekey.authenticator.security.VaultIO
 import com.safekey.authenticator.ui.components.AppIcons
 import com.safekey.authenticator.ui.components.DialogBodyText
 import com.safekey.authenticator.ui.components.LocalNetworkPermissionGate
-import com.safekey.authenticator.ui.components.SettingLinkRow
 import com.safekey.authenticator.ui.components.rememberLocalNetworkPermissionRequest
 import com.safekey.authenticator.ui.components.SimpleTopBar
 import com.safekey.authenticator.ui.components.scrollBelowTopBar
@@ -77,17 +76,18 @@ import java.util.Locale
 fun WebDavScreen(
     vm: MainViewModel,
     onBack: () -> Unit,
-    onManagePassword: () -> Unit = {},
-    onOpenSecurityLevel: () -> Unit = {}
+    onManagePassword: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val savedConfig by vm.webDavConfig.collectAsState()
     val settings by vm.settings.collectAsState()
-    // Same stored level as the file export; restoring always follows the file.
+    // WebDAV has its own level (Settings → Security); restoring always
+    // follows the parameters stored in the file.
     val securityLevel = BackupEncryptionGate.clamp(
         context,
-        BackupEncryptionLevel.fromId(settings.backupKdfLevel)
+        BackupEncryptionLevel.fromId(settings.backupKdfWebDavLevel),
+        settings.ignoreBackupMemoryLimit
     )
 
     // The form fields use rememberSaveable, not remember: with "verify on
@@ -263,7 +263,12 @@ fun WebDavScreen(
                 )
             }
             val payload = withContext(Dispatchers.Default) {
-                VaultIO.encrypt(export.vault, exportPassword.toCharArray(), securityLevel)
+                VaultIO.encrypt(
+                    export.vault,
+                    exportPassword.toCharArray(),
+                    securityLevel,
+                    settings.ignoreBackupMemoryLimit
+                )
             }
             try {
                 WebDavClient.upload(currentConfig(), fileName, payload.toByteArray(Charsets.UTF_8))
@@ -292,7 +297,11 @@ fun WebDavScreen(
         runBusy(context.getString(R.string.webdav_downloading)) {
             val bytes = WebDavClient.download(currentConfig(), file.href)
             val vault = withContext(Dispatchers.Default) {
-                VaultIO.decrypt(bytes, exportPassword.toCharArray())
+                VaultIO.decrypt(
+                    bytes,
+                    exportPassword.toCharArray(),
+                    settings.ignoreBackupMemoryLimit
+                )
             }
             restoreVault = vault
         }
@@ -492,12 +501,6 @@ fun WebDavScreen(
                     text = stringResource(R.string.webdav_warning),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                SettingLinkRow(
-                    icon = AppIcons.Security,
-                    title = stringResource(R.string.security_level_title),
-                    value = backupLevelName(securityLevel),
-                    onClick = onOpenSecurityLevel
                 )
             }
         }

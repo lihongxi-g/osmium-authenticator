@@ -752,12 +752,12 @@
     <string name="error_import_needs_update">This backup was made with a newer encryption method. Update Osmium, then try again.</string>
     <string name="error_import_low_memory">Not enough memory on this phone to open this backup.</string>
     <string name="security_level_title">Security level</string>
-    <string name="security_level_intro">How much work guessing your backup password takes. Only new backups use this; opening a backup always follows what is stored in that file.</string>
-    <string name="security_level_this_phone">This phone reports %1$s GB of RAM.</string>
-    <string name="security_level_standard_desc">PBKDF2 · no extra memory · readable by every Osmium version.</string>
-    <string name="security_level_medium_desc">Argon2id · 64 MB · needs a phone with at least 6 GB of RAM.</string>
-    <string name="security_level_high_desc">Argon2id · 128 MB · needs a phone with at least 8 GB of RAM.</string>
-    <string name="security_level_fallback">This phone cannot run the saved level, so %1$s is used.</string>
-    <string name="security_level_lan_note">LAN transfer is not affected: it uses a one-time key agreed by both phones, not the backup password.</string>
     <string name="error_export_low_memory">Not enough memory on this phone for this level. Choose a lower one.</string>
+    <string name="security_level_export">File export</string>
+    <string name="security_level_webdav">WebDAV backup</string>
+    <string name="security_level_autobackup">Scheduled backup</string>
+    <string name="security_level_memory_link">Tap to see this device’s live memory use</string>
+    <string name="security_level_memory_failed">Could not open the memory screen</string>
+    <string name="security_level_locked">This phone does not have enough RAM for the stronger levels.</string>
+    <string name="security_level_desc">Encryption strength for exports and backups</string>
 </resources>

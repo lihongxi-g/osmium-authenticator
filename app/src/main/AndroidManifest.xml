@@ -43,6 +43,10 @@
         <package android:name="com.sukisu.ultra" />
         <package android:name="me.bmax.apatch" />
         <package android:name="org.lsposed.manager" />
+        <!-- Settings → Security → Security level opens the system "Running
+             services" screen; package visibility is required for
+             resolveActivity() to see it on Android 11+. -->
+        <package android:name="com.android.settings" />
         <package android:name="com.tsng.hidemyapplist" />
         <package android:name="eu.chainfire.supersu" />
         <package android:name="com.noshufou.android.su" />

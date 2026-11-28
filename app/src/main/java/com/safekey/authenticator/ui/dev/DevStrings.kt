@@ -39,6 +39,9 @@ data class DevStrings(
 
     val detailedLogging: String,
     val detailedLoggingDesc: String,
+    val ignoreMemoryLimit: String,
+    val ignoreMemoryLimitDesc: String,
+    val ignoreMemoryLimitDisclaimer: String,
     val exitDevMode: String,
     val exitDevModeDesc: String,
     val previewUpdate: String,
@@ -144,6 +147,13 @@ data class DevStrings(
 
             detailedLogging = "Detailed detection logging",
             detailedLoggingDesc = "Write device-integrity detection details into the in-app log (off by default)",
+            ignoreMemoryLimit = "Ignore memory limits",
+            ignoreMemoryLimitDesc = "Allow Argon2 backup levels regardless of this phone's RAM",
+            ignoreMemoryLimitDisclaimer = "Argon2id reserves 64 MB or 128 MB of memory while a backup is " +
+                "written or opened. Removing the RAM check lets you pick a level this phone may not " +
+                "be able to hold: the app can freeze, stutter or be killed with an out-of-memory " +
+                "error, and that backup is then unreadable on this phone. Use it only to write a " +
+                "backup for a stronger phone, never for the backups you rely on here.", 
             exitDevMode = "Turn off developer mode",
             exitDevModeDesc = "Also resets the dangerous toggles",
             previewUpdate = "Preview the update dialog",
@@ -232,6 +242,11 @@ data class DevStrings(
 
             detailedLogging = "检测详细日志",
             detailedLoggingDesc = "将设备完整性检测细节写入应用内日志（默认关闭）",
+            ignoreMemoryLimit = "忽略内存限制",
+            ignoreMemoryLimitDesc = "不论本机内存大小，都允许使用 Argon2 高档位",
+            ignoreMemoryLimitDisclaimer = "写入或打开备份时，Argon2id 会占用 64 MB 或 128 MB 内存。" +
+                "关掉内存检查后，你可以选一个本机可能撑不住的档位：应用可能卡顿、被系统按内存不足杀掉，" +
+                "这份备份在本机也就读不回来了。只在该备份是给内存更大的手机准备时使用，别用在你自己要恢复的备份上。",
             exitDevMode = "关闭开发者模式",
             exitDevModeDesc = "同时重置危险开关",
             previewUpdate = "预览更新弹窗",

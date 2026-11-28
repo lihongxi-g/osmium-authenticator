@@ -750,12 +750,12 @@
     <string name="error_import_needs_update">此备份使用了更新的加密方式，请先更新 Osmium 再试。</string>
     <string name="error_import_low_memory">本机内存不足，无法打开此备份。</string>
     <string name="security_level_title">安全级别</string>
-    <string name="security_level_intro">猜出备份密码要花多少代价。只影响新备份；打开备份时只认文件里记录的参数。</string>
-    <string name="security_level_this_phone">本机报告的运行内存：%1$s GB。</string>
-    <string name="security_level_standard_desc">普通：PBKDF2 · 不额外占内存 · 任何 Osmium 版本都能读。</string>
-    <string name="security_level_medium_desc">中：Argon2id · 64 MB · 需要至少 6 GB 运行内存的手机。</string>
-    <string name="security_level_high_desc">高：Argon2id · 128 MB · 需要至少 8 GB 运行内存的手机。</string>
-    <string name="security_level_fallback">本机无法运行已保存的档位，已改用「%1$s」。</string>
-    <string name="security_level_lan_note">局域网传输不受影响：它用的是两台手机当场协商的一次性密钥，不是备份密码。</string>
     <string name="error_export_low_memory">本机内存不足，无法使用该档位，请选低一档。</string>
+    <string name="security_level_export">文件导出</string>
+    <string name="security_level_webdav">WebDAV 备份</string>
+    <string name="security_level_autobackup">自动备份</string>
+    <string name="security_level_memory_link">点击查看设备实时内存占用情况</string>
+    <string name="security_level_memory_failed">无法打开内存页面</string>
+    <string name="security_level_locked">本机内存不足，无法使用更高档位。</string>
+    <string name="security_level_desc">导出与备份使用的加密强度</string>
 </resources>

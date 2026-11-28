@@ -735,12 +735,12 @@
     <string name="error_import_needs_update">このバックアップは新しい暗号化方式です。Osmium を更新してからもう一度お試しください。</string>
     <string name="error_import_low_memory">この端末のメモリが足りないため、このバックアップを開けません。</string>
     <string name="security_level_title">セキュリティレベル</string>
-    <string name="security_level_intro">新しいバックアップのパスワードを推測するコストです。新規バックアップにのみ適用され、開くときはファイルに記録された設定が使われます。</string>
-    <string name="security_level_this_phone">この端末の RAM は %1$s GB です。</string>
-    <string name="security_level_standard_desc">PBKDF2 · 追加メモリなし · すべての Osmium バージョンで読めます。</string>
-    <string name="security_level_medium_desc">Argon2id · 64 MB · 6 GB 以上の RAM を搭載した端末が必要です。</string>
-    <string name="security_level_high_desc">Argon2id · 128 MB · 8 GB 以上の RAM を搭載した端末が必要です。</string>
-    <string name="security_level_fallback">この端末では保存されたレベルを実行できないため、%1$s を使用します。</string>
-    <string name="security_level_lan_note">LAN 転送は影響を受けません。2 台の端末がその場で合意した一時キーを使い、バックアップのパスワードは使いません。</string>
     <string name="error_export_low_memory">この端末のメモリが足りないため、このレベルは使えません。低いレベルを選んでください。</string>
+    <string name="security_level_export">ファイル書き出し</string>
+    <string name="security_level_webdav">WebDAV バックアップ</string>
+    <string name="security_level_autobackup">自動バックアップ</string>
+    <string name="security_level_memory_link">タップして端末のメモリ使用状況を表示</string>
+    <string name="security_level_memory_failed">メモリ画面を開けませんでした</string>
+    <string name="security_level_locked">この端末は上位レベルに必要な RAM が足りません。</string>
+    <string name="security_level_desc">書き出しとバックアップの暗号化強度</string>
 </resources>

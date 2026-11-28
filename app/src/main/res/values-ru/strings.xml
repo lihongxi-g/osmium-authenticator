@@ -735,12 +735,12 @@
     <string name="error_import_needs_update">Эта копия создана более новым способом шифрования. Обновите Osmium и повторите попытку.</string>
     <string name="error_import_low_memory">На этом телефоне недостаточно памяти, чтобы открыть эту копию.</string>
     <string name="security_level_title">Уровень безопасности</string>
-    <string name="security_level_intro">Сколько усилий нужно, чтобы угадать пароль новой резервной копии. Действует только для новых копий; при открытии используются параметры из файла.</string>
-    <string name="security_level_this_phone">Этот телефон сообщает %1$s ГБ ОЗУ.</string>
-    <string name="security_level_standard_desc">PBKDF2 · без дополнительной памяти · читается любой версией Osmium.</string>
-    <string name="security_level_medium_desc">Argon2id · 64 MB · нужен телефон с ОЗУ не менее 6 ГБ.</string>
-    <string name="security_level_high_desc">Argon2id · 128 MB · нужен телефон с ОЗУ не менее 8 ГБ.</string>
-    <string name="security_level_fallback">Этот телефон не может выполнить сохранённый уровень, поэтому используется %1$s.</string>
-    <string name="security_level_lan_note">Передача по локальной сети не затрагивается: используется одноразовый ключ, согласованный двумя телефонами, а не пароль резервной копии.</string>
     <string name="error_export_low_memory">На этом телефоне недостаточно памяти для этого уровня. Выберите уровень ниже.</string>
+    <string name="security_level_export">Экспорт в файл</string>
+    <string name="security_level_webdav">Резервная копия WebDAV</string>
+    <string name="security_level_autobackup">Автоматическая копия</string>
+    <string name="security_level_memory_link">Нажмите, чтобы увидеть использование памяти</string>
+    <string name="security_level_memory_failed">Не удалось открыть экран памяти</string>
+    <string name="security_level_locked">На этом телефоне недостаточно ОЗУ для повышенных уровней.</string>
+    <string name="security_level_desc">Стойкость шифрования экспорта и копий</string>
 </resources>

@@ -203,15 +203,20 @@ object AutoBackupRunner {
         }
 
         val accounts = export.vault.accounts.size
-        // Same stored level as the manual exports. Clamped to this phone's
-        // real RAM: a preference carried over from a bigger device must never
-        // produce a backup that cannot be opened here.
+        // Scheduled backups have their own level. Clamped to this phone's real
+        // RAM unless the developer-mode override is on, so a preference carried
+        // over from a bigger device cannot produce a backup nobody can open.
         val level = BackupEncryptionGate.clamp(
             app,
-            BackupEncryptionLevel.fromId(settings.backupKdfLevel)
+            BackupEncryptionLevel.fromId(settings.backupKdfAutoLevel),
+            settings.ignoreBackupMemoryLimit
         )
-        val payload = VaultIO.encrypt(export.vault, password.toCharArray(), level)
-            .toByteArray(Charsets.UTF_8)
+        val payload = VaultIO.encrypt(
+            export.vault,
+            password.toCharArray(),
+            level,
+            settings.ignoreBackupMemoryLimit
+        ).toByteArray(Charsets.UTF_8)
         val fileName = "$FILE_PREFIX${
             SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US).format(Date())
         }.json"

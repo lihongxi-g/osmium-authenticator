@@ -103,6 +103,9 @@ fun DeveloperScreen(
     var phraseError by remember { mutableStateOf(false) }
     var showPinEntry by remember { mutableStateOf(false) }
     var pinError by remember { mutableStateOf<String?>(null) }
+    // Memory-limit override: switch ON only after the disclaimer is accepted.
+    var showIgnoreMemoryDialog by remember { mutableStateOf(false) }
+    var ignoreMemoryAccepted by remember { mutableStateOf(false) }
 
     fun ceremonyPhrase(): String = when (ceremony) {
         "disable" -> dev.phraseDisableRootSecurity
@@ -320,6 +323,21 @@ fun DeveloperScreen(
                 onClick = { vm.setDevDetailedLogging(!settings.devDetailedLogging) }
             )
 
+            SettingRow(
+                icon = AppIcons.Science,
+                title = dev.ignoreMemoryLimit,
+                description = dev.ignoreMemoryLimitDesc,
+                trailing = { DevStateText(settings.ignoreBackupMemoryLimit, dev) },
+                onClick = {
+                    if (settings.ignoreBackupMemoryLimit) {
+                        vm.setIgnoreBackupMemoryLimit(false)
+                    } else {
+                        ignoreMemoryAccepted = false
+                        showIgnoreMemoryDialog = true
+                    }
+                }
+            )
+
             Spacer(Modifier.height(24.dp))
 
             SettingRow(
@@ -331,6 +349,53 @@ fun DeveloperScreen(
 
             Spacer(Modifier.height(24.dp))
         }
+    }
+
+    // ------------------------------------------------ memory-limit disclaimer
+
+    if (showIgnoreMemoryDialog) {
+        AlertDialog(
+            onDismissRequest = { showIgnoreMemoryDialog = false },
+            title = { Text(dev.disclaimerTitle) },
+            text = {
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                    Text(
+                        text = dev.ignoreMemoryLimitDisclaimer,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { ignoreMemoryAccepted = !ignoreMemoryAccepted }
+                    ) {
+                        Checkbox(
+                            checked = ignoreMemoryAccepted,
+                            onCheckedChange = { ignoreMemoryAccepted = it }
+                        )
+                        Text(
+                            text = dev.disclaimerAccept,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    enabled = ignoreMemoryAccepted,
+                    onClick = {
+                        vm.setIgnoreBackupMemoryLimit(true)
+                        showIgnoreMemoryDialog = false
+                    }
+                ) { Text(dev.continueLabel) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showIgnoreMemoryDialog = false }) {
+                    Text(dev.cancel)
+                }
+            }
+        )
     }
 
     // ------------------------------------------------------------ report dialog

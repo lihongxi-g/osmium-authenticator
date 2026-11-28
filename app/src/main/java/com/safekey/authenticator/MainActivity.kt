@@ -1449,6 +1449,7 @@ private fun IntegrityNoticeDialog(
                 onImport = { vm.nav.push(Screen.Import) },
                 onWebDav = { vm.nav.push(Screen.WebDav) },
                 onAutoBackup = { vm.nav.push(Screen.AutoBackup) },
+                onSecurityLevel = { vm.nav.push(Screen.SecurityLevel) },
                 onOpenPinSetup = { vm.nav.push(Screen.PinSetup("pin")) },
                 onOpenPinVerify = { next -> vm.nav.push(Screen.PinVerify(next)) },
                 onRequireBiometric = { onSuccess ->
@@ -1562,8 +1563,7 @@ private fun IntegrityNoticeDialog(
             is Screen.Export -> ExportScreen(
                 vm = vm,
                 onDone = { vm.nav.pop() },
-                onBack = { vm.nav.pop() },
-                onOpenSecurityLevel = { vm.nav.push(Screen.SecurityLevel) }
+                onBack = { vm.nav.pop() }
             )
 
             is Screen.SecurityLevel -> SecurityLevelScreen(
@@ -1591,8 +1591,7 @@ private fun IntegrityNoticeDialog(
             is Screen.WebDav -> WebDavScreen(
                 vm = vm,
                 onBack = { vm.nav.pop() },
-                onManagePassword = { vm.nav.push(Screen.WebDavPassword) },
-                onOpenSecurityLevel = { vm.nav.push(Screen.SecurityLevel) }
+                onManagePassword = { vm.nav.push(Screen.WebDavPassword) }
             )
 
             is Screen.WebDavPassword -> WebDavPasswordScreen(
@@ -1602,14 +1601,12 @@ private fun IntegrityNoticeDialog(
 
             is Screen.AutoBackup -> AutoBackupScreen(
                 vm = vm,
-                onBack = { vm.nav.pop() },
-                onOpenSecurityLevel = { vm.nav.push(Screen.SecurityLevel) }
+                onBack = { vm.nav.pop() }
             )
 
             is Screen.LanTransfer -> LanTransferScreen(
                 vm = vm,
                 onBack = { vm.nav.pop() },
-                onOpenSecurityLevel = { vm.nav.push(Screen.SecurityLevel) },
                 // Blocking a peer device is a security decision: verify
                 // identity first (same pattern as the settings toggles).
                 onRequireBiometric = if (canAuthenticateBiometric()) {

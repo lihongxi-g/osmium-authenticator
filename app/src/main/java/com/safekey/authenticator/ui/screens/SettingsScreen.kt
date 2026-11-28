@@ -85,7 +85,8 @@ fun SettingsScreen(
      * uses these instead of the pair above.
      */
     onRequireBiometricStrict: ((onSuccess: () -> Unit) -> Unit)? = null,
-    onRequireCredentialStrict: ((onSuccess: () -> Unit) -> Unit)? = null
+    onRequireCredentialStrict: ((onSuccess: () -> Unit) -> Unit)? = null,
+    onSecurityLevel: () -> Unit = {}
 ) {
     val settings by vm.settings.collectAsState()
     val accounts by vm.accounts.collectAsState()
@@ -314,6 +315,15 @@ fun SettingsScreen(
                         }
                     }
                 }
+            )
+
+            // Encryption strength per backup path. Lives on its own page:
+            // three sliders do not belong in a settings list.
+            SettingRow(
+                icon = AppIcons.Security,
+                title = stringResource(R.string.security_level_title),
+                description = stringResource(R.string.security_level_desc),
+                onClick = onSecurityLevel
             )
 
             // -------------------------------------------------------- PIN

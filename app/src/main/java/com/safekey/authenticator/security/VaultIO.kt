@@ -50,10 +50,11 @@ object VaultIO {
     fun encrypt(
         vault: VaultFile,
         password: CharArray,
-        level: BackupEncryptionLevel = BackupEncryptionLevel.STANDARD
+        level: BackupEncryptionLevel = BackupEncryptionLevel.STANDARD,
+        ignoreMemoryLimit: Boolean = false
     ): String {
         val plain = json.encodeToString(vault)
-        return VaultCrypto.encrypt(plain, password, level)
+        return VaultCrypto.encrypt(plain, password, level, ignoreMemoryLimit)
     }
 
     /**
@@ -141,12 +142,17 @@ object VaultIO {
      *   fails (wrong password, corrupted data, or not an encrypted file),
      *   and wrongPassword=false when the decrypted JSON is not an Osmium vault.
      */
-    fun decrypt(payload: ByteArray, password: CharArray): VaultFile {
+    @JvmOverloads
+    fun decrypt(
+        payload: ByteArray,
+        password: CharArray,
+        ignoreMemoryLimit: Boolean = false
+    ): VaultFile {
         if (payload.size > MAX_PAYLOAD_BYTES) {
             throw VaultFormatException(wrongPassword = false)
         }
         val plainJson = try {
-            VaultCrypto.decrypt(String(payload, Charsets.UTF_8), password)
+            VaultCrypto.decrypt(String(payload, Charsets.UTF_8), password, ignoreMemoryLimit)
         } catch (e: UnsupportedKdfException) {
             throw VaultFormatException(wrongPassword = false, needsNewerApp = true, cause = e)
         } catch (e: KdfMemoryException) {

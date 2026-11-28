@@ -34,8 +34,18 @@ object BackupEncryptionGate {
     fun totalMemGb(context: Context): Int =
         (totalMemBytes(context) / BYTES_PER_GIB).toInt()
 
-    fun isSupported(context: Context, level: BackupEncryptionLevel): Boolean {
+    /**
+     * [ignoreMemoryLimit] is the developer-mode override: it skips the RAM
+     * gate entirely. The write path then relies on the heap check and the
+     * OutOfMemoryError catch, which is exactly what the disclaimer warns about.
+     */
+    fun isSupported(
+        context: Context,
+        level: BackupEncryptionLevel,
+        ignoreMemoryLimit: Boolean = false
+    ): Boolean {
         if (level == BackupEncryptionLevel.STANDARD) return true
+        if (ignoreMemoryLimit) return true
         val total = totalMemBytes(context)
         // No reading at all: allow only the level that needs nothing.
         if (total <= 0L) return level == BackupEncryptionLevel.STANDARD
@@ -46,13 +56,20 @@ object BackupEncryptionGate {
      * Strongest level this phone may write. STANDARD is always available, so
      * this never returns null and the export can never be blocked.
      */
-    fun highestSupported(context: Context): BackupEncryptionLevel =
-        BackupEncryptionLevel.entries.lastOrNull { isSupported(context, it) }
+    fun highestSupported(
+        context: Context,
+        ignoreMemoryLimit: Boolean = false
+    ): BackupEncryptionLevel =
+        BackupEncryptionLevel.entries.lastOrNull { isSupported(context, it, ignoreMemoryLimit) }
             ?: BackupEncryptionLevel.STANDARD
 
     /** Clamps a stored preference to what this phone can actually run. */
-    fun clamp(context: Context, level: BackupEncryptionLevel): BackupEncryptionLevel {
-        val highest = highestSupported(context)
+    fun clamp(
+        context: Context,
+        level: BackupEncryptionLevel,
+        ignoreMemoryLimit: Boolean = false
+    ): BackupEncryptionLevel {
+        val highest = highestSupported(context, ignoreMemoryLimit)
         return if (level.ordinal > highest.ordinal) highest else level
     }
 }

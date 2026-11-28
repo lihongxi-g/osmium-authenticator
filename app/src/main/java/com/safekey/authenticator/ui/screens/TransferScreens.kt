@@ -46,8 +46,6 @@ import com.safekey.authenticator.security.BackupEncryptionLevel
 import com.safekey.authenticator.security.KdfMemoryException
 import com.safekey.authenticator.security.VaultFormatException
 import com.safekey.authenticator.security.VaultIO
-import com.safekey.authenticator.ui.components.AppIcons
-import com.safekey.authenticator.ui.components.SettingLinkRow
 import com.safekey.authenticator.ui.components.SimpleTopBar
 import com.safekey.authenticator.ui.components.scrollBelowTopBar
 import com.safekey.authenticator.ui.dev.DevStrings
@@ -57,23 +55,19 @@ import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ExportScreen(
-    vm: MainViewModel,
-    onDone: () -> Unit,
-    onBack: () -> Unit,
-    onOpenSecurityLevel: () -> Unit = {}
-) {
+fun ExportScreen(vm: MainViewModel, onDone: () -> Unit, onBack: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val settings by vm.settings.collectAsState()
     val dev = DevStrings.forContext(context)
     val plaintextMode = settings.devPlaintextExport
-    // Strength for this export. Restoring always follows the file, so this is
-    // read at write time only; the saved value is clamped to what this phone
-    // can actually run.
+    // Strength for this export, from Settings → Security. Restoring always
+    // follows the file; the saved value is clamped to what this phone can run
+    // unless the developer-mode override is on.
     val securityLevel = BackupEncryptionGate.clamp(
         context,
-        BackupEncryptionLevel.fromId(settings.backupKdfLevel)
+        BackupEncryptionLevel.fromId(settings.backupKdfExportLevel),
+        settings.ignoreBackupMemoryLimit
     )
     var password by remember { mutableStateOf("") }
     var confirm by remember { mutableStateOf("") }
@@ -130,7 +124,12 @@ fun ExportScreen(
                                 )
                             }
                             if (plaintextMode) VaultIO.encodePlain(export.vault) else withContext(Dispatchers.Default) {
-                                VaultIO.encrypt(export.vault, password.toCharArray(), securityLevel)
+                                VaultIO.encrypt(
+                                    export.vault,
+                                    password.toCharArray(),
+                                    securityLevel,
+                                    settings.ignoreBackupMemoryLimit
+                                )
                             }
                         }
                         pendingJson = json
@@ -144,14 +143,6 @@ fun ExportScreen(
                 }
             }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.export_vault)) }
 
-            // Footer link: the strength is a property of the file being
-            // written, so it lives on its own page instead of in this form.
-            SettingLinkRow(
-                icon = AppIcons.Security,
-                title = stringResource(R.string.security_level_title),
-                value = backupLevelName(securityLevel),
-                onClick = onOpenSecurityLevel
-            )
         }
     }
 }
@@ -180,7 +171,11 @@ fun ImportScreen(vm: MainViewModel, onDone: () -> Unit, onBack: () -> Unit) {
                 bytes = payload
                 vault = withContext(Dispatchers.Default) {
                     if (plaintextImport) VaultIO.decodePlain(payload)
-                    else VaultIO.decrypt(payload, password.toCharArray())
+                    else VaultIO.decrypt(
+                        payload,
+                        password.toCharArray(),
+                        settings.ignoreBackupMemoryLimit
+                    )
                 }
                 error = null
             } catch (e: VaultFormatException) {

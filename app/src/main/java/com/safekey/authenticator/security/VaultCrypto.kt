@@ -91,9 +91,10 @@ object VaultCrypto {
     fun encrypt(
         plaintextJson: String,
         password: CharArray,
-        level: BackupEncryptionLevel = BackupEncryptionLevel.STANDARD
+        level: BackupEncryptionLevel = BackupEncryptionLevel.STANDARD,
+        ignoreMemoryLimit: Boolean = false
     ): String =
-        if (level.isArgon2) encryptArgon2(plaintextJson, password, level)
+        if (level.isArgon2) encryptArgon2(plaintextJson, password, level, ignoreMemoryLimit)
         else encryptPbkdf2(plaintextJson, password)
 
     /**
@@ -102,7 +103,12 @@ object VaultCrypto {
      * when the file needs a newer app, and [KdfMemoryException] when this
      * device cannot hold the KDF's working memory.
      */
-    fun decrypt(envelopeJson: String, password: CharArray): String {
+    @JvmOverloads
+    fun decrypt(
+        envelopeJson: String,
+        password: CharArray,
+        ignoreMemoryLimit: Boolean = false
+    ): String {
         val kdf = try {
             val root = json.parseToJsonElement(envelopeJson) as? JsonObject
                 ?: throw IllegalArgumentException("Not an Osmium encrypted file")
@@ -114,7 +120,7 @@ object VaultCrypto {
         }
         return when (kdf) {
             KDF_PBKDF2 -> decryptPbkdf2(envelopeJson, password)
-            KDF_ARGON2ID -> decryptArgon2(envelopeJson, password)
+            KDF_ARGON2ID -> decryptArgon2(envelopeJson, password, ignoreMemoryLimit)
             else -> throw UnsupportedKdfException("Unsupported key derivation function: $kdf")
         }
     }
@@ -160,13 +166,20 @@ object VaultCrypto {
     private fun encryptArgon2(
         plaintextJson: String,
         password: CharArray,
-        level: BackupEncryptionLevel
+        level: BackupEncryptionLevel,
+        ignoreMemoryLimit: Boolean
     ): String {
         val salt = randomBytes(SALT_BYTES)
         // Same refusal as the read path: the RAM gate only looks at total
         // memory, while the JVM heap can be much smaller (256 MB on a phone
         // with 8 GB). Fail with a message the UI can show instead of an OOM.
-        requireHeapForArgon2(level.memoryKib, plaintextJson.toByteArray(Charsets.UTF_8).size * 3)
+        // The developer-mode override skips this too, by design.
+        if (!ignoreMemoryLimit) {
+            requireHeapForArgon2(
+                level.memoryKib,
+                plaintextJson.toByteArray(Charsets.UTF_8).size * 3
+            )
+        }
         val key = deriveArgon2Key(password, salt, level)
         val cipher = Cipher.getInstance(TRANSFORMATION)
         cipher.init(Cipher.ENCRYPT_MODE, key)
@@ -183,7 +196,11 @@ object VaultCrypto {
         return json.encodeToString(envelope)
     }
 
-    private fun decryptArgon2(envelopeJson: String, password: CharArray): String {
+    private fun decryptArgon2(
+        envelopeJson: String,
+        password: CharArray,
+        ignoreMemoryLimit: Boolean
+    ): String {
         val envelope = try {
             json.decodeFromString<EncryptedVaultArgon2>(envelopeJson)
         } catch (e: Exception) {
@@ -198,7 +215,9 @@ object VaultCrypto {
         val salt = decodeBase64(envelope.salt)
         val iv = decodeBase64(envelope.iv)
         val ciphertext = decodeBase64(envelope.ciphertext)
-        requireHeapForArgon2(envelope.memoryKib, ciphertext.size)
+        if (!ignoreMemoryLimit) {
+            requireHeapForArgon2(envelope.memoryKib, ciphertext.size)
+        }
         val key = deriveArgon2Key(
             password,
             salt,

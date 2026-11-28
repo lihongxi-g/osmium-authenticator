@@ -735,12 +735,12 @@
     <string name="error_import_needs_update">Cette sauvegarde utilise un chiffrement plus récent. Mettez Osmium à jour, puis réessayez.</string>
     <string name="error_import_low_memory">Mémoire insuffisante sur ce téléphone pour ouvrir cette sauvegarde.</string>
     <string name="security_level_title">Niveau de sécurité</string>
-    <string name="security_level_intro">Le coût pour deviner le mot de passe d’une nouvelle sauvegarde. Ne concerne que les nouvelles sauvegardes ; à l’ouverture, les paramètres du fichier font foi.</string>
-    <string name="security_level_this_phone">Ce téléphone annonce %1$s Go de RAM.</string>
-    <string name="security_level_standard_desc">PBKDF2 · aucune mémoire supplémentaire · lisible par toutes les versions d’Osmium.</string>
-    <string name="security_level_medium_desc">Argon2id · 64 Mo · nécessite un téléphone avec au moins 6 Go de RAM.</string>
-    <string name="security_level_high_desc">Argon2id · 128 Mo · nécessite un téléphone avec au moins 8 Go de RAM.</string>
-    <string name="security_level_fallback">Ce téléphone ne peut pas exécuter le niveau enregistré ; %1$s est utilisé.</string>
-    <string name="security_level_lan_note">Le transfert LAN n’est pas concerné : il utilise une clé éphémère négociée entre les deux téléphones, pas le mot de passe de sauvegarde.</string>
     <string name="error_export_low_memory">Mémoire insuffisante sur ce téléphone pour ce niveau. Choisissez un niveau inférieur.</string>
+    <string name="security_level_export">Export de fichier</string>
+    <string name="security_level_webdav">Sauvegarde WebDAV</string>
+    <string name="security_level_autobackup">Sauvegarde automatique</string>
+    <string name="security_level_memory_link">Touchez pour voir l’utilisation mémoire en direct</string>
+    <string name="security_level_memory_failed">Impossible d’ouvrir l’écran mémoire</string>
+    <string name="security_level_locked">Ce téléphone n’a pas assez de RAM pour les niveaux supérieurs.</string>
+    <string name="security_level_desc">Force du chiffrement des exports et des sauvegardes</string>
 </resources>

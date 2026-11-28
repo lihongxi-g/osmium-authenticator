@@ -735,12 +735,12 @@
     <string name="error_import_needs_update">Dieses Backup nutzt eine neuere Verschlüsselung. Aktualisiere Osmium und versuche es erneut.</string>
     <string name="error_import_low_memory">Nicht genügend Speicher auf diesem Telefon, um dieses Backup zu öffnen.</string>
     <string name="security_level_title">Sicherheitsstufe</string>
-    <string name="security_level_intro">Wie aufwendig es ist, das Passwort einer neuen Sicherung zu erraten. Gilt nur für neue Sicherungen; beim Öffnen zählen immer die Angaben in der Datei.</string>
-    <string name="security_level_this_phone">Dieses Telefon meldet %1$s GB RAM.</string>
-    <string name="security_level_standard_desc">PBKDF2 · kein zusätzlicher Speicher · von jeder Osmium-Version lesbar.</string>
-    <string name="security_level_medium_desc">Argon2id · 64 MB · braucht ein Telefon mit mindestens 6 GB RAM.</string>
-    <string name="security_level_high_desc">Argon2id · 128 MB · braucht ein Telefon mit mindestens 8 GB RAM.</string>
-    <string name="security_level_fallback">Dieses Telefon kann die gespeicherte Stufe nicht ausführen, daher wird %1$s verwendet.</string>
-    <string name="security_level_lan_note">Die LAN-Übertragung ist nicht betroffen: Sie nutzt einen einmaligen Schlüssel, den beide Telefone aushandeln, nicht das Backup-Passwort.</string>
     <string name="error_export_low_memory">Nicht genügend Speicher auf diesem Telefon für diese Stufe. Wähle eine niedrigere.</string>
+    <string name="security_level_export">Dateiexport</string>
+    <string name="security_level_webdav">WebDAV-Sicherung</string>
+    <string name="security_level_autobackup">Automatische Sicherung</string>
+    <string name="security_level_memory_link">Tippen, um den aktuellen Speicherverbrauch zu sehen</string>
+    <string name="security_level_memory_failed">Speicheransicht konnte nicht geöffnet werden</string>
+    <string name="security_level_locked">Dieses Telefon hat zu wenig RAM für die stärkeren Stufen.</string>
+    <string name="security_level_desc">Verschlüsselungsstärke für Exporte und Sicherungen</string>
 </resources>
