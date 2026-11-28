@@ -742,4 +742,5 @@
     <string name="security_level_high_desc">Argon2id · 128 MB · 8 GB 以上の RAM を搭載した端末が必要です。</string>
     <string name="security_level_fallback">この端末では保存されたレベルを実行できないため、%1$s を使用します。</string>
     <string name="security_level_lan_note">LAN 転送は影響を受けません。2 台の端末がその場で合意した一時キーを使い、バックアップのパスワードは使いません。</string>
+    <string name="error_export_low_memory">この端末のメモリが足りないため、このレベルは使えません。低いレベルを選んでください。</string>
 </resources>

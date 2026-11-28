@@ -742,4 +742,5 @@
     <string name="security_level_high_desc">Argon2id · 128 MB · нужен телефон с ОЗУ не менее 8 ГБ.</string>
     <string name="security_level_fallback">Этот телефон не может выполнить сохранённый уровень, поэтому используется %1$s.</string>
     <string name="security_level_lan_note">Передача по локальной сети не затрагивается: используется одноразовый ключ, согласованный двумя телефонами, а не пароль резервной копии.</string>
+    <string name="error_export_low_memory">На этом телефоне недостаточно памяти для этого уровня. Выберите уровень ниже.</string>
 </resources>

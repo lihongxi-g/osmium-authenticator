@@ -755,4 +755,5 @@
     <string name="security_level_high_desc">高：Argon2id · 128 MB · 需要至少 8 GB 執行記憶體的手機。</string>
     <string name="security_level_fallback">本機無法執行已儲存的檔位，已改用「%1$s」。</string>
     <string name="security_level_lan_note">區域網路傳輸不受影響：它用的是兩台手機當場協商的一次性金鑰，不是備份密碼。</string>
+    <string name="error_export_low_memory">本機記憶體不足，無法使用該檔位，請選低一檔。</string>
 </resources>

@@ -742,4 +742,5 @@
     <string name="security_level_high_desc">Argon2id · 128 MB · requiere un teléfono con al menos 8 GB de RAM.</string>
     <string name="security_level_fallback">Este teléfono no puede usar el nivel guardado, así que se usa %1$s.</string>
     <string name="security_level_lan_note">La transferencia por LAN no se ve afectada: usa una clave de un solo uso acordada por ambos teléfonos, no la contraseña de la copia.</string>
+    <string name="error_export_low_memory">No hay memoria suficiente en este teléfono para este nivel. Elige uno más bajo.</string>
 </resources>

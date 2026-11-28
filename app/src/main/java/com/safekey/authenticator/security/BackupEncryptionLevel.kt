@@ -34,14 +34,9 @@ enum class BackupEncryptionLevel(
 
     val isArgon2: Boolean get() = this != STANDARD
 
-    /** Position in the strength slider: 0 = standard, 1 = medium, 2 = high. */
-    val sliderIndex: Int get() = ordinal
-
     companion object {
         /** Value stored in SettingsRepository; unknown/legacy strings fall back to [MEDIUM]. */
         fun fromId(id: String?): BackupEncryptionLevel =
             entries.firstOrNull { it.id == id } ?: MEDIUM
-
-        val highest: BackupEncryptionLevel get() = entries.last()
     }
 }

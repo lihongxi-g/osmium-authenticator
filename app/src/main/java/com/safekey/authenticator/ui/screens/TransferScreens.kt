@@ -43,6 +43,7 @@ import com.safekey.authenticator.model.VaultFile
 import com.safekey.authenticator.repository.ImportPlan
 import com.safekey.authenticator.security.BackupEncryptionGate
 import com.safekey.authenticator.security.BackupEncryptionLevel
+import com.safekey.authenticator.security.KdfMemoryException
 import com.safekey.authenticator.security.VaultFormatException
 import com.safekey.authenticator.security.VaultIO
 import com.safekey.authenticator.ui.components.AppIcons
@@ -136,6 +137,9 @@ fun ExportScreen(
                         vm.setTransferPickerActive(true)
                         try { launcher.launch(if (plaintextMode) "osmium-vault-plain.json" else "osmium-backup.json") }
                         catch (e: Exception) { vm.setTransferPickerActive(false); error = context.getString(R.string.export_failed, e.message ?: "Error") }
+                    } catch (e: KdfMemoryException) {
+                        error = context.getString(R.string.error_export_low_memory)
+                        exporting = false
                     } catch (e: Exception) { error = context.getString(R.string.export_failed, e.message ?: "Error"); exporting = false }
                 }
             }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.export_vault)) }

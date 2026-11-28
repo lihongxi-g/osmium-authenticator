@@ -48,6 +48,7 @@ import com.safekey.authenticator.network.WebDavException
 import com.safekey.authenticator.network.WebDavFile
 import com.safekey.authenticator.security.BackupEncryptionGate
 import com.safekey.authenticator.security.BackupEncryptionLevel
+import com.safekey.authenticator.security.KdfMemoryException
 import com.safekey.authenticator.security.VaultFormatException
 import com.safekey.authenticator.security.VaultIO
 import com.safekey.authenticator.ui.components.AppIcons
@@ -204,6 +205,8 @@ fun WebDavScreen(
                 }
             } catch (_: LocalNetworkPermissionException) {
                 requestLocalNetwork { runBusy(label, block) }
+            } catch (e: KdfMemoryException) {
+                vm.showToast(context.getString(R.string.error_export_low_memory))
             } catch (e: WebDavException) {
                 vm.showToast(e.message ?: context.getString(R.string.export_failed, "WebDAV"))
             } catch (e: VaultFormatException) {

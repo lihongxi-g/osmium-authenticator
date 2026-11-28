@@ -80,9 +80,6 @@ object VaultCrypto {
 
     private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
 
-    /** Fixed IV length of both envelope versions (AES-GCM). */
-    const val IV_LENGTH = IV_BYTES
-
     /**
      * Encrypt the plaintext vault JSON with a user password. Returns the
      * envelope JSON.
@@ -166,6 +163,10 @@ object VaultCrypto {
         level: BackupEncryptionLevel
     ): String {
         val salt = randomBytes(SALT_BYTES)
+        // Same refusal as the read path: the RAM gate only looks at total
+        // memory, while the JVM heap can be much smaller (256 MB on a phone
+        // with 8 GB). Fail with a message the UI can show instead of an OOM.
+        requireHeapForArgon2(level.memoryKib, plaintextJson.toByteArray(Charsets.UTF_8).size * 3)
         val key = deriveArgon2Key(password, salt, level)
         val cipher = Cipher.getInstance(TRANSFORMATION)
         cipher.init(Cipher.ENCRYPT_MODE, key)
