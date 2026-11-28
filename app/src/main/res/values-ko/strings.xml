@@ -86,6 +86,8 @@
     <string name="theme_system">시스템 따르기</string>
     <string name="theme_light">라이트</string>
     <string name="theme_dark">다크</string>
+    <string name="ui_style_title">인터페이스 스타일</string>
+    <string name="ui_style_desc">표준 Material 3 또는 더 둥글고 탄력 있는 Expressive 스타일</string>
     <string name="dynamic_color">다이내믹 컬러 (Material You)</string>
     <string name="dynamic_color_desc">배경화면 색상을 사용합니다. Android 12+만 지원.</string>
     <string name="biometric_lock">생체 인식 잠금</string>

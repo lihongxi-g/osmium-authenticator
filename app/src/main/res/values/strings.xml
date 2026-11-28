@@ -91,6 +91,8 @@
     <string name="theme_system">Follow system</string>
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
+    <string name="ui_style_title">Interface style</string>
+    <string name="ui_style_desc">Material 3 standard, or the rounder, springier Expressive style</string>
     <string name="dynamic_color">Dynamic color (Material You)</string>
     <string name="dynamic_color_desc">Use colors from your wallpaper. Android 12+ only.</string>
     <string name="biometric_lock">Biometric lock</string>

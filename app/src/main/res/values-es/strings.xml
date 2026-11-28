@@ -86,6 +86,8 @@
     <string name="theme_system">Seguir al sistema</string>
     <string name="theme_light">Claro</string>
     <string name="theme_dark">Oscuro</string>
+    <string name="ui_style_title">Estilo de la interfaz</string>
+    <string name="ui_style_desc">Material 3 estándar o el estilo Expressive, más redondeado y elástico</string>
     <string name="dynamic_color">Color dinámico (Material You)</string>
     <string name="dynamic_color_desc">Usa los colores de tu fondo de pantalla. Solo Android 12+.</string>
     <string name="biometric_lock">Bloqueo biométrico</string>

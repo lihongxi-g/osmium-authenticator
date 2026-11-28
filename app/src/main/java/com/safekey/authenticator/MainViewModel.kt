@@ -765,6 +765,8 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch { settingsRepo.setHapticEnabled(enabled) }
     fun setPredictiveBackAnimation(enabled: Boolean) =
         viewModelScope.launch { settingsRepo.setPredictiveBackAnimation(enabled) }
+    fun setDesignSystem(system: String) =
+        viewModelScope.launch { settingsRepo.setDesignSystem(system) }
     fun setVerifyRequired(id: String, required: Boolean) =
         viewModelScope.launch { settingsRepo.setVerifyRequired(id, required) }
     fun setHapticIntensityPercent(percent: Int) =

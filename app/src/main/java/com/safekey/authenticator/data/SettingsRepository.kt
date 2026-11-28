@@ -18,6 +18,8 @@ private val Context.dataStore by preferencesDataStore(name = "safekey_settings")
 data class AppSettings(
     val themeMode: String = THEME_SYSTEM,
     val dynamicColor: Boolean = true,
+    /** Design system: baseline Material 3 or Material 3 Expressive tokens. */
+    val designSystem: String = DESIGN_MATERIAL_3,
     /** Text scale in percent, 80-200; applied on top of the system font scale. */
     val fontScalePercent: Int = FONT_SCALE_PERCENT_DEFAULT,
     /** Master switch: off means Osmium's own default size, slider locked. */
@@ -144,6 +146,12 @@ data class AppSettings(
         const val SORT_COPIES = "copies"
         const val THEME_LIGHT = "light"
         const val THEME_DARK = "dark"
+
+        // ---- design system ----
+        /** Baseline Material 3: the app's existing look. */
+        const val DESIGN_MATERIAL_3 = "material3"
+        /** Material 3 Expressive: rounder shapes, heavier headings, springier motion. */
+        const val DESIGN_EXPRESSIVE = "expressive"
 
         // ---- text size ----
         const val FONT_SCALE_PERCENT_MIN = 80
@@ -341,6 +349,7 @@ class SettingsRepository(
         val HAPTIC_ENABLED = booleanPreferencesKey("haptic_enabled")
         val HAPTIC_INTENSITY = intPreferencesKey("haptic_intensity_percent")
         val PREDICTIVE_BACK = booleanPreferencesKey("predictive_back_animation")
+        val DESIGN_SYSTEM = stringPreferencesKey("design_system")
         val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
         val GATE_ON_OPEN = booleanPreferencesKey("gate_on_open")
         val ALLOW_SCREENSHOTS = booleanPreferencesKey("allow_screenshots")
@@ -394,6 +403,10 @@ class SettingsRepository(
         AppSettings(
             themeMode = prefs[Keys.THEME_MODE] ?: AppSettings.THEME_SYSTEM,
             dynamicColor = prefs[Keys.DYNAMIC_COLOR] ?: true,
+            designSystem = when (prefs[Keys.DESIGN_SYSTEM]) {
+                AppSettings.DESIGN_EXPRESSIVE -> AppSettings.DESIGN_EXPRESSIVE
+                else -> AppSettings.DESIGN_MATERIAL_3
+            },
             fontScalePercent = prefs[Keys.FONT_SCALE_PERCENT]
                 ?: prefs[Keys.FONT_SIZE]?.let { AppSettings.fontScalePercentOfLegacyStep(it) }
                 ?: AppSettings.FONT_SCALE_PERCENT_DEFAULT,
@@ -493,6 +506,15 @@ class SettingsRepository(
 
     suspend fun setPredictiveBackAnimation(enabled: Boolean) {
         context.dataStore.edit { it[Keys.PREDICTIVE_BACK] = enabled }
+    }
+
+    suspend fun setDesignSystem(value: String) {
+        context.dataStore.edit {
+            it[Keys.DESIGN_SYSTEM] = when (value) {
+                AppSettings.DESIGN_EXPRESSIVE -> AppSettings.DESIGN_EXPRESSIVE
+                else -> AppSettings.DESIGN_MATERIAL_3
+            }
+        }
     }
 
     suspend fun setHapticIntensityPercent(percent: Int) {

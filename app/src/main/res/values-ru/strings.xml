@@ -86,6 +86,8 @@
     <string name="theme_system">Как в системе</string>
     <string name="theme_light">Светлая</string>
     <string name="theme_dark">Тёмная</string>
+    <string name="ui_style_title">Стиль интерфейса</string>
+    <string name="ui_style_desc">Стандартный Material 3 или более округлый и пружинистый стиль Expressive</string>
     <string name="dynamic_color">Динамический цвет (Material You)</string>
     <string name="dynamic_color_desc">Использовать цвета обоев. Только Android 12+.</string>
     <string name="biometric_lock">Биометрическая блокировка</string>

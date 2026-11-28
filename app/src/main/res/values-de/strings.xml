@@ -86,6 +86,8 @@
     <string name="theme_system">System übernehmen</string>
     <string name="theme_light">Hell</string>
     <string name="theme_dark">Dunkel</string>
+    <string name="ui_style_title">Oberflächenstil</string>
+    <string name="ui_style_desc">Material 3 standardmäßig oder der runderte, federnde Expressive-Stil</string>
     <string name="dynamic_color">Dynamische Farbe (Material You)</string>
     <string name="dynamic_color_desc">Verwendet Farben aus deinem Hintergrundbild. Nur Android 12+.</string>
     <string name="biometric_lock">Biometrische Sperre</string>

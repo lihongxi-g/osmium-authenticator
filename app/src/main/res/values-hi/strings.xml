@@ -86,6 +86,8 @@
     <string name="theme_system">सिस्टम के अनुसार</string>
     <string name="theme_light">लाइट</string>
     <string name="theme_dark">डार्क</string>
+    <string name="ui_style_title">इंटरफ़ेस शैली</string>
+    <string name="ui_style_desc">मानक Material 3, या अधिक गोल और स्प्रिंगी Expressive शैली</string>
     <string name="dynamic_color">डायनामिक रंग (Material You)</string>
     <string name="dynamic_color_desc">वॉलपेपर से रंग लें। केवल Android 12+।</string>
     <string name="biometric_lock">बायोमेट्रिक लॉक</string>

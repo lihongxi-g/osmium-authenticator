@@ -91,6 +91,8 @@
     <string name="theme_system">跟隨系統</string>
     <string name="theme_light">淺色</string>
     <string name="theme_dark">深色</string>
+    <string name="ui_style_title">介面風格</string>
+    <string name="ui_style_desc">標準 Material 3，或更圓潤、更有彈性的表現力風格</string>
     <string name="dynamic_color">動態取色（Material You）</string>
     <string name="dynamic_color_desc">跟隨壁紙取色，僅 Android 12+ 支援。</string>
     <string name="biometric_lock">生物辨識锁</string>

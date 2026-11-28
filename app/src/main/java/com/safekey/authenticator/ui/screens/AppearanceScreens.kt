@@ -115,6 +115,24 @@ fun AppearanceSettingsScreen(
                 onClick = { vm.nav.push(Screen.ThemeSettings) }
             )
 
+            // Dual UI: the whole app re-themes in place; no restart.
+            if ("theme" !in hiddenFeatures) SettingRow(
+                icon = AppIcons.Tune,
+                title = stringResource(R.string.ui_style_title),
+                description = stringResource(R.string.ui_style_desc),
+                trailing = {
+                    Switch(
+                        checked = settings.designSystem == AppSettings.DESIGN_EXPRESSIVE,
+                        onCheckedChange = {
+                            vm.setDesignSystem(
+                                if (it) AppSettings.DESIGN_EXPRESSIVE
+                                else AppSettings.DESIGN_MATERIAL_3
+                            )
+                        }
+                    )
+                }
+            )
+
             if ("fontFamily" !in hiddenFeatures) SettingRow(
                 icon = AppIcons.TextFields,
                 title = stringResource(R.string.font_family_title),

@@ -24,9 +24,13 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -133,6 +137,7 @@ import com.safekey.authenticator.ui.screens.ManualScreen
 import com.safekey.authenticator.ui.screens.WebDavPasswordScreen
 import com.safekey.authenticator.ui.screens.WebDavScreen
 import com.safekey.authenticator.ui.screens.VerifySettingsScreen
+import com.safekey.authenticator.ui.theme.LocalExpressiveDesign
 import com.safekey.authenticator.ui.theme.SafeKeyTheme
 import com.safekey.authenticator.update.UpdateChecker
 import com.safekey.authenticator.update.UpdateInfo
@@ -298,6 +303,7 @@ class MainActivity : FragmentActivity() {
             SafeKeyTheme(
                 themeMode = settings.themeMode,
                 dynamicColor = settings.dynamicColor,
+                designSystem = settings.designSystem,
                 fontScaleEnabled = settings.fontScaleEnabled,
                 fontScalePercent = settings.fontScalePercent,
                 fontFamily = effectiveFontFamily,
@@ -1240,6 +1246,9 @@ private fun IntegrityNoticeDialog(
         val current = vm.nav.current
         val rootRestricted by vm.rootRestricted.collectAsState()
         val settings by vm.settings.collectAsState()
+        // Expressive moves the page transitions to springs; standard keeps the
+        // timed slide it shipped with.
+        val expressive = LocalExpressiveDesign.current
 
         // Defense in depth: if the restriction becomes active while a blocked
         // screen is open (e.g. restored after a config change), leave it
@@ -1309,17 +1318,46 @@ private fun IntegrityNoticeDialog(
                         AnimatedContent(
                             targetState = current,
                             transitionSpec = {
-                                if (vm.nav.instantTransition) {
-                                    // Swipe-back already moved both screens into
-                                    // place; animating here would snap them back
-                                    // to the start position first.
-                                    EnterTransition.None togetherWith ExitTransition.None
-                                } else if (direction > 0) {
-                                    (slideInHorizontally(tween(280)) { it / 3 } + fadeIn(tween(220))) togetherWith
-                                        (slideOutHorizontally(tween(260)) { -it / 5 } + fadeOut(tween(200)))
-                                } else {
-                                    (slideInHorizontally(tween(280)) { -it / 3 } + fadeIn(tween(220))) togetherWith
-                                        (slideOutHorizontally(tween(260)) { it / 5 } + fadeOut(tween(200)))
+                                when {
+                                    vm.nav.instantTransition ->
+                                        // Swipe-back already moved both screens
+                                        // into place; animating here would snap
+                                        // them back to the start position first.
+                                        EnterTransition.None togetherWith ExitTransition.None
+                                    expressive -> {
+                                        // Expressive motion: spring in from a
+                                        // shorter distance and settle with a
+                                        // slight scale, instead of a timed slide.
+                                        val travel = spring<IntOffset>(
+                                            dampingRatio = 0.72f,
+                                            stiffness = Spring.StiffnessMediumLow
+                                        )
+                                        val settle = spring<IntOffset>(
+                                            dampingRatio = 0.9f,
+                                            stiffness = Spring.StiffnessMedium
+                                        )
+                                        val grow = spring<Float>(
+                                            dampingRatio = 0.72f,
+                                            stiffness = Spring.StiffnessMediumLow
+                                        )
+                                        val push = direction > 0
+                                        (slideInHorizontally(travel) {
+                                            if (push) it / 4 else -it / 4
+                                        } + fadeIn(tween(180)) +
+                                            scaleIn(grow, initialScale = 0.94f)) togetherWith
+                                            (slideOutHorizontally(settle) {
+                                                if (push) -it / 8 else it / 8
+                                            } + fadeOut(tween(130)) +
+                                                scaleOut(tween(130), targetScale = 0.98f))
+                                    }
+                                    direction > 0 -> {
+                                        (slideInHorizontally(tween(280)) { it / 3 } + fadeIn(tween(220))) togetherWith
+                                            (slideOutHorizontally(tween(260)) { -it / 5 } + fadeOut(tween(200)))
+                                    }
+                                    else -> {
+                                        (slideInHorizontally(tween(280)) { -it / 3 } + fadeIn(tween(220))) togetherWith
+                                            (slideOutHorizontally(tween(260)) { it / 5 } + fadeOut(tween(200)))
+                                    }
                                 }
                             },
                             label = "nav"

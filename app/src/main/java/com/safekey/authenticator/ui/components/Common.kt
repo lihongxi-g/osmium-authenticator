@@ -1,10 +1,13 @@
 package com.safekey.authenticator.ui.components
 
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -28,12 +31,14 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.safekey.authenticator.ui.theme.LocalExpressiveDesign
 
 /**
  * Single M3 TopAppBar wrapper so every screen gets a consistent bar
@@ -148,7 +153,11 @@ fun SettingRow(
     onClick: (() -> Unit)? = null,
     trailing: (@Composable () -> Unit)? = null
 ) {
+    // Expressive: the icon sits in a tinted bubble and the row is a rounder
+    // surface. Standard keeps the flat 24dp glyph and the baseline radius.
+    val expressive = LocalExpressiveDesign.current
     Card(
+        shape = if (expressive) MaterialTheme.shapes.large else MaterialTheme.shapes.medium,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
         ),
@@ -161,14 +170,34 @@ fun SettingRow(
             modifier = Modifier
                 .fillMaxWidth()
                 .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier)
-                .padding(horizontal = 16.dp, vertical = 14.dp),
+                .padding(
+                    horizontal = if (expressive) 14.dp else 16.dp,
+                    vertical = if (expressive) 12.dp else 14.dp
+                ),
             leading = {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                if (expressive) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primaryContainer),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = null,
+                            modifier = Modifier.size(22.dp),
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+                } else {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             },
             trailing = trailing
         ) {

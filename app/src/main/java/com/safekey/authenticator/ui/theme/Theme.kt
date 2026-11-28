@@ -3,7 +3,10 @@ package com.safekey.authenticator.ui.theme
 import android.os.Build
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Shapes
+import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
@@ -13,10 +16,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import com.safekey.authenticator.data.AppSettings
 
 // Fallback palette (no Dynamic Color support, i.e. Android < 12):
@@ -34,6 +41,53 @@ private val FallbackDark = darkColorScheme(
     onPrimaryContainer = Color(0xFFD7E3FF)
 )
 
+/** Baseline Material 3 shape scale — what the app shipped with. */
+private val StandardShapes = Shapes()
+
+/**
+ * Material 3 Expressive shape scale.
+ *
+ * Every step is noticeably rounder than the baseline, so cards, sheets,
+ * dialogs, menus and settings rows pick up the expressive silhouette through
+ * `MaterialTheme.shapes` alone — layout metrics stay exactly where they were.
+ */
+private val ExpressiveShapes = Shapes(
+    extraSmall = RoundedCornerShape(8.dp),
+    small = RoundedCornerShape(14.dp),
+    medium = RoundedCornerShape(22.dp),
+    large = RoundedCornerShape(30.dp),
+    extraLarge = RoundedCornerShape(38.dp)
+)
+
+/**
+ * True when the expressive design system is selected.
+ *
+ * Read by the few components whose expressive treatment is more than a token
+ * swap (the settings icon bubbles, the page transitions).
+ */
+val LocalExpressiveDesign = staticCompositionLocalOf { false }
+
+/**
+ * Heavier heading tokens on top of the user's font weight.
+ *
+ * A relative step (not an absolute weight) so the font-weight setting still
+ * does something in expressive mode, and the face's available weights are
+ * never overrun.
+ */
+private fun Typography.expressiveEmphasis(): Typography {
+    fun TextStyle.bolder(step: Int): TextStyle = copy(
+        fontWeight = FontWeight(
+            ((fontWeight ?: FontWeight.Normal).weight + step).coerceAtMost(900)
+        )
+    )
+    return copy(
+        headlineSmall = headlineSmall.bolder(200),
+        titleLarge = titleLarge.bolder(200),
+        titleMedium = titleMedium.bolder(100),
+        labelLarge = labelLarge.bolder(100)
+    )
+}
+
 /**
  * Theme strategy (user decision): Dynamic Color from the wallpaper when
  * available (Android 12+); otherwise a blue-on-white / blue-on-black scheme.
@@ -43,6 +97,7 @@ private val FallbackDark = darkColorScheme(
 fun SafeKeyTheme(
     themeMode: String,
     dynamicColor: Boolean,
+    designSystem: String = AppSettings.DESIGN_MATERIAL_3,
     fontScaleEnabled: Boolean = false,
     fontScalePercent: Int = AppSettings.FONT_SCALE_PERCENT_DEFAULT,
     fontFamily: String = AppSettings.FONT_FAMILY_SYSTEM,
@@ -79,16 +134,22 @@ fun SafeKeyTheme(
     val weightDelta = remember(fontFamily, fontWeightBody) {
         AppSettings.fontWeightDelta(fontWeightBody, fontFamily)
     }
-    val typography = remember(fontScale, typeface, weightDelta) {
-        AppTypography.scaledTo(fontScale).withFamily(typeface).withWeightDelta(weightDelta)
+    val expressive = designSystem == AppSettings.DESIGN_EXPRESSIVE
+    val typography = remember(fontScale, typeface, weightDelta, expressive) {
+        val base = AppTypography.scaledTo(fontScale).withFamily(typeface).withWeightDelta(weightDelta)
+        if (expressive) base.expressiveEmphasis() else base
     }
     val hapticTick = rememberHapticTick(hapticEnabled, hapticIntensityPercent)
     val latestTick = rememberUpdatedState(hapticTick)
 
-    CompositionLocalProvider(LocalFontScale provides fontScale) {
+    CompositionLocalProvider(
+        LocalFontScale provides fontScale,
+        LocalExpressiveDesign provides expressive
+    ) {
         MaterialTheme(
             colorScheme = colorScheme,
-            typography = typography
+            typography = typography,
+            shapes = if (expressive) ExpressiveShapes else StandardShapes
         ) {
             // Clickable surfaces get the tick through the indication, so only
             // real controls vibrate (buttons, switches, rows, the keypad,

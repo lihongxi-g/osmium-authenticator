@@ -86,6 +86,8 @@
     <string name="theme_system">システムに従う</string>
     <string name="theme_light">ライト</string>
     <string name="theme_dark">ダーク</string>
+    <string name="ui_style_title">インターフェースのスタイル</string>
+    <string name="ui_style_desc">標準の Material 3、またはより丸く弾む Expressive スタイル</string>
     <string name="dynamic_color">ダイナミックカラー（Material You）</string>
     <string name="dynamic_color_desc">壁紙の色を使用します。Android 12以降のみ。</string>
     <string name="biometric_lock">生体認証ロック</string>

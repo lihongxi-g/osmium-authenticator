@@ -121,6 +121,10 @@ object AppIcons {
     val Science: ImageVector by lazy {
         icon("science", "M19.8 18.4L14 10.67V6.5l1.35-1.69C15.61 4.48 15.38 4 14.96 4H9.04C8.62 4 8.39 4.48 8.65 4.81L10 6.5v4.17L4.2 18.4C3.71 19.06 4.18 20 5 20h14C19.82 20 20.29 19.06 19.8 18.4z")
     }
+    /** Material Symbols "tune" — the interface-style switch under Appearance. */
+    val Tune: ImageVector by lazy {
+        icon("tune", "M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z")
+    }
     val Telegram: ImageVector by lazy {
         icon("telegram", "M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z")
     }
