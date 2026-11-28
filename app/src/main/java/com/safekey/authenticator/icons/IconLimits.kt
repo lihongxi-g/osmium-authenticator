@@ -27,8 +27,13 @@ object IconLimits {
     /** Maximum number of entries in the ZIP itself (declared or not). */
     const val MAX_ZIP_ENTRIES = 20_000
 
-    /** pack.json version must be a small non-negative int (also a path segment). */
-    const val MAX_VERSION = 999_999
+    /**
+     * pack.json version must be a non-negative int. There is deliberately no
+     * small upper bound: aegis-icons ships `"version": 20260701` (a date), and
+     * the version is only ever written as `Int.toString()`, which cannot carry
+     * a path separator.
+     */
+    const val MAX_VERSION = Int.MAX_VALUE
 
     /** Reject entries that claim a compression ratio above this. */
     const val MAX_COMPRESSION_RATIO = 200L

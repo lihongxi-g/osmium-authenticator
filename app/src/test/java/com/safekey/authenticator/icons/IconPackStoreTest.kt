@@ -243,6 +243,16 @@ class IconPackStoreTest {
     }
 
     @Test
+    fun `date style pack version installs`() {
+        setUp()
+        // aegis-icons ships "version": 20260701; the old 999999 cap rejected
+        // every official pack before its icons were even looked at.
+        val installed = store.install(validPack(version = 20260701))
+        assertEquals(20260701, installed.version)
+        assertEquals(20260701, store.list().single().version)
+    }
+
+    @Test
     fun `removing a pack deletes its directory`() {
         setUp()
         val installed = store.install(validPack())

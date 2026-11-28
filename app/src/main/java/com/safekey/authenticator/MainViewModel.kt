@@ -794,6 +794,11 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                     temp?.delete()
                 }
             }
+            if (error == null) {
+                AppLog.d("icon pack imported")
+            } else {
+                AppLog.d("icon pack import failed: $error")
+            }
             refreshIconPacks()
             onResult(error == null, error)
         }
